@@ -1,0 +1,4 @@
+# Application build executables.
+
+build/fate-seekers-client
+build/fate-seekers-server

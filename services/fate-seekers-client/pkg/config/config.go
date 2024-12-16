@@ -42,7 +42,7 @@ func SetupDefaultConfig() {
 	viper.SetDefault("database.connection-retry-delay", time.Second*3)
 	viper.SetDefault("logging.level", "info")
 	viper.SetDefault("logging.console", true)
-	viper.SetDefault("logging.name", "fate-seekers.log")
+	viper.SetDefault("logging.name", "fate_seekers.log")
 	viper.SetDefault("logging.directory", "log")
 }
 
