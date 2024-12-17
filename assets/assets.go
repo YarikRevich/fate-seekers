@@ -1,4 +1,4 @@
-package embeder
+package assets
 
 import "embed"
 

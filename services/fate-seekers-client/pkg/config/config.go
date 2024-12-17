@@ -31,8 +31,14 @@ var (
 )
 
 var (
-	// Represents home directory where all application related data will be saved.
-	internalDirectory = "/.fate-seekers-client"
+	// Represents home directory where all application related data is located.
+	internalGlobalDirectory = "/.fate-seekers-client"
+
+	// Represents directory where all application configuration files are located.
+	internalConfigDirectory = "/config"
+
+	// Represents database directory where all the database files is located.
+	internalDatabaseDirectory = "/internal/database"
 )
 
 // SetupDefaultConfig initializes default parameters for the configuration file.
@@ -62,14 +68,14 @@ func Init() {
 	databaseConnectionRetryDelay = viper.GetDuration("database.connection-retry-delay")
 	loggingLevel = viper.GetString("logging.level")
 	loggingConsole = viper.GetBool("logging.console")
-	loggingName = viper.GetString("loggging.name")
+	loggingName = viper.GetString("logging.name")
 
 	homeDirectory, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	loggingDirectory = filepath.Join(homeDirectory, viper.GetString("logging.directory"))
+	loggingDirectory = filepath.Join(homeDirectory, internalGlobalDirectory, viper.GetString("logging.directory"))
 
 	if err := os.MkdirAll(loggingDirectory, 0755); err != nil {
 		log.Fatalln(err)
@@ -86,7 +92,7 @@ func GetDatabaseName() string {
 		log.Fatalln(err)
 	}
 
-	return filepath.Join(homeDir, internalDirectory, databaseName)
+	return filepath.Join(homeDir, internalGlobalDirectory, internalDatabaseDirectory, databaseName)
 }
 
 func GetDatabaseConnectionRetryDelay() time.Duration {
@@ -115,5 +121,5 @@ func getDefaultConfigDirectory() string {
 		log.Fatalln(err)
 	}
 
-	return filepath.Join(homeDirectory, internalDirectory)
+	return filepath.Join(homeDirectory, internalGlobalDirectory, internalConfigDirectory)
 }

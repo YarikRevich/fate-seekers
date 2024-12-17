@@ -1,0 +1,12 @@
+operation:
+  debug: true
+
+database:
+  name: "fate_seekers.db"
+  connection-retry-delay: 3s
+
+logging:
+  level: "debug"
+  console: true
+  name: "fate_seekers.log"
+  directory: "log"
