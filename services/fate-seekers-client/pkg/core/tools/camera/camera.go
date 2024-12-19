@@ -52,14 +52,14 @@ func (c *Camera) ProjectPositionToWorld(x, y int) (float64, float64) {
 	return math.NaN(), math.NaN()
 }
 
-// SetPositionY sets camera horizontal position with the given value.
-func (c *Camera) SetPositionX(x int) {
-	c.position[0] = float64(x)
+// TranslatePositionX translates camera horizontal position by the given value.
+func (c *Camera) TranslatePositionX(x float64) {
+	c.position[0] += x
 }
 
-// SetPositionY sets camera vertical position with the given value.
-func (c *Camera) SetPositionY(y int) {
-	c.position[1] = float64(y)
+// TranslatePositionY translates camera vertical position by the given value.
+func (c *Camera) TranslatePositionY(y float64) {
+	c.position[1] += y
 }
 
 // ZoomIn zooms in camera.
@@ -67,9 +67,24 @@ func (c *Camera) ZoomIn() {
 	c.zoom++
 }
 
+// ZoomInBy zooms in camera by the given value.
+func (c *Camera) ZoomInBy(value float64) {
+	c.zoom += value
+}
+
 // ZoomOut zooms out camera.
 func (c *Camera) ZoomOut() {
 	c.zoom--
+}
+
+// ZoomOutBy zooms out camera by the given value.
+func (c *Camera) ZoomOutBy(value float64) {
+	c.zoom -= value
+}
+
+// GetZoom retrieves camera zoom value.
+func (c *Camera) GetZoom() float64 {
+	return c.zoom
 }
 
 // RotateRight performs right-based direction rotation.
@@ -77,16 +92,28 @@ func (c *Camera) RotateRight() {
 	c.rotation++
 }
 
+// RotateRightBy performs right-based direction rotation by the given value.
+func (c *Camera) RotateRightBy(value float64) {
+	c.rotation += value
+}
+
 // RotateRight performs left-based direction rotation.
 func (c *Camera) RotateLeft() {
 	c.rotation--
+}
+
+// RotateRightBy performs left-based direction rotation by the given value.
+func (c *Camera) RotateLeftBy(value float64) {
+	c.rotation -= value
 }
 
 // Reset performs camera properties reset.
 func (c *Camera) Reset() {
 	c.position[0] = 0
 	c.position[1] = 0
+
 	c.rotation = 0
+
 	c.zoom = 0
 }
 

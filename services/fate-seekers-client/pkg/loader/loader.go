@@ -2,6 +2,7 @@ package loader
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"io/fs"
 	"path/filepath"
@@ -12,12 +13,17 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+
+	_ "image/png"
+
+	"github.com/Frabjous-Studios/asebiten"
 )
 
 var (
-	ErrReadingFile   = errors.New("err happened during file read operation")
-	ErrLoadingShader = errors.New("err happened during shader loading operation")
-	ErrLoadingImage  = errors.New("err happened during image loading operation")
+	ErrReadingFile      = errors.New("err happened during file read operation")
+	ErrLoadingShader    = errors.New("err happened during shader loading operation")
+	ErrLoadingStatic    = errors.New("err happened during image loading operation")
+	ErrLoadingAnimation = errors.New("err happened during animation loading operation")
 )
 
 var (
@@ -25,7 +31,7 @@ var (
 	GetInstance = sync.OnceValue[*Loader](newLoader)
 )
 
-// Describes all the available objects to be loaded.
+// Describes all the available statics to be loaded.
 const ()
 
 // Describes all the available shaders to be loaded.
@@ -34,28 +40,37 @@ const ()
 // Describes all the available templates to be loaded.
 const ()
 
+// Describes all the available animations to be loaded.
+const (
+	IntroSkullAnimation = "intro-skull/intro-skull"
+)
+
 // Decsribes all the embedded files base pathes.
 const (
-	ShadersPath   = "dist/shaders"
-	ObjectsPath   = "dist/objects"
-	TemplatesPath = "dist/templates"
+	ShadersPath    = "dist/shaders"
+	ObjectsPath    = "dist/objects"
+	TemplatesPath  = "dist/templates"
+	AnimationsPath = "dist/animations"
 )
 
 // Loader represents asset loader manager, which operates in a lazy mode manner.
 type Loader struct {
-	// Represents cache map of embedded objects.
-	objects sync.Map
+	// Represents cache map of embedded statics.
+	statics sync.Map
 
 	// Represents cache map of embedded shaders.
 	shaders sync.Map
 
 	// Represents cache map of embedded templates.
 	templates sync.Map
+
+	// Represents cache map of embedded animations.
+	animations sync.Map
 }
 
 // GetObject retrieves object content with the given name.
-func (l *Loader) GetObject(name string) *ebiten.Image {
-	result, ok := l.objects.Load(name)
+func (l *Loader) GetStatic(name string) *ebiten.Image {
+	result, ok := l.statics.Load(name)
 	if ok {
 		return result.(*ebiten.Image)
 	}
@@ -67,14 +82,14 @@ func (l *Loader) GetObject(name string) *ebiten.Image {
 
 	source, _, err := image.Decode(bytes.NewReader(file))
 	if err != nil {
-		logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingImage.Error()).Error())
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingStatic.Error()).Error())
 	}
 
 	image := ebiten.NewImageFromImage(source)
 
-	l.objects.Store(name, image)
+	l.statics.Store(name, image)
 
-	logging.GetInstance().Debug("Image has been loaded", zap.String("name", name))
+	logging.GetInstance().Debug("Static has been loaded", zap.String("name", name))
 
 	return image
 }
@@ -120,6 +135,31 @@ func (l *Loader) GetTemplate(name string) []byte {
 	logging.GetInstance().Debug("Template has been loaded", zap.String("name", name))
 
 	return file
+}
+
+// GetAnimation retrieves animation content with the given name. Allows to load new instance everytime.
+// In order to load global object, it's required to set second argumeent to 'true'.
+func (l *Loader) GetAnimation(name string, shared bool) *asebiten.Animation {
+	if shared {
+		result, ok := l.animations.Load(name)
+		if ok {
+			return result.(*asebiten.Animation)
+		}
+	}
+
+	animation, err := asebiten.LoadAnimation(
+		assets.Assets, filepath.Join(AnimationsPath, fmt.Sprintf("%s.json", name)))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingAnimation.Error()).Error())
+	}
+
+	if shared {
+		l.animations.Store(name, animation)
+
+		logging.GetInstance().Debug("Animation has been loaded", zap.String("name", name))
+	}
+
+	return animation
 }
 
 // newLoader initializes Loader.

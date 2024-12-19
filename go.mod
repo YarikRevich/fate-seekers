@@ -5,6 +5,7 @@ go 1.22.0
 toolchain go1.22.10
 
 require (
+	github.com/Frabjous-Studios/asebiten v0.6.4
 	github.com/hajimehoshi/ebiten/v2 v2.8.5
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.23.1
@@ -25,6 +26,7 @@ require (
 	github.com/jezek/xgb v1.1.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/luisvinicius167/godux v0.0.0-20201004124859-70bcb3c51748 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
