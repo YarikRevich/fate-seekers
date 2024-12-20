@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -30,7 +31,18 @@ var (
 	loggingName, loggingDirectory string
 )
 
-var (
+// Represents window configuration.
+const (
+	windowName = "Fate Seekers"
+)
+
+// Represents internal world size.
+const (
+	worldWidth  = 480
+	worldHeight = 320
+)
+
+const (
 	// Represents home directory where all application related data is located.
 	internalGlobalDirectory = "/.fate-seekers-client"
 
@@ -43,6 +55,8 @@ var (
 
 // SetupDefaultConfig initializes default parameters for the configuration file.
 func SetupDefaultConfig() {
+	viper.SetDefault("window.width", 1920)
+	viper.SetDefault("window.height", 1080)
 	viper.SetDefault("operation.debug", false)
 	viper.SetDefault("database.name", "fate_seekers.db")
 	viper.SetDefault("database.connection-retry-delay", time.Second*3)
@@ -63,6 +77,8 @@ func Init() {
 		log.Fatalln(ErrReadingFromConfig.Error(), zap.String("configFile", *configFile), zap.Error(err))
 	}
 
+	windowWidth := viper.GetInt("window.width")
+	windowHeight := viper.GetInt("window.height")
 	debug = viper.GetBool("operation.debug")
 	databaseName = viper.GetString("database.name")
 	databaseConnectionRetryDelay = viper.GetDuration("database.connection-retry-delay")
@@ -80,6 +96,11 @@ func Init() {
 	if err := os.MkdirAll(loggingDirectory, 0755); err != nil {
 		log.Fatalln(err)
 	}
+
+	ebiten.SetWindowSize(windowWidth, windowHeight)
+	ebiten.SetWindowTitle(windowName)
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	ebiten.SetVsyncEnabled(true)
 }
 
 func GetDebug() bool {
@@ -113,6 +134,14 @@ func GetLoggingName() string {
 
 func GetLoggingDirectory() string {
 	return loggingDirectory
+}
+
+func GetWorldWidth() int {
+	return worldWidth
+}
+
+func GetWorldHeight() int {
+	return worldHeight
 }
 
 func getDefaultConfigDirectory() string {

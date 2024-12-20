@@ -2,7 +2,6 @@ package loader
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"io/fs"
 	"path/filepath"
@@ -35,14 +34,17 @@ var (
 const ()
 
 // Describes all the available shaders to be loaded.
-const ()
+const (
+	BasicTransitionShader = "basic-transition.kage"
+)
 
 // Describes all the available templates to be loaded.
 const ()
 
 // Describes all the available animations to be loaded.
 const (
-	IntroSkullAnimation = "intro-skull/intro-skull"
+	IntroSkullAnimation = "intro-skull/intro-skull.json"
+	LogoAnimation       = "logo/logo.json"
 )
 
 // Decsribes all the embedded files base pathes.
@@ -148,7 +150,7 @@ func (l *Loader) GetAnimation(name string, shared bool) *asebiten.Animation {
 	}
 
 	animation, err := asebiten.LoadAnimation(
-		assets.Assets, filepath.Join(AnimationsPath, fmt.Sprintf("%s.json", name)))
+		assets.Assets, filepath.Join(AnimationsPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingAnimation.Error()).Error())
 	}
