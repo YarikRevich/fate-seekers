@@ -21,10 +21,8 @@ var (
 )
 
 const (
-	screenWidth  = 640
-	screenHeight = 480
-	scale        = 64
-	starsCount   = 256
+	scale      = 64
+	starsCount = 256
 )
 
 type Star struct {
@@ -32,9 +30,9 @@ type Star struct {
 }
 
 func (s *Star) Init() {
-	s.tox = rand.Float32() * screenWidth * scale
+	s.tox = rand.Float32() * float32(config.GetWorldWidth()) * scale
 	s.fromx = s.tox
-	s.toy = rand.Float32() * screenHeight * scale
+	s.toy = rand.Float32() * float32(config.GetWorldHeight()) * scale
 	s.fromy = s.toy
 	s.brightness = rand.Float32() * 0xff
 }
@@ -48,7 +46,7 @@ func (s *Star) Update() {
 	if 0xff < s.brightness {
 		s.brightness = 0xff
 	}
-	if s.fromx < 0 || screenWidth*scale < s.fromx || s.fromy < 0 || screenHeight*scale < s.fromy {
+	if s.fromx < 0 || float32(config.GetWorldWidth())*scale < s.fromx || s.fromy < 0 || float32(config.GetWorldHeight())*scale < s.fromy {
 		s.Init()
 	}
 }
@@ -79,7 +77,7 @@ type EntryScreen struct {
 	logoAnimation *asebiten.Animation
 }
 
-func (es *EntryScreen) HandleInput() {
+func (es *EntryScreen) HandleInput() error {
 	es.logoAnimation.Update()
 
 	for i := 0; i < starsCount; i++ {
@@ -96,6 +94,7 @@ func (es *EntryScreen) HandleInput() {
 	default:
 	}
 
+	return nil
 }
 
 func (es *EntryScreen) HandleNetworking() {

@@ -10,6 +10,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/assets"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -21,6 +22,7 @@ import (
 var (
 	ErrReadingFile      = errors.New("err happened during file read operation")
 	ErrLoadingShader    = errors.New("err happened during shader loading operation")
+	ErrLoadingFont      = errors.New("err happened during font loading operation")
 	ErrLoadingStatic    = errors.New("err happened during image loading operation")
 	ErrLoadingAnimation = errors.New("err happened during animation loading operation")
 )
@@ -31,11 +33,20 @@ var (
 )
 
 // Describes all the available statics to be loaded.
-const ()
+const (
+	ButtonIdleButton  = "button-idle.png"
+	ButtonHoverButton = "button-hover.png"
+	PanelIdlePanel    = "panel-idle.png"
+)
 
 // Describes all the available shaders to be loaded.
 const (
 	BasicTransitionShader = "basic-transition.kage"
+)
+
+// Describes all the available fonts to be loaded.
+const (
+	KyivRegularFont = "kyiv-regular.ttf"
 )
 
 // Describes all the available templates to be loaded.
@@ -50,18 +61,22 @@ const (
 // Decsribes all the embedded files base pathes.
 const (
 	ShadersPath    = "dist/shaders"
-	ObjectsPath    = "dist/objects"
+	FontsPath      = "dist/fonts"
+	ObjectsPath    = "dist/statics"
 	TemplatesPath  = "dist/templates"
 	AnimationsPath = "dist/animations"
 )
 
-// Loader represents asset loader manager, which operates in a lazy mode manner.
+// Loader represents low level asset loading manager, which operates in a lazy mode manner.
 type Loader struct {
 	// Represents cache map of embedded statics.
 	statics sync.Map
 
 	// Represents cache map of embedded shaders.
 	shaders sync.Map
+
+	// Represents cache map of embedded fonts.
+	fonts sync.Map
 
 	// Represents cache map of embedded templates.
 	templates sync.Map
@@ -118,6 +133,30 @@ func (l *Loader) GetShader(name string) *ebiten.Shader {
 	logging.GetInstance().Debug("Shader has been loaded", zap.String("name", name))
 
 	return shader
+}
+
+// GetFont retrieves font content with the given name.
+func (l *Loader) GetFont(name string) *text.GoTextFaceSource {
+	result, ok := l.fonts.Load(name)
+	if ok {
+		return result.(*text.GoTextFaceSource)
+	}
+
+	file, err := fs.ReadFile(assets.Assets, filepath.Join(FontsPath, name))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	font, err := text.NewGoTextFaceSource(bytes.NewReader(file))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingFont.Error()).Error())
+	}
+
+	l.shaders.Store(name, font)
+
+	logging.GetInstance().Debug("Font has been loaded", zap.String("name", name))
+
+	return font
 }
 
 // GetTemplate retrieves template content with the given name.

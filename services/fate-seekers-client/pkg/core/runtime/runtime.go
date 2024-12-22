@@ -26,7 +26,10 @@ func (r *Runtime) Update() error {
 		r.activeScreen = menu.GetInstance()
 	}
 
-	r.activeScreen.HandleInput()
+	err := r.activeScreen.HandleInput()
+	if err != nil {
+		return err
+	}
 
 	r.activeScreen.HandleNetworking()
 

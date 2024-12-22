@@ -3,6 +3,7 @@ package store
 import (
 	"sync"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/screen"
 	"github.com/luisvinicius167/godux"
 )
@@ -26,7 +27,11 @@ func newStore() *godux.Store {
 	screenStateReducer := screen.NewScreenStateReducer(store)
 	screenStateReducer.Init()
 
+	applicationStateReducer := application.NewApplicationStateReducer(store)
+	applicationStateReducer.Init()
+
 	store.Reducer(screenStateReducer.GetProcessor())
+	store.Reducer(applicationStateReducer.GetProcessor())
 
 	return store
 }

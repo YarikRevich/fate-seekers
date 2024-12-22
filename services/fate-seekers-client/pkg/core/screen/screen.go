@@ -5,7 +5,7 @@ import "github.com/hajimehoshi/ebiten/v2"
 // Reducer represents common screen interface.
 type Screen interface {
 	// HandleInput handles provided user input.
-	HandleInput()
+	HandleInput() error
 
 	// HandleNetworking handles network communication.
 	HandleNetworking()

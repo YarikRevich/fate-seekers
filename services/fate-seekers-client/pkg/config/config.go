@@ -36,10 +36,16 @@ const (
 	windowName = "Fate Seekers"
 )
 
+// // Represents internal world size.
+// const (
+// 	worldWidth  = 640
+// 	worldHeight = 360
+// )
+
 // Represents internal world size.
 const (
-	worldWidth  = 480
-	worldHeight = 320
+	worldWidth  = 640 * 2
+	worldHeight = 360 * 2
 )
 
 const (

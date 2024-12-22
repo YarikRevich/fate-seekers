@@ -46,8 +46,8 @@ var (
 type SessionScreen struct {
 }
 
-func (ss *SessionScreen) HandleInput() {
-
+func (ss *SessionScreen) HandleInput() error {
+	return nil
 }
 
 func (ss *SessionScreen) HandleNetworking() {
