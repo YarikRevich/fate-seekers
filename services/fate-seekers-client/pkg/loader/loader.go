@@ -152,7 +152,7 @@ func (l *Loader) GetFont(name string) *text.GoTextFaceSource {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingFont.Error()).Error())
 	}
 
-	l.shaders.Store(name, font)
+	l.fonts.Store(name, font)
 
 	logging.GetInstance().Debug("Font has been loaded", zap.String("name", name))
 

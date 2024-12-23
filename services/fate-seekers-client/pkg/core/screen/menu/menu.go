@@ -8,6 +8,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/camera"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
@@ -120,9 +121,7 @@ func (ms *MenuScreen) HandleRender(screen *ebiten.Image) {
 
 	ms.ui.Draw(ms.world)
 
-	var g ebiten.GeoM
-
-	screen.DrawImage(ms.world, &ebiten.DrawImageOptions{GeoM: g})
+	screen.DrawImage(ms.world, &ebiten.DrawImageOptions{})
 
 	// worldX, worldY := r.camera.ScreenToWorld(ebiten.CursorPosition())
 	// ebitenutil.DebugPrint(
@@ -183,8 +182,10 @@ func newMenuScreen() screen.Screen {
 	// // To display the text widget, we have to add it to the root container.
 	// rootContainer.AddChild(helloWorldLabel)
 
+	// inventory.NewInventoryComponent()
+
 	return &MenuScreen{
-		ui:    builder.Build(menu.NewMenuComponent()),
+		ui:    builder.Build(menu.NewMenuComponent(), letter.NewLetterComponent()),
 		world: ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		camera: camera.NewCamera(
 			float64(config.GetWorldWidth()),

@@ -1,7 +1,6 @@
-package inventory
+package letter
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
@@ -10,8 +9,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
-// NewInventoryComponent creates new session inventory component.
-func NewInventoryComponent() *widget.Container {
+// NewLetterComponent creates new session letter component.
+func NewLetterComponent() *widget.Container {
 	result := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(400, 300)),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.TrackHover(false)),
@@ -42,42 +41,46 @@ func NewInventoryComponent() *widget.Container {
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
-		widget.TextOpts.Text("Inventory", generalFont, color.White)))
+		widget.TextOpts.Text("Letter", generalFont, color.White)))
 
-	bc := widget.NewContainer(
-		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-			Stretch: true,
+	result.AddChild(widget.NewTextArea(
+		widget.TextAreaOpts.ContainerOpts(
+			widget.ContainerOpts.WidgetOpts(
+				widget.WidgetOpts.LayoutData(widget.GridLayoutData{
+					MaxHeight: 220,
+				}))),
+		widget.TextAreaOpts.ScrollContainerOpts(widget.ScrollContainerOpts.Image(&widget.ScrollContainerImage{
+			Idle:     common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0),
+			Mask:     common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0),
+			Disabled: common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0),
 		})),
-		widget.ContainerOpts.Layout(widget.NewGridLayout(
-			widget.GridLayoutOpts.Columns(4),
-			widget.GridLayoutOpts.Stretch([]bool{true, true, true, true}, nil),
-			widget.GridLayoutOpts.Spacing(10, 10),
-			widget.GridLayoutOpts.Padding(widget.Insets{
-				Top: 20,
-			}))))
-
-	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0)
-	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 0)
-
-	i := 0
-	for row := 0; row < 3; row++ {
-		for col := 0; col < 4; col++ {
-			b := widget.NewButton(
-				widget.ButtonOpts.Image(&widget.ButtonImage{
-					Idle:         buttonIdleIcon,
-					Hover:        buttonHoverIcon,
-					Pressed:      buttonIdleIcon,
-					PressedHover: buttonIdleIcon,
-					Disabled:     buttonIdleIcon,
-				}),
-				widget.ButtonOpts.Text(fmt.Sprintf("%s %d", string(rune('A'+i)), i+1), generalFont, &widget.ButtonTextColor{Idle: color.White}))
-			bc.AddChild(b)
-
-			i++
-		}
-	}
-
-	result.AddChild(bc)
+		widget.TextAreaOpts.SliderOpts(
+			widget.SliderOpts.Images(nil, &widget.ButtonImage{
+				Idle:         common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0),
+				Hover:        common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0),
+				Pressed:      common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0),
+				PressedHover: common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0),
+				Disabled:     common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0),
+			}),
+			widget.SliderOpts.MinHandleSize(20),
+			// widget.SliderOpts.TrackPadding(widget.Insets{}),
+		),
+		widget.TextAreaOpts.ShowVerticalScrollbar(),
+		widget.TextAreaOpts.VerticalScrollMode(widget.PositionAtEnd),
+		widget.TextAreaOpts.ProcessBBCode(true),
+		widget.TextAreaOpts.FontFace(&text.GoTextFace{
+			Source: loader.GetInstance().GetFont(loader.KyivRegularFont),
+			Size:   25,
+		}),
+		widget.TextAreaOpts.FontColor(color.White),
+		widget.TextAreaOpts.TextPadding(widget.Insets{
+			Top:    20,
+			Bottom: 20,
+			Left:   20,
+			Right:  20,
+		}),
+		widget.TextAreaOpts.Text("it wofjdkfjflfjlsfjlfjlfjldfjdlkfjdfjdkjfdkjfkdjfkdjfkjfkrks"),
+	))
 
 	closeContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
@@ -88,6 +91,9 @@ func NewInventoryComponent() *widget.Container {
 			}),
 		)),
 	)
+
+	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0)
+	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 0)
 
 	closeContainer.AddChild(widget.NewButton(
 		widget.ButtonOpts.Image(&widget.ButtonImage{

@@ -16,27 +16,28 @@ import (
 // NewMenuComponent creates new main menu component.
 func NewMenuComponent() *widget.Container {
 	result := widget.NewContainer(
-		widget.ContainerOpts.Layout(widget.NewRowLayout(
-			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
-			widget.RowLayoutOpts.Padding(widget.Insets{
-				Top:  200,
-				Left: 100,
-			}),
-		)))
-
-	blockContainer := widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(200, 100)),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.TrackHover(false)),
 		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)),
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				Padding: widget.Insets{
+					Left: 100,
+				},
+				VerticalPosition:  widget.AnchorLayoutPositionCenter,
+				StretchHorizontal: false,
+				StretchVertical:   false,
+			}),
+		),
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
 			widget.RowLayoutOpts.Padding(widget.Insets{
-				Left:   70,
-				Right:  70,
-				Top:    70,
-				Bottom: 70,
+				Left:   30,
+				Right:  30,
+				Top:    30,
+				Bottom: 30,
 			}),
-		)),
-	)
+		)))
 
 	buttonsContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
@@ -138,9 +139,7 @@ func NewMenuComponent() *widget.Container {
 		}),
 	))
 
-	blockContainer.AddChild(buttonsContainer)
-
-	result.AddChild(blockContainer)
+	result.AddChild(buttonsContainer)
 
 	return result
 }
