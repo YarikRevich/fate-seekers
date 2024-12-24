@@ -36,7 +36,18 @@ var (
 const (
 	ButtonIdleButton  = "button-idle.png"
 	ButtonHoverButton = "button-hover.png"
-	PanelIdlePanel    = "panel-idle.png"
+
+	PanelIdlePanel = "panel-idle.png"
+
+	ListDisabled = "list-disabled.png"
+	ListIdle     = "list-idle.png"
+
+	ListMask          = "list-mask.png"
+	ListTrackDisabled = "list-track-disabled.png"
+	ListTrackIdle     = "list-track-idle.png"
+
+	SliderHandleHover = "slider-handle-hover.png"
+	SliderHandleIdle  = "slider-handle-idle.png"
 )
 
 // Describes all the available shaders to be loaded.

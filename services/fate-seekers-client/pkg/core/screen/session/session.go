@@ -37,6 +37,46 @@ import (
 // 	}
 // 	}
 
+// if ebiten.IsKeyPressed(ebiten.KeyU) {
+// 	ms.animation.Update()
+// }
+
+// if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
+// 	ms.camera.TranslatePositionX(-1)
+// }
+// if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
+// 	ms.camera.TranslatePositionX(1)
+// }
+// if ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
+// 	ms.camera.TranslatePositionY(-1)
+// }
+// if ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
+// 	ms.camera.TranslatePositionY(1)
+// }
+
+// if ebiten.IsKeyPressed(ebiten.KeyQ) {
+// 	if ms.camera.GetZoom() > -2400 {
+// 		ms.camera.ZoomOutBy(10)
+// 	}
+// }
+// if ebiten.IsKeyPressed(ebiten.KeyE) {
+// 	if ms.camera.GetZoom() < 2400 {
+// 		ms.camera.ZoomInBy(10)
+// 	}
+// }
+
+// if ebiten.IsKeyPressed(ebiten.KeyR) {
+// 	ms.camera.RotateLeft()
+// }
+
+// if ebiten.IsKeyPressed(ebiten.KeyT) {
+// 	ms.camera.RotateRight()
+// }
+
+// if ebiten.IsKeyPressed(ebiten.KeySpace) {
+// 	ms.camera.Reset()
+// }
+
 var (
 	// GetInstance retrieves instance of the session screen, performing initilization if needed.
 	GetInstance = sync.OnceValue[screen.Screen](newSessionScreen)

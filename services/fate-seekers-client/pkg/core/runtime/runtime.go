@@ -5,6 +5,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/menu"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -18,6 +19,11 @@ type Runtime struct {
 
 // Update performs logic update operations.
 func (r *Runtime) Update() error {
+	if store.GetInstance().GetState(application.EXIT_APPLICATION_STATE) ==
+		value.EXIT_APPLICATION_TRUE_VALUE {
+		return ebiten.Termination
+	}
+
 	switch store.GetActiveScreen() {
 	case value.ACTIVE_SCREEN_ENTRY_VALUE:
 		r.activeScreen = entry.GetInstance()
