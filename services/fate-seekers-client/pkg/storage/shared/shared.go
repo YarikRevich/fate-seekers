@@ -27,7 +27,12 @@ func (ss *SharedStorage) GetBackgroundAnimation() *combiner.AnimationCombiner {
 func newSharedStorage() *SharedStorage {
 	return &SharedStorage{
 		backgroundAnimation: combiner.NewAnimationCombiner(
-			loader.GetInstance().GetAnimation(loader.BackgroundAnimation, false),
+			loader.GetInstance().GetAnimation(loader.Background1Animation, false),
+			loader.GetInstance().GetAnimation(loader.Background2Animation, false),
+			loader.GetInstance().GetAnimation(loader.Background3Animation, false),
+			loader.GetInstance().GetAnimation(loader.Background4Animation, false),
+			loader.GetInstance().GetAnimation(loader.Background5Animation, false),
+			loader.GetInstance().GetAnimation(loader.Background6Animation, false),
 		),
 	}
 }

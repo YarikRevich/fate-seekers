@@ -30,8 +30,19 @@ func newStore() *godux.Store {
 	applicationStateReducer := application.NewApplicationStateReducer(store)
 	applicationStateReducer.Init()
 
-	store.Reducer(screenStateReducer.GetProcessor())
-	store.Reducer(applicationStateReducer.GetProcessor())
+	store.Reducer(func(action godux.Action) interface{} {
+		result := screenStateReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = applicationStateReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		return nil
+	})
 
 	return store
 }

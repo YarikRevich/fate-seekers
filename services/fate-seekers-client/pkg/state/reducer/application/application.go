@@ -31,7 +31,7 @@ func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) inte
 				dto.ReducerResultUnit{Key: EXIT_APPLICATION_STATE, Value: value.Value})
 
 		default:
-			return asr.store.GetAllState()
+			return nil
 		}
 	}
 }

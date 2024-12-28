@@ -31,7 +31,7 @@ func (ssr *ScreenStateReducer) GetProcessor() func(value godux.Action) interface
 				dto.ReducerResultUnit{Key: ACTIVE_SCREEN_STATE, Value: value.Value})
 
 		default:
-			return ssr.store.GetAllState()
+			return nil
 		}
 	}
 }

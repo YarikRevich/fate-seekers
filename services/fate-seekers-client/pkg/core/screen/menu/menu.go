@@ -7,6 +7,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
@@ -55,7 +56,15 @@ func (ms *MenuScreen) HandleNetworking() {
 func (ms *MenuScreen) HandleRender(screen *ebiten.Image) {
 	ms.world.Clear()
 
-	shared.GetInstance().GetBackgroundAnimation().DrawTo(ms.world, &ebiten.DrawImageOptions{})
+	var backgroundAnimationGeometry ebiten.GeoM
+
+	backgroundAnimationGeometry.Scale(
+		scaler.GetScaleFactor(config.GetMinStaticWidth(), config.GetWorldWidth()),
+		scaler.GetScaleFactor(config.GetMinStaticHeight(), config.GetWorldHeight()))
+
+	shared.GetInstance().GetBackgroundAnimation().DrawTo(ms.world, &ebiten.DrawImageOptions{
+		GeoM: backgroundAnimationGeometry,
+	})
 
 	ms.ui.Draw(ms.world)
 

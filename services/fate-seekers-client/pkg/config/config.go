@@ -42,6 +42,12 @@ const (
 	worldHeight = 360 * 2
 )
 
+// Represents internal min static size.
+const (
+	minStaticWidth  = 640
+	minStaticHeight = 360
+)
+
 const (
 	// Represents home directory where all application related data is located.
 	internalGlobalDirectory = "/.fate-seekers-client"
@@ -142,6 +148,14 @@ func GetWorldWidth() int {
 
 func GetWorldHeight() int {
 	return worldHeight
+}
+
+func GetMinStaticWidth() int {
+	return minStaticWidth
+}
+
+func GetMinStaticHeight() int {
+	return minStaticHeight
 }
 
 func getDefaultConfigDirectory() string {
