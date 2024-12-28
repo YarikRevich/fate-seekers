@@ -67,6 +67,7 @@ const ()
 const (
 	IntroSkullAnimation = "intro-skull/intro-skull.json"
 	LogoAnimation       = "logo/logo.json"
+	BackgroundAnimation = "background/background.json"
 )
 
 // Decsribes all the embedded files base pathes.

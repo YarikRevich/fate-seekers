@@ -106,3 +106,26 @@ func (ss *SessionScreen) Clean() {
 func newSessionScreen() screen.Screen {
 	return new(SessionScreen)
 }
+
+// var shaderOpts ebiten.DrawRectShaderOptions
+
+// var g ebiten.GeoM
+// // g.Translate(float64(config.GetWorldWidth())/1.5, 0)
+
+// shaderOpts.GeoM = g
+
+// shaderOpts.Uniforms = make(map[string]interface{})
+// shaderOpts.Uniforms["Center"] = []float32{
+// 	float32(screen.Bounds().Dx()) / 2,
+// 	float32(screen.Bounds().Dy()) / 2,
+// }
+
+// screen.DrawRectShader(
+// 	screen.Bounds().Dx()/2,
+// 	screen.Bounds().Dy(),
+// 	loader.GetInstance().GetShader(loader.BasicTransitionShader),
+// 	&shaderOpts)
+
+// draw shader
+// indices := []uint16{0, 1, 2, 2, 1, 3} // map vertices to triangles
+// screen.(self.vertices[:], indices, self.shader, &shaderOpts)
