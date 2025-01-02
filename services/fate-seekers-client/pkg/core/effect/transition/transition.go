@@ -16,6 +16,9 @@ type TransitionEffect interface {
 	// Clean performes forced memory cleanup for the transition only.
 	Clean()
 
+	// Reset performes transition state reset.
+	Reset()
+
 	// GetOptions retrieves updated image draw options.
 	GetOptions() *ebiten.DrawImageOptions
 }

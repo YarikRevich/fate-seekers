@@ -3,6 +3,8 @@ package letter
 import (
 	"image/color"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/ebitenui/ebitenui/image"
@@ -13,7 +15,9 @@ import (
 // NewLetterComponent creates new session letter component.
 func NewLetterComponent() *widget.Container {
 	result := widget.NewContainer(
-		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(400, 500)),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(
+			scaler.GetPercentageOf(config.GetWorldWidth(), 30),
+			scaler.GetPercentageOf(config.GetWorldHeight(), 60))),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.TrackHover(false)),
 		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)),
 		widget.ContainerOpts.WidgetOpts(
@@ -52,7 +56,7 @@ func NewLetterComponent() *widget.Container {
 			}),
 			widget.WidgetOpts.MinSize(
 				result.GetWidget().MinWidth,
-				result.GetWidget().MinHeight*72/100),
+				scaler.GetPercentageOf(result.GetWidget().MinHeight, 72)),
 		),
 		widget.ContainerOpts.Layout(widget.NewGridLayout(
 			widget.GridLayoutOpts.Columns(1),
@@ -126,7 +130,24 @@ func NewLetterComponent() *widget.Container {
 	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0)
 	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 0)
 
-	closeContainer.AddChild(widget.NewButton(
+	buttonsContainer := widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				VerticalPosition:   widget.AnchorLayoutPositionEnd,
+				HorizontalPosition: widget.AnchorLayoutPositionEnd,
+				StretchHorizontal:  true,
+				StretchVertical:    false,
+			}),
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				// MaxWidth: 100,
+			}),
+		),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Spacing(30),
+		)))
+
+	buttonsContainer.AddChild(widget.NewButton(
 		widget.ButtonOpts.Image(&widget.ButtonImage{
 			Idle:         buttonIdleIcon,
 			Hover:        buttonHoverIcon,
@@ -139,11 +160,15 @@ func NewLetterComponent() *widget.Container {
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionEnd,
 				HorizontalPosition: widget.AnchorLayoutPositionEnd,
-				StretchHorizontal:  false,
+				StretchHorizontal:  true,
 				StretchVertical:    false,
 			}),
-		),
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Stretch: true,
+			})),
 	))
+
+	closeContainer.AddChild(buttonsContainer)
 
 	result.AddChild(closeContainer)
 

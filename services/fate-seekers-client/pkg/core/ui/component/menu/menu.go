@@ -1,47 +1,47 @@
 package menu
 
 import (
-	"fmt"
 	"image/color"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
 // NewMenuComponent creates new main menu component.
-func NewMenuComponent() *widget.Container {
+func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCallback func()) *widget.Container {
 	result := widget.NewContainer(
-		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(200, 100)),
-		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.TrackHover(false)),
-		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)),
 		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(
+				scaler.GetPercentageOf(config.GetWorldWidth(), 20),
+				scaler.GetPercentageOf(config.GetWorldHeight(), 40),
+			),
+			widget.WidgetOpts.TrackHover(false),
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				Padding: widget.Insets{
-					Left: 100,
+					Left: scaler.GetPercentageOf(config.GetWorldWidth(), 22),
 				},
 				VerticalPosition:  widget.AnchorLayoutPositionCenter,
 				StretchHorizontal: false,
 				StretchVertical:   false,
-			}),
-		),
+			})),
+		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)),
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
 			widget.RowLayoutOpts.Padding(widget.Insets{
-				Left:   30,
-				Right:  30,
-				Top:    30,
-				Bottom: 30,
+				Left:   50,
+				Right:  50,
+				Top:    40,
+				Bottom: 40,
 			}),
 		)))
 
 	buttonsContainer := widget.NewContainer(
-		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-			StretchHorizontal: true,
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+			Position: widget.RowLayoutPositionCenter,
 		})),
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
@@ -72,8 +72,9 @@ func NewMenuComponent() *widget.Container {
 			Left:  30,
 			Right: 30,
 		}),
-		widget.ButtonOpts.CursorEnteredHandler(func(args *widget.ButtonHoverEventArgs) { fmt.Println("Cursor Entered: " + args.Button.Text().Label) }),
-		widget.ButtonOpts.CursorExitedHandler(func(args *widget.ButtonHoverEventArgs) { fmt.Println("Cursor Exited: " + args.Button.Text().Label) }),
+		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			startCallback()
+		}),
 	))
 
 	buttonsContainer.AddChild(widget.NewButton(
@@ -92,8 +93,9 @@ func NewMenuComponent() *widget.Container {
 			Left:  30,
 			Right: 30,
 		}),
-		widget.ButtonOpts.CursorEnteredHandler(func(args *widget.ButtonHoverEventArgs) { fmt.Println("Cursor Entered: " + args.Button.Text().Label) }),
-		widget.ButtonOpts.CursorExitedHandler(func(args *widget.ButtonHoverEventArgs) { fmt.Println("Cursor Exited: " + args.Button.Text().Label) }),
+		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			creditsCallback()
+		}),
 	))
 
 	buttonsContainer.AddChild(widget.NewButton(
@@ -112,8 +114,9 @@ func NewMenuComponent() *widget.Container {
 			Left:  30,
 			Right: 30,
 		}),
-		widget.ButtonOpts.CursorEnteredHandler(func(args *widget.ButtonHoverEventArgs) { fmt.Println("Cursor Entered: " + args.Button.Text().Label) }),
-		widget.ButtonOpts.CursorExitedHandler(func(args *widget.ButtonHoverEventArgs) { fmt.Println("Cursor Exited: " + args.Button.Text().Label) }),
+		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			settingsCallback()
+		}),
 	))
 
 	buttonsContainer.AddChild(widget.NewButton(
@@ -132,10 +135,8 @@ func NewMenuComponent() *widget.Container {
 			Left:  30,
 			Right: 30,
 		}),
-		widget.ButtonOpts.CursorEnteredHandler(func(args *widget.ButtonHoverEventArgs) { fmt.Println("Cursor Entered: " + args.Button.Text().Label) }),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			dispatcher.GetInstance().Dispatch(
-				action.NewSetExitApplicationAction(value.EXIT_APPLICATION_TRUE_VALUE))
+			exitCallback()
 		}),
 	))
 

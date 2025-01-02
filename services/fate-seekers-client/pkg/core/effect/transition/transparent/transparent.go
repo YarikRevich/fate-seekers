@@ -43,6 +43,14 @@ func (tte *TransparentTransitionEffect) Clean() {
 	tte.finished = true
 }
 
+func (tte *TransparentTransitionEffect) Reset() {
+	tte.ticker = time.NewTicker(time.Microsecond * 10)
+
+	tte.counter = 0
+
+	tte.finished = false
+}
+
 func (tte *TransparentTransitionEffect) GetOptions() *ebiten.DrawImageOptions {
 	var c ebiten.ColorM
 

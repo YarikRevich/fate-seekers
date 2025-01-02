@@ -9,9 +9,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -51,10 +48,8 @@ func (es *EntryScreen) HandleInput() error {
 }
 
 func (es *EntryScreen) HandleNetworking() {
-	// TODO: do initial connection
-
-	dispatcher.GetInstance().Dispatch(
-		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+	// dispatcher.GetInstance().Dispatch(
+	// 	action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 }
 
 func (es *EntryScreen) HandleRender(screen *ebiten.Image) {

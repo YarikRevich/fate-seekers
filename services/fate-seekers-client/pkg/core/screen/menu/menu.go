@@ -11,8 +11,12 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
+	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -21,7 +25,7 @@ var (
 	GetInstance = sync.OnceValue[screen.Screen](newMenuScreen)
 )
 
-// MenuScreen represents entry screen implementation.
+// MenuScreen represents menu screen implementation.
 type MenuScreen struct {
 	// Represents attached user interface.
 	ui *ebitenui.UI
@@ -31,6 +35,9 @@ type MenuScreen struct {
 
 	// Represents global world view.
 	world *ebiten.Image
+
+	// Represents interface world view.
+	interfaceWorld *ebiten.Image
 }
 
 func (ms *MenuScreen) HandleInput() error {
@@ -56,6 +63,8 @@ func (ms *MenuScreen) HandleNetworking() {
 func (ms *MenuScreen) HandleRender(screen *ebiten.Image) {
 	ms.world.Clear()
 
+	ms.interfaceWorld.Clear()
+
 	var backgroundAnimationGeometry ebiten.GeoM
 
 	backgroundAnimationGeometry.Scale(
@@ -66,21 +75,48 @@ func (ms *MenuScreen) HandleRender(screen *ebiten.Image) {
 		GeoM: backgroundAnimationGeometry,
 	})
 
-	ms.ui.Draw(ms.world)
+	ms.ui.Draw(ms.interfaceWorld)
 
-	screen.DrawImage(ms.world, &ebiten.DrawImageOptions{
-		ColorM: ms.transparentTransitionEffect.GetOptions().ColorM})
+	ms.world.DrawImage(ms.interfaceWorld, &ebiten.DrawImageOptions{
+		ColorM: ms.transparentTransitionEffect.GetOptions().ColorM,
+	})
+
+	screen.DrawImage(ms.world, &ebiten.DrawImageOptions{})
 }
 
 func (ms *MenuScreen) Clean() {
 
 }
 
-// newMenuScreen initializes MenuScreen.
 func newMenuScreen() screen.Screen {
+	f := letter.NewLetterComponent()
+
+	f.GetWidget().Visibility = widget.Visibility_Hide
+
+	transparentTransitionEffect := transparent.NewTransparentTransitionEffect()
+
 	return &MenuScreen{
-		ui:                          builder.Build(menu.NewMenuComponent(), letter.NewLetterComponent()),
-		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
+		ui: builder.Build(
+			menu.NewMenuComponent(
+				func() {
+
+				},
+				func() {
+
+				},
+				func() {
+					transparentTransitionEffect.Reset()
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SETTINGS_VALUE))
+				},
+				func() {
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetExitApplicationAction(value.EXIT_APPLICATION_TRUE_VALUE))
+				}),
+			f),
+		transparentTransitionEffect: transparentTransitionEffect,
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		interfaceWorld:              ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 	}
 }

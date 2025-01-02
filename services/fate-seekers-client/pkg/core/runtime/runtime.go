@@ -5,6 +5,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/menu"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/settings"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
@@ -30,6 +31,9 @@ func (r *Runtime) Update() error {
 
 	case value.ACTIVE_SCREEN_MENU_VALUE:
 		r.activeScreen = menu.GetInstance()
+
+	case value.ACTIVE_SCREEN_SETTINGS_VALUE:
+		r.activeScreen = settings.GetInstance()
 	}
 
 	err := r.activeScreen.HandleInput()
