@@ -58,8 +58,8 @@ func NewChestComponent() *widget.Container {
 				Top: 20,
 			}))))
 
-	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0)
-	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 0)
+	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 15)
+	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 15)
 
 	i := 0
 	for row := 0; row < 3; row++ {

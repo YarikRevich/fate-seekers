@@ -11,6 +11,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
+var (
+	textColor = color.RGBA{R: 11, G: 16, B: 37, A: 255}
+)
+
 // NewMenuComponent creates new main menu component.
 func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCallback func()) *widget.Container {
 	result := widget.NewContainer(
@@ -32,8 +36,8 @@ func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCall
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
 			widget.RowLayoutOpts.Padding(widget.Insets{
-				Left:   50,
-				Right:  50,
+				Left:   100,
+				Right:  100,
 				Top:    40,
 				Bottom: 40,
 			}),
@@ -48,8 +52,8 @@ func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCall
 			widget.RowLayoutOpts.Spacing(30),
 		)))
 
-	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0)
-	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 0)
+	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 15)
+	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 15)
 
 	buttonFont := &text.GoTextFace{
 		Source: loader.GetInstance().GetFont(loader.KyivRegularFont),
@@ -67,10 +71,12 @@ func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCall
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Start", buttonFont, &widget.ButtonTextColor{Idle: color.White}),
+		widget.ButtonOpts.Text("Start", buttonFont, &widget.ButtonTextColor{Idle: textColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:  30,
-			Right: 30,
+			Left:   30,
+			Right:  30,
+			Top:    20,
+			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
 			startCallback()
@@ -88,10 +94,12 @@ func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCall
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Credits", buttonFont, &widget.ButtonTextColor{Idle: color.White}),
+		widget.ButtonOpts.Text("Credits", buttonFont, &widget.ButtonTextColor{Idle: textColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:  30,
-			Right: 30,
+			Left:   30,
+			Right:  30,
+			Top:    20,
+			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
 			creditsCallback()
@@ -109,10 +117,12 @@ func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCall
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Settings", buttonFont, &widget.ButtonTextColor{Idle: color.White}),
+		widget.ButtonOpts.Text("Settings", buttonFont, &widget.ButtonTextColor{Idle: textColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:  30,
-			Right: 30,
+			Left:   30,
+			Right:  30,
+			Top:    20,
+			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
 			settingsCallback()
@@ -130,10 +140,12 @@ func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCall
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Exit", buttonFont, &widget.ButtonTextColor{Idle: color.White}),
+		widget.ButtonOpts.Text("Exit", buttonFont, &widget.ButtonTextColor{Idle: textColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:  30,
-			Right: 30,
+			Left:   30,
+			Right:  30,
+			Top:    20,
+			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
 			exitCallback()

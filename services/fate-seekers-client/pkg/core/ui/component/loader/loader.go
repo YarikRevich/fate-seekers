@@ -54,8 +54,8 @@ func NewLoaderComponent() *widget.Container {
 			widget.WidgetOpts.MinSize(result.GetWidget().MinWidth, 40)),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()))
 
-	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 0)
-	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 0)
+	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 15)
+	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 15)
 
 	buttonsContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
@@ -94,7 +94,7 @@ func NewLoaderComponent() *widget.Container {
 				Stretch: true,
 			})),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			closeCallback()
+
 		}),
 	))
 

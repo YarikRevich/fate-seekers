@@ -67,6 +67,7 @@ const ()
 const (
 	IntroSkullAnimation = "intro-skull/intro-skull.json"
 	LogoAnimation       = "logo/logo.json"
+	LoaderAnimation     = "loader/loader.json"
 
 	Background1Animation = "background/1/background-1.json"
 	Background2Animation = "background/2/background-2.json"

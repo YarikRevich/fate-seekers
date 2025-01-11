@@ -5,26 +5,6 @@ import (
 	"github.com/ebitenui/ebitenui/image"
 )
 
-// func loadGraphicImages(idle string, disabled string) (*widget.ButtonImageImage, error) {
-// 	idleImage, err := newImageFromFile(idle)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	var disabledImage *ebiten.Image
-// 	if disabled != "" {
-// 		disabledImage, err = newImageFromFile(disabled)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	}
-
-// 	return &widget.ButtonImageImage{
-// 		Idle:     idleImage,
-// 		Disabled: disabledImage,
-// 	}, nil
-// }
-
 // GetImageAsNineSlice retrieves image in a nine slice form.
 func GetImageAsNineSlice(name string, centerWidth int, centerHeight int) *image.NineSlice {
 	rawImage := loader.GetInstance().GetStatic(name)

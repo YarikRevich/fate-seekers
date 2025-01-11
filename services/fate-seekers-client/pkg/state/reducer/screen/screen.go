@@ -20,7 +20,7 @@ type ScreenStateReducer struct {
 }
 
 func (ssr *ScreenStateReducer) Init() {
-	ssr.store.SetState(ACTIVE_SCREEN_STATE, value.ACTIVE_SCREEN_ENTRY_VALUE)
+	ssr.store.SetState(ACTIVE_SCREEN_STATE, value.ACTIVE_SCREEN_INTRO_VALUE)
 }
 
 func (ssr *ScreenStateReducer) GetProcessor() func(value godux.Action) interface{} {
