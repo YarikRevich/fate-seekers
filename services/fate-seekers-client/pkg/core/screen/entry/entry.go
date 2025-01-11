@@ -10,6 +10,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/subtitles"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
@@ -77,6 +78,9 @@ func (es *EntryScreen) HandleNetworking() {
 
 		subtitles.GetInstance().Push("О, лягушка! Так дивно...", time.Second*6)
 		subtitles.GetInstance().Push("'У багатих свої причуди!'", time.Second*6)
+
+		notification.GetInstance().Push("Тестове повідомлення!", time.Second*6)
+		notification.GetInstance().Push("Друге повідомлення!", time.Second*6)
 	default:
 	}
 }

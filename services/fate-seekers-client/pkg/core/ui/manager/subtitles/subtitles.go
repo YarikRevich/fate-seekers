@@ -12,6 +12,7 @@ var (
 	GetInstance = sync.OnceValue[*SubtitlesManager](newSubtitlesManager)
 )
 
+// subtitlesUnit represents a subtitle unit.
 type subtitlesUnit struct {
 	// Represents text for of the subtitles unit.
 	text string
