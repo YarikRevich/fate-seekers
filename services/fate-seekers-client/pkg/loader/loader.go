@@ -14,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	_ "image/jpeg"
 	_ "image/png"
 
 	"github.com/Frabjous-Studios/asebiten"
@@ -34,20 +35,24 @@ var (
 
 // Describes all the available statics to be loaded.
 const (
-	ButtonIdleButton  = "button-idle.png"
-	ButtonHoverButton = "button-hover.png"
+	Girls = "letter/girls.jpg"
 
-	PanelIdlePanel = "panel-idle.png"
+	ButtonIdleButton  = "ui/button-idle.png"
+	ButtonHoverButton = "ui/button-hover.png"
 
-	ListDisabled = "list-disabled.png"
-	ListIdle     = "list-idle.png"
+	PanelIdlePanel = "ui/panel-idle.png"
 
-	ListMask          = "list-mask.png"
-	ListTrackDisabled = "list-track-disabled.png"
-	ListTrackIdle     = "list-track-idle.png"
+	ListDisabled = "ui/list-disabled.png"
+	ListIdle     = "ui/list-idle.png"
 
-	SliderHandleHover = "slider-handle-hover.png"
-	SliderHandleIdle  = "slider-handle-idle.png"
+	ListMask          = "ui/list-mask.png"
+	ListTrackDisabled = "ui/list-track-disabled.png"
+	ListTrackIdle     = "ui/list-track-idle.png"
+
+	SliderHandleHover = "ui/slider-handle-hover.png"
+	SliderHandleIdle  = "ui/slider-handle-idle.png"
+
+	TextInputIdle = "ui/text-input-idle.png"
 )
 
 // Describes all the available shaders to be loaded.
@@ -57,7 +62,8 @@ const (
 
 // Describes all the available fonts to be loaded.
 const (
-	KyivRegularFont = "kyiv-regular.ttf"
+	KyivRegularFont     = "kyiv-regular.ttf"
+	NotosansRegulerFont = "notosans-regular.ttf"
 )
 
 // Describes all the available templates to be loaded.
@@ -65,9 +71,9 @@ const ()
 
 // Describes all the available animations to be loaded.
 const (
-	IntroSkullAnimation = "intro-skull/intro-skull.json"
-	LogoAnimation       = "logo/logo.json"
-	LoaderAnimation     = "loader/loader.json"
+	SkullAnimation  = "skull/skull.json"
+	LogoAnimation   = "logo/logo.json"
+	LoaderAnimation = "loader/loader.json"
 
 	Background1Animation = "background/1/background-1.json"
 	Background2Animation = "background/2/background-2.json"
@@ -75,6 +81,11 @@ const (
 	Background4Animation = "background/4/background-4.json"
 	Background5Animation = "background/5/background-5.json"
 	Background6Animation = "background/6/background-6.json"
+
+	BlinkingScreen1Animation = "blinking-screen/1/blinking-screen-1.json"
+	BlinkingScreen2Animation = "blinking-screen/2/blinking-screen-2.json"
+	BlinkingScreen3Animation = "blinking-screen/3/blinking-screen-3.json"
+	BlinkingScreen4Animation = "blinking-screen/4/blinking-screen-4.json"
 )
 
 // Decsribes all the embedded files base pathes.

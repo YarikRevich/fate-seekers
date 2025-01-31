@@ -1,22 +1,17 @@
 package menu
 
 import (
-	"image/color"
-
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
+	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
-var (
-	textColor = color.RGBA{R: 11, G: 16, B: 37, A: 255}
-)
-
 // NewMenuComponent creates new main menu component.
-func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCallback func()) *widget.Container {
+func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, settingsCallback, exitCallback func()) *widget.Container {
 	result := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
@@ -26,7 +21,7 @@ func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCall
 			widget.WidgetOpts.TrackHover(false),
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				Padding: widget.Insets{
-					Left: scaler.GetPercentageOf(config.GetWorldWidth(), 22),
+					Left: scaler.GetPercentageOf(config.GetWorldWidth(), 19),
 				},
 				VerticalPosition:  widget.AnchorLayoutPositionCenter,
 				StretchHorizontal: false,
@@ -71,7 +66,7 @@ func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCall
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Start", buttonFont, &widget.ButtonTextColor{Idle: textColor}),
+		widget.ButtonOpts.Text("Start", buttonFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,
@@ -94,7 +89,7 @@ func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCall
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Credits", buttonFont, &widget.ButtonTextColor{Idle: textColor}),
+		widget.ButtonOpts.Text("Credits", buttonFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,
@@ -117,7 +112,30 @@ func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCall
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Settings", buttonFont, &widget.ButtonTextColor{Idle: textColor}),
+		widget.ButtonOpts.Text("Collections", buttonFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.TextPadding(widget.Insets{
+			Left:   30,
+			Right:  30,
+			Top:    20,
+			Bottom: 20,
+		}),
+		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			collectionsCallback()
+		}),
+	))
+
+	buttonsContainer.AddChild(widget.NewButton(
+		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+			Stretch: true,
+		})),
+		widget.ButtonOpts.Image(&widget.ButtonImage{
+			Idle:         buttonIdleIcon,
+			Hover:        buttonHoverIcon,
+			Pressed:      buttonIdleIcon,
+			PressedHover: buttonIdleIcon,
+			Disabled:     buttonIdleIcon,
+		}),
+		widget.ButtonOpts.Text("Settings", buttonFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,
@@ -140,7 +158,7 @@ func NewMenuComponent(startCallback, creditsCallback, settingsCallback, exitCall
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Exit", buttonFont, &widget.ButtonTextColor{Idle: textColor}),
+		widget.ButtonOpts.Text("Exit", buttonFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,

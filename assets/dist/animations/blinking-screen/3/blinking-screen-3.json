@@ -1,0 +1,246 @@
+{
+  "frames": [
+    {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 360
+      },
+      "duration": 55
+    },
+    {
+      "frame": {
+        "x": 460,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 360
+      },
+      "duration": 55
+    },
+    {
+      "frame": {
+        "x": 920,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 360
+      },
+      "duration": 55
+    },
+    {
+      "frame": {
+        "x": 1380,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 360
+      },
+      "duration": 55
+    },
+    {
+      "frame": {
+        "x": 1840,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 360
+      },
+      "duration": 55
+    },
+    {
+      "frame": {
+        "x": 2300,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 360
+      },
+      "duration": 55
+    },
+    {
+      "frame": {
+        "x": 2760,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 360
+      },
+      "duration": 55
+    },
+    {
+      "frame": {
+        "x": 3220,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 360
+      },
+      "duration": 55
+    },
+    {
+      "frame": {
+        "x": 3680,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 460,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 460,
+        "h": 360
+      },
+      "duration": 55
+    }
+  ],
+  "meta": {
+    "app": "https://www.aseprite.org/",
+    "version": "1.3.11-arm64",
+    "image": "blinking-screen-3.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 4140,
+      "h": 360
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "third",
+        "from": 0,
+        "to": 8,
+        "direction": "forward",
+        "color": "#000000ff"
+      }
+    ],
+    "layers": [
+      {
+        "name": "background",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "edges",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "edge-details",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "turnon",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "noise1",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "noise2",
+        "opacity": 255,
+        "blendMode": "normal"
+      }
+    ],
+    "slices": []
+  }
+}

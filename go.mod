@@ -6,7 +6,10 @@ toolchain go1.22.10
 
 require (
 	github.com/Frabjous-Studios/asebiten v0.6.4
+	github.com/ebitenui/ebitenui v0.6.0
+	github.com/gabstv/ebiten-imgui/v3 v3.0.1-0.20231031222543-cc91fc85039e
 	github.com/hajimehoshi/ebiten/v2 v2.8.5
+	github.com/luisvinicius167/godux v0.0.0-20201004124859-70bcb3c51748
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.23.1
 	github.com/spf13/viper v1.19.0
@@ -21,14 +24,13 @@ require (
 	github.com/ebitengine/gomobile v0.0.0-20240911145611-4856209ac325 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/purego v0.8.0 // indirect
-	github.com/ebitenui/ebitenui v0.6.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/gabstv/cimgui-go v0.0.0-20231031174417-f6c70bbc133c // indirect
 	github.com/go-text/typesetting v0.2.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jezek/xgb v1.1.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/luisvinicius167/godux v0.0.0-20201004124859-70bcb3c51748 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
@@ -47,7 +49,6 @@ require (
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

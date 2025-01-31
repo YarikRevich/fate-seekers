@@ -22,16 +22,6 @@ type NotificationComponent struct {
 	container *widget.Container
 }
 
-// Disable disable container to be invisible.
-func (sc *NotificationComponent) Disable() {
-	sc.container.GetWidget().Visibility = widget.Visibility_Show
-}
-
-// Enable enables container to be visible.
-func (sc *NotificationComponent) Enable() {
-	sc.container.GetWidget().Visibility = widget.Visibility_Hide
-}
-
 // SetText modifies text component in the container.
 func (sc *NotificationComponent) SetText(value string) {
 	sc.container.GetWidget().Visibility = widget.Visibility_Show

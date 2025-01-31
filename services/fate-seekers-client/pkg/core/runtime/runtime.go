@@ -1,22 +1,32 @@
 package runtime
 
 import (
+	"image/color"
+
 	"github.com/Frabjous-Studios/asebiten"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/intro"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/menu"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/session"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/settings"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/travel"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/imgui"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/mask"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letterimage"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/subtitles"
 	notificationmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	subtitlesmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/subtitles"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
@@ -32,11 +42,23 @@ type Runtime struct {
 	// Represents attached notification user interface.
 	notificationInterface *ebitenui.UI
 
+	// Represents attached letter image user interface.
+	letterImageInterface *ebitenui.UI
+
 	// Represents transparent transition effect used for notification component.
 	notificationTransparentTransitionEffect transition.TransitionEffect
 
+	// Represents transparent transition effect used for letter image component.
+	letterImageTransparentTransitionEffect transition.TransitionEffect
+
 	// Represents notification interface world view.
 	notificationInterfaceWorld *ebiten.Image
+
+	// Represents letter image interface world view.
+	letterImageInterfaceWorld *ebiten.Image
+
+	// Represents letter image interface mask.
+	letterImageInterfaceMask *ebiten.Image
 
 	// Represents currently active screen.
 	activeScreen screen.Screen
@@ -75,6 +97,16 @@ func (r *Runtime) Update() error {
 		r.notificationTransparentTransitionEffect.Reset()
 	}
 
+	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {
+		if !r.letterImageTransparentTransitionEffect.Done() {
+			if !r.letterImageTransparentTransitionEffect.OnEnd() {
+				r.letterImageTransparentTransitionEffect.Update()
+			} else {
+				r.letterImageTransparentTransitionEffect.Clean()
+			}
+		}
+	}
+
 	switch store.GetActiveScreen() {
 	case value.ACTIVE_SCREEN_INTRO_VALUE:
 		r.activeScreen = intro.GetInstance()
@@ -87,6 +119,19 @@ func (r *Runtime) Update() error {
 
 	case value.ACTIVE_SCREEN_SETTINGS_VALUE:
 		r.activeScreen = settings.GetInstance()
+
+	case value.ACTIVE_SCREEN_SESSION_VALUE:
+		r.activeScreen = session.GetInstance()
+
+	case value.ACTIVE_SCREEN_TRAVEL_VALUE:
+		r.activeScreen = travel.GetInstance()
+
+	case value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE:
+		r.activeScreen = answerinput.GetInstance()
+	}
+
+	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {
+		r.letterImageInterface.Update()
 	}
 
 	err := r.activeScreen.HandleInput()
@@ -94,11 +139,15 @@ func (r *Runtime) Update() error {
 		return err
 	}
 
-	r.activeScreen.HandleNetworking()
-
 	r.subtitlesInterface.Update()
 
 	r.notificationInterface.Update()
+
+	r.activeScreen.HandleNetworking()
+
+	if config.GetDebug() {
+		imgui.GetInstance().Update()
+	}
 
 	return nil
 }
@@ -106,6 +155,8 @@ func (r *Runtime) Update() error {
 // Draw performs render operation.
 func (r *Runtime) Draw(screen *ebiten.Image) {
 	r.notificationInterfaceWorld.Clear()
+
+	r.letterImageInterfaceWorld.Clear()
 
 	r.activeScreen.HandleRender(screen)
 
@@ -126,23 +177,73 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 
 	screen.DrawImage(r.notificationInterfaceWorld, &ebiten.DrawImageOptions{
 		ColorM: r.notificationTransparentTransitionEffect.GetOptions().ColorM})
+
+	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {
+		letterImage := loader.GetInstance().GetStatic(store.GetLetterImage())
+
+		screen.DrawImage(r.letterImageInterfaceMask, &ebiten.DrawImageOptions{
+			ColorM: mask.GetMaskEffect(80).ColorM,
+		})
+
+		r.letterImageInterfaceWorld.DrawImage(
+			letterImage,
+			&ebiten.DrawImageOptions{
+				GeoM: scaler.GetCenteredGeometry(
+					50,
+					70,
+					letterImage.Bounds().Dx(),
+					letterImage.Bounds().Dy(),
+				)})
+
+		r.letterImageInterface.Draw(r.letterImageInterfaceWorld)
+
+		screen.DrawImage(r.letterImageInterfaceWorld, &ebiten.DrawImageOptions{
+			ColorM: r.letterImageTransparentTransitionEffect.GetOptions().ColorM})
+	}
+
+	if config.GetDebug() {
+		imgui.GetInstance().Draw(screen)
+	}
 }
 
 // Layout manages virtual world size.
 func (r *Runtime) Layout(outsideWidth, outsideHeight int) (int, int) {
+	if config.GetDebug() {
+		imgui.GetInstance().Layout(outsideWidth, outsideHeight)
+	}
+
 	return config.GetWorldWidth(), config.GetWorldHeight()
 }
 
 // NewRuntime creates new instance of Runtime.
 func NewRuntime() *Runtime {
+	letterImageTransparentTransitionEffect := transparent.NewTransparentTransitionEffect()
+
+	letterImageInterfaceMask := ebiten.NewImage(
+		config.GetWorldWidth(), config.GetWorldHeight())
+
+	letterImageInterfaceMask.Fill(color.Black)
+
 	return &Runtime{
 		subtitlesInterface: builder.Build(
 			subtitles.GetInstance().GetContainer()),
 		notificationInterface: builder.Build(
 			notification.GetInstance().GetContainer()),
+		letterImageInterface: builder.Build(
+			letterimage.NewLetterImageComponent(func() {
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetLetterImageAction(value.LETTER_IMAGE_EMPTY_VALUE))
+
+				letterImageTransparentTransitionEffect.Reset()
+			}),
+		),
 		notificationTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
+		letterImageTransparentTransitionEffect:  letterImageTransparentTransitionEffect,
 		notificationInterfaceWorld: ebiten.NewImage(
 			config.GetWorldWidth(), config.GetWorldHeight()),
+		letterImageInterfaceWorld: ebiten.NewImage(
+			config.GetWorldWidth(), config.GetWorldHeight()),
+		letterImageInterfaceMask: letterImageInterfaceMask,
 
 		// Guarantees non blocking rendering, if state management fails.
 		activeScreen:    entry.GetInstance(),

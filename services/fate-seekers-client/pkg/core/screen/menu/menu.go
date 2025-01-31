@@ -9,14 +9,12 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
-	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -89,15 +87,15 @@ func (ms *MenuScreen) Clean() {
 }
 
 func newMenuScreen() screen.Screen {
-	f := letter.NewLetterComponent()
-
-	f.GetWidget().Visibility = widget.Visibility_Hide
-
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect()
 
 	return &MenuScreen{
 		ui: builder.Build(
 			menu.NewMenuComponent(
+				func() {
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+				},
 				func() {
 
 				},
@@ -113,8 +111,7 @@ func newMenuScreen() screen.Screen {
 				func() {
 					dispatcher.GetInstance().Dispatch(
 						action.NewSetExitApplicationAction(value.EXIT_APPLICATION_TRUE_VALUE))
-				}),
-			f),
+				})),
 		transparentTransitionEffect: transparentTransitionEffect,
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		interfaceWorld:              ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),

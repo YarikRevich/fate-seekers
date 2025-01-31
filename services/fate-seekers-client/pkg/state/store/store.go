@@ -1,9 +1,11 @@
 package store
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/networking"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/screen"
 	"github.com/luisvinicius167/godux"
@@ -42,6 +44,13 @@ func GetEntryHandshakeStartedNetworking() string {
 	return instance.GetState(networking.ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE).(string)
 }
 
+// GetLetterImage retrieves letter image state value.
+func GetLetterImage() string {
+	instance := GetInstance()
+
+	return instance.GetState(letter.LETTER_IMAGE_APPLICATION_STATE).(string)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()
@@ -55,7 +64,12 @@ func newStore() *godux.Store {
 	networkingStateReducer := networking.NewNetworkingStateReducer(store)
 	networkingStateReducer.Init()
 
+	letterStateReducer := letter.NewLetterStateReducer(store)
+	letterStateReducer.Init()
+
 	store.Reducer(func(action godux.Action) interface{} {
+		fmt.Println("INCOMING ACTION")
+
 		result := screenStateReducer.GetProcessor()(action)
 		if result != nil {
 			return result
@@ -67,6 +81,11 @@ func newStore() *godux.Store {
 		}
 
 		result = networkingStateReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = letterStateReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

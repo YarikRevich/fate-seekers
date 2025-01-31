@@ -3,7 +3,13 @@ package session
 import (
 	"sync"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letter"
+	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -84,9 +90,27 @@ var (
 
 // SessionScreen represents session screen implementation.
 type SessionScreen struct {
+	// Represents attached user interface.
+	ui *ebitenui.UI
+
+	// Represents transparent transition effect.
+	transparentTransitionEffect transition.TransitionEffect
+
+	// Represents global world view.
+	world *ebiten.Image
 }
 
 func (ss *SessionScreen) HandleInput() error {
+	if !ss.transparentTransitionEffect.Done() {
+		if !ss.transparentTransitionEffect.OnEnd() {
+			ss.transparentTransitionEffect.Update()
+		} else {
+			ss.transparentTransitionEffect.Clean()
+		}
+	}
+
+	ss.ui.Update()
+
 	return nil
 }
 
@@ -95,7 +119,12 @@ func (ss *SessionScreen) HandleNetworking() {
 }
 
 func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
+	ss.world.Clear()
 
+	ss.ui.Draw(ss.world)
+
+	screen.DrawImage(ss.world, &ebiten.DrawImageOptions{
+		ColorM: ss.transparentTransitionEffect.GetOptions().ColorM})
 }
 
 func (ss *SessionScreen) Clean() {
@@ -104,7 +133,11 @@ func (ss *SessionScreen) Clean() {
 
 // newSessionScreen initializes SessionScreen.
 func newSessionScreen() screen.Screen {
-	return new(SessionScreen)
+	return &SessionScreen{
+		ui:                          builder.Build(letter.NewLetterComponent()),
+		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
+		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+	}
 }
 
 // var shaderOpts ebiten.DrawRectShaderOptions

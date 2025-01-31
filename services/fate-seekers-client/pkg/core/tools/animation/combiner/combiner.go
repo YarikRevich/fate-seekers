@@ -42,6 +42,33 @@ func (ac *AnimationCombiner) DrawTo(screen *ebiten.Image, options *ebiten.DrawIm
 	ac.animations[ac.currentAnimationIndex].DrawTo(screen, options)
 }
 
+// OnEnd checks if animation batch has been located on the end.
+func (ac *AnimationCombiner) OnEnd() bool {
+	if ac.currentAnimationIndex == len(ac.animations)-1 {
+		return ac.animations[ac.currentAnimationIndex].FrameIdx() ==
+			len(ac.animations[ac.currentAnimationIndex].Source.Frames)-1
+	}
+
+	return false
+}
+
+// GetFrameWidth retrieves current frame width
+func (ac *AnimationCombiner) GetFrameWidth() int {
+	return ac.animations[ac.currentAnimationIndex].Bounds().Dx()
+}
+
+// GetFrameHeight retrieves current frame height
+func (ac *AnimationCombiner) GetFrameHeight() int {
+	return ac.animations[ac.currentAnimationIndex].Bounds().Dy()
+}
+
+// Reset performs animation reset opereation.
+func (ac *AnimationCombiner) Reset() {
+	ac.animations[ac.currentAnimationIndex].Restart()
+
+	ac.currentAnimationIndex = 0
+}
+
 // NewAnimationCombiner initializes AnimationCombiner.
 func NewAnimationCombiner(animations ...*asebiten.Animation) *AnimationCombiner {
 	if len(animations) == 0 {

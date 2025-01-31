@@ -12,6 +12,78 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
+// var (
+// 	// GetInstance retrieves instance of the letter component, performing initial creation if needed.
+// 	GetInstance = sync.OnceValue[*LetterComponent](newLetterComponent)
+// )
+
+// // LetterComponent represents component, which contains actual letter.
+// type LetterComponent struct {
+// 	container *widget.Container
+// }
+
+// // SetText modifies text component in the container.
+// func (lc *LetterComponent) SetText(value string) {
+// 	sc.container.GetWidget().Visibility = widget.Visibility_Show
+
+// 	sc.container.AddChild(widget.NewText(
+// 		widget.TextOpts.MaxWidth(float64(scaler.GetPercentageOf(config.GetWorldWidth(), 30))),
+// 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+// 			HorizontalPosition: widget.AnchorLayoutPositionCenter,
+// 			VerticalPosition:   widget.AnchorLayoutPositionStart,
+// 			StretchHorizontal:  false,
+// 			StretchVertical:    false,
+// 		})),
+// 		widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionStart),
+// 		widget.TextOpts.Insets(widget.Insets{
+// 			Top:    20,
+// 			Bottom: 20,
+// 			Left:   20,
+// 			Right:  20,
+// 		}),
+// 		widget.TextOpts.ProcessBBCode(true),
+// 		widget.TextOpts.Text(
+// 			value,
+// 			&text.GoTextFace{
+// 				Source: loader.GetInstance().GetFont(loader.KyivRegularFont),
+// 				Size:   20,
+// 			},
+// 			color.White)))
+// }
+
+// // CleanText cleans text component in the container.
+// func (sc *NotificationComponent) CleanText() {
+// 	sc.container.GetWidget().Visibility = widget.Visibility_Hide
+
+// 	sc.container.RemoveChildren()
+// }
+
+// // GetContainer retrieves container widget.
+// func (sc *NotificationComponent) GetContainer() *widget.Container {
+// 	return sc.container
+// }
+
+// // newNotificationComponent initializes NotificationComponent.
+// func newNotificationComponent() *NotificationComponent {
+// 	container := widget.NewContainer(
+// 		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)),
+// 		widget.ContainerOpts.WidgetOpts(
+// 			widget.WidgetOpts.TrackHover(false),
+// 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+// 				Padding:            widget.Insets{Top: 10, Right: 10},
+// 				HorizontalPosition: widget.AnchorLayoutPositionEnd,
+// 				VerticalPosition:   widget.AnchorLayoutPositionStart,
+// 				StretchHorizontal:  false,
+// 				StretchVertical:    false,
+// 			}),
+// 		),
+// 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()))
+
+// 	container.GetWidget().Visibility = widget.Visibility_Hide
+
+// 	return &NotificationComponent{container: container}
+// }
+
 // NewLetterComponent creates new session letter component.
 func NewLetterComponent() *widget.Container {
 	result := widget.NewContainer(
@@ -155,7 +227,34 @@ func NewLetterComponent() *widget.Container {
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
+		widget.ButtonOpts.Text("Attachment", generalFont, &widget.ButtonTextColor{Idle: color.White}),
+		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			result.GetWidget().Visibility = widget.Visibility_Hide
+		}),
+		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				VerticalPosition:   widget.AnchorLayoutPositionEnd,
+				HorizontalPosition: widget.AnchorLayoutPositionEnd,
+				StretchHorizontal:  true,
+				StretchVertical:    false,
+			}),
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Stretch: true,
+			})),
+	))
+
+	buttonsContainer.AddChild(widget.NewButton(
+		widget.ButtonOpts.Image(&widget.ButtonImage{
+			Idle:         buttonIdleIcon,
+			Hover:        buttonHoverIcon,
+			Pressed:      buttonIdleIcon,
+			PressedHover: buttonIdleIcon,
+			Disabled:     buttonIdleIcon,
+		}),
 		widget.ButtonOpts.Text("Close", generalFont, &widget.ButtonTextColor{Idle: color.White}),
+		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			result.GetWidget().Visibility = widget.Visibility_Hide
+		}),
 		widget.ButtonOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionEnd,
@@ -171,6 +270,8 @@ func NewLetterComponent() *widget.Container {
 	closeContainer.AddChild(buttonsContainer)
 
 	result.AddChild(closeContainer)
+
+	// result.GetWidget().Visibility = widget.Visibility_Hide
 
 	return result
 }

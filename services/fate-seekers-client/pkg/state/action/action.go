@@ -18,6 +18,11 @@ const (
 	SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION = "SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION"
 )
 
+// Describes all the available state actions for letter reducer.
+const (
+	SET_LETTER_IMAGE_ACTION = "SET_LETTER_IMAGE_ACTION"
+)
+
 // NewSetActiveScreenAction creates new set active screen action.
 func NewSetActiveScreenAction(value string) godux.Action {
 	return godux.Action{
@@ -46,6 +51,14 @@ func NewSetLoadingApplicationAction(value string) godux.Action {
 func NewSetEntryHandshakeStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetLetterImageAction creates new set letter image action.
+func NewSetLetterImageAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_LETTER_IMAGE_ACTION,
 		Value: value,
 	}
 }
