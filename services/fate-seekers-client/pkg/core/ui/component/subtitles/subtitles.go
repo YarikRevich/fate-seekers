@@ -24,8 +24,6 @@ type SubtitlesComponent struct {
 
 // SetText modifies text component in the container.
 func (sc *SubtitlesComponent) SetText(value string) {
-	sc.container.GetWidget().Visibility = widget.Visibility_Show
-
 	sc.container.AddChild(widget.NewText(
 		widget.TextOpts.MaxWidth(float64(scaler.GetPercentageOf(config.GetWorldWidth(), 30))),
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
@@ -53,8 +51,6 @@ func (sc *SubtitlesComponent) SetText(value string) {
 
 // CleanText cleans text component in the container.
 func (sc *SubtitlesComponent) CleanText() {
-	sc.container.GetWidget().Visibility = widget.Visibility_Hide
-
 	sc.container.RemoveChildren()
 }
 
@@ -78,8 +74,6 @@ func newSubtitlesComponent() *SubtitlesComponent {
 			}),
 		),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()))
-
-	container.GetWidget().Visibility = widget.Visibility_Hide
 
 	return &SubtitlesComponent{container: container}
 }

@@ -2,93 +2,84 @@ package letter
 
 import (
 	"image/color"
+	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
+	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
-// var (
-// 	// GetInstance retrieves instance of the letter component, performing initial creation if needed.
-// 	GetInstance = sync.OnceValue[*LetterComponent](newLetterComponent)
-// )
+var (
+	// GetInstance retrieves instance of the letter component, performing initial creation if needed.
+	GetInstance = sync.OnceValue[*LetterComponent](newLetterComponent)
+)
 
-// // LetterComponent represents component, which contains actual letter.
-// type LetterComponent struct {
-// 	container *widget.Container
-// }
+// LetterComponent represents component, which contains actual letter.
+type LetterComponent struct {
+	// Represents text area widget.
+	textArea *widget.TextArea
 
-// // SetText modifies text component in the container.
-// func (lc *LetterComponent) SetText(value string) {
-// 	sc.container.GetWidget().Visibility = widget.Visibility_Show
+	// Represents attachment value.
+	attachmentValue *string
 
-// 	sc.container.AddChild(widget.NewText(
-// 		widget.TextOpts.MaxWidth(float64(scaler.GetPercentageOf(config.GetWorldWidth(), 30))),
-// 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-// 			HorizontalPosition: widget.AnchorLayoutPositionCenter,
-// 			VerticalPosition:   widget.AnchorLayoutPositionStart,
-// 			StretchHorizontal:  false,
-// 			StretchVertical:    false,
-// 		})),
-// 		widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionStart),
-// 		widget.TextOpts.Insets(widget.Insets{
-// 			Top:    20,
-// 			Bottom: 20,
-// 			Left:   20,
-// 			Right:  20,
-// 		}),
-// 		widget.TextOpts.ProcessBBCode(true),
-// 		widget.TextOpts.Text(
-// 			value,
-// 			&text.GoTextFace{
-// 				Source: loader.GetInstance().GetFont(loader.KyivRegularFont),
-// 				Size:   20,
-// 			},
-// 			color.White)))
-// }
+	// Represents attachment callback.
+	attachmentCallback func(value string)
 
-// // CleanText cleans text component in the container.
-// func (sc *NotificationComponent) CleanText() {
-// 	sc.container.GetWidget().Visibility = widget.Visibility_Hide
+	// Represents close callback.
+	closeCallback func()
 
-// 	sc.container.RemoveChildren()
-// }
+	// Represents container widget.
+	container *widget.Container
+}
 
-// // GetContainer retrieves container widget.
-// func (sc *NotificationComponent) GetContainer() *widget.Container {
-// 	return sc.container
-// }
+// SetText modifies text component in the container.
+func (lc *LetterComponent) SetText(value string) {
+	lc.textArea.SetText(value)
+}
 
-// // newNotificationComponent initializes NotificationComponent.
-// func newNotificationComponent() *NotificationComponent {
-// 	container := widget.NewContainer(
-// 		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)),
-// 		widget.ContainerOpts.WidgetOpts(
-// 			widget.WidgetOpts.TrackHover(false),
-// 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-// 				Padding:            widget.Insets{Top: 10, Right: 10},
-// 				HorizontalPosition: widget.AnchorLayoutPositionEnd,
-// 				VerticalPosition:   widget.AnchorLayoutPositionStart,
-// 				StretchHorizontal:  false,
-// 				StretchVertical:    false,
-// 			}),
-// 		),
-// 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()))
+// GetText retrieves current text.
+func (lc *LetterComponent) GetText() string {
+	return lc.textArea.GetText()
+}
 
-// 	container.GetWidget().Visibility = widget.Visibility_Hide
+// SetAttachment modified attachment button redirect in the container.
+func (lc *LetterComponent) SetAttachment(value string) {
+	*lc.attachmentValue = value
+}
 
-// 	return &NotificationComponent{container: container}
-// }
+// GetAttachment retrieves attachment button redirect.
+func (lc *LetterComponent) GetAttachment(value string) {
+	*lc.attachmentValue = value
+}
 
-// NewLetterComponent creates new session letter component.
-func NewLetterComponent() *widget.Container {
-	result := widget.NewContainer(
+// SetAttachmentCallback modified close callback in the container.
+func (lc *LetterComponent) SetAttachmentCallback(callback func(value string)) {
+	lc.attachmentCallback = callback
+}
+
+// SetCloseCallback modified close callback in the container.
+func (lc *LetterComponent) SetCloseCallback(callback func()) {
+	lc.closeCallback = callback
+}
+
+// GetContainer retrieves container widget.
+func (lc *LetterComponent) GetContainer() *widget.Container {
+	return lc.container
+}
+
+// newLetterComponent initializes LetterComponent.
+func newLetterComponent() *LetterComponent {
+	var result *LetterComponent
+
+	container := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(
-			scaler.GetPercentageOf(config.GetWorldWidth(), 30),
+			scaler.GetPercentageOf(config.GetWorldWidth(), 45),
 			scaler.GetPercentageOf(config.GetWorldHeight(), 60))),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.TrackHover(false)),
 		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)),
@@ -115,7 +106,7 @@ func NewLetterComponent() *widget.Container {
 		Size:   20,
 	}
 
-	result.AddChild(widget.NewText(
+	container.AddChild(widget.NewText(
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
@@ -127,8 +118,8 @@ func NewLetterComponent() *widget.Container {
 				Stretch: true,
 			}),
 			widget.WidgetOpts.MinSize(
-				result.GetWidget().MinWidth,
-				scaler.GetPercentageOf(result.GetWidget().MinHeight, 72)),
+				container.GetWidget().MinWidth,
+				scaler.GetPercentageOf(container.GetWidget().MinHeight, 72)),
 		),
 		widget.ContainerOpts.Layout(widget.NewGridLayout(
 			widget.GridLayoutOpts.Columns(1),
@@ -141,7 +132,7 @@ func NewLetterComponent() *widget.Container {
 		),
 	)
 
-	textAreaContainer.AddChild(widget.NewTextArea(
+	textArea := widget.NewTextArea(
 		widget.TextAreaOpts.ContainerOpts(
 			widget.ContainerOpts.WidgetOpts(
 				widget.WidgetOpts.MinSize(
@@ -189,14 +180,22 @@ func NewLetterComponent() *widget.Container {
 			Left:   20,
 			Right:  20,
 		}),
-		widget.TextAreaOpts.Text("Це був перший ранок після катастрофи, всі були у шоці та печалі. Тіло капітана корабля поцвіло травневим мохом та й було посічене вологою. "),
-	))
+		widget.TextAreaOpts.Text(""),
+	)
 
-	result.AddChild(textAreaContainer)
+	textAreaContainer.AddChild(textArea)
 
-	closeContainer := widget.NewContainer(
+	container.AddChild(textAreaContainer)
+
+	bottomContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(result.GetWidget().MinWidth, 40)),
+			widget.WidgetOpts.MinSize(
+				container.GetWidget().MinWidth,
+				scaler.GetPercentageOf(container.GetWidget().MinHeight, 3)),
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Position: widget.RowLayoutPositionEnd,
+				Stretch:  true,
+			})),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()))
 
 	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 15)
@@ -204,6 +203,9 @@ func NewLetterComponent() *widget.Container {
 
 	buttonsContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(
+				bottomContainer.GetWidget().MinWidth,
+				bottomContainer.GetWidget().MinHeight),
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionEnd,
 				HorizontalPosition: widget.AnchorLayoutPositionEnd,
@@ -211,14 +213,19 @@ func NewLetterComponent() *widget.Container {
 				StretchVertical:    false,
 			}),
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-				// MaxWidth: 100,
+				Position: widget.RowLayoutPositionEnd,
+				Stretch:  true,
 			}),
 		),
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
-			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
 			widget.RowLayoutOpts.Spacing(30),
 		)))
 
+	attachmentValue := new(string)
+
+	*attachmentValue = value.LETTER_IMAGE_EMPTY_VALUE
+
 	buttonsContainer.AddChild(widget.NewButton(
 		widget.ButtonOpts.Image(&widget.ButtonImage{
 			Idle:         buttonIdleIcon,
@@ -227,9 +234,15 @@ func NewLetterComponent() *widget.Container {
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Attachment", generalFont, &widget.ButtonTextColor{Idle: color.White}),
+		widget.ButtonOpts.Text("Attachment", generalFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			result.GetWidget().Visibility = widget.Visibility_Hide
+			result.attachmentCallback(*result.attachmentValue)
+		}),
+		widget.ButtonOpts.TextPadding(widget.Insets{
+			Left:   25,
+			Right:  25,
+			Top:    25,
+			Bottom: 25,
 		}),
 		widget.ButtonOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
@@ -251,9 +264,15 @@ func NewLetterComponent() *widget.Container {
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Close", generalFont, &widget.ButtonTextColor{Idle: color.White}),
+		widget.ButtonOpts.Text("Close", generalFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			result.GetWidget().Visibility = widget.Visibility_Hide
+			result.closeCallback()
+		}),
+		widget.ButtonOpts.TextPadding(widget.Insets{
+			Left:   25,
+			Right:  25,
+			Top:    25,
+			Bottom: 25,
 		}),
 		widget.ButtonOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
@@ -267,11 +286,15 @@ func NewLetterComponent() *widget.Container {
 			})),
 	))
 
-	closeContainer.AddChild(buttonsContainer)
+	bottomContainer.AddChild(buttonsContainer)
 
-	result.AddChild(closeContainer)
+	container.AddChild(bottomContainer)
 
-	// result.GetWidget().Visibility = widget.Visibility_Hide
+	result = &LetterComponent{
+		textArea:        textArea,
+		attachmentValue: attachmentValue,
+		container:       container,
+	}
 
 	return result
 }

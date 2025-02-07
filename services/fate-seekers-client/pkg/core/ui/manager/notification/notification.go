@@ -5,21 +5,13 @@ import (
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/notification"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 )
 
 var (
 	// GetInstance retrieves instance of the notification manager, performing initial creation if needed.
 	GetInstance = sync.OnceValue[*NotificationManager](newNotificationManager)
 )
-
-// notificationUnit represents a notification unit.
-type notificationUnit struct {
-	// Represents text for of the notification unit.
-	text string
-
-	// Represents duration of which notification unit will be shown.
-	duration time.Duration
-}
 
 // NotificationManager represents notification manager, which acts in a queue manner.
 type NotificationManager struct {
@@ -33,7 +25,7 @@ type NotificationManager struct {
 	textUpdated bool
 
 	// Represents queue of notification units.
-	queue []*notificationUnit
+	queue []*dto.NotificationUnit
 }
 
 func (sm *NotificationManager) GetTextUpdated() bool {
@@ -53,16 +45,16 @@ func (sm *NotificationManager) ToggleVisible() {
 // Update updates currently shown subtitles.
 func (sm *NotificationManager) Update() {
 	if len(sm.queue) > 0 {
-		subtitleUnit := sm.queue[0]
+		notificationUnit := sm.queue[0]
 
 		if !sm.textUpdated {
-			notification.GetInstance().SetText(subtitleUnit.text)
+			notification.GetInstance().SetText(notificationUnit.Text)
 
 			sm.textUpdated = true
 		}
 
 		if sm.timer == nil && sm.visible {
-			sm.timer = time.NewTimer(subtitleUnit.duration)
+			sm.timer = time.NewTimer(notificationUnit.Duration)
 		}
 
 		if sm.timer != nil {
@@ -85,15 +77,19 @@ func (sm *NotificationManager) Update() {
 
 // Push pushes new value to the notification queue.
 func (sm *NotificationManager) Push(text string, duration time.Duration) {
-	sm.queue = append(sm.queue, &notificationUnit{
-		text:     text,
-		duration: duration,
+	sm.queue = append(sm.queue, &dto.NotificationUnit{
+		Text:     text,
+		Duration: duration,
 	})
 }
 
 // Reset removes all the values from the queue.
 func (sm *NotificationManager) Reset() {
 	sm.queue = sm.queue[:0]
+}
+
+func (sm *NotificationManager) IsEmpty() bool {
+	return len(sm.queue) == 0
 }
 
 // newNotificationManager initializes NotificationManager.

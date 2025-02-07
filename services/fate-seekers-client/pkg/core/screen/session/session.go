@@ -8,7 +8,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letter"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -134,7 +133,7 @@ func (ss *SessionScreen) Clean() {
 // newSessionScreen initializes SessionScreen.
 func newSessionScreen() screen.Screen {
 	return &SessionScreen{
-		ui:                          builder.Build(letter.NewLetterComponent()),
+		ui:                          builder.Build(),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 	}

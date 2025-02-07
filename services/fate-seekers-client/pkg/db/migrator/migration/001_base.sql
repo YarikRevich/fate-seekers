@@ -11,17 +11,13 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: state; Type: TABLE; Schema: public; 
+-- Name: collection; Type: TABLE; Schema: public; 
 --
 
-CREATE TABLE state (
-    id SERIAL PRIMARY KEY,
---     intor TEXT,
---     client_id TEXT NOT NULL,
---     client_key TEXT NOT NULL,
---     mnemonic TEXT,
---     private_key TEXT NOT NULL UNIQUE,
---     created_at BIGINT NOT NULL
+CREATE TABLE collection (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL
 );
 
 +goose StatementEnd

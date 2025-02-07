@@ -2,12 +2,14 @@ package loader
 
 import (
 	"bytes"
+	"encoding/json"
 	"image"
 	"io/fs"
 	"path/filepath"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/assets"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -62,12 +64,18 @@ const (
 
 // Describes all the available fonts to be loaded.
 const (
-	KyivRegularFont     = "kyiv-regular.ttf"
-	NotosansRegulerFont = "notosans-regular.ttf"
+	KyivRegularFont = "kyiv-regular.ttf"
+)
+
+// Describes all the available letters to be loaded.
+const (
+	LoneManLetter = "lone-man.json"
 )
 
 // Describes all the available templates to be loaded.
-const ()
+const (
+	LoneManTemplate = "lone-man.toml"
+)
 
 // Describes all the available animations to be loaded.
 const (
@@ -93,6 +101,7 @@ const (
 	ShadersPath    = "dist/shaders"
 	FontsPath      = "dist/fonts"
 	ObjectsPath    = "dist/statics"
+	LettersPath    = "dist/letters"
 	TemplatesPath  = "dist/templates"
 	AnimationsPath = "dist/animations"
 )
@@ -107,6 +116,9 @@ type Loader struct {
 
 	// Represents cache map of embedded fonts.
 	fonts sync.Map
+
+	// Represents cache map of embedded letters.
+	letters sync.Map
 
 	// Represents cache map of embedded templates.
 	templates sync.Map
@@ -187,6 +199,32 @@ func (l *Loader) GetFont(name string) *text.GoTextFaceSource {
 	logging.GetInstance().Debug("Font has been loaded", zap.String("name", name))
 
 	return font
+}
+
+// GetLetter retrieves letter content with the given name.
+func (l *Loader) GetLetter(name string) dto.LetterLoaderUnit {
+	result, ok := l.letters.Load(name)
+	if ok {
+		return result.(dto.LetterLoaderUnit)
+	}
+
+	file, err := fs.ReadFile(assets.Assets, filepath.Join(LettersPath, name))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	var data dto.LetterLoaderUnit
+
+	err = json.Unmarshal(file, &data)
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	l.letters.Store(name, data)
+
+	logging.GetInstance().Debug("Letter has been loaded", zap.String("name", name))
+
+	return data
 }
 
 // GetTemplate retrieves template content with the given name.

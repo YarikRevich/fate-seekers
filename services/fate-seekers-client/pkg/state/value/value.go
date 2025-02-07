@@ -13,6 +13,9 @@ const (
 
 // Describes all the available application reducer store values.
 const (
+	TRANSLATION_UPDATED_TRUE_VALUE  = "true"
+	TRANSLATION_UPDATED_FALSE_VALUE = "false"
+
 	EXIT_APPLICATION_TRUE_VALUE = "true"
 
 	LOADING_APPLICATION_TRUE_VALUE  = "true"
@@ -27,5 +30,8 @@ const (
 
 // Describes all the available letter reducer store values.
 const (
-	LETTER_IMAGE_EMPTY_VALUE = ""
+	LETTER_UPDATED_TRUE_VALUE  = "true"
+	LETTER_UPDATED_FALSE_VALUE = "false"
+	LETTER_NAME_EMPTY_VALUE    = ""
+	LETTER_IMAGE_EMPTY_VALUE   = ""
 )

@@ -9,8 +9,9 @@ const (
 
 // Describes all the available state actions for application reducer.
 const (
-	SET_EXIT_APPLICATION_ACTION    = "SET_EXIT_APPLICATION_ACTION"
-	SET_LOADING_APPLICATION_ACTION = "SET_LOADING_APPLICATION_ACTION"
+	SET_TRANSLATION_UPDATED_APPLICATION_ACTION = "SET_TRANSLATION_UPDATED_APPLICATION_ACTION"
+	SET_EXIT_APPLICATION_ACTION                = "SET_EXIT_APPLICATION_ACTION"
+	SET_LOADING_APPLICATION_ACTION             = "SET_LOADING_APPLICATION_ACTION"
 )
 
 // Describes all the available state actions for networking reducer.
@@ -20,13 +21,23 @@ const (
 
 // Describes all the available state actions for letter reducer.
 const (
-	SET_LETTER_IMAGE_ACTION = "SET_LETTER_IMAGE_ACTION"
+	SET_LETTER_UPDATED_ACTION = "SET_LETTER_UPDATED_ACTION"
+	SET_LETTER_NAME_ACTION    = "SET_LETTER_NAME_ACTION"
+	SET_LETTER_IMAGE_ACTION   = "SET_LETTER_IMAGE_ACTION"
 )
 
 // NewSetActiveScreenAction creates new set active screen action.
 func NewSetActiveScreenAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_ACTIVE_SCREEN_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetTranslationUpdatedApplicationAction creates new set translation updated application action.
+func NewSetTranslationUpdatedApplicationAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_TRANSLATION_UPDATED_APPLICATION_ACTION,
 		Value: value,
 	}
 }
@@ -51,6 +62,22 @@ func NewSetLoadingApplicationAction(value string) godux.Action {
 func NewSetEntryHandshakeStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetLetterUpdatedAction creates new set letter updated action.
+func NewSetLetterUpdatedAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_LETTER_UPDATED_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetLetterNameAction creates new set letter name action.
+func NewSetLetterNameAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_LETTER_NAME_ACTION,
 		Value: value,
 	}
 }

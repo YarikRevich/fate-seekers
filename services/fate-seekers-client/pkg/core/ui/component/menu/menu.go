@@ -10,6 +10,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
+type MenuComponent struct {
+}
+
 // NewMenuComponent creates new main menu component.
 func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, settingsCallback, exitCallback func()) *widget.Container {
 	result := widget.NewContainer(

@@ -19,6 +19,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/mask"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letterimage"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/subtitles"
@@ -45,11 +46,17 @@ type Runtime struct {
 	// Represents attached letter image user interface.
 	letterImageInterface *ebitenui.UI
 
+	// Represents attached letter user interface.
+	letterInterface *ebitenui.UI
+
 	// Represents transparent transition effect used for notification component.
 	notificationTransparentTransitionEffect transition.TransitionEffect
 
 	// Represents transparent transition effect used for letter image component.
 	letterImageTransparentTransitionEffect transition.TransitionEffect
+
+	// Represents transparent transition effect used for letter component.
+	letterTransparentTransitionEffect transition.TransitionEffect
 
 	// Represents notification interface world view.
 	notificationInterfaceWorld *ebiten.Image
@@ -59,6 +66,12 @@ type Runtime struct {
 
 	// Represents letter image interface mask.
 	letterImageInterfaceMask *ebiten.Image
+
+	// Represents letter interface world view.
+	letterInterfaceWorld *ebiten.Image
+
+	// Represents letter interface mask.
+	letterInterfaceMask *ebiten.Image
 
 	// Represents currently active screen.
 	activeScreen screen.Screen
@@ -95,6 +108,16 @@ func (r *Runtime) Update() error {
 
 	if !notificationmanager.GetInstance().GetTextUpdated() {
 		r.notificationTransparentTransitionEffect.Reset()
+	}
+
+	if store.GetLetterName() != value.LETTER_NAME_EMPTY_VALUE {
+		if !r.letterTransparentTransitionEffect.Done() {
+			if !r.letterTransparentTransitionEffect.OnEnd() {
+				r.letterTransparentTransitionEffect.Update()
+			} else {
+				r.letterTransparentTransitionEffect.Clean()
+			}
+		}
 	}
 
 	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {
@@ -134,14 +157,33 @@ func (r *Runtime) Update() error {
 		r.letterImageInterface.Update()
 	}
 
+	if store.GetLetterName() != value.LETTER_NAME_EMPTY_VALUE {
+		if store.GetLetterUpdated() == value.LETTER_UPDATED_FALSE_VALUE {
+			loadedLetter := loader.GetInstance().GetLetter(store.GetLetterName())
+
+			letter.GetInstance().SetText(loadedLetter.Text)
+
+			letter.GetInstance().SetAttachment(loadedLetter.Attachment)
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetLetterUpdatedAction(value.LETTER_UPDATED_TRUE_VALUE))
+		}
+
+		r.letterInterface.Update()
+	}
+
 	err := r.activeScreen.HandleInput()
 	if err != nil {
 		return err
 	}
 
-	r.subtitlesInterface.Update()
+	if !subtitlesmanager.GetInstance().IsEmpty() {
+		r.subtitlesInterface.Update()
+	}
 
-	r.notificationInterface.Update()
+	if !notificationmanager.GetInstance().IsEmpty() {
+		r.notificationInterface.Update()
+	}
 
 	r.activeScreen.HandleNetworking()
 
@@ -154,9 +196,17 @@ func (r *Runtime) Update() error {
 
 // Draw performs render operation.
 func (r *Runtime) Draw(screen *ebiten.Image) {
-	r.notificationInterfaceWorld.Clear()
+	if !notificationmanager.GetInstance().IsEmpty() {
+		r.notificationInterfaceWorld.Clear()
+	}
 
-	r.letterImageInterfaceWorld.Clear()
+	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {
+		r.letterImageInterfaceWorld.Clear()
+	}
+
+	if store.GetLetterName() != value.LETTER_NAME_EMPTY_VALUE {
+		r.letterInterfaceWorld.Clear()
+	}
 
 	r.activeScreen.HandleRender(screen)
 
@@ -171,19 +221,36 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 		r.loaderAnimation.DrawTo(screen, &ebiten.DrawImageOptions{GeoM: loadingAnimationGeometry})
 	}
 
-	r.subtitlesInterface.Draw(screen)
+	if !subtitlesmanager.GetInstance().IsEmpty() {
+		r.subtitlesInterface.Draw(screen)
+	}
 
-	r.notificationInterface.Draw(r.notificationInterfaceWorld)
+	if !notificationmanager.GetInstance().IsEmpty() {
+		r.notificationInterface.Draw(r.notificationInterfaceWorld)
+	}
 
 	screen.DrawImage(r.notificationInterfaceWorld, &ebiten.DrawImageOptions{
 		ColorM: r.notificationTransparentTransitionEffect.GetOptions().ColorM})
 
-	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {
-		letterImage := loader.GetInstance().GetStatic(store.GetLetterImage())
+	if store.GetLetterName() != value.LETTER_NAME_EMPTY_VALUE {
+		if store.GetLetterImage() == value.LETTER_IMAGE_EMPTY_VALUE {
+			screen.DrawImage(r.letterInterfaceMask, &ebiten.DrawImageOptions{
+				ColorM: mask.GetMaskEffect(80).ColorM,
+			})
+		}
 
-		screen.DrawImage(r.letterImageInterfaceMask, &ebiten.DrawImageOptions{
+		r.letterInterface.Draw(r.letterInterfaceWorld)
+
+		screen.DrawImage(r.letterInterfaceWorld, &ebiten.DrawImageOptions{
+			ColorM: r.letterTransparentTransitionEffect.GetOptions().ColorM})
+	}
+
+	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {
+		screen.DrawImage(r.letterInterfaceMask, &ebiten.DrawImageOptions{
 			ColorM: mask.GetMaskEffect(80).ColorM,
 		})
+
+		letterImage := loader.GetInstance().GetStatic(store.GetLetterImage())
 
 		r.letterImageInterfaceWorld.DrawImage(
 			letterImage,
@@ -219,10 +286,30 @@ func (r *Runtime) Layout(outsideWidth, outsideHeight int) (int, int) {
 func NewRuntime() *Runtime {
 	letterImageTransparentTransitionEffect := transparent.NewTransparentTransitionEffect()
 
+	letterTransparentTransitionEffect := transparent.NewTransparentTransitionEffect()
+
 	letterImageInterfaceMask := ebiten.NewImage(
 		config.GetWorldWidth(), config.GetWorldHeight())
 
 	letterImageInterfaceMask.Fill(color.Black)
+
+	letterInterfaceMask := ebiten.NewImage(
+		config.GetWorldWidth(), config.GetWorldHeight())
+
+	letterInterfaceMask.Fill(color.Black)
+
+	letter.GetInstance().SetAttachmentCallback(func(value string) {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetLetterImageAction(value))
+	})
+
+	letter.GetInstance().SetCloseCallback(func() {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetLetterUpdatedAction(value.LETTER_UPDATED_FALSE_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetLetterNameAction(value.LETTER_NAME_EMPTY_VALUE))
+	})
 
 	return &Runtime{
 		subtitlesInterface: builder.Build(
@@ -237,13 +324,19 @@ func NewRuntime() *Runtime {
 				letterImageTransparentTransitionEffect.Reset()
 			}),
 		),
+		letterInterface: builder.Build(
+			letter.GetInstance().GetContainer()),
 		notificationTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
 		letterImageTransparentTransitionEffect:  letterImageTransparentTransitionEffect,
+		letterTransparentTransitionEffect:       letterTransparentTransitionEffect,
 		notificationInterfaceWorld: ebiten.NewImage(
 			config.GetWorldWidth(), config.GetWorldHeight()),
 		letterImageInterfaceWorld: ebiten.NewImage(
 			config.GetWorldWidth(), config.GetWorldHeight()),
 		letterImageInterfaceMask: letterImageInterfaceMask,
+		letterInterfaceWorld: ebiten.NewImage(
+			config.GetWorldWidth(), config.GetWorldHeight()),
+		letterInterfaceMask: letterInterfaceMask,
 
 		// Guarantees non blocking rendering, if state management fails.
 		activeScreen:    entry.GetInstance(),

@@ -1,7 +1,6 @@
 package store
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
@@ -21,6 +20,13 @@ func GetActiveScreen() string {
 	instance := GetInstance()
 
 	return instance.GetState(screen.ACTIVE_SCREEN_STATE).(string)
+}
+
+// GetTranslationUpdatedApplication retrieves translation updated application state value.
+func GetTranslationUpdatedApplication() string {
+	instance := GetInstance()
+
+	return instance.GetState(application.TRANSLATION_UPDATED_APPLICATION_STATE).(string)
 }
 
 // GetExitApplication retrieves exit application state value.
@@ -44,11 +50,25 @@ func GetEntryHandshakeStartedNetworking() string {
 	return instance.GetState(networking.ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE).(string)
 }
 
+// GetLetterUpdated retrieves letter updated state value.
+func GetLetterUpdated() string {
+	instance := GetInstance()
+
+	return instance.GetState(letter.LETTER_UPDATED_LETTER_STATE).(string)
+}
+
+// GetLetterName retrieves letter name state value.
+func GetLetterName() string {
+	instance := GetInstance()
+
+	return instance.GetState(letter.LETTER_NAME_LETTER_STATE).(string)
+}
+
 // GetLetterImage retrieves letter image state value.
 func GetLetterImage() string {
 	instance := GetInstance()
 
-	return instance.GetState(letter.LETTER_IMAGE_APPLICATION_STATE).(string)
+	return instance.GetState(letter.LETTER_IMAGE_LETTER_STATE).(string)
 }
 
 // newStore creates new instance of application store.
@@ -68,8 +88,6 @@ func newStore() *godux.Store {
 	letterStateReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
-		fmt.Println("INCOMING ACTION")
-
 		result := screenStateReducer.GetProcessor()(action)
 		if result != nil {
 			return result

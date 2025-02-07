@@ -24,8 +24,6 @@ type NotificationComponent struct {
 
 // SetText modifies text component in the container.
 func (sc *NotificationComponent) SetText(value string) {
-	sc.container.GetWidget().Visibility = widget.Visibility_Show
-
 	sc.container.AddChild(widget.NewText(
 		widget.TextOpts.MaxWidth(float64(scaler.GetPercentageOf(config.GetWorldWidth(), 30))),
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
@@ -53,8 +51,6 @@ func (sc *NotificationComponent) SetText(value string) {
 
 // CleanText cleans text component in the container.
 func (sc *NotificationComponent) CleanText() {
-	sc.container.GetWidget().Visibility = widget.Visibility_Hide
-
 	sc.container.RemoveChildren()
 }
 
@@ -78,8 +74,6 @@ func newNotificationComponent() *NotificationComponent {
 			}),
 		),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()))
-
-	container.GetWidget().Visibility = widget.Visibility_Hide
 
 	return &NotificationComponent{container: container}
 }
