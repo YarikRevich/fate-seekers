@@ -28,6 +28,7 @@ type NotificationManager struct {
 	queue []*dto.NotificationUnit
 }
 
+// GetTextUpdated retrieves if notification manager text is updated.
 func (sm *NotificationManager) GetTextUpdated() bool {
 	return sm.textUpdated
 }

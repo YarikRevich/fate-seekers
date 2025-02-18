@@ -10,7 +10,8 @@ import (
 
 // Describes all the available networking reducer store states.
 const (
-	ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE = "entry_handshake_started"
+	SESSION_HANDSHAKE_STARTED_NETWORKING_STATE = "session_handshake_started"
+	ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE   = "entry_handshake_started"
 )
 
 // NetworkingStateReducer represents reducer used for networking state management.

@@ -37,8 +37,6 @@ var (
 
 // Describes all the available statics to be loaded.
 const (
-	Girls = "letter/girls.jpg"
-
 	ButtonIdleButton  = "ui/button-idle.png"
 	ButtonHoverButton = "ui/button-hover.png"
 

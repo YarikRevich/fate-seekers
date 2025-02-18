@@ -35,3 +35,11 @@ const (
 	LETTER_NAME_EMPTY_VALUE    = ""
 	LETTER_IMAGE_EMPTY_VALUE   = ""
 )
+
+// Describes all the available answer input reducer store values.
+const (
+	ANSWER_INPUT_OPENED_TRUE_VALUE            = "true"
+	ANSWER_INPUT_OPENED_FALSE_VALUE           = "false"
+	ANSWER_INPUT_QUESTION_UPDATED_TRUE_VALUE  = "true"
+	ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE = "false"
+)

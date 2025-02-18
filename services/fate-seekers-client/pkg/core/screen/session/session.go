@@ -4,6 +4,8 @@ import (
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/particle"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/particle/loadingstars"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
@@ -97,6 +99,9 @@ type SessionScreen struct {
 
 	// Represents global world view.
 	world *ebiten.Image
+
+	// Represents
+	loadingStarsParticleEffect particle.ParticleEffect
 }
 
 func (ss *SessionScreen) HandleInput() error {
@@ -110,6 +115,22 @@ func (ss *SessionScreen) HandleInput() error {
 
 	ss.ui.Update()
 
+	if !ss.loadingStarsParticleEffect.Done() {
+		if !ss.loadingStarsParticleEffect.OnEnd() {
+			ss.loadingStarsParticleEffect.Update()
+		} else {
+			ss.loadingStarsParticleEffect.Clean()
+		}
+	}
+
+	// TODO: click on the letter.
+	// dispatcher.GetInstance().Dispatch(action.NewSetLetterNameAction(""))
+
+	// dispatcher.GetInstance().Dispatch(action.NewSetLetterImageAction(""))
+
+	// TODO: click on the chest.
+	// dispatcher.GetInstance().Dispatch(action.New)
+
 	return nil
 }
 
@@ -119,6 +140,10 @@ func (ss *SessionScreen) HandleNetworking() {
 
 func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 	ss.world.Clear()
+
+	if !ss.loadingStarsParticleEffect.Done() {
+		ss.loadingStarsParticleEffect.Draw(screen)
+	}
 
 	ss.ui.Draw(ss.world)
 
@@ -136,6 +161,7 @@ func newSessionScreen() screen.Screen {
 		ui:                          builder.Build(),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		loadingStarsParticleEffect:  loadingstars.NewStarsParticleEffect(),
 	}
 }
 

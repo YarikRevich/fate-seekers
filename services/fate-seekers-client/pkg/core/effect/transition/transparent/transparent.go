@@ -31,7 +31,11 @@ func (tte *TransparentTransitionEffect) OnEnd() bool {
 func (tte *TransparentTransitionEffect) Update() {
 	select {
 	case <-tte.ticker.C:
+		tte.ticker.Stop()
+
 		tte.counter += 5
+
+		tte.ticker.Reset(time.Microsecond * 10)
 	}
 }
 

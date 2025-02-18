@@ -9,10 +9,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/answerinput"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -95,18 +91,21 @@ func (ais *AnswerInputScreen) Clean() {
 func newAnswerInputScreen() screen.Screen {
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect()
 
+	// answerinput.GetInstance()
+
 	return &AnswerInputScreen{
-		ui: builder.Build(answerinput.NewAnswerInputComponent(
-			func() {},
-			func() {
-				shared.GetInstance().GetBlinkingScreenAnimation().Reset()
+		// ui: builder.Build(answerinput.NewAnswerInputComponent(
+		// 	func() {},
+		// 	func() {
+		// 		shared.GetInstance().GetBlinkingScreenAnimation().Reset()
 
-				dispatcher.GetInstance().Dispatch(
-					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))
+		// 		dispatcher.GetInstance().Dispatch(
+		// 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))
 
-				transparentTransitionEffect.Reset()
-			},
-		)),
+		// 		transparentTransitionEffect.Reset()
+		// 	},
+		// )),
+		ui:                          builder.Build(),
 		transparentTransitionEffect: transparentTransitionEffect,
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		interfaceWorld:              ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),

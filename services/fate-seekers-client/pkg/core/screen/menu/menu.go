@@ -94,7 +94,7 @@ func newMenuScreen() screen.Screen {
 			menu.NewMenuComponent(
 				func() {
 					dispatcher.GetInstance().Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))
 				},
 				func() {
 

@@ -11,10 +11,10 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: collection; Type: TABLE; Schema: public; 
+-- Name: collections; Type: TABLE; Schema: public; 
 --
 
-CREATE TABLE collection (
+CREATE TABLE collections (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL

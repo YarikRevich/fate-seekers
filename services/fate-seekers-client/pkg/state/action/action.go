@@ -26,6 +26,12 @@ const (
 	SET_LETTER_IMAGE_ACTION   = "SET_LETTER_IMAGE_ACTION"
 )
 
+// Describes all the available state actions for answer input reducer.
+const (
+	SET_ANSWER_INPUT_OPENED_ACTION           = "SET_ANSWER_INPUT_OPENED_ACTION"
+	SET_ANSWER_INPUT_QUESTION_UPDATED_ACTION = "SET_ANSWER_INPUT_QUESTION_UPDATED_ACTION"
+)
+
 // NewSetActiveScreenAction creates new set active screen action.
 func NewSetActiveScreenAction(value string) godux.Action {
 	return godux.Action{
@@ -86,6 +92,22 @@ func NewSetLetterNameAction(value string) godux.Action {
 func NewSetLetterImageAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_LETTER_IMAGE_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetAnswerInputOpened creates new set answer input opened action.
+func NewSetAnswerInputOpened(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_ANSWER_INPUT_OPENED_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetAnswerInputQuestionUpdated creates new set answer input question updated action.
+func NewSetAnswerInputQuestionUpdated(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_ANSWER_INPUT_QUESTION_UPDATED_ACTION,
 		Value: value,
 	}
 }

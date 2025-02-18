@@ -163,7 +163,8 @@ func (r *Runtime) Update() error {
 
 			letter.GetInstance().SetText(loadedLetter.Text)
 
-			letter.GetInstance().SetAttachment(loadedLetter.Attachment)
+			// TODO: take attachement
+			// letter.GetInstance().SetAttachment(loadedLetter.Attachment.Location)
 
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetLetterUpdatedAction(value.LETTER_UPDATED_TRUE_VALUE))

@@ -2,7 +2,6 @@ package letter
 
 import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
@@ -24,7 +23,7 @@ type LetterStateReducer struct {
 
 func (lsr *LetterStateReducer) Init() {
 	lsr.store.SetState(LETTER_UPDATED_LETTER_STATE, value.LETTER_UPDATED_FALSE_VALUE)
-	lsr.store.SetState(LETTER_NAME_LETTER_STATE, loader.LoneManLetter)
+	lsr.store.SetState(LETTER_NAME_LETTER_STATE, value.LETTER_NAME_EMPTY_VALUE)
 	lsr.store.SetState(LETTER_IMAGE_LETTER_STATE, value.LETTER_IMAGE_EMPTY_VALUE)
 }
 

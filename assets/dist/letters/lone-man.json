@@ -1,7 +1,12 @@
 {
     "text": "IT WORKS KURWA",
+    "collection": {
+        "name": "History",
+        "max": 10,
+        "index": 0
+    },
     "attachment": {
         "type": "image",
-        "location": "letter/girls.jpg"
+        "location": "letter/boys.jpg"
     }
 }

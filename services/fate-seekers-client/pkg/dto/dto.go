@@ -9,6 +9,27 @@ const (
 	ATTACHMENT_AUDIO_TYPE     = "audio"
 )
 
+// GeneratedQuestionUnit represents a generated question unit.
+type GeneratedQuestionUnit struct {
+	// Represents generated question body.
+	Question string
+
+	// Represents answer for the generated question.
+	Answer int
+}
+
+// LetterLoaderAttachmentUnit represents a letter attachment unit.
+type LetterLoaderCollectionUnit struct {
+	// Represents collection name.
+	Name string `json:"name"`
+
+	// Represents collection max value.
+	Max int64 `json:"max"`
+
+	// Represents collection index in the context of max collection value.
+	Index int64 `json:"index"`
+}
+
 // LetterLoaderAttachmentUnit represents a letter attachment unit.
 type LetterLoaderAttachmentUnit struct {
 	// Represents attachment type. Currently supported are 'image', 'animation', 'audio'.
@@ -22,6 +43,9 @@ type LetterLoaderAttachmentUnit struct {
 type LetterLoaderUnit struct {
 	// Represents letter text.
 	Text string `json:"text"`
+
+	// Represents letter collection.
+	Collection LetterLoaderCollectionUnit `json:"collection"`
 
 	// Represents letter attachment.
 	Attachment LetterLoaderAttachmentUnit `json:"attachment"`

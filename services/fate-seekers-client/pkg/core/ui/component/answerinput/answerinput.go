@@ -21,7 +21,7 @@ const (
 
 var (
 	// GetInstance retrieves instance of the letter component, performing initial creation if needed.
-	GetInstance = sync.OnceValue[*LetterComponent](newLetterComponent)
+	GetInstance = sync.OnceValue[*AnswerInputComponent](newLetterComponent)
 )
 
 // AnswerInputComponent represents component, which contains actual answer input.
