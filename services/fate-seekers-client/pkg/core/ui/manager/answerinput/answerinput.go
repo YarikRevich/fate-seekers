@@ -7,7 +7,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Knetic/govaluate"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 )
 
 var (
@@ -48,8 +50,6 @@ func (sm *AnswerInputManager) UpdateQuestion() {
 
 	sequence := []string{fmt.Sprintf("%d", number)}
 
-	result := number
-
 	var operator string
 
 	for i := 0; i < maxOperators-1; i++ {
@@ -57,25 +57,24 @@ func (sm *AnswerInputManager) UpdateQuestion() {
 
 		number = rand.Intn(maxValue) + 1
 
-		switch operator {
-		case plusOperator:
-			result += number
-
-		case minusOperator:
-			result -= number
-
-		case multiplyOperator:
-			result *= number
-
-		}
-
 		sequence = append(sequence, operator, fmt.Sprintf("%d", number))
+	}
 
+	question := strings.Join(sequence, " ")
+
+	expression, err := govaluate.NewEvaluableExpression(question)
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
+	result, err := expression.Evaluate(nil)
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
 	}
 
 	sm.generatedQuestion = &dto.GeneratedQuestionUnit{
-		Question: strings.Join(sequence, " "),
-		Answer:   result,
+		Question: question,
+		Answer:   int(result.(float64)),
 	}
 }
 

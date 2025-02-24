@@ -1,5 +1,7 @@
 github.com/Frabjous-Studios/asebiten v0.6.4 h1:bJk0fgAsjjphQyc2hMup0/lMCP0JBht7dlnVQbnEnO4=
 github.com/Frabjous-Studios/asebiten v0.6.4/go.mod h1:cEgf+xE93IzBQ6BBGDOiGLUUWmq7zAAJMSB+Ao2O0NA=
+github.com/Knetic/govaluate v3.0.0+incompatible h1:7o6+MAPhYTCF0+fdvoz1xDedhRb4f6s9Tn1Tt7/WTEg=
+github.com/Knetic/govaluate v3.0.0+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=

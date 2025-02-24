@@ -10,7 +10,6 @@ import (
 
 // Describes all the available answer input reducer store states.
 const (
-	ANSWER_INPUT_OPENED_STATE           = "answer_input_opened"
 	ANSWER_INPUT_QUESTION_UPDATED_STATE = "answer_input_question_updated"
 )
 
@@ -21,17 +20,12 @@ type AnswerInputStateReducer struct {
 }
 
 func (aisr *AnswerInputStateReducer) Init() {
-	aisr.store.SetState(ANSWER_INPUT_OPENED_STATE, value.ANSWER_INPUT_OPENED_FALSE_VALUE)
 	aisr.store.SetState(ANSWER_INPUT_QUESTION_UPDATED_STATE, value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE)
 }
 
 func (aisr *AnswerInputStateReducer) GetProcessor() func(value godux.Action) interface{} {
 	return func(value godux.Action) interface{} {
 		switch value.Type {
-		case action.SET_ANSWER_INPUT_OPENED_ACTION:
-			return dto.ComposeReducerResult(
-				dto.ReducerResultUnit{Key: ANSWER_INPUT_OPENED_STATE, Value: value.Value})
-
 		case action.SET_ANSWER_INPUT_QUESTION_UPDATED_ACTION:
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: ANSWER_INPUT_QUESTION_UPDATED_STATE, Value: value.Value})

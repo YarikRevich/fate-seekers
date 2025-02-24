@@ -14,5 +14,5 @@ type Screen interface {
 	HandleRender(screen *ebiten.Image)
 
 	// Clean performes forced memory cleanup for the screen only.
-	Clean()
+	Clean() // TODO: remove
 }

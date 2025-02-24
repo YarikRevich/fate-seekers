@@ -21,6 +21,8 @@ var (
 	configFile      = flag.String("config", "config.yaml", "a name of configuration file")
 	configDirectory = flag.String("configDirectory", getDefaultConfigDirectory(), "a directory where configuration file is located")
 
+	networkingHost string
+
 	debug bool
 
 	databaseName                 string
@@ -63,6 +65,7 @@ const (
 func SetupDefaultConfig() {
 	viper.SetDefault("window.width", 1920)
 	viper.SetDefault("window.height", 1080)
+	viper.SetDefault("networking.host", "localhost:8080")
 	viper.SetDefault("operation.debug", false)
 	viper.SetDefault("database.name", "fate_seekers.db")
 	viper.SetDefault("database.connection-retry-delay", time.Second*3)
@@ -85,6 +88,7 @@ func Init() {
 
 	windowWidth := viper.GetInt("window.width")
 	windowHeight := viper.GetInt("window.height")
+	networkingHost = viper.GetString("networking.host")
 	debug = viper.GetBool("operation.debug")
 	databaseName = viper.GetString("database.name")
 	databaseConnectionRetryDelay = viper.GetDuration("database.connection-retry-delay")
@@ -107,6 +111,10 @@ func Init() {
 	ebiten.SetWindowTitle(windowName)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetVsyncEnabled(true)
+}
+
+func NetworkingHost() string {
+	return networkingHost
 }
 
 func GetDebug() bool {

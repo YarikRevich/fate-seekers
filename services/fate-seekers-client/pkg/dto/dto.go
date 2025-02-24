@@ -1,6 +1,9 @@
 package dto
 
-import "time"
+import (
+	"image/color"
+	"time"
+)
 
 // Describes all the available letter attachment types.
 const (
@@ -66,8 +69,11 @@ type SubtitlesUnit struct {
 
 // NotificationUnit represents a notification unit.
 type NotificationUnit struct {
-	// Represents text for of the notification unit.
+	// Represents text of the notification unit.
 	Text string
+
+	// Represents text color of the notification unit.
+	Color color.Color
 
 	// Represents duration of which notification unit will be shown.
 	Duration time.Duration

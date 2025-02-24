@@ -23,7 +23,7 @@ type NotificationComponent struct {
 }
 
 // SetText modifies text component in the container.
-func (sc *NotificationComponent) SetText(value string) {
+func (sc *NotificationComponent) SetText(value string, color color.Color) {
 	sc.container.AddChild(widget.NewText(
 		widget.TextOpts.MaxWidth(float64(scaler.GetPercentageOf(config.GetWorldWidth(), 30))),
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
@@ -46,7 +46,7 @@ func (sc *NotificationComponent) SetText(value string) {
 				Source: loader.GetInstance().GetFont(loader.KyivRegularFont),
 				Size:   20,
 			},
-			color.White)))
+			color)))
 }
 
 // CleanText cleans text component in the container.

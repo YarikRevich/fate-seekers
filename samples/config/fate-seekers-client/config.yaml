@@ -2,6 +2,9 @@ window:
   height: 1080
   width: 1920
 
+networking:
+  host: "localhost:8080"
+
 operation:
   debug: true
 

@@ -36,6 +36,8 @@ type IntroScreen struct {
 
 func (es *IntroScreen) HandleInput() error {
 	// TODO: check if intro scene has already been played
+	// repository.GetFlagsRepository().GetByName()
+
 	dispatcher.GetInstance().Dispatch(
 		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ENTRY_VALUE))
 

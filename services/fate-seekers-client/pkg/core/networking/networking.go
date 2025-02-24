@@ -1,7 +1,7 @@
 package networking
 
-// NetworkingChannel represent channel interface.
-type NetworkingChannel interface {
-	// Execute performs channel call.
-	Execute(args interface{}, finishCallback func())
+// NetworkingConnector represents networking connector interface.
+type NetworkingConnector interface {
+	// Reconnect performs networking connector reconnection operation.
+	Reconnect()
 }

@@ -1,7 +1,9 @@
 package answerinput
 
 import (
+	"strconv"
 	"sync"
+	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
@@ -9,6 +11,14 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/answerinput"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
+	answerinputmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/answerinput"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -45,6 +55,16 @@ func (ais *AnswerInputScreen) HandleInput() error {
 				ais.transparentTransitionEffect.Clean()
 			}
 		}
+	}
+
+	if store.GetAnswerInputQuestionUpdated() == value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE {
+		answerinputmanager.GetInstance().UpdateQuestion()
+
+		answerinput.GetInstance().SetText(
+			answerinputmanager.GetInstance().GetGeneratedQuestion().Question)
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetAnswerInputQuestionUpdated(value.ANSWER_INPUT_QUESTION_UPDATED_TRUE_VALUE))
 	}
 
 	ais.ui.Update()
@@ -91,21 +111,39 @@ func (ais *AnswerInputScreen) Clean() {
 func newAnswerInputScreen() screen.Screen {
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect()
 
-	// answerinput.GetInstance()
+	answerinput.GetInstance().SetSubmitCallback(func(valueRaw string) {
+		value, err := strconv.Atoi(valueRaw)
+		if err != nil {
+			notification.GetInstance().Push(
+				"Answer is incorrect!", time.Second*2, common.NotificationErrorTextColor)
+
+			return
+		}
+
+		if answerinputmanager.GetInstance().GetGeneratedQuestion().Answer == value {
+			notification.GetInstance().Push(
+				"Answer is correct!", time.Second*2, common.NotificationInfoTextColor)
+		} else {
+			notification.GetInstance().Push(
+				"Answer is incorrect!", time.Second*2, common.NotificationErrorTextColor)
+		}
+	})
+
+	answerinput.GetInstance().SetCloseCallback(func() {
+		shared.GetInstance().GetBlinkingScreenAnimation().Reset()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetAnswerInputQuestionUpdated(value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE))
+
+		transparentTransitionEffect.Reset()
+	})
 
 	return &AnswerInputScreen{
-		// ui: builder.Build(answerinput.NewAnswerInputComponent(
-		// 	func() {},
-		// 	func() {
-		// 		shared.GetInstance().GetBlinkingScreenAnimation().Reset()
-
-		// 		dispatcher.GetInstance().Dispatch(
-		// 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))
-
-		// 		transparentTransitionEffect.Reset()
-		// 	},
-		// )),
-		ui:                          builder.Build(),
+		ui: builder.Build(
+			answerinput.GetInstance().GetContainer()),
 		transparentTransitionEffect: transparentTransitionEffect,
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		interfaceWorld:              ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),

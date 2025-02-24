@@ -3,6 +3,7 @@ package store
 import (
 	"sync"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/networking"
@@ -71,6 +72,13 @@ func GetLetterImage() string {
 	return instance.GetState(letter.LETTER_IMAGE_LETTER_STATE).(string)
 }
 
+// GetAnswerInputQuestionUpdated retrieves question updated state value.
+func GetAnswerInputQuestionUpdated() string {
+	instance := GetInstance()
+
+	return instance.GetState(answerinput.ANSWER_INPUT_QUESTION_UPDATED_STATE).(string)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()
@@ -86,6 +94,9 @@ func newStore() *godux.Store {
 
 	letterStateReducer := letter.NewLetterStateReducer(store)
 	letterStateReducer.Init()
+
+	answerInputReducer := answerinput.NewAnswerInputStateReducer(store)
+	answerInputReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
@@ -104,6 +115,11 @@ func newStore() *godux.Store {
 		}
 
 		result = letterStateReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = answerInputReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

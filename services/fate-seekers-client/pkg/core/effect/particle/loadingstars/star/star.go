@@ -58,7 +58,7 @@ func (spe *StarParticleElement) Update() {
 	spe.toX += (spe.toX - float32(config.GetWorldWidth()/2)) / spe.divider
 	spe.toY += (spe.toY - float32(config.GetWorldHeight()/2)) / spe.divider
 
-	if spe.brightness < 0xff {
+	if spe.brightness < 255 {
 		spe.brightness++
 	}
 
@@ -78,10 +78,10 @@ func (spe *StarParticleElement) Draw(screen *ebiten.Image) {
 		spe.toY,
 		2,
 		&color.RGBA{
-			R: uint8(0xbb * spe.brightness / 0xff),
-			G: uint8(0xdd * spe.brightness / 0xff),
-			B: uint8(0xff * spe.brightness / 0xff),
-			A: 0xff},
+			R: uint8(187 * spe.brightness / 255),
+			G: uint8(221 * spe.brightness / 255),
+			B: uint8(255 * spe.brightness / 255),
+			A: 255},
 		true)
 }
 

@@ -1,6 +1,7 @@
 package answerinput
 
 import (
+	"fmt"
 	"image/color"
 	"sync"
 
@@ -21,7 +22,7 @@ const (
 
 var (
 	// GetInstance retrieves instance of the letter component, performing initial creation if needed.
-	GetInstance = sync.OnceValue[*AnswerInputComponent](newLetterComponent)
+	GetInstance = sync.OnceValue[*AnswerInputComponent](newAnswerInputComponent)
 )
 
 // AnswerInputComponent represents component, which contains actual answer input.
@@ -30,7 +31,7 @@ type AnswerInputComponent struct {
 	text *widget.Text
 
 	// Represents submit callback.
-	submitCallback func(value string)
+	submitCallback func(valueRaw string)
 
 	// Represents close callback.
 	closeCallback func()
@@ -41,42 +42,32 @@ type AnswerInputComponent struct {
 
 // SetText modifies text component in the container.
 func (aic *AnswerInputComponent) SetText(value string) {
-	// aic.text.Get(value)
+	aic.text.Label = fmt.Sprintf("Please solve:   %s", value)
 }
 
 // GetText retrieves current text.
-func (lc *LetterComponent) GetText() string {
-	return lc.textArea.GetText()
+func (aic *AnswerInputComponent) GetText() string {
+	return aic.text.Label
 }
 
-// SetAttachment modified attachment button redirect in the container.
-func (lc *LetterComponent) SetAttachment(value string) {
-	*lc.attachmentValue = value
-}
-
-// GetAttachment retrieves attachment button redirect.
-func (lc *LetterComponent) GetAttachment(value string) {
-	*lc.attachmentValue = value
-}
-
-// SetAttachmentCallback modified close callback in the container.
-func (lc *LetterComponent) SetAttachmentCallback(callback func(value string)) {
-	lc.attachmentCallback = callback
+// SetSubmitCallback modified submit callback in the container.
+func (aic *AnswerInputComponent) SetSubmitCallback(callback func(valueRaw string)) {
+	aic.submitCallback = callback
 }
 
 // SetCloseCallback modified close callback in the container.
-func (lc *LetterComponent) SetCloseCallback(callback func()) {
-	lc.closeCallback = callback
+func (aic *AnswerInputComponent) SetCloseCallback(callback func()) {
+	aic.closeCallback = callback
 }
 
 // GetContainer retrieves container widget.
-func (lc *LetterComponent) GetContainer() *widget.Container {
-	return lc.container
+func (aic *AnswerInputComponent) GetContainer() *widget.Container {
+	return aic.container
 }
 
 // newAnswerInputComponent creates new answer input component.
-func newAnswerInputComponent(submitCallback, closeCallback func()) *widget.Container {
-	// var result *LetterComponent
+func newAnswerInputComponent() *AnswerInputComponent {
+	var result *AnswerInputComponent
 
 	container := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
@@ -92,7 +83,7 @@ func newAnswerInputComponent(submitCallback, closeCallback func()) *widget.Conta
 			})),
 		widget.ContainerOpts.Layout(widget.NewAnchorLayout()))
 
-	container.AddChild(widget.NewText(
+	textWidget := widget.NewText(
 		widget.TextOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionCenter,
@@ -105,8 +96,10 @@ func newAnswerInputComponent(submitCallback, closeCallback func()) *widget.Conta
 			})),
 		widget.TextOpts.Text("", &text.GoTextFace{
 			Source: loader.GetInstance().GetFont(loader.KyivRegularFont),
-			Size:   30,
-		}, color.White)))
+			Size:   40,
+		}, componentscommon.ButtonTextColor))
+
+	container.AddChild(textWidget)
 
 	generalFont := &text.GoTextFace{
 		Source: loader.GetInstance().GetFont(loader.KyivRegularFont),
@@ -217,7 +210,7 @@ func newAnswerInputComponent(submitCallback, closeCallback func()) *widget.Conta
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			closeCallback()
+			result.submitCallback(answerInput.GetText())
 		}),
 	))
 
@@ -241,11 +234,16 @@ func newAnswerInputComponent(submitCallback, closeCallback func()) *widget.Conta
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			closeCallback()
+			result.closeCallback()
 		}),
 	))
 
 	container.AddChild(buttonsContainer)
+
+	result = &AnswerInputComponent{
+		text:      textWidget,
+		container: container,
+	}
 
 	return result
 }

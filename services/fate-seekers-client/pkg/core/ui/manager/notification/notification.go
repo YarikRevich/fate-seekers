@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"image/color"
 	"sync"
 	"time"
 
@@ -49,7 +50,7 @@ func (sm *NotificationManager) Update() {
 		notificationUnit := sm.queue[0]
 
 		if !sm.textUpdated {
-			notification.GetInstance().SetText(notificationUnit.Text)
+			notification.GetInstance().SetText(notificationUnit.Text, notificationUnit.Color)
 
 			sm.textUpdated = true
 		}
@@ -77,9 +78,10 @@ func (sm *NotificationManager) Update() {
 }
 
 // Push pushes new value to the notification queue.
-func (sm *NotificationManager) Push(text string, duration time.Duration) {
+func (sm *NotificationManager) Push(text string, duration time.Duration, color color.Color) {
 	sm.queue = append(sm.queue, &dto.NotificationUnit{
 		Text:     text,
+		Color:    color,
 		Duration: duration,
 	})
 }
