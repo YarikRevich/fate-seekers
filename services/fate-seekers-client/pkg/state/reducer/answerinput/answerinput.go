@@ -10,6 +10,7 @@ import (
 
 // Describes all the available answer input reducer store states.
 const (
+	ANSWER_INPUT_SELECTED_CHEST_STATE   = "answer_input_selected_chest"
 	ANSWER_INPUT_QUESTION_UPDATED_STATE = "answer_input_question_updated"
 )
 
@@ -26,6 +27,10 @@ func (aisr *AnswerInputStateReducer) Init() {
 func (aisr *AnswerInputStateReducer) GetProcessor() func(value godux.Action) interface{} {
 	return func(value godux.Action) interface{} {
 		switch value.Type {
+		case action.SET_ANSWER_INPUT_SELECTED_CHEST_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: ANSWER_INPUT_SELECTED_CHEST_STATE, Value: value.Value})
+
 		case action.SET_ANSWER_INPUT_QUESTION_UPDATED_ACTION:
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: ANSWER_INPUT_QUESTION_UPDATED_STATE, Value: value.Value})

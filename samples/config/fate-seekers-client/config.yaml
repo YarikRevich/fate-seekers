@@ -1,19 +1,44 @@
-window:
-  height: 1080
-  width: 1920
+# Represents sector used for game settings description.
+settings:
+  # Represents sector used for window settings description.
+  window:
+    # Represents window height property.
+    height: 1080
 
-networking:
-  host: "localhost:8080"
+    # Represents window width property.
+    width: 1920
 
+  # Represents sector used for networking settings description.
+  networking:
+    # Represents host value used for networking.
+    host: "localhost:8080"
+
+  # Represents language selected for interface.
+  language: "en"
+
+# Represents sector used for internal operation properties. 
 operation:
+  # Represents debug property, which enables debug panels used for testing.
   debug: true
 
-database:
-  name: "fate_seekers.db"
-  connection-retry-delay: 3s
+  # Represents database properties description.
+  database:
+    # Represents name of the sqlite3 database file.
+    name: "fate_seekers.db"
 
-logging:
-  level: "debug"
-  console: true
-  name: "fate_seekers.log"
-  directory: "log"
+    # Represents connection retry delay used for retry operations.
+    connection-retry-delay: 3s
+
+  # Represents logging properties description.
+  logging:
+    # Represents logging level.
+    level: "debug"
+
+    # Enables console output.
+    console: true
+
+    # Represents output file name.
+    name: "fate_seekers.log"
+
+    # Represents output file directory.
+    directory: "log"

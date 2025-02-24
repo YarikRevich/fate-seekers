@@ -1,0 +1,14 @@
+{
+    "orangutan": {
+        "description": "Description",
+        "one": "Тут є банан.\n"
+    },
+    "try": {
+        "description": "Description",
+        "other": ""
+    },
+    "thanks": {
+        "description": "Description",
+        "other": ""
+    }
+}

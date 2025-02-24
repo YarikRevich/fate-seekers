@@ -28,6 +28,7 @@ const (
 
 // Describes all the available state actions for answer input reducer.
 const (
+	SET_ANSWER_INPUT_SELECTED_CHEST_ACTION   = "SET_ANSWER_INPUT_SELECTED_CHEST_ACTION"
 	SET_ANSWER_INPUT_QUESTION_UPDATED_ACTION = "SET_ANSWER_INPUT_QUESTION_UPDATED_ACTION"
 )
 
@@ -91,6 +92,14 @@ func NewSetLetterNameAction(value string) godux.Action {
 func NewSetLetterImageAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_LETTER_IMAGE_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetAnswerInputSelectedChest creates new set answer input selected chest action.
+func NewSetAnswerInputSelectedChest(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_ANSWER_INPUT_SELECTED_CHEST_ACTION,
 		Value: value,
 	}
 }

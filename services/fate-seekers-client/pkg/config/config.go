@@ -14,7 +14,8 @@ import (
 )
 
 var (
-	ErrReadingFromConfig = errors.New("err happened during config file read operation")
+	ErrReadingFromConfig                 = errors.New("err happened during config file read operation")
+	ErrReadingSettingsLanguageFromConfig = errors.New("err happened during config file settings language read operation")
 )
 
 var (
@@ -22,6 +23,8 @@ var (
 	configDirectory = flag.String("configDirectory", getDefaultConfigDirectory(), "a directory where configuration file is located")
 
 	networkingHost string
+
+	settingsLanguage string
 
 	debug bool
 
@@ -50,6 +53,12 @@ const (
 	minStaticHeight = 360
 )
 
+// Represents all the available settings language values.
+const (
+	SETTINGS_LANGUAGE_ENGLISH   = "en"
+	SETTINGS_LANGUAGE_UKRAINIAN = "uk"
+)
+
 const (
 	// Represents home directory where all application related data is located.
 	internalGlobalDirectory = "/.fate-seekers-client"
@@ -63,9 +72,10 @@ const (
 
 // SetupDefaultConfig initializes default parameters for the configuration file.
 func SetupDefaultConfig() {
-	viper.SetDefault("window.width", 1920)
-	viper.SetDefault("window.height", 1080)
-	viper.SetDefault("networking.host", "localhost:8080")
+	viper.SetDefault("settings.window.width", 1920)
+	viper.SetDefault("settings.window.height", 1080)
+	viper.SetDefault("settings.networking.host", "localhost:8080")
+	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
 	viper.SetDefault("operation.debug", false)
 	viper.SetDefault("database.name", "fate_seekers.db")
 	viper.SetDefault("database.connection-retry-delay", time.Second*3)
@@ -86,9 +96,19 @@ func Init() {
 		log.Fatalln(ErrReadingFromConfig.Error(), zap.String("configFile", *configFile), zap.Error(err))
 	}
 
-	windowWidth := viper.GetInt("window.width")
-	windowHeight := viper.GetInt("window.height")
-	networkingHost = viper.GetString("networking.host")
+	windowWidth := viper.GetInt("settings.window.width")
+	windowHeight := viper.GetInt("settings.window.height")
+	networkingHost = viper.GetString("settings.networking.host")
+	settingsLanguage = viper.GetString("settings.language")
+
+	if settingsLanguage != SETTINGS_LANGUAGE_ENGLISH &&
+		settingsLanguage != SETTINGS_LANGUAGE_UKRAINIAN {
+		log.Fatalln(
+			ErrReadingSettingsLanguageFromConfig.Error(),
+			zap.String("configFile", *configFile),
+			zap.String("settingsLanguage", settingsLanguage))
+	}
+
 	debug = viper.GetBool("operation.debug")
 	databaseName = viper.GetString("database.name")
 	databaseConnectionRetryDelay = viper.GetDuration("database.connection-retry-delay")
@@ -113,8 +133,27 @@ func Init() {
 	ebiten.SetVsyncEnabled(true)
 }
 
-func NetworkingHost() string {
+func SetWindowSize(width, height int) {
+	viper.Set("settings.window.width", width)
+	viper.Set("settings.window.height", height)
+
+	ebiten.SetWindowSize(width, height)
+}
+
+func SetNetworkingHost(value string) {
+	viper.Set("settings.networking.host", value)
+}
+
+func GetNetworkingHost() string {
 	return networkingHost
+}
+
+func SetSettingsLanguage(value string) {
+	viper.Set("settings.language", value)
+}
+
+func GetSettingsLanguage() string {
+	return settingsLanguage
 }
 
 func GetDebug() bool {

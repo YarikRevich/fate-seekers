@@ -112,7 +112,7 @@ func newAnswerInputScreen() screen.Screen {
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect()
 
 	answerinput.GetInstance().SetSubmitCallback(func(valueRaw string) {
-		value, err := strconv.Atoi(valueRaw)
+		result, err := strconv.Atoi(valueRaw)
 		if err != nil {
 			notification.GetInstance().Push(
 				"Answer is incorrect!", time.Second*2, common.NotificationErrorTextColor)
@@ -120,9 +120,12 @@ func newAnswerInputScreen() screen.Screen {
 			return
 		}
 
-		if answerinputmanager.GetInstance().GetGeneratedQuestion().Answer == value {
+		if answerinputmanager.GetInstance().GetGeneratedQuestion().Answer == result {
 			notification.GetInstance().Push(
 				"Answer is correct!", time.Second*2, common.NotificationInfoTextColor)
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetAnswerInputQuestionUpdated(value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE))
 		} else {
 			notification.GetInstance().Push(
 				"Answer is incorrect!", time.Second*2, common.NotificationErrorTextColor)
