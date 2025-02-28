@@ -51,6 +51,10 @@ const (
 
 	SliderHandleHover = "ui/slider-handle-hover.png"
 	SliderHandleIdle  = "ui/slider-handle-idle.png"
+	SliderTrackIdle   = "ui/slider-track-idle.png"
+
+	ComboArrayIdleButton = "ui/arrow-down-idle.png"
+	ComboIdleButton      = "ui/combo-button-idle.png"
 
 	TextInputIdle = "ui/text-input-idle.png"
 )
@@ -72,7 +76,8 @@ const (
 
 // Describes all the available templates to be loaded.
 const (
-	LoneManTemplate = "lone-man.toml"
+	EnglishTemplate   = "en/en.json"
+	UkrainianTemplate = "uk/uk.json"
 )
 
 // Describes all the available animations to be loaded.

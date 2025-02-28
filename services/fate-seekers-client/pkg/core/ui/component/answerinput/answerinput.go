@@ -9,6 +9,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
@@ -42,7 +43,10 @@ type AnswerInputComponent struct {
 
 // SetText modifies text component in the container.
 func (aic *AnswerInputComponent) SetText(value string) {
-	aic.text.Label = fmt.Sprintf("Please solve:   %s", value)
+	aic.text.Label = fmt.Sprintf(
+		"%s:   %s",
+		translation.GetInstance().GetTranslation("answerinput.solvetext"),
+		value)
 }
 
 // GetText retrieves current text.
@@ -162,12 +166,22 @@ func newAnswerInputComponent() *AnswerInputComponent {
 
 			return false, &newInputText
 		}),
-		widget.TextInputOpts.Placeholder("Enter text here"))
+		widget.TextInputOpts.Placeholder(translation.GetInstance().GetTranslation("answerinput.entertext")))
 
 	container.AddChild(answerInput)
 
 	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 15)
 	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 15)
+
+	var buttonsLeftPadding int
+
+	switch config.GetSettingsLanguage() {
+	case config.SETTINGS_LANGUAGE_ENGLISH:
+		buttonsLeftPadding = scaler.GetPercentageOf(config.GetWorldWidth(), 73)
+
+	case config.SETTINGS_LANGUAGE_UKRAINIAN:
+		buttonsLeftPadding = scaler.GetPercentageOf(config.GetWorldWidth(), 68)
+	}
 
 	buttonsContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
@@ -185,7 +199,7 @@ func newAnswerInputComponent() *AnswerInputComponent {
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
 			widget.RowLayoutOpts.Spacing(13),
 			widget.RowLayoutOpts.Padding(widget.Insets{
-				Left:   scaler.GetPercentageOf(config.GetWorldWidth(), 73),
+				Left:   buttonsLeftPadding,
 				Bottom: scaler.GetPercentageOf(config.GetWorldHeight(), 9),
 			}),
 		)))
@@ -198,7 +212,10 @@ func newAnswerInputComponent() *AnswerInputComponent {
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Submit", generalFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("answerinput.submit"),
+			generalFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 				Position: widget.RowLayoutPositionEnd,
@@ -222,7 +239,10 @@ func newAnswerInputComponent() *AnswerInputComponent {
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Close", generalFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("answerinput.close"),
+			generalFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 				Position: widget.RowLayoutPositionEnd,

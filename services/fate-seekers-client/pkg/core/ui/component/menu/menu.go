@@ -5,6 +5,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -24,7 +25,7 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			widget.WidgetOpts.TrackHover(false),
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				Padding: widget.Insets{
-					Left: scaler.GetPercentageOf(config.GetWorldWidth(), 19),
+					Left: scaler.GetPercentageOf(config.GetWorldWidth(), 17),
 				},
 				VerticalPosition:  widget.AnchorLayoutPositionCenter,
 				StretchHorizontal: false,
@@ -69,7 +70,10 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Start", buttonFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("menu.start"),
+			buttonFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,
@@ -92,7 +96,10 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Credits", buttonFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("menu.credits"),
+			buttonFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,
@@ -115,7 +122,10 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Collections", buttonFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("menu.collections"),
+			buttonFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,
@@ -138,7 +148,10 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Settings", buttonFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("menu.settings"),
+			buttonFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,
@@ -161,7 +174,10 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Exit", buttonFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("menu.exit"),
+			buttonFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,

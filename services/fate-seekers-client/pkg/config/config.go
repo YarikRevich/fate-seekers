@@ -24,7 +24,8 @@ var (
 
 	networkingHost string
 
-	settingsLanguage string
+	settingsSoundMusic, settingsSoundFX int
+	settingsLanguage                    string
 
 	debug bool
 
@@ -75,6 +76,8 @@ func SetupDefaultConfig() {
 	viper.SetDefault("settings.window.width", 1920)
 	viper.SetDefault("settings.window.height", 1080)
 	viper.SetDefault("settings.networking.host", "localhost:8080")
+	viper.SetDefault("settings.sound.music", 100)
+	viper.SetDefault("settings.sound.fx", 100)
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
 	viper.SetDefault("operation.debug", false)
 	viper.SetDefault("database.name", "fate_seekers.db")
@@ -99,6 +102,8 @@ func Init() {
 	windowWidth := viper.GetInt("settings.window.width")
 	windowHeight := viper.GetInt("settings.window.height")
 	networkingHost = viper.GetString("settings.networking.host")
+	settingsSoundMusic = viper.GetInt("settings.sound.music")
+	settingsSoundFX = viper.GetInt("settings.sound.fx")
 	settingsLanguage = viper.GetString("settings.language")
 
 	if settingsLanguage != SETTINGS_LANGUAGE_ENGLISH &&
@@ -146,6 +151,22 @@ func SetNetworkingHost(value string) {
 
 func GetNetworkingHost() string {
 	return networkingHost
+}
+
+func SetSettingsSoundMusic(value int) {
+	viper.Set("settings.sound.music", value)
+}
+
+func GetSettingsSoundMusic() int {
+	return settingsSoundMusic
+}
+
+func SetSettingsSoundFX(value int) {
+	viper.Set("settings.sound.fx", value)
+}
+
+func GetSettingsSoundFX() int {
+	return settingsSoundFX
 }
 
 func SetSettingsLanguage(value string) {
