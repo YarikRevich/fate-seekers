@@ -32,6 +32,14 @@ const (
 	SET_ANSWER_INPUT_QUESTION_UPDATED_ACTION = "SET_ANSWER_INPUT_QUESTION_UPDATED_ACTION"
 )
 
+// Describes all the available state actions for prompt reducer.
+const (
+	SET_UPDATED_PROMPT_ACTION         = "SET_UPDATED_PROMPT_ACTION"
+	SET_TEXT_PROMPT_ACTION            = "SET_TEXT_PROMPT_ACTION"
+	SET_SUBMIT_CALLBACK_PROMPT_ACTION = "SET_SUBMIT_CALLBACK_PROMPT_ACTION"
+	SET_CANCEL_CALLBACK_PROMPT_ACTION = "SET_CANCEL_CALLBACK_PROMPT_ACTION"
+)
+
 // NewSetActiveScreenAction creates new set active screen action.
 func NewSetActiveScreenAction(value string) godux.Action {
 	return godux.Action{
@@ -108,6 +116,38 @@ func NewSetAnswerInputSelectedChest(value string) godux.Action {
 func NewSetAnswerInputQuestionUpdated(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_ANSWER_INPUT_QUESTION_UPDATED_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetPromptUpdated creates new set prompt updated action.
+func NewSetPromptUpdated(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_UPDATED_PROMPT_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetPromptText creates new set prompt text action.
+func NewSetPromptText(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_TEXT_PROMPT_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetPromptSubmitCallback creates new set prompt submit callback action.
+func NewSetPromptSubmitCallback(value func()) godux.Action {
+	return godux.Action{
+		Type:  SET_SUBMIT_CALLBACK_PROMPT_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetPromptCancelCallback creates new set prompt cancel callback action.
+func NewSetPromptCancelCallback(value func()) godux.Action {
+	return godux.Action{
+		Type:  SET_CANCEL_CALLBACK_PROMPT_ACTION,
 		Value: value,
 	}
 }

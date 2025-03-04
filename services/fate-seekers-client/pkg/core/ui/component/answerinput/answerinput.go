@@ -49,11 +49,6 @@ func (aic *AnswerInputComponent) SetText(value string) {
 		value)
 }
 
-// GetText retrieves current text.
-func (aic *AnswerInputComponent) GetText() string {
-	return aic.text.Label
-}
-
 // SetSubmitCallback modified submit callback in the container.
 func (aic *AnswerInputComponent) SetSubmitCallback(callback func(valueRaw string)) {
 	aic.submitCallback = callback

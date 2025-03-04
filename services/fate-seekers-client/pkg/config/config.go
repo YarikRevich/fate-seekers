@@ -22,7 +22,7 @@ var (
 	configFile      = flag.String("config", "config.yaml", "a name of configuration file")
 	configDirectory = flag.String("configDirectory", getDefaultConfigDirectory(), "a directory where configuration file is located")
 
-	networkingHost string
+	settingsNetworkingHost string
 
 	settingsSoundMusic, settingsSoundFX int
 	settingsLanguage                    string
@@ -101,7 +101,7 @@ func Init() {
 
 	windowWidth := viper.GetInt("settings.window.width")
 	windowHeight := viper.GetInt("settings.window.height")
-	networkingHost = viper.GetString("settings.networking.host")
+	settingsNetworkingHost = viper.GetString("settings.networking.host")
 	settingsSoundMusic = viper.GetInt("settings.sound.music")
 	settingsSoundFX = viper.GetInt("settings.sound.fx")
 	settingsLanguage = viper.GetString("settings.language")
@@ -138,23 +138,27 @@ func Init() {
 	ebiten.SetVsyncEnabled(true)
 }
 
-func SetWindowSize(width, height int) {
+func SetSettingsWindowSize(width, height int) {
 	viper.Set("settings.window.width", width)
 	viper.Set("settings.window.height", height)
 
 	ebiten.SetWindowSize(width, height)
 }
 
-func SetNetworkingHost(value string) {
+func SetSettingsNetworkingHost(value string) {
 	viper.Set("settings.networking.host", value)
+
+	settingsNetworkingHost = value
 }
 
-func GetNetworkingHost() string {
-	return networkingHost
+func GetSettingsNetworkingHost() string {
+	return settingsNetworkingHost
 }
 
 func SetSettingsSoundMusic(value int) {
 	viper.Set("settings.sound.music", value)
+
+	settingsSoundMusic = value
 }
 
 func GetSettingsSoundMusic() int {
@@ -163,6 +167,8 @@ func GetSettingsSoundMusic() int {
 
 func SetSettingsSoundFX(value int) {
 	viper.Set("settings.sound.fx", value)
+
+	settingsSoundFX = value
 }
 
 func GetSettingsSoundFX() int {
@@ -171,6 +177,8 @@ func GetSettingsSoundFX() int {
 
 func SetSettingsLanguage(value string) {
 	viper.Set("settings.language", value)
+
+	settingsLanguage = value
 }
 
 func GetSettingsLanguage() string {

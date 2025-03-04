@@ -10,6 +10,8 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/settings"
+	settingsmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/settings"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
@@ -90,12 +92,43 @@ func newSettingsScreen() screen.Screen {
 
 	return &SettingsScreen{
 		ui: builder.Build(
-			settings.NewSettingsComponent(func() {
-				transparentTransitionEffect.Reset()
+			settings.NewSettingsComponent(
+				func(soundMusic, soundFX int, networkingHost, language string) {
+					settingsmanager.ProcessChanges(soundMusic, soundFX, networkingHost, language)
 
-				dispatcher.GetInstance().Dispatch(
-					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
-			})),
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+				},
+				func(soundMusic, soundFX int, networkingHost, language string) {
+					if settingsmanager.AnyProvidedChanges(soundMusic, soundFX, networkingHost, language) {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPromptText(
+								translation.GetInstance().GetTranslation("prompt.settings")))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPromptSubmitCallback(func() {
+								settingsmanager.ProcessChanges(soundMusic, soundFX, networkingHost, language)
+
+								transparentTransitionEffect.Reset()
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+							}))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPromptCancelCallback(func() {
+								transparentTransitionEffect.Reset()
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+							}))
+					} else {
+						transparentTransitionEffect.Reset()
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+					}
+				})),
 		transparentTransitionEffect: transparentTransitionEffect,
 		world: ebiten.NewImage(
 			config.GetWorldWidth(), config.GetWorldHeight()),

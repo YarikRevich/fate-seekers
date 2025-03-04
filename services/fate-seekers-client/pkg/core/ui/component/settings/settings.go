@@ -15,6 +15,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
+const (
+	// Describes max amount of symbols, which can be entered to input component.
+	maxInputSymbols = 30
+)
+
 // Describes all the colors used for list combo definition.
 var (
 	selectedListColor = color.NRGBA{183, 228, 202, 255}
@@ -23,7 +28,9 @@ var (
 )
 
 // NewSettingsComponent creates new main settings component.
-func NewSettingsComponent(closeCallback func()) *widget.Container {
+func NewSettingsComponent(
+	submitCallback func(soundMusic, soundFX int, networkingHost, language string),
+	closeCallback func(soundMusic, soundFX int, networkingHost, language string)) *widget.Container {
 	result := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
@@ -138,7 +145,30 @@ func NewSettingsComponent(closeCallback func()) *widget.Container {
 			generalFont,
 			color.White)))
 
-	components.AddChild(widget.NewSlider(
+	soundFXComponent := widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(100, 10)),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
+			widget.RowLayoutOpts.Spacing(30),
+		)),
+	)
+
+	soundFXLabel := widget.NewText(
+		widget.TextOpts.Text(
+			fmt.Sprintf("%d", config.GetSettingsSoundFX()),
+			generalFont,
+			color.White))
+
+	soundFXSlider := widget.NewSlider(
+		widget.SliderOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(
+				scaler.GetPercentageOf(config.GetWorldWidth(), 15),
+				10),
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Stretch:  true,
+				Position: widget.RowLayoutPositionStart,
+			}),
+		),
 		widget.SliderOpts.MinMax(1, 100),
 		widget.SliderOpts.Images(&widget.SliderTrackImage{
 			Idle:     image.NewNineSlice(loader.GetInstance().GetStatic(loader.SliderTrackIdle), [3]int{0, 19, 0}, [3]int{6, 0, 0}),
@@ -153,9 +183,87 @@ func NewSettingsComponent(closeCallback func()) *widget.Container {
 		widget.SliderOpts.FixedHandleSize(4),
 		widget.SliderOpts.TrackOffset(5),
 		widget.SliderOpts.ChangedHandler(func(args *widget.SliderChangedEventArgs) {
-			// text.Label = fmt.Sprintf("%d", args.Current)
+			soundFXLabel.Label = fmt.Sprintf("%d", args.Current)
 		}),
-	))
+	)
+
+	soundFXSlider.Current = config.GetSettingsSoundFX()
+
+	soundFXComponent.AddChild(soundFXSlider)
+
+	soundFXComponent.AddChild(soundFXLabel)
+
+	components.AddChild(soundFXComponent)
+
+	components.AddChild(widget.NewText(
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+			Stretch: true,
+		})),
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("settings.host"),
+			generalFont,
+			color.White)))
+
+	var networkingHostInput *widget.TextInput
+
+	networkingHostInput = widget.NewTextInput(
+		widget.TextInputOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(
+				scaler.GetPercentageOf(config.GetWorldWidth(), 20), 0),
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				VerticalPosition:   widget.AnchorLayoutPositionCenter,
+				HorizontalPosition: widget.AnchorLayoutPositionCenter,
+				StretchHorizontal:  false,
+				StretchVertical:    false,
+				Padding: widget.Insets{
+					Bottom: scaler.GetPercentageOf(config.GetWorldHeight(), 20),
+				},
+			})),
+		widget.TextInputOpts.Image(&widget.TextInputImage{
+			Idle:     image.NewNineSlice(loader.GetInstance().GetStatic(loader.TextInputIdle), [3]int{9, 14, 6}, [3]int{9, 14, 6}),
+			Disabled: image.NewNineSlice(loader.GetInstance().GetStatic(loader.TextInputIdle), [3]int{9, 14, 6}, [3]int{9, 14, 6}),
+		}),
+		widget.TextInputOpts.Color(&widget.TextInputColor{
+			Idle:          color.White,
+			Disabled:      color.White,
+			Caret:         color.White,
+			DisabledCaret: color.White,
+		}),
+		widget.TextInputOpts.Padding(widget.Insets{
+			Left:   13,
+			Right:  13,
+			Top:    13,
+			Bottom: 13,
+		}),
+		widget.TextInputOpts.Face(&text.GoTextFace{
+			Source: loader.GetInstance().GetFont(loader.KyivRegularFont),
+			Size:   20,
+		}),
+		widget.TextInputOpts.CaretOpts(
+			widget.CaretOpts.Size(generalFont, 4),
+		),
+		widget.TextInputOpts.AllowDuplicateSubmit(false),
+		widget.TextInputOpts.Validation(func(newInputTextRaw string) (bool, *string) {
+			newInputText := newInputTextRaw
+
+			parsedNewInputText := newInputText[len(networkingHostInput.GetText()):]
+
+			if len(parsedNewInputText) > 1 {
+				newInputText = networkingHostInput.GetText() + parsedNewInputText[:1]
+			}
+
+			if len(newInputText) >= maxInputSymbols {
+				replacement := networkingHostInput.GetText()
+
+				return false, &replacement
+			}
+
+			return false, &newInputText
+		}))
+
+	networkingHostInput.SetText(config.GetSettingsNetworkingHost())
+
+	components.AddChild(networkingHostInput)
 
 	components.AddChild(widget.NewText(
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
@@ -166,7 +274,7 @@ func NewSettingsComponent(closeCallback func()) *widget.Container {
 			generalFont,
 			color.White)))
 
-	components.AddChild(widget.NewListComboButton(
+	languageComboButton := widget.NewListComboButton(
 		widget.ListComboButtonOpts.SelectComboButtonOpts(
 			widget.SelectComboButtonOpts.ComboButtonOpts(
 				widget.ComboButtonOpts.ButtonOpts(
@@ -190,8 +298,8 @@ func NewSettingsComponent(closeCallback func()) *widget.Container {
 		}),
 		widget.ListComboButtonOpts.ListOpts(
 			widget.ListOpts.Entries([]interface{}{
-				translation.GetInstance().GetTranslation("settings.language.english"),
-				translation.GetInstance().GetTranslation("settings.language.ukrainian"),
+				config.SETTINGS_LANGUAGE_ENGLISH,
+				config.SETTINGS_LANGUAGE_UKRAINIAN,
 			}),
 			widget.ListOpts.ScrollContainerOpts(
 				widget.ScrollContainerOpts.Image(&widget.ScrollContainerImage{
@@ -235,14 +343,29 @@ func NewSettingsComponent(closeCallback func()) *widget.Container {
 		),
 		widget.ListComboButtonOpts.EntryLabelFunc(
 			func(e any) string {
-				return e.(string)
+				switch e.(string) {
+				case config.SETTINGS_LANGUAGE_ENGLISH:
+					return translation.GetInstance().GetTranslation("settings.language.english")
+				case config.SETTINGS_LANGUAGE_UKRAINIAN:
+					return translation.GetInstance().GetTranslation("settings.language.ukrainian")
+				default:
+					return e.(string)
+				}
 			},
 			func(e any) string {
-				return e.(string)
-			}),
-		widget.ListComboButtonOpts.EntrySelectedHandler(func(args *widget.ListComboButtonEntrySelectedEventArgs) {
-			fmt.Println(args.Entry)
-		})))
+				switch e.(string) {
+				case config.SETTINGS_LANGUAGE_ENGLISH:
+					return translation.GetInstance().GetTranslation("settings.language.english")
+				case config.SETTINGS_LANGUAGE_UKRAINIAN:
+					return translation.GetInstance().GetTranslation("settings.language.ukrainian")
+				default:
+					return e.(string)
+				}
+			}))
+
+	languageComboButton.SetSelectedEntry(config.GetSettingsLanguage())
+
+	components.AddChild(languageComboButton)
 
 	result.AddChild(components)
 
@@ -304,7 +427,11 @@ func NewSettingsComponent(closeCallback func()) *widget.Container {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-
+			submitCallback(
+				soundMusicSlider.Current,
+				soundFXSlider.Current,
+				networkingHostInput.GetText(),
+				languageComboButton.SelectedEntry().(string))
 		}),
 	))
 
@@ -331,7 +458,11 @@ func NewSettingsComponent(closeCallback func()) *widget.Container {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-
+			closeCallback(
+				soundMusicSlider.Current,
+				soundFXSlider.Current,
+				networkingHostInput.GetText(),
+				languageComboButton.SelectedEntry().(string))
 		}),
 	))
 

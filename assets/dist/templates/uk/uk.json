@@ -43,6 +43,10 @@
         "one": "Українська",
         "other": "Українська"
     },
+    "settings.host": {
+        "one": "Хост",
+        "other": "Хост"
+    },
     "settings.close": {
         "one": "Закрити",
         "other": "Закрити"
@@ -50,6 +54,18 @@
     "letterimage.close": {
         "one": "Закрити",
         "other": "Закрити"
+    },
+    "prompt.submit": {
+        "one": "Підтвердити",
+        "other": "Підтвердити"
+    },
+    "prompt.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
+    "prompt.settings": {
+        "one": "Є не затверджені зміни. Чи треба їх застосувати?",
+        "other": "Є не затверджені зміни. Чи треба їх застосувати?"
     },
     "answerinput.solvetext": {
         "one": "Надайте розвʼязок",
@@ -66,5 +82,9 @@
     "answerinput.close": {
         "one": "Закрити",
         "other": "Закрити"
+    },
+    "settingsmanager.success": {
+        "one": "Налаштування були змінені",
+        "other": "Налаштування були змінені"
     }
 }

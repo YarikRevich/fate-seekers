@@ -22,6 +22,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letterimage"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/notification"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/prompt"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/subtitles"
 	notificationmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	subtitlesmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/subtitles"
@@ -49,17 +50,29 @@ type Runtime struct {
 	// Represents attached letter user interface.
 	letterInterface *ebitenui.UI
 
+	// Represents attached prompt user interface.
+	promptInterface *ebitenui.UI
+
 	// Represents transparent transition effect used for notification component.
 	notificationTransparentTransitionEffect transition.TransitionEffect
-
-	// Represents transparent transition effect used for letter image component.
-	letterImageTransparentTransitionEffect transition.TransitionEffect
 
 	// Represents transparent transition effect used for letter component.
 	letterTransparentTransitionEffect transition.TransitionEffect
 
+	// Represents transparent transition effect used for letter image component.
+	letterImageTransparentTransitionEffect transition.TransitionEffect
+
+	// Represents transparent transition effect used for prompt component.
+	promptTransparentTransitionEffect transition.TransitionEffect
+
 	// Represents notification interface world view.
 	notificationInterfaceWorld *ebiten.Image
+
+	// Represents letter interface world view.
+	letterInterfaceWorld *ebiten.Image
+
+	// Represents letter interface mask.
+	letterInterfaceMask *ebiten.Image
 
 	// Represents letter image interface world view.
 	letterImageInterfaceWorld *ebiten.Image
@@ -67,11 +80,11 @@ type Runtime struct {
 	// Represents letter image interface mask.
 	letterImageInterfaceMask *ebiten.Image
 
-	// Represents letter interface world view.
-	letterInterfaceWorld *ebiten.Image
+	// Represents prompt interface world view.
+	promptInterfaceWorld *ebiten.Image
 
-	// Represents letter interface mask.
-	letterInterfaceMask *ebiten.Image
+	// Represents prompt interface mask.
+	promptInterfaceMask *ebiten.Image
 
 	// Represents currently active screen.
 	activeScreen screen.Screen
@@ -108,6 +121,16 @@ func (r *Runtime) Update() error {
 
 	if !notificationmanager.GetInstance().GetTextUpdated() {
 		r.notificationTransparentTransitionEffect.Reset()
+	}
+
+	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
+		if !r.promptTransparentTransitionEffect.Done() {
+			if !r.promptTransparentTransitionEffect.OnEnd() {
+				r.promptTransparentTransitionEffect.Update()
+			} else {
+				r.promptTransparentTransitionEffect.Clean()
+			}
+		}
 	}
 
 	if store.GetLetterName() != value.LETTER_NAME_EMPTY_VALUE {
@@ -173,6 +196,17 @@ func (r *Runtime) Update() error {
 		r.letterInterface.Update()
 	}
 
+	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
+		if store.GetPromptUpdated() == value.PROMPT_UPDATED_FALSE_VALUE {
+			prompt.GetInstance().SetText(store.GetPromptText())
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetPromptUpdated(value.PROMPT_UPDATED_TRUE_VALUE))
+		}
+
+		r.promptInterface.Update()
+	}
+
 	err := r.activeScreen.HandleInput()
 	if err != nil {
 		return err
@@ -199,6 +233,10 @@ func (r *Runtime) Update() error {
 func (r *Runtime) Draw(screen *ebiten.Image) {
 	if !notificationmanager.GetInstance().IsEmpty() {
 		r.notificationInterfaceWorld.Clear()
+	}
+
+	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
+		r.promptInterfaceWorld.Clear()
 	}
 
 	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {
@@ -269,6 +307,17 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 			ColorM: r.letterImageTransparentTransitionEffect.GetOptions().ColorM})
 	}
 
+	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
+		screen.DrawImage(r.promptInterfaceMask, &ebiten.DrawImageOptions{
+			ColorM: mask.GetMaskEffect(80).ColorM,
+		})
+
+		r.promptInterface.Draw(r.promptInterfaceWorld)
+
+		screen.DrawImage(r.promptInterfaceWorld, &ebiten.DrawImageOptions{
+			ColorM: r.promptTransparentTransitionEffect.GetOptions().ColorM})
+	}
+
 	if config.GetDebug() {
 		imgui.GetInstance().Draw(screen)
 	}
@@ -285,9 +334,11 @@ func (r *Runtime) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 // NewRuntime creates new instance of Runtime.
 func NewRuntime() *Runtime {
+	letterTransparentTransitionEffect := transparent.NewTransparentTransitionEffect()
+
 	letterImageTransparentTransitionEffect := transparent.NewTransparentTransitionEffect()
 
-	letterTransparentTransitionEffect := transparent.NewTransparentTransitionEffect()
+	promptTransparentTransitionEffect := transparent.NewTransparentTransitionEffect()
 
 	letterImageInterfaceMask := ebiten.NewImage(
 		config.GetWorldWidth(), config.GetWorldHeight())
@@ -298,6 +349,11 @@ func NewRuntime() *Runtime {
 		config.GetWorldWidth(), config.GetWorldHeight())
 
 	letterInterfaceMask.Fill(color.Black)
+
+	promptInterfaceMask := ebiten.NewImage(
+		config.GetWorldWidth(), config.GetWorldHeight())
+
+	promptInterfaceMask.Fill(color.Black)
 
 	letter.GetInstance().SetAttachmentCallback(func(value string) {
 		dispatcher.GetInstance().Dispatch(
@@ -310,6 +366,42 @@ func NewRuntime() *Runtime {
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetLetterNameAction(value.LETTER_NAME_EMPTY_VALUE))
+
+		letterTransparentTransitionEffect.Reset()
+	})
+
+	prompt.GetInstance().SetSubmitCallback(func() {
+		store.GetPromptSubmitCallback()()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetPromptSubmitCallback(value.SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetPromptCancelCallback(value.CANCEL_PROMPT_CALLBACK_EMPTY_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetPromptText(value.PROMPT_TEXT_EMPTY_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetPromptUpdated(value.PROMPT_UPDATED_FALSE_VALUE))
+	})
+
+	prompt.GetInstance().SetCloseCallback(func() {
+		store.GetPromptCancelCallback()()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetPromptSubmitCallback(value.SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetPromptCancelCallback(value.CANCEL_PROMPT_CALLBACK_EMPTY_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetPromptText(value.PROMPT_TEXT_EMPTY_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetPromptUpdated(value.PROMPT_UPDATED_FALSE_VALUE))
+
+		promptTransparentTransitionEffect.Reset()
 	})
 
 	return &Runtime{
@@ -327,17 +419,23 @@ func NewRuntime() *Runtime {
 		),
 		letterInterface: builder.Build(
 			letter.GetInstance().GetContainer()),
+		promptInterface: builder.Build(
+			prompt.GetInstance().GetContainer()),
 		notificationTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
-		letterImageTransparentTransitionEffect:  letterImageTransparentTransitionEffect,
 		letterTransparentTransitionEffect:       letterTransparentTransitionEffect,
+		letterImageTransparentTransitionEffect:  letterImageTransparentTransitionEffect,
+		promptTransparentTransitionEffect:       promptTransparentTransitionEffect,
 		notificationInterfaceWorld: ebiten.NewImage(
 			config.GetWorldWidth(), config.GetWorldHeight()),
-		letterImageInterfaceWorld: ebiten.NewImage(
-			config.GetWorldWidth(), config.GetWorldHeight()),
-		letterImageInterfaceMask: letterImageInterfaceMask,
 		letterInterfaceWorld: ebiten.NewImage(
 			config.GetWorldWidth(), config.GetWorldHeight()),
 		letterInterfaceMask: letterInterfaceMask,
+		letterImageInterfaceWorld: ebiten.NewImage(
+			config.GetWorldWidth(), config.GetWorldHeight()),
+		letterImageInterfaceMask: letterImageInterfaceMask,
+		promptInterfaceWorld: ebiten.NewImage(
+			config.GetWorldWidth(), config.GetWorldHeight()),
+		promptInterfaceMask: promptInterfaceMask,
 
 		// Guarantees non blocking rendering, if state management fails.
 		activeScreen:    entry.GetInstance(),

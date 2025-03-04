@@ -41,3 +41,16 @@ const (
 	ANSWER_INPUT_QUESTION_UPDATED_TRUE_VALUE  = "true"
 	ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE = "false"
 )
+
+// Describes available prompt reducer store values.
+const (
+	PROMPT_UPDATED_TRUE_VALUE  = "true"
+	PROMPT_UPDATED_FALSE_VALUE = "false"
+	PROMPT_TEXT_EMPTY_VALUE    = ""
+)
+
+// Describes available prompt reducer store values.
+var (
+	SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE = func() {}
+	CANCEL_PROMPT_CALLBACK_EMPTY_VALUE = func() {}
+)

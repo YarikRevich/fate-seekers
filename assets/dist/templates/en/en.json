@@ -43,6 +43,10 @@
         "one": "Ukrainian",
         "other": "Ukrainian"
     },
+    "settings.host": {
+        "one": "Host",
+        "other": "Host"
+    },
     "settings.close": {
         "one": "Close",
         "other": "Close"
@@ -50,6 +54,18 @@
     "letterimage.close": {
         "one": "Close",
         "other": "Close"
+    },
+    "prompt.submit": {
+        "one": "Submit",
+        "other": "Submit"
+    },
+    "prompt.close": {
+        "one": "Close",
+        "other": "Close"
+    },
+    "prompt.settings": {
+        "one": "There are unsaved changes. Would you like to apply them?",
+        "other": "There are unsaved changes. Would you like to apply them?"
     },
     "answerinput.solvetext": {
         "one": "Please solve",
@@ -66,5 +82,9 @@
     "answerinput.close": {
         "one": "Close",
         "other": "Close"
+    },
+    "settingsmanager.success": {
+        "one": "Settings have been changed",
+        "other": "Settings have been changed"
     }
 }

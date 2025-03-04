@@ -94,6 +94,9 @@ type SessionScreen struct {
 	// Represents attached user interface.
 	ui *ebitenui.UI
 
+	// Represents attached pressed user interface.
+	pressedInterface *ebitenui.UI
+
 	// Represents transparent transition effect.
 	transparentTransitionEffect transition.TransitionEffect
 
@@ -158,7 +161,9 @@ func (ss *SessionScreen) Clean() {
 // newSessionScreen initializes SessionScreen.
 func newSessionScreen() screen.Screen {
 	return &SessionScreen{
-		ui:                          builder.Build(),
+		ui: builder.Build(
+		// prompt.NewPromptComponent(),
+		),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		loadingStarsParticleEffect:  loadingstars.NewStarsParticleEffect(),

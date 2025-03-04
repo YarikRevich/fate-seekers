@@ -14,7 +14,7 @@ settings:
     host: "localhost:8080"
 
   # Represents language selected for the interface.
-  language: "en"
+  language: "uk"
 
 # Represents sector used for internal operation properties. 
 operation:

@@ -43,11 +43,6 @@ func (lc *LetterComponent) SetText(value string) {
 	lc.textArea.SetText(value)
 }
 
-// GetText retrieves current text.
-func (lc *LetterComponent) GetText() string {
-	return lc.textArea.GetText()
-}
-
 // SetAttachment modified attachment button redirect in the container.
 func (lc *LetterComponent) SetAttachment(value string) {
 	*lc.attachmentValue = value
@@ -58,7 +53,7 @@ func (lc *LetterComponent) GetAttachment(value string) {
 	*lc.attachmentValue = value
 }
 
-// SetAttachmentCallback modified close callback in the container.
+// SetAttachmentCallback modified attachment callback in the container.
 func (lc *LetterComponent) SetAttachmentCallback(callback func(value string)) {
 	lc.attachmentCallback = callback
 }

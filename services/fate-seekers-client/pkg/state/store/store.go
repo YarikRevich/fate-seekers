@@ -7,6 +7,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/networking"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/prompt"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/screen"
 	"github.com/luisvinicius167/godux"
 )
@@ -79,6 +80,34 @@ func GetAnswerInputQuestionUpdated() string {
 	return instance.GetState(answerinput.ANSWER_INPUT_QUESTION_UPDATED_STATE).(string)
 }
 
+// GetPromptUpdated retrieves prompt updated state value.
+func GetPromptUpdated() string {
+	instance := GetInstance()
+
+	return instance.GetState(prompt.UPDATED_PROMPT_STATE).(string)
+}
+
+// GetPromptText retrieves prompt text state value.
+func GetPromptText() string {
+	instance := GetInstance()
+
+	return instance.GetState(prompt.TEXT_PROMPT_STATE).(string)
+}
+
+// GetPromptSubmitCallback retrieves prompt submit callback state value.
+func GetPromptSubmitCallback() func() {
+	instance := GetInstance()
+
+	return instance.GetState(prompt.SUBMIT_CALLBACK_PROMPT_STATE).(func())
+}
+
+// GetPromptCancelCallback retrieves prompt cancel callback state value.
+func GetPromptCancelCallback() func() {
+	instance := GetInstance()
+
+	return instance.GetState(prompt.CANCEL_CALLBACK_PROMPT_STATE).(func())
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()
@@ -97,6 +126,9 @@ func newStore() *godux.Store {
 
 	answerInputReducer := answerinput.NewAnswerInputStateReducer(store)
 	answerInputReducer.Init()
+
+	promptReducer := prompt.NewPromptStateReducer(store)
+	promptReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
@@ -120,6 +152,11 @@ func newStore() *godux.Store {
 		}
 
 		result = answerInputReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = promptReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

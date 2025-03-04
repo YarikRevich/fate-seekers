@@ -22,10 +22,11 @@ type TranslationManager struct {
 }
 
 // GetTranslation returns translated text for the given key, using currently
-// selected language.
-func (tm *TranslationManager) GetTranslation(key string) string {
+// selected language. It also accepts optional template arguments.
+func (tm *TranslationManager) GetTranslation(key string, args ...map[string]interface{}) string {
 	return tm.localizer.MustLocalize(&i18n.LocalizeConfig{
-		MessageID: key,
+		MessageID:    key,
+		TemplateData: args,
 	})
 }
 
