@@ -51,6 +51,12 @@ const (
 
 // Describes available prompt reducer store values.
 var (
-	SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE = func() {}
-	CANCEL_PROMPT_CALLBACK_EMPTY_VALUE = func() {}
+	PROMPT_SUBMIT_CALLBACK_EMPTY_VALUE = func() {}
+	PROMPT_CANCEL_CALLBACK_EMPTY_VALUE = func() {}
+)
+
+// Describes available event reducer store values.
+var (
+	EVENT_NAME_EMPTY_VALUE      = ""
+	EVENT_NAME_TOXIC_RAIN_VALUE = "toxic_rain"
 )

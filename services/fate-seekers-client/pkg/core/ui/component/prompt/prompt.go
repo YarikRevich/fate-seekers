@@ -1,6 +1,7 @@
 package prompt
 
 import (
+	"image/color"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
@@ -60,8 +61,8 @@ func newPromptComponent() *PromptComponent {
 	container := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
-				config.GetWorldWidth(),
-				config.GetWorldHeight()),
+				scaler.GetPercentageOf(config.GetWorldWidth(), 40),
+				scaler.GetPercentageOf(config.GetWorldHeight(), 20)),
 			widget.WidgetOpts.TrackHover(false),
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionCenter,
@@ -69,7 +70,16 @@ func newPromptComponent() *PromptComponent {
 				StretchHorizontal:  false,
 				StretchVertical:    false,
 			})),
-		widget.ContainerOpts.Layout(widget.NewAnchorLayout()))
+		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Padding(widget.Insets{
+				Left:   30,
+				Right:  30,
+				Top:    30,
+				Bottom: 30,
+			}),
+		)))
 
 	textWidget := widget.NewText(
 		widget.TextOpts.WidgetOpts(
@@ -84,8 +94,8 @@ func newPromptComponent() *PromptComponent {
 			})),
 		widget.TextOpts.Text("", &text.GoTextFace{
 			Source: loader.GetInstance().GetFont(loader.KyivRegularFont),
-			Size:   40,
-		}, componentscommon.ButtonTextColor))
+			Size:   25,
+		}, color.White))
 
 	container.AddChild(textWidget)
 
@@ -97,53 +107,15 @@ func newPromptComponent() *PromptComponent {
 	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 15)
 	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 15)
 
-	// closeContainer := widget.NewContainer(
-	// 	widget.ContainerOpts.WidgetOpts(
-	// 		widget.WidgetOpts.MinSize(
-	// 			container.GetWidget().MinWidth,
-	// 			container.GetWidget().MinHeight),
-	// 		widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-	// 			VerticalPosition:   widget.AnchorLayoutPositionEnd,
-	// 			HorizontalPosition: widget.AnchorLayoutPositionEnd,
-	// 			StretchHorizontal:  false,
-	// 			StretchVertical:    false,
-	// 		}),
-	// 	),
-	// 	widget.ContainerOpts.Layout(widget.NewAnchorLayout()))
+	var buttonsLeftPadding int
 
-	// closeContainer.AddChild(widget.NewButton(
-	// 	widget.ButtonOpts.Image(&widget.ButtonImage{
-	// 		Idle:         buttonIdleIcon,
-	// 		Hover:        buttonHoverIcon,
-	// 		Pressed:      buttonIdleIcon,
-	// 		PressedHover: buttonIdleIcon,
-	// 		Disabled:     buttonIdleIcon,
-	// 	}),
-	// 	widget.ButtonOpts.Text(
-	// 		translation.GetInstance().GetTranslation("prompt.close"),
-	// 		generalFont,
-	// 		&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
-	// 	widget.ButtonOpts.WidgetOpts(
-	// 		widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-	// 			VerticalPosition:   widget.AnchorLayoutPositionEnd,
-	// 			HorizontalPosition: widget.AnchorLayoutPositionEnd,
-	// 			StretchHorizontal:  false,
-	// 			StretchVertical:    false,
-	// 			Padding: widget.Insets{
-	// 				Right:  60,
-	// 				Bottom: 25,
-	// 			},
-	// 		})),
-	// 	widget.ButtonOpts.TextPadding(widget.Insets{
-	// 		Left:   30,
-	// 		Right:  30,
-	// 		Top:    20,
-	// 		Bottom: 20,
-	// 	}),
-	// 	widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-	// 		result.closeCallback()
-	// 	}),
-	// ))
+	switch config.GetSettingsInitialLanguage() {
+	case config.SETTINGS_LANGUAGE_ENGLISH:
+		buttonsLeftPadding = scaler.GetPercentageOf(config.GetWorldWidth(), 34)
+
+	case config.SETTINGS_LANGUAGE_UKRAINIAN:
+		buttonsLeftPadding = scaler.GetPercentageOf(config.GetWorldWidth(), 20)
+	}
 
 	buttonsContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
@@ -161,8 +133,7 @@ func newPromptComponent() *PromptComponent {
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
 			widget.RowLayoutOpts.Spacing(13),
 			widget.RowLayoutOpts.Padding(widget.Insets{
-				Left:   100,
-				Bottom: scaler.GetPercentageOf(config.GetWorldHeight(), 9),
+				Left: buttonsLeftPadding,
 			}),
 		)))
 

@@ -9,9 +9,8 @@ const (
 
 // Describes all the available state actions for application reducer.
 const (
-	SET_TRANSLATION_UPDATED_APPLICATION_ACTION = "SET_TRANSLATION_UPDATED_APPLICATION_ACTION"
-	SET_EXIT_APPLICATION_ACTION                = "SET_EXIT_APPLICATION_ACTION"
-	SET_LOADING_APPLICATION_ACTION             = "SET_LOADING_APPLICATION_ACTION"
+	SET_EXIT_APPLICATION_ACTION    = "SET_EXIT_APPLICATION_ACTION"
+	SET_LOADING_APPLICATION_ACTION = "SET_LOADING_APPLICATION_ACTION"
 )
 
 // Describes all the available state actions for networking reducer.
@@ -40,18 +39,15 @@ const (
 	SET_CANCEL_CALLBACK_PROMPT_ACTION = "SET_CANCEL_CALLBACK_PROMPT_ACTION"
 )
 
+// Describes all the available state actions for event reducer.
+const (
+	SET_NAME_EVENT_ACTION = "SET_NAME_EVENT_ACTION"
+)
+
 // NewSetActiveScreenAction creates new set active screen action.
 func NewSetActiveScreenAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_ACTIVE_SCREEN_ACTION,
-		Value: value,
-	}
-}
-
-// NewSetTranslationUpdatedApplicationAction creates new set translation updated application action.
-func NewSetTranslationUpdatedApplicationAction(value string) godux.Action {
-	return godux.Action{
-		Type:  SET_TRANSLATION_UPDATED_APPLICATION_ACTION,
 		Value: value,
 	}
 }
@@ -148,6 +144,14 @@ func NewSetPromptSubmitCallback(value func()) godux.Action {
 func NewSetPromptCancelCallback(value func()) godux.Action {
 	return godux.Action{
 		Type:  SET_CANCEL_CALLBACK_PROMPT_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetEventName creates new set event name action.
+func NewSetEventName(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_NAME_EVENT_ACTION,
 		Value: value,
 	}
 }

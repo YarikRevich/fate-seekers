@@ -1,7 +1,6 @@
 package connector
 
 import (
-	"net"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking"
@@ -17,15 +16,12 @@ type NetworkingContentConnector struct {
 }
 
 func (ncc *NetworkingContentConnector) Reconnect() {
-	addr := &net.UDPAddr{
-		Port: 1234,
-		IP:   net.ParseIP("127.0.0.1"),
-	}
+	// addr := &net.UDPAddr{
+	// 	Port: 1234,
+	// 	IP:   net.ParseIP("127.0.0.1"),
+	// }
 
-	conn, err := net.ListenUDP("udp", addr)
-
-	// notification.GetInstance().Push("Тестове повідомлення!", time.Second*6)
-	// 	notification.GetInstance().Push("Друге повідомлення!", time.Second*6)
+	// conn, err := net.ListenUDP("udp", addr)
 }
 
 // newNetworkingContentConnector initializes NetworkingContentConnector.

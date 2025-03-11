@@ -94,10 +94,10 @@ func newSettingsScreen() screen.Screen {
 		ui: builder.Build(
 			settings.NewSettingsComponent(
 				func(soundMusic, soundFX int, networkingHost, language string) {
-					settingsmanager.ProcessChanges(soundMusic, soundFX, networkingHost, language)
-
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+					if settingsmanager.ProcessChanges(soundMusic, soundFX, networkingHost, language) {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+					}
 				},
 				func(soundMusic, soundFX int, networkingHost, language string) {
 					if settingsmanager.AnyProvidedChanges(soundMusic, soundFX, networkingHost, language) {

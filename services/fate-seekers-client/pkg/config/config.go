@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/host"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -14,8 +15,9 @@ import (
 )
 
 var (
-	ErrReadingFromConfig                 = errors.New("err happened during config file read operation")
-	ErrReadingSettingsLanguageFromConfig = errors.New("err happened during config file settings language read operation")
+	ErrReadingFromConfig                       = errors.New("err happened during config file read operation")
+	ErrReadingSettingsLanguageFromConfig       = errors.New("err happened during config file settings language read operation")
+	ErrReadingSettingsNetworkingHostFromConfig = errors.New("err happened during config file networking host read operation")
 )
 
 var (
@@ -26,6 +28,8 @@ var (
 
 	settingsSoundMusic, settingsSoundFX int
 	settingsLanguage                    string
+
+	settingsInitialLanguage string
 
 	debug bool
 
@@ -102,6 +106,14 @@ func Init() {
 	windowWidth := viper.GetInt("settings.window.width")
 	windowHeight := viper.GetInt("settings.window.height")
 	settingsNetworkingHost = viper.GetString("settings.networking.host")
+
+	if !host.Validate(settingsNetworkingHost) {
+		log.Fatalln(
+			ErrReadingSettingsNetworkingHostFromConfig.Error(),
+			zap.String("configFile", *configFile),
+			zap.String("settingsLanguage", settingsNetworkingHost))
+	}
+
 	settingsSoundMusic = viper.GetInt("settings.sound.music")
 	settingsSoundFX = viper.GetInt("settings.sound.fx")
 	settingsLanguage = viper.GetString("settings.language")
@@ -113,6 +125,8 @@ func Init() {
 			zap.String("configFile", *configFile),
 			zap.String("settingsLanguage", settingsLanguage))
 	}
+
+	settingsInitialLanguage = settingsLanguage
 
 	debug = viper.GetBool("operation.debug")
 	databaseName = viper.GetString("database.name")
@@ -142,11 +156,15 @@ func SetSettingsWindowSize(width, height int) {
 	viper.Set("settings.window.width", width)
 	viper.Set("settings.window.height", height)
 
+	viper.WriteConfigAs(viper.ConfigFileUsed())
+
 	ebiten.SetWindowSize(width, height)
 }
 
 func SetSettingsNetworkingHost(value string) {
 	viper.Set("settings.networking.host", value)
+
+	viper.WriteConfigAs(viper.ConfigFileUsed())
 
 	settingsNetworkingHost = value
 }
@@ -158,6 +176,8 @@ func GetSettingsNetworkingHost() string {
 func SetSettingsSoundMusic(value int) {
 	viper.Set("settings.sound.music", value)
 
+	viper.WriteConfigAs(viper.ConfigFileUsed())
+
 	settingsSoundMusic = value
 }
 
@@ -167,6 +187,8 @@ func GetSettingsSoundMusic() int {
 
 func SetSettingsSoundFX(value int) {
 	viper.Set("settings.sound.fx", value)
+
+	viper.WriteConfigAs(viper.ConfigFileUsed())
 
 	settingsSoundFX = value
 }
@@ -178,11 +200,17 @@ func GetSettingsSoundFX() int {
 func SetSettingsLanguage(value string) {
 	viper.Set("settings.language", value)
 
+	viper.WriteConfigAs(viper.ConfigFileUsed())
+
 	settingsLanguage = value
 }
 
 func GetSettingsLanguage() string {
 	return settingsLanguage
+}
+
+func GetSettingsInitialLanguage() string {
+	return settingsInitialLanguage
 }
 
 func GetDebug() bool {

@@ -371,7 +371,7 @@ func NewSettingsComponent(
 
 	var buttonsLeftPadding int
 
-	switch config.GetSettingsLanguage() {
+	switch config.GetSettingsInitialLanguage() {
 	case config.SETTINGS_LANGUAGE_ENGLISH:
 		buttonsLeftPadding = scaler.GetPercentageOf(config.GetWorldWidth(), 20)
 

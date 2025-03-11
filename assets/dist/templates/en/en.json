@@ -86,5 +86,13 @@
     "settingsmanager.success": {
         "one": "Settings have been changed",
         "other": "Settings have been changed"
+    },
+    "settingsmanager.restart-demand": {
+        "one": "Settings have been changed, but some of them need game restart",
+        "other": "Settings have been changed, but some of them need game restart"
+    },
+    "settingsmanager.invalid-networking-host": {
+        "one": "Provided host is invalid",
+        "other": "Provided host is invalid"
     }
 }

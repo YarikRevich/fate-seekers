@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	imgui "github.com/gabstv/cimgui-go"
 	ebimgui "github.com/gabstv/ebiten-imgui/v3"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -26,6 +27,24 @@ func (i *ImGUI) Update() {
 	ebimgui.BeginFrame()
 
 	imgui.Text(fmt.Sprintf("FPS: %f", ebiten.ActualFPS()))
+
+	if imgui.BeginMenu("States") {
+		imgui.Text(fmt.Sprintf("active_screen: %s", store.GetActiveScreen()))
+		imgui.Text(fmt.Sprintf("answer_input_question_updated: %s", store.GetAnswerInputQuestionUpdated()))
+		imgui.Text(fmt.Sprintf("entry_handshake_started_networking: %s", store.GetEntryHandshakeStartedNetworking()))
+		imgui.Text(fmt.Sprintf("event_name: %s", store.GetEventName()))
+		imgui.Text(fmt.Sprintf("letter_image: %s", store.GetLetterImage()))
+		imgui.Text(fmt.Sprintf("letter_name: %s", store.GetLetterName()))
+		imgui.Text(fmt.Sprintf("letter_updated: %s", store.GetLetterUpdated()))
+		imgui.Text(fmt.Sprintf("application_exit: %s", store.GetApplicationExit()))
+		imgui.Text(fmt.Sprintf("application_loading: %s", store.GetApplicationLoading()))
+		imgui.Text(fmt.Sprintf("prompt_text: %s", store.GetPromptText()))
+		imgui.Text(fmt.Sprintf("prompt_updated: %s", store.GetPromptUpdated()))
+		imgui.Text(fmt.Sprintf("prompt_submit_callback: %v", store.GetPromptSubmitCallback()))
+		imgui.Text(fmt.Sprintf("prompt_cancel_callback: %v", store.GetPromptCancelCallback()))
+
+		imgui.EndMenu()
+	}
 
 	ebimgui.EndFrame()
 }

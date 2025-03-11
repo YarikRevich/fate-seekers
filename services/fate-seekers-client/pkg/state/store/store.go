@@ -5,6 +5,7 @@ import (
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/event"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/networking"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/prompt"
@@ -24,22 +25,15 @@ func GetActiveScreen() string {
 	return instance.GetState(screen.ACTIVE_SCREEN_STATE).(string)
 }
 
-// GetTranslationUpdatedApplication retrieves translation updated application state value.
-func GetTranslationUpdatedApplication() string {
-	instance := GetInstance()
-
-	return instance.GetState(application.TRANSLATION_UPDATED_APPLICATION_STATE).(string)
-}
-
-// GetExitApplication retrieves exit application state value.
-func GetExitApplication() string {
+// GetApplicationExit retrieves exit application state value.
+func GetApplicationExit() string {
 	instance := GetInstance()
 
 	return instance.GetState(application.EXIT_APPLICATION_STATE).(string)
 }
 
-// GetLoadingApplication retrieves loading application state value.
-func GetLoadingApplication() string {
+// GetApplicationLoading retrieves loading application state value.
+func GetApplicationLoading() string {
 	instance := GetInstance()
 
 	return instance.GetState(application.LOADING_APPLICATION_STATE).(string)
@@ -108,6 +102,13 @@ func GetPromptCancelCallback() func() {
 	return instance.GetState(prompt.CANCEL_CALLBACK_PROMPT_STATE).(func())
 }
 
+// GetEventName retrieves event name state value.
+func GetEventName() string {
+	instance := GetInstance()
+
+	return instance.GetState(event.NAME_EVENT_STATE).(string)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()
@@ -129,6 +130,9 @@ func newStore() *godux.Store {
 
 	promptReducer := prompt.NewPromptStateReducer(store)
 	promptReducer.Init()
+
+	eventReducer := event.NewEventStateReducer(store)
+	eventReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
@@ -157,6 +161,11 @@ func newStore() *godux.Store {
 		}
 
 		result = promptReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = eventReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

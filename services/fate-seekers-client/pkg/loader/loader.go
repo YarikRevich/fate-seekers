@@ -61,7 +61,7 @@ const (
 
 // Describes all the available shaders to be loaded.
 const (
-	BasicTransitionShader = "basic-transition.kage"
+	ToxicRainShader = "toxic-rain.kage"
 )
 
 // Describes all the available fonts to be loaded.

@@ -2,6 +2,7 @@ package shared
 
 import (
 	"sync"
+	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/animation/combiner"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
@@ -19,6 +20,9 @@ type SharedStorage struct {
 
 	// Represents global blinking screen animation.
 	blinkingScreenAnimation *combiner.AnimationCombiner
+
+	// Represents global shader start time.
+	shaderStartTime time.Time
 }
 
 // GetBackgroundAnimation retrieves background animation.
@@ -29,6 +33,11 @@ func (ss *SharedStorage) GetBackgroundAnimation() *combiner.AnimationCombiner {
 // GetBlinkingScreenAnimation retrieves blinking screen animation.
 func (ss *SharedStorage) GetBlinkingScreenAnimation() *combiner.AnimationCombiner {
 	return ss.blinkingScreenAnimation
+}
+
+// GetShaderTime represents shader global time.
+func (ss *SharedStorage) GetShaderTime() float32 {
+	return float32(time.Since(ss.shaderStartTime).Seconds())
 }
 
 // newSharedStorage initializes shared storage.
@@ -48,5 +57,6 @@ func newSharedStorage() *SharedStorage {
 			loader.GetInstance().GetAnimation(loader.BlinkingScreen3Animation, false),
 			loader.GetInstance().GetAnimation(loader.BlinkingScreen4Animation, false),
 		),
+		shaderStartTime: time.Now(),
 	}
 }

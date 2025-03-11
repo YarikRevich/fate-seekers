@@ -29,7 +29,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui"
@@ -95,11 +94,11 @@ type Runtime struct {
 
 // Update performs logic update operations.
 func (r *Runtime) Update() error {
-	if store.GetExitApplication() == value.EXIT_APPLICATION_TRUE_VALUE {
+	if store.GetApplicationExit() == value.EXIT_APPLICATION_TRUE_VALUE {
 		return ebiten.Termination
 	}
 
-	if store.GetLoadingApplication() == value.LOADING_APPLICATION_TRUE_VALUE {
+	if store.GetApplicationLoading() == value.LOADING_APPLICATION_TRUE_VALUE {
 		r.loaderAnimation.Update()
 	}
 
@@ -249,8 +248,7 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 
 	r.activeScreen.HandleRender(screen)
 
-	if store.GetInstance().GetState(application.LOADING_APPLICATION_STATE) ==
-		value.LOADING_APPLICATION_TRUE_VALUE {
+	if store.GetApplicationLoading() == value.LOADING_APPLICATION_TRUE_VALUE {
 		var loadingAnimationGeometry ebiten.GeoM
 
 		loadingAnimationGeometry.Translate(
@@ -374,10 +372,10 @@ func NewRuntime() *Runtime {
 		store.GetPromptSubmitCallback()()
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptSubmitCallback(value.SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptSubmitCallback(value.PROMPT_SUBMIT_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptCancelCallback(value.CANCEL_PROMPT_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptCancelCallback(value.PROMPT_CANCEL_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetPromptText(value.PROMPT_TEXT_EMPTY_VALUE))
@@ -390,10 +388,10 @@ func NewRuntime() *Runtime {
 		store.GetPromptCancelCallback()()
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptSubmitCallback(value.SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptSubmitCallback(value.PROMPT_SUBMIT_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptCancelCallback(value.CANCEL_PROMPT_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptCancelCallback(value.PROMPT_CANCEL_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetPromptText(value.PROMPT_TEXT_EMPTY_VALUE))

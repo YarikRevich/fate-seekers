@@ -6,10 +6,13 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/particle"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/particle/loadingstars"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/shader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -103,8 +106,14 @@ type SessionScreen struct {
 	// Represents global world view.
 	world *ebiten.Image
 
-	// Represents
+	// Represents event world view.
+	eventWorld *ebiten.Image
+
+	// Represents session loading stars particle effect.
 	loadingStarsParticleEffect particle.ParticleEffect
+
+	// Represents session toxic rain event shader effect.
+	toxicRainEventShaderEffect shader.ShaderEffect
 }
 
 func (ss *SessionScreen) HandleInput() error {
@@ -144,6 +153,10 @@ func (ss *SessionScreen) HandleNetworking() {
 func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 	ss.world.Clear()
 
+	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
+		ss.eventWorld.Clear()
+	}
+
 	if !ss.loadingStarsParticleEffect.Done() {
 		ss.loadingStarsParticleEffect.Draw(screen)
 	}
@@ -152,6 +165,15 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 
 	screen.DrawImage(ss.world, &ebiten.DrawImageOptions{
 		ColorM: ss.transparentTransitionEffect.GetOptions().ColorM})
+
+	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
+		switch store.GetEventName() {
+		case value.EVENT_NAME_TOXIC_RAIN_VALUE:
+			ss.toxicRainEventShaderEffect.Draw(ss.eventWorld)
+		}
+
+		screen.DrawImage(ss.eventWorld, &ebiten.DrawImageOptions{})
+	}
 }
 
 func (ss *SessionScreen) Clean() {
@@ -161,34 +183,10 @@ func (ss *SessionScreen) Clean() {
 // newSessionScreen initializes SessionScreen.
 func newSessionScreen() screen.Screen {
 	return &SessionScreen{
-		ui: builder.Build(
-		// prompt.NewPromptComponent(),
-		),
+		ui:                          builder.Build(),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		eventWorld:                  ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		loadingStarsParticleEffect:  loadingstars.NewStarsParticleEffect(),
 	}
 }
-
-// var shaderOpts ebiten.DrawRectShaderOptions
-
-// var g ebiten.GeoM
-// // g.Translate(float64(config.GetWorldWidth())/1.5, 0)
-
-// shaderOpts.GeoM = g
-
-// shaderOpts.Uniforms = make(map[string]interface{})
-// shaderOpts.Uniforms["Center"] = []float32{
-// 	float32(screen.Bounds().Dx()) / 2,
-// 	float32(screen.Bounds().Dy()) / 2,
-// }
-
-// screen.DrawRectShader(
-// 	screen.Bounds().Dx()/2,
-// 	screen.Bounds().Dy(),
-// 	loader.GetInstance().GetShader(loader.BasicTransitionShader),
-// 	&shaderOpts)
-
-// draw shader
-// indices := []uint16{0, 1, 2, 2, 1, 3} // map vertices to triangles
-// screen.(self.vertices[:], indices, self.shader, &shaderOpts)

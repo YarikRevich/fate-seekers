@@ -1,18 +1,29 @@
 package settings
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/host"
 )
 
 // ProcessChanges performs provided changes application.
-func ProcessChanges(soundMusic, soundFX int, networkingHost, language string) {
+func ProcessChanges(soundMusic, soundFX int, networkingHost, language string) bool {
 	var applied, demandRestart bool
+
+	if config.GetSettingsNetworkingHost() != networkingHost {
+		if !host.Validate(networkingHost) {
+			notification.GetInstance().Push(
+				translation.GetInstance().GetTranslation("settingsmanager.invalid-networking-host"),
+				time.Second*3,
+				common.NotificationErrorTextColor)
+
+			return false
+		}
+	}
 
 	if config.GetSettingsSoundMusic() != soundMusic {
 		config.SetSettingsSoundMusic(soundMusic)
@@ -30,7 +41,6 @@ func ProcessChanges(soundMusic, soundFX int, networkingHost, language string) {
 		config.SetSettingsNetworkingHost(networkingHost)
 
 		applied = true
-		demandRestart = true
 	}
 
 	if config.GetSettingsLanguage() != language {
@@ -41,13 +51,20 @@ func ProcessChanges(soundMusic, soundFX int, networkingHost, language string) {
 	}
 
 	if applied {
-		fmt.Println(demandRestart)
-
-		notification.GetInstance().Push(
-			translation.GetInstance().GetTranslation("settingsmanager.success"),
-			time.Second*3,
-			common.NotificationInfoTextColor)
+		if demandRestart {
+			notification.GetInstance().Push(
+				translation.GetInstance().GetTranslation("settingsmanager.restart-demand"),
+				time.Second*3,
+				common.NotificationInfoTextColor)
+		} else {
+			notification.GetInstance().Push(
+				translation.GetInstance().GetTranslation("settingsmanager.success"),
+				time.Second*3,
+				common.NotificationInfoTextColor)
+		}
 	}
+
+	return true
 }
 
 // AnyProvidedChanges checks if there are any new provided changes.
