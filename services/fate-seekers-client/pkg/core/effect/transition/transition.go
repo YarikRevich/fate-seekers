@@ -1,7 +1,5 @@
 package transition
 
-import "github.com/hajimehoshi/ebiten/v2"
-
 // TransitionEffect represents transition effects interface.
 type TransitionEffect interface {
 	// Done checks if transition has been finished.
@@ -19,6 +17,6 @@ type TransitionEffect interface {
 	// Reset performes transition state reset.
 	Reset()
 
-	// GetOptions retrieves updated image draw options.
-	GetOptions() *ebiten.DrawImageOptions
+	// GetValue retrieves updated value.
+	GetValue() float64
 }

@@ -109,6 +109,20 @@ func GetEventName() string {
 	return instance.GetState(event.NAME_EVENT_STATE).(string)
 }
 
+// GetEventStarted retrieves event started state value.
+func GetEventStarted() string {
+	instance := GetInstance()
+
+	return instance.GetState(event.STARTED_EVENT_STATE).(string)
+}
+
+// GetEventEnding retrieves event ending state value.
+func GetEventEnding() string {
+	instance := GetInstance()
+
+	return instance.GetState(event.ENDING_EVENT_STATE).(string)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()

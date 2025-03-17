@@ -2,11 +2,13 @@ package settings
 
 import (
 	"sync"
+	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/settings"
@@ -78,7 +80,8 @@ func (ss *SettingsScreen) HandleRender(screen *ebiten.Image) {
 	ss.ui.Draw(ss.interfaceWorld)
 
 	ss.world.DrawImage(ss.interfaceWorld, &ebiten.DrawImageOptions{
-		ColorM: ss.transparentTransitionEffect.GetOptions().ColorM})
+		ColorM: options.GetTransparentDrawOptions(
+			ss.transparentTransitionEffect.GetValue()).ColorM})
 
 	screen.DrawImage(ss.world, &ebiten.DrawImageOptions{})
 }
@@ -88,7 +91,7 @@ func (ss *SettingsScreen) Clean() {
 }
 
 func newSettingsScreen() screen.Screen {
-	transparentTransitionEffect := transparent.NewTransparentTransitionEffect()
+	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
 	return &SettingsScreen{
 		ui: builder.Build(

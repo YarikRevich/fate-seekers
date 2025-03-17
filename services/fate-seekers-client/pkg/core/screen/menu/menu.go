@@ -2,11 +2,13 @@ package menu
 
 import (
 	"sync"
+	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
@@ -76,7 +78,8 @@ func (ms *MenuScreen) HandleRender(screen *ebiten.Image) {
 	ms.ui.Draw(ms.interfaceWorld)
 
 	ms.world.DrawImage(ms.interfaceWorld, &ebiten.DrawImageOptions{
-		ColorM: ms.transparentTransitionEffect.GetOptions().ColorM,
+		ColorM: options.GetTransparentDrawOptions(
+			ms.transparentTransitionEffect.GetValue()).ColorM,
 	})
 
 	screen.DrawImage(ms.world, &ebiten.DrawImageOptions{})
@@ -87,7 +90,7 @@ func (ms *MenuScreen) Clean() {
 }
 
 func newMenuScreen() screen.Screen {
-	transparentTransitionEffect := transparent.NewTransparentTransitionEffect()
+	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
 	return &MenuScreen{
 		ui: builder.Build(

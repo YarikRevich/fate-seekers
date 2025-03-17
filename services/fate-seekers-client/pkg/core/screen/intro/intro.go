@@ -2,11 +2,13 @@ package intro
 
 import (
 	"sync"
+	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
@@ -75,7 +77,8 @@ func (is *IntroScreen) HandleRender(screen *ebiten.Image) {
 	is.ui.Draw(is.world)
 
 	screen.DrawImage(is.world, &ebiten.DrawImageOptions{
-		ColorM: is.transparentTransitionEffect.GetOptions().ColorM})
+		ColorM: options.GetTransparentDrawOptions(
+			is.transparentTransitionEffect.GetValue()).ColorM})
 }
 
 func (es *IntroScreen) Clean() {
@@ -85,7 +88,7 @@ func (es *IntroScreen) Clean() {
 func newIntroScreen() screen.Screen {
 	return &IntroScreen{
 		ui:                          builder.Build(),
-		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
+		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10),
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 	}
 }

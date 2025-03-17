@@ -59,4 +59,8 @@ var (
 var (
 	EVENT_NAME_EMPTY_VALUE      = ""
 	EVENT_NAME_TOXIC_RAIN_VALUE = "toxic_rain"
+	EVENT_STARTED_FALSE_VALUE   = "false"
+	EVENT_STARTED_TRUE_VALUE    = "true"
+	EVENT_ENDING_FALSE_VALUE    = "false"
+	EVENT_ENDING_TRUE_VALUE     = "true"
 )

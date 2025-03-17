@@ -2,15 +2,19 @@ package session
 
 import (
 	"sync"
+	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/particle"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/particle/loadingstars"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/shader"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/shader/event/toxicrain"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui"
@@ -103,6 +107,12 @@ type SessionScreen struct {
 	// Represents transparent transition effect.
 	transparentTransitionEffect transition.TransitionEffect
 
+	// Represents transparent transition effect used for toxic rain event component, when event is started.
+	toxicRainEventStartTransparentTransitionEffect transition.TransitionEffect
+
+	// Represents transparent transition effect used for toxic rain event component, when event is ended.
+	toxicRainEventEndTransparentTransitionEffect transition.TransitionEffect
+
 	// Represents global world view.
 	world *ebiten.Image
 
@@ -113,10 +123,16 @@ type SessionScreen struct {
 	loadingStarsParticleEffect particle.ParticleEffect
 
 	// Represents session toxic rain event shader effect.
-	toxicRainEventShaderEffect shader.ShaderEffect
+	toxicRainEventShaderEffect *toxicrain.ToxicRainEventEffect
 }
 
 func (ss *SessionScreen) HandleInput() error {
+	if ebiten.IsKeyPressed(ebiten.KeyD) {
+		dispatcher.GetInstance().Dispatch(action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
+	} else {
+		dispatcher.GetInstance().Dispatch(action.NewSetEventEnding(value.EVENT_ENDING_TRUE_VALUE))
+	}
+
 	if !ss.transparentTransitionEffect.Done() {
 		if !ss.transparentTransitionEffect.OnEnd() {
 			ss.transparentTransitionEffect.Update()
@@ -132,6 +148,49 @@ func (ss *SessionScreen) HandleInput() error {
 			ss.loadingStarsParticleEffect.Update()
 		} else {
 			ss.loadingStarsParticleEffect.Clean()
+		}
+	}
+
+	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
+		if store.GetEventStarted() == value.EVENT_STARTED_FALSE_VALUE {
+			switch store.GetEventName() {
+			case value.EVENT_NAME_TOXIC_RAIN_VALUE:
+				if !ss.toxicRainEventStartTransparentTransitionEffect.Done() {
+					if !ss.toxicRainEventStartTransparentTransitionEffect.OnEnd() {
+						ss.toxicRainEventStartTransparentTransitionEffect.Update()
+					} else {
+						ss.toxicRainEventStartTransparentTransitionEffect.Clean()
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetEventStarted(value.EVENT_STARTED_TRUE_VALUE))
+					}
+				}
+			}
+		} else {
+			if store.GetEventEnding() == value.EVENT_ENDING_TRUE_VALUE {
+				switch store.GetEventName() {
+				case value.EVENT_NAME_TOXIC_RAIN_VALUE:
+					if !ss.toxicRainEventEndTransparentTransitionEffect.Done() {
+						if !ss.toxicRainEventEndTransparentTransitionEffect.OnEnd() {
+							ss.toxicRainEventEndTransparentTransitionEffect.Update()
+						} else {
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetEventName(value.EVENT_NAME_EMPTY_VALUE))
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetEventStarted(value.EVENT_STARTED_FALSE_VALUE))
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetEventEnding(value.EVENT_ENDING_FALSE_VALUE))
+
+							ss.toxicRainEventStartTransparentTransitionEffect.Reset()
+
+							ss.toxicRainEventEndTransparentTransitionEffect.Reset()
+						}
+					}
+				}
+			}
+
 		}
 	}
 
@@ -164,12 +223,19 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 	ss.ui.Draw(ss.world)
 
 	screen.DrawImage(ss.world, &ebiten.DrawImageOptions{
-		ColorM: ss.transparentTransitionEffect.GetOptions().ColorM})
+		ColorM: options.GetTransparentDrawOptions(
+			ss.transparentTransitionEffect.GetValue()).ColorM})
 
 	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
 		switch store.GetEventName() {
 		case value.EVENT_NAME_TOXIC_RAIN_VALUE:
-			ss.toxicRainEventShaderEffect.Draw(ss.eventWorld)
+			if store.GetEventStarted() == value.EVENT_STARTED_TRUE_VALUE && store.GetEventEnding() == value.EVENT_ENDING_TRUE_VALUE {
+				ss.toxicRainEventShaderEffect.Draw(
+					ss.eventWorld, ss.toxicRainEventEndTransparentTransitionEffect.GetValue())
+			} else {
+				ss.toxicRainEventShaderEffect.Draw(
+					ss.eventWorld, ss.toxicRainEventStartTransparentTransitionEffect.GetValue())
+			}
 		}
 
 		screen.DrawImage(ss.eventWorld, &ebiten.DrawImageOptions{})
@@ -183,10 +249,16 @@ func (ss *SessionScreen) Clean() {
 // newSessionScreen initializes SessionScreen.
 func newSessionScreen() screen.Screen {
 	return &SessionScreen{
-		ui:                          builder.Build(),
-		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
-		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
-		eventWorld:                  ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
-		loadingStarsParticleEffect:  loadingstars.NewStarsParticleEffect(),
+		ui: builder.Build(),
+		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(
+			true, 255, 0, 5, time.Microsecond*10),
+		toxicRainEventStartTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(
+			true, 10, 0, 0.5, time.Millisecond*200),
+		toxicRainEventEndTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(
+			false, 0, 10, 0.5, time.Millisecond*200),
+		world:                      ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		eventWorld:                 ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		loadingStarsParticleEffect: loadingstars.NewStarsParticleEffect(),
+		toxicRainEventShaderEffect: toxicrain.NewToxicRainEventEffect(),
 	}
 }

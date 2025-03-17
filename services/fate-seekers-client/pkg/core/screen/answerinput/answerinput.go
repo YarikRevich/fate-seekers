@@ -9,6 +9,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/answerinput"
@@ -100,7 +101,8 @@ func (ais *AnswerInputScreen) HandleRender(screen *ebiten.Image) {
 	screen.DrawImage(ais.world, &ebiten.DrawImageOptions{})
 
 	screen.DrawImage(ais.interfaceWorld, &ebiten.DrawImageOptions{
-		ColorM: ais.transparentTransitionEffect.GetOptions().ColorM})
+		ColorM: options.GetTransparentDrawOptions(
+			ais.transparentTransitionEffect.GetValue()).ColorM})
 }
 
 func (ais *AnswerInputScreen) Clean() {
@@ -109,7 +111,7 @@ func (ais *AnswerInputScreen) Clean() {
 
 // newAnswerInputScreen initializes AnswerInputScreen.
 func newAnswerInputScreen() screen.Screen {
-	transparentTransitionEffect := transparent.NewTransparentTransitionEffect()
+	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
 	answerinput.GetInstance().SetSubmitCallback(func(valueRaw string) {
 		result, err := strconv.Atoi(valueRaw)

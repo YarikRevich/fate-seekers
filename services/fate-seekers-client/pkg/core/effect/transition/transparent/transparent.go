@@ -1,20 +1,33 @@
 package transparent
 
 import (
-	"image/color"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // TransparentTransitionEffect represents transparent transition effect.
 type TransparentTransitionEffect struct {
+	// Represents transition direction progression.
+	forward bool
+
+	// Represents max state of the transition.
+	maxCounter float64
+
+	// Represents min state of the transition.
+	minCounter float64
+
+	// Represents provided shift for the transition.
+	shift float64
+
+	// Represents transition timer period.
+	period time.Duration
+
 	// Represents transition time ticker used for transition progression.
 	ticker *time.Ticker
 
 	// Represents current state of the transition.
-	counter uint8
+	counter float64
 
 	// Represents if transition effect has been finished.
 	finished bool
@@ -25,7 +38,7 @@ func (tte *TransparentTransitionEffect) Done() bool {
 }
 
 func (tte *TransparentTransitionEffect) OnEnd() bool {
-	return tte.counter == 255
+	return tte.counter == tte.maxCounter
 }
 
 func (tte *TransparentTransitionEffect) Update() {
@@ -33,9 +46,14 @@ func (tte *TransparentTransitionEffect) Update() {
 	case <-tte.ticker.C:
 		tte.ticker.Stop()
 
-		tte.counter += 5
+		if tte.forward {
+			tte.counter += tte.shift
+		} else {
+			tte.counter -= tte.shift
+		}
 
-		tte.ticker.Reset(time.Microsecond * 10)
+		tte.ticker.Reset(tte.period)
+	default:
 	}
 }
 
@@ -48,24 +66,29 @@ func (tte *TransparentTransitionEffect) Clean() {
 }
 
 func (tte *TransparentTransitionEffect) Reset() {
-	tte.ticker = time.NewTicker(time.Microsecond * 10)
+	tte.ticker = time.NewTicker(tte.period)
 
-	tte.counter = 0
+	tte.counter = tte.minCounter
 
 	tte.finished = false
 }
 
-func (tte *TransparentTransitionEffect) GetOptions() *ebiten.DrawImageOptions {
-	var c ebiten.ColorM
-
-	c.ScaleWithColor(color.RGBA{R: 255, G: 255, B: 255, A: tte.counter})
-
-	return &ebiten.DrawImageOptions{ColorM: c}
+func (tte *TransparentTransitionEffect) GetValue() float64 {
+	return float64(tte.counter)
 }
 
 // NewTransparentTransitionEffect initializes TransparentTransitionEffect.
-func NewTransparentTransitionEffect() transition.TransitionEffect {
-	return &TransparentTransitionEffect{
-		ticker: time.NewTicker(time.Microsecond * 10),
+func NewTransparentTransitionEffect(
+	forward bool, maxCounter, minCounter, shift float64, period time.Duration) transition.TransitionEffect {
+	result := &TransparentTransitionEffect{
+		forward:    forward,
+		maxCounter: maxCounter,
+		minCounter: minCounter,
+		counter:    minCounter,
+		shift:      shift,
+		period:     period,
+		ticker:     time.NewTicker(period),
 	}
+
+	return result
 }

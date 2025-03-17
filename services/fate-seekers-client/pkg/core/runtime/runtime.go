@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"image/color"
+	"time"
 
 	"github.com/Frabjous-Studios/asebiten"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
@@ -17,6 +18,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/travel"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/imgui"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/mask"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letter"
@@ -267,7 +269,8 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 	}
 
 	screen.DrawImage(r.notificationInterfaceWorld, &ebiten.DrawImageOptions{
-		ColorM: r.notificationTransparentTransitionEffect.GetOptions().ColorM})
+		ColorM: options.GetTransparentDrawOptions(
+			r.notificationTransparentTransitionEffect.GetValue()).ColorM})
 
 	if store.GetLetterName() != value.LETTER_NAME_EMPTY_VALUE {
 		if store.GetLetterImage() == value.LETTER_IMAGE_EMPTY_VALUE {
@@ -279,7 +282,8 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 		r.letterInterface.Draw(r.letterInterfaceWorld)
 
 		screen.DrawImage(r.letterInterfaceWorld, &ebiten.DrawImageOptions{
-			ColorM: r.letterTransparentTransitionEffect.GetOptions().ColorM})
+			ColorM: options.GetTransparentDrawOptions(
+				r.letterTransparentTransitionEffect.GetValue()).ColorM})
 	}
 
 	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {
@@ -302,7 +306,8 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 		r.letterImageInterface.Draw(r.letterImageInterfaceWorld)
 
 		screen.DrawImage(r.letterImageInterfaceWorld, &ebiten.DrawImageOptions{
-			ColorM: r.letterImageTransparentTransitionEffect.GetOptions().ColorM})
+			ColorM: options.GetTransparentDrawOptions(
+				r.letterImageTransparentTransitionEffect.GetValue()).ColorM})
 	}
 
 	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
@@ -313,7 +318,8 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 		r.promptInterface.Draw(r.promptInterfaceWorld)
 
 		screen.DrawImage(r.promptInterfaceWorld, &ebiten.DrawImageOptions{
-			ColorM: r.promptTransparentTransitionEffect.GetOptions().ColorM})
+			ColorM: options.GetTransparentDrawOptions(
+				r.promptTransparentTransitionEffect.GetValue()).ColorM})
 	}
 
 	if config.GetDebug() {
@@ -332,11 +338,11 @@ func (r *Runtime) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 // NewRuntime creates new instance of Runtime.
 func NewRuntime() *Runtime {
-	letterTransparentTransitionEffect := transparent.NewTransparentTransitionEffect()
+	letterTransparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
-	letterImageTransparentTransitionEffect := transparent.NewTransparentTransitionEffect()
+	letterImageTransparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
-	promptTransparentTransitionEffect := transparent.NewTransparentTransitionEffect()
+	promptTransparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
 	letterImageInterfaceMask := ebiten.NewImage(
 		config.GetWorldWidth(), config.GetWorldHeight())
@@ -419,7 +425,7 @@ func NewRuntime() *Runtime {
 			letter.GetInstance().GetContainer()),
 		promptInterface: builder.Build(
 			prompt.GetInstance().GetContainer()),
-		notificationTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(),
+		notificationTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10),
 		letterTransparentTransitionEffect:       letterTransparentTransitionEffect,
 		letterImageTransparentTransitionEffect:  letterImageTransparentTransitionEffect,
 		promptTransparentTransitionEffect:       promptTransparentTransitionEffect,

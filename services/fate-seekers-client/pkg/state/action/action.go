@@ -41,7 +41,9 @@ const (
 
 // Describes all the available state actions for event reducer.
 const (
-	SET_NAME_EVENT_ACTION = "SET_NAME_EVENT_ACTION"
+	SET_NAME_EVENT_ACTION    = "SET_NAME_EVENT_ACTION"
+	SET_STARTED_EVENT_ACTION = "SET_STARTED_EVENT_ACTION"
+	SET_ENDING_EVENT_ACTION  = "SET_ENDING_EVENT_ACTION"
 )
 
 // NewSetActiveScreenAction creates new set active screen action.
@@ -152,6 +154,22 @@ func NewSetPromptCancelCallback(value func()) godux.Action {
 func NewSetEventName(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_NAME_EVENT_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetEventStarted creates new set event started action.
+func NewSetEventStarted(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_STARTED_EVENT_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetEventEnding creates new set event ending action.
+func NewSetEventEnding(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_ENDING_EVENT_ACTION,
 		Value: value,
 	}
 }

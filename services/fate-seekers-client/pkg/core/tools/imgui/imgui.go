@@ -40,6 +40,9 @@ func (i *ImGUI) Update() {
 		imgui.Text(fmt.Sprintf("application_loading: %s", store.GetApplicationLoading()))
 		imgui.Text(fmt.Sprintf("prompt_text: %s", store.GetPromptText()))
 		imgui.Text(fmt.Sprintf("prompt_updated: %s", store.GetPromptUpdated()))
+		imgui.Text(fmt.Sprintf("event_name: %s", store.GetEventName()))
+		imgui.Text(fmt.Sprintf("event_started: %s", store.GetEventStarted()))
+		imgui.Text(fmt.Sprintf("event_ending: %s", store.GetEventEnding()))
 		imgui.Text(fmt.Sprintf("prompt_submit_callback: %v", store.GetPromptSubmitCallback()))
 		imgui.Text(fmt.Sprintf("prompt_cancel_callback: %v", store.GetPromptCancelCallback()))
 
