@@ -3,6 +3,8 @@ package dto
 import (
 	"image/color"
 	"time"
+
+	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 // Describes all the available letter attachment types.
@@ -77,6 +79,36 @@ type NotificationUnit struct {
 
 	// Represents duration of which notification unit will be shown.
 	Duration time.Duration
+}
+
+// AmbientSoundUnit represents ambient sound unit.
+type AmbientSoundUnit struct {
+	// Represents ambient sound name.
+	Name string
+
+	// Represents ambient sound duration.
+	Duration time.Duration
+
+	// Represents ambient sound player.
+	Player *audio.Player
+}
+
+// MusicSoundUnit represents music sound unit.
+type MusicSoundUnit struct {
+	// Represents music sound duration.
+	Duration time.Duration
+
+	// Represents music sound player.
+	Player *audio.Player
+}
+
+// FXSoundUnit represents fx sound unit.
+type FXSoundUnit struct {
+	// Represents fx sound duration.
+	Duration time.Duration
+
+	// Represents fx sound player.
+	Player *audio.Player
 }
 
 // ReducerResult represents result of reducer execution operation.

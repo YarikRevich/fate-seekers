@@ -8,7 +8,7 @@ require (
 	github.com/Frabjous-Studios/asebiten v0.6.4
 	github.com/ebitenui/ebitenui v0.6.0
 	github.com/gabstv/ebiten-imgui/v3 v3.0.1-0.20231031222543-cc91fc85039e
-	github.com/hajimehoshi/ebiten/v2 v2.8.5
+	github.com/hajimehoshi/ebiten/v2 v2.8.6
 	github.com/luisvinicius167/godux v0.0.0-20201004124859-70bcb3c51748
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.23.1
@@ -24,12 +24,16 @@ require (
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
 	github.com/ebitengine/gomobile v0.0.0-20240911145611-4856209ac325 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
+	github.com/ebitengine/oto/v3 v3.3.2 // indirect
 	github.com/ebitengine/purego v0.8.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabstv/cimgui-go v0.0.0-20231031174417-f6c70bbc133c // indirect
 	github.com/go-text/typesetting v0.2.0 // indirect
+	github.com/hajimehoshi/go-mp3 v0.3.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jezek/xgb v1.1.1 // indirect
+	github.com/jfreymuth/oggvorbis v1.0.5 // indirect
+	github.com/jfreymuth/vorbis v1.0.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect

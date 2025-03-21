@@ -11,8 +11,10 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -127,6 +129,12 @@ type SessionScreen struct {
 }
 
 func (ss *SessionScreen) HandleInput() error {
+	if ebiten.IsKeyPressed(ebiten.KeyA) {
+		if !sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
+			sound.GetInstance().GetSoundMusicManager().StartMusic(loader.EnergetykMusicSound)
+		}
+	}
+
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
 		dispatcher.GetInstance().Dispatch(action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
 	} else {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	imgui "github.com/gabstv/cimgui-go"
 	ebimgui "github.com/gabstv/ebiten-imgui/v3"
@@ -45,6 +46,15 @@ func (i *ImGUI) Update() {
 		imgui.Text(fmt.Sprintf("event_ending: %s", store.GetEventEnding()))
 		imgui.Text(fmt.Sprintf("prompt_submit_callback: %v", store.GetPromptSubmitCallback()))
 		imgui.Text(fmt.Sprintf("prompt_cancel_callback: %v", store.GetPromptCancelCallback()))
+
+		imgui.EndMenu()
+	}
+
+	if imgui.BeginMenu("Settings") {
+		imgui.Text(fmt.Sprintf("sound_music: %d", config.GetSettingsSoundMusic()))
+		imgui.Text(fmt.Sprintf("sound_fx: %d", config.GetSettingsSoundFX()))
+		imgui.Text(fmt.Sprintf("language: %s", config.GetSettingsLanguage()))
+		imgui.Text(fmt.Sprintf("host: %s", config.GetSettingsNetworkingHost()))
 
 		imgui.EndMenu()
 	}

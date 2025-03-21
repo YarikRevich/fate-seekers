@@ -9,6 +9,7 @@ const (
 	ACTIVE_SCREEN_SESSION_VALUE      = "session"
 	ACTIVE_SCREEN_TRAVEL_VALUE       = "travel"
 	ACTIVE_SCREEN_ANSWER_INPUT_VALUE = "answer_input"
+	ACTIVE_SCREEN_RESUME_VALUE       = "resume"
 )
 
 // Describes all the available application reducer store values.

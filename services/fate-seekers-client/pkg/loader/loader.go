@@ -12,6 +12,8 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
+	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -99,6 +101,13 @@ const (
 	BlinkingScreen4Animation = "blinking-screen/4/blinking-screen-4.json"
 )
 
+// Describes all the available sounds to be loaded.
+const (
+	EnergetykMusicSound = "music/energetyk/energetyk.mp3"
+
+	TestFXSound = "fx/test/test.ogg"
+)
+
 // Decsribes all the embedded files base pathes.
 const (
 	ShadersPath    = "dist/shaders"
@@ -107,6 +116,7 @@ const (
 	LettersPath    = "dist/letters"
 	TemplatesPath  = "dist/templates"
 	AnimationsPath = "dist/animations"
+	SoundsPath     = "dist/sounds"
 )
 
 // Loader represents low level asset loading manager, which operates in a lazy mode manner.
@@ -128,6 +138,9 @@ type Loader struct {
 
 	// Represents cache map of embedded animations.
 	animations sync.Map
+
+	// Represents cache map of embedded sounds.
+	sounds sync.Map
 }
 
 // GetObject retrieves object content with the given name.
@@ -247,6 +260,54 @@ func (l *Loader) GetTemplate(name string) []byte {
 	logging.GetInstance().Debug("Template has been loaded", zap.String("name", name))
 
 	return file
+}
+
+// GetSoundMusic retrieves music sound content with the given name.
+func (l *Loader) GetSoundMusic(name string) *mp3.Stream {
+	result, ok := l.sounds.Load(name)
+	if ok {
+		return result.(*mp3.Stream)
+	}
+
+	file, err := fs.ReadFile(assets.Assets, filepath.Join(SoundsPath, name))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	stream, err := mp3.DecodeF32(bytes.NewReader(file))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	l.sounds.Store(name, stream)
+
+	logging.GetInstance().Debug("Music sound has been loaded", zap.String("name", name))
+
+	return stream
+}
+
+// GetSoundFX retrieves FX sound content with the given name.
+func (l *Loader) GetSoundFX(name string) *vorbis.Stream {
+	result, ok := l.sounds.Load(name)
+	if ok {
+		return result.(*vorbis.Stream)
+	}
+
+	file, err := fs.ReadFile(assets.Assets, filepath.Join(SoundsPath, name))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	stream, err := vorbis.DecodeF32(bytes.NewReader(file))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	l.sounds.Store(name, stream)
+
+	logging.GetInstance().Debug("FX sound has been loaded", zap.String("name", name))
+
+	return stream
 }
 
 // GetAnimation retrieves animation content with the given name. Allows to load new instance everytime.

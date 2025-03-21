@@ -9,6 +9,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
@@ -16,6 +17,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	answerinputmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -139,6 +141,8 @@ func newAnswerInputScreen() screen.Screen {
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))
+
+		sound.GetInstance().GetSoundFxManager().PushImmediately(loader.TestFXSound)
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetAnswerInputQuestionUpdated(value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE))
