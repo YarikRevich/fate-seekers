@@ -129,16 +129,25 @@ type SessionScreen struct {
 }
 
 func (ss *SessionScreen) HandleInput() error {
-	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		if !sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
-			sound.GetInstance().GetSoundMusicManager().StartMusic(loader.EnergetykMusicSound)
+	// Debug statements
+	{
+		if ebiten.IsKeyPressed(ebiten.KeyA) {
+			if !sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
+				sound.GetInstance().GetSoundMusicManager().StartMusic(loader.EnergetykMusicSound)
+			}
 		}
-	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		dispatcher.GetInstance().Dispatch(action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
-	} else {
-		dispatcher.GetInstance().Dispatch(action.NewSetEventEnding(value.EVENT_ENDING_TRUE_VALUE))
+		if ebiten.IsKeyPressed(ebiten.KeyY) {
+			if sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
+				sound.GetInstance().GetSoundMusicManager().StopMusic()
+			}
+		}
+
+		if ebiten.IsKeyPressed(ebiten.KeyD) {
+			dispatcher.GetInstance().Dispatch(action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
+		} else {
+			dispatcher.GetInstance().Dispatch(action.NewSetEventEnding(value.EVENT_ENDING_TRUE_VALUE))
+		}
 	}
 
 	if !ss.transparentTransitionEffect.Done() {

@@ -11,7 +11,7 @@ import (
 // Describes all the available event reducer store states.
 const (
 	MUSIC_UPDATED_SOUND_STATE = "music_updated"
-	VFX_UPDATED_SOUND_STATE   = "vfx_updated"
+	FX_UPDATED_SOUND_STATE    = "fx_updated"
 )
 
 // EventStateReducer represents reducer used for event state management.
@@ -21,25 +21,20 @@ type EventStateReducer struct {
 }
 
 func (esr *EventStateReducer) Init() {
-	esr.store.SetState(NAME_EVENT_STATE, value.EVENT_NAME_EMPTY_VALUE)
-	esr.store.SetState(STARTED_EVENT_STATE, value.EVENT_STARTED_FALSE_VALUE)
-	esr.store.SetState(ENDING_EVENT_STATE, value.EVENT_ENDING_FALSE_VALUE)
+	esr.store.SetState(FX_UPDATED_SOUND_STATE, value.SOUND_FX_UPDATED_TRUE_VALUE)
+	esr.store.SetState(MUSIC_UPDATED_SOUND_STATE, value.SOUND_MUSIC_UPDATED_TRUE_VALUE)
 }
 
 func (esr *EventStateReducer) GetProcessor() func(value godux.Action) interface{} {
 	return func(value godux.Action) interface{} {
 		switch value.Type {
-		case action.SET_NAME_EVENT_ACTION:
+		case action.SET_FX_UPDATED_SOUND_ACTION:
 			return dto.ComposeReducerResult(
-				dto.ReducerResultUnit{Key: NAME_EVENT_STATE, Value: value.Value})
+				dto.ReducerResultUnit{Key: FX_UPDATED_SOUND_STATE, Value: value.Value})
 
-		case action.SET_STARTED_EVENT_ACTION:
+		case action.SET_MUSIC_UPDATED_SOUND_ACTION:
 			return dto.ComposeReducerResult(
-				dto.ReducerResultUnit{Key: STARTED_EVENT_STATE, Value: value.Value})
-
-		case action.SET_ENDING_EVENT_ACTION:
-			return dto.ComposeReducerResult(
-				dto.ReducerResultUnit{Key: ENDING_EVENT_STATE, Value: value.Value})
+				dto.ReducerResultUnit{Key: MUSIC_UPDATED_SOUND_STATE, Value: value.Value})
 
 		default:
 			return nil

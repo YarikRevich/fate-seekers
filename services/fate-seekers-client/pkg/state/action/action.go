@@ -46,6 +46,12 @@ const (
 	SET_ENDING_EVENT_ACTION  = "SET_ENDING_EVENT_ACTION"
 )
 
+// Describes all the available state actions for sound reducer.
+const (
+	SET_FX_UPDATED_SOUND_ACTION    = "SET_FX_UPDATED_SOUND_ACTION"
+	SET_MUSIC_UPDATED_SOUND_ACTION = "SET_MUSIC_UPDATED_SOUND_ACTION"
+)
+
 // NewSetActiveScreenAction creates new set active screen action.
 func NewSetActiveScreenAction(value string) godux.Action {
 	return godux.Action{
@@ -170,6 +176,14 @@ func NewSetEventStarted(value string) godux.Action {
 func NewSetEventEnding(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_ENDING_EVENT_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetSoundFxUpdated creates new set sound fx updated action.
+func NewSetSoundFXUpdated(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_FX_UPDATED_SOUND_ACTION,
 		Value: value,
 	}
 }

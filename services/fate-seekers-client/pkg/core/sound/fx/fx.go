@@ -2,6 +2,7 @@ package fx
 
 import (
 	"math"
+	"sync/atomic"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
@@ -9,6 +10,10 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/pkg/errors"
 )
@@ -17,16 +22,19 @@ const (
 	// Represents processing ticker duration.
 	processingTickerPeriod = time.Millisecond * 400
 
-	// Represents temp ticker period.
+	// Represents start temp ticker period.
 	startTempTickerPeriod = time.Millisecond * 10
 
-	// Represents temp ticker period.
+	// Represents end temp ticker period.
 	endTempTickerPeriod = time.Millisecond * 120
 
-	// Represents fadeout duration.
-	fadeoutDuration = time.Millisecond * 1300
+	// Represents volume ticker period.
+	volumeTickerPeriod = time.Second
 
-	// Represents volume decremention step.
+	// Represents fadeout duration.
+	fadeoutDuration = time.Millisecond * 200
+
+	// Represents volume shift step.
 	volumeShift = 30.0
 )
 
@@ -43,15 +51,20 @@ type SoundFXManager struct {
 
 	// Represents currently playing player.
 	currentPlayer *dto.FXSoundUnit
+
+	// Represents state if volume is configured.
+	volumeConfigured atomic.Bool
 }
 
-// Init starts sound FX manager processing worker.
+// Init starts sound FX manager processing worker. Additionally starts volume update worker.
 func (svm *SoundFXManager) Init() {
 	go func() {
 		for {
 			select {
 			case <-svm.ticker.C:
 				if len(svm.processingBatch) > 0 && svm.currentPlayer == nil {
+					svm.volumeConfigured.Store(false)
+
 					svm.currentPlayer = svm.processingBatch[0]
 
 					svm.processingBatch = append(svm.processingBatch[:0], svm.processingBatch[1:]...)
@@ -65,10 +78,12 @@ func (svm *SoundFXManager) Init() {
 
 						var volume float64
 
-						for svm.currentPlayer != nil && svm.currentPlayer.Player.Volume()*float64(config.GetSettingsSoundFX()) < float64(config.GetSettingsSoundFX()) {
+						for svm.currentPlayer != nil && svm.currentPlayer.Player.Volume() < float64(config.GetSettingsSoundFX())/100 {
 							select {
 							case <-interruptionChan:
 								tempTicker.Stop()
+
+								svm.volumeConfigured.Store(true)
 
 								return
 							case <-tempTicker.C:
@@ -80,11 +95,13 @@ func (svm *SoundFXManager) Init() {
 									volume = float64(config.GetSettingsSoundFX())
 								}
 
-								svm.currentPlayer.Player.SetVolume(volume / float64(config.GetSettingsSoundFX()))
+								svm.currentPlayer.Player.SetVolume(volume / 100)
 
 								tempTicker.Reset(startTempTickerPeriod)
 							}
 						}
+
+						svm.volumeConfigured.Store(true)
 					}()
 
 					svm.currentPlayer.Player.Play()
@@ -98,6 +115,8 @@ func (svm *SoundFXManager) Init() {
 								tempTicker.Stop()
 
 								if svm.currentPlayer.Duration-svm.currentPlayer.Player.Position() <= fadeoutDuration {
+									svm.volumeConfigured.Store(false)
+
 									select {
 									case interruptionChan <- 1:
 									default:
@@ -112,13 +131,15 @@ func (svm *SoundFXManager) Init() {
 
 										newVolume := float64(svm.currentPlayer.Player.Volume()) * fadeFactor
 
-										if svm.currentPlayer.Player.Volume() > 0 {
-											svm.currentPlayer.Player.SetVolume(newVolume)
+										if svm.currentPlayer.Player.Volume() >= 0 {
+											svm.currentPlayer.Player.SetVolume(newVolume * float64(config.GetSettingsSoundFX()) / 100)
 										}
 									}
 								}
 
 								if !svm.currentPlayer.Player.IsPlaying() {
+									svm.volumeConfigured.Store(true)
+
 									if err := svm.currentPlayer.Player.Close(); err != nil {
 										logging.GetInstance().Fatal(errors.Wrap(err, common.ErrSoundPlayerAccess.Error()).Error())
 									}
@@ -134,6 +155,24 @@ func (svm *SoundFXManager) Init() {
 							}
 						}
 					}()
+				}
+			}
+		}
+	}()
+
+	go func() {
+		volumeTicker := time.NewTicker(volumeTickerPeriod)
+
+		for {
+			select {
+			case <-volumeTicker.C:
+				if store.GetSoundFXUpdated() == value.SOUND_FX_UPDATED_FALSE_VALUE {
+					if svm.volumeConfigured.Load() {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetSoundFXUpdated(value.SOUND_FX_UPDATED_TRUE_VALUE))
+
+						svm.currentPlayer.Player.SetVolume(float64(config.GetSettingsSoundFX()) / 100)
+					}
 				}
 			}
 		}

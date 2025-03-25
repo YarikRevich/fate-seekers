@@ -35,9 +35,7 @@ func (sm *SoundManager) GetSoundMusicManager() *music.SoundMusicManager {
 
 // initSoundAmbientBatch performs ambient sound players batch initialization.
 func (sm *SoundManager) initSoundAmbientBatch() {
-	// sm.soundMusicManager.PushAmbient(loader.TestVFXSound)
-	// sm.soundMusicManager.PushAmbient(loader.TestVFXSound)
-	// sm.soundMusicManager.PushAmbient(loader.TestVFXSound)
+	// sm.soundMusicManager.PushAmbient(loader.AmbientMusicSound)
 }
 
 // newSoundManager initializes SoundManager.

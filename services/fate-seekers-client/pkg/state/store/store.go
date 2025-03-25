@@ -10,6 +10,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/networking"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/prompt"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/sound"
 	"github.com/luisvinicius167/godux"
 )
 
@@ -123,6 +124,20 @@ func GetEventEnding() string {
 	return instance.GetState(event.ENDING_EVENT_STATE).(string)
 }
 
+// GetSoundFXUpdated retrieves sound fx updated state value.
+func GetSoundFXUpdated() string {
+	instance := GetInstance()
+
+	return instance.GetState(sound.FX_UPDATED_SOUND_STATE).(string)
+}
+
+// GetSoundMusicUpdated retrieves sound music updated state value.
+func GetSoundMusicUpdated() string {
+	instance := GetInstance()
+
+	return instance.GetState(sound.MUSIC_UPDATED_SOUND_STATE).(string)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()
@@ -147,6 +162,9 @@ func newStore() *godux.Store {
 
 	eventReducer := event.NewEventStateReducer(store)
 	eventReducer.Init()
+
+	soundReducer := sound.NewEventStateReducer(store)
+	soundReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
@@ -180,6 +198,11 @@ func newStore() *godux.Store {
 		}
 
 		result = eventReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = soundReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

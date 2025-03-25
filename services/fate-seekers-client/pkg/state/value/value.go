@@ -65,3 +65,11 @@ var (
 	EVENT_ENDING_FALSE_VALUE    = "false"
 	EVENT_ENDING_TRUE_VALUE     = "true"
 )
+
+// Describes available sound reducer store values.
+var (
+	SOUND_FX_UPDATED_FALSE_VALUE    = "false"
+	SOUND_FX_UPDATED_TRUE_VALUE     = "true"
+	SOUND_MUSIC_UPDATED_FALSE_VALUE = "false"
+	SOUND_MUSIC_UPDATED_TRUE_VALUE  = "true"
+)

@@ -1,9 +1,11 @@
 package music
 
 import (
-	"fmt"
+	"math"
+	"sync/atomic"
 	"time"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
@@ -21,17 +23,17 @@ const (
 	// Represents processing ticker duration.
 	processingTickerPeriod = time.Millisecond * 400
 
-	// Represents temp ticker period.
-	tempTickerPeriod = time.Millisecond * 200
+	// Represents start temp ticker period.
+	startTempTickerPeriod = time.Millisecond * 10
+
+	// Represents end temp ticker period.
+	endTempTickerPeriod = time.Millisecond * 120
 
 	// Represents fadeout duration.
-	fadeoutDuration = time.Second * 5
+	fadeoutDuration = time.Second * 3
 
-	// Represents volume decremention step.
-	volumeDecrementor = 20.0
-
-	// Represents ambient suspension volume level, given in percentage.
-	ambientSuspensionVolume = 30
+	// Represents volume shift step.
+	volumeShift = 20.0
 )
 
 // SoundMusicManager represents sound music manager, used for both ambient and music streams management.
@@ -45,20 +47,17 @@ type SoundMusicManager struct {
 	// Represents processing ambient player infinite batch.
 	ambientProcessingBatch []*dto.AmbientSoundUnit
 
-	// Represents check if initial current ambient player volume setup was performed.
-	currentAmbientPlayerVolumeConfigured bool
+	// Represents lock used to interrupt ambient processing operation.
+	ambientProcessingInterruption atomic.Bool
 
 	// Represents currently playing ambient player.
 	currentAmbientPlayer *dto.AmbientSoundUnit
-
-	// Represents check if initial current music player volume setup was performed.
-	currentMusicPlayerVolumeConfigured bool
 
 	// Represents currently playing music player.
 	currentMusicPlayer *dto.MusicSoundUnit
 }
 
-// Init starts sound music manager processing worker.
+// Init starts sound music manager processing worker. Additionally starts volume update worker.
 func (smm *SoundMusicManager) Init() {
 	go func() {
 		for {
@@ -84,53 +83,85 @@ func (smm *SoundMusicManager) Init() {
 
 					smm.currentAmbientPlayer.Player.SetVolume(0)
 
+					interruptionChan := make(chan int, 1)
+
 					go func() {
-						tempTicker := time.NewTicker(tempTickerPeriod)
+						tempTicker := time.NewTicker(startTempTickerPeriod)
 
 						var volume float64
 
-						for smm.currentAmbientPlayer.Player.Volume()*100 != 100 {
-							select {
-							case <-tempTicker.C:
-								volume += volumeDecrementor
+						for smm.currentAmbientPlayer != nil && smm.currentAmbientPlayer.Player.Volume()*float64(config.GetSettingsSoundMusic()) < float64(config.GetSettingsSoundMusic()) {
+							if smm.ambientProcessingInterruption.Load() {
+								tempTicker.Stop()
 
-								smm.currentAmbientPlayer.Player.SetVolume(volume / 100)
+								return
+							}
+
+							select {
+							case <-interruptionChan:
+								tempTicker.Stop()
+
+								return
+							case <-tempTicker.C:
+								tempTicker.Stop()
+
+								if volume+volumeShift <= float64(config.GetSettingsSoundMusic()) {
+									volume += volumeShift
+								} else {
+									volume = float64(config.GetSettingsSoundMusic())
+								}
+
+								smm.currentAmbientPlayer.Player.SetVolume(volume / float64(config.GetSettingsSoundMusic()))
+
+								tempTicker.Reset(startTempTickerPeriod)
 							}
 						}
-
-						smm.currentAmbientPlayerVolumeConfigured = true
-
-						tempTicker.Stop()
 					}()
 
 					smm.currentAmbientPlayer.Player.Play()
 
 					go func() {
-						tempTicker := time.NewTicker(tempTickerPeriod)
+						tempTicker := time.NewTicker(endTempTickerPeriod)
 
 						for {
 							select {
 							case <-tempTicker.C:
-								if smm.currentAmbientPlayer.Duration-smm.currentAmbientPlayer.Player.Position() <= fadeoutDuration && smm.currentAmbientPlayerVolumeConfigured {
-									if smm.currentAmbientPlayer.Player.Volume() != 0 {
-										smm.currentAmbientPlayer.Player.SetVolume(
-											((smm.currentAmbientPlayer.Player.Volume() * 100) - volumeDecrementor) / 100)
+								tempTicker.Stop()
+
+								if smm.currentAmbientPlayer.Duration-smm.currentAmbientPlayer.Player.Position() <= fadeoutDuration && !smm.ambientProcessingInterruption.Load() {
+									select {
+									case interruptionChan <- 1:
+									default:
 									}
 
-									if !smm.currentAmbientPlayer.Player.IsPlaying() {
-										if err := smm.currentAmbientPlayer.Player.Close(); err != nil {
-											logging.GetInstance().Fatal(errors.Wrap(err, common.ErrSoundPlayerAccess.Error()).Error())
+									if smm.currentAmbientPlayer.Player.Volume() != 0 {
+										remainingTime := smm.currentAmbientPlayer.Duration - smm.currentAmbientPlayer.Player.Position()
+
+										normalized := float64(remainingTime.Milliseconds()) / float64(fadeoutDuration.Milliseconds())
+
+										fadeFactor := math.Max(0, math.Sin((math.Pi/2)*normalized))
+
+										newVolume := float64(smm.currentAmbientPlayer.Player.Volume()) * fadeFactor
+
+										if smm.currentAmbientPlayer.Player.Volume() >= 0 {
+											smm.currentAmbientPlayer.Player.SetVolume(newVolume)
 										}
+									}
+								}
+
+								if !smm.currentAmbientPlayer.Player.IsPlaying() {
+									if err := smm.currentAmbientPlayer.Player.Close(); err != nil {
+										logging.GetInstance().Fatal(errors.Wrap(err, common.ErrSoundPlayerAccess.Error()).Error())
 									}
 
 									tempTicker.Stop()
 
 									smm.currentAmbientPlayer = nil
 
-									smm.currentAmbientPlayerVolumeConfigured = false
-
-									break
+									return
 								}
+
+								tempTicker.Reset(endTempTickerPeriod)
 							}
 						}
 					}()
@@ -180,77 +211,113 @@ func (smm *SoundMusicManager) StartMusic(name string) {
 	}
 
 	go func() {
-		tempTicker := time.NewTicker(tempTickerPeriod)
+		tempTicker := time.NewTicker(startTempTickerPeriod)
+
+		if smm.currentAmbientPlayer != nil {
+			smm.ambientProcessingInterruption.Store(true)
+
+			for smm.currentAmbientPlayer.Player.Volume() != 0 {
+				select {
+				case <-tempTicker.C:
+					remainingTime := smm.currentAmbientPlayer.Duration - smm.currentAmbientPlayer.Player.Position()
+
+					normalized := float64(remainingTime.Milliseconds()) / float64(fadeoutDuration.Milliseconds())
+
+					fadeFactor := math.Max(0, math.Sin((math.Pi/2)*normalized))
+
+					newVolume := float64(smm.currentAmbientPlayer.Player.Volume()) * fadeFactor
+
+					if smm.currentAmbientPlayer.Player.Volume() >= 0 {
+						smm.currentAmbientPlayer.Player.SetVolume(newVolume)
+					}
+				}
+			}
+
+			smm.ambientProcessingInterruption.Store(false)
+		}
 
 		smm.currentMusicPlayer.Player.SetVolume(0)
 
-		var volume float64
-
-		if smm.currentAmbientPlayer != nil {
-			volume := smm.currentAmbientPlayer.Player.Volume() * 100
-
-			for smm.currentAmbientPlayer.Player.Volume()*100 != ambientSuspensionVolume {
-				select {
-				case <-tempTicker.C:
-					if volume-volumeDecrementor >= ambientSuspensionVolume {
-						volume -= volumeDecrementor
-					} else {
-						volume = ambientSuspensionVolume
-					}
-
-					smm.currentAmbientPlayer.Player.SetVolume(volume / 100)
-				}
-			}
-		}
-
 		smm.currentMusicPlayer.Player.Play()
 
-		volume = smm.currentMusicPlayer.Player.Volume() * 100
+		interruptionChan := make(chan int, 1)
 
-		for smm.currentMusicPlayer.Player.Volume()*100 != 100 {
+		var volume float64
+
+		for smm.currentMusicPlayer != nil && smm.currentMusicPlayer.Player.Volume()*float64(config.GetSettingsSoundMusic()) < float64(config.GetSettingsSoundMusic()) {
 			select {
+			case <-interruptionChan:
+				tempTicker.Stop()
+
+				return
 			case <-tempTicker.C:
-				volume += volumeDecrementor
+				tempTicker.Stop()
 
-				fmt.Println(volume)
+				if volume+volumeShift <= float64(config.GetSettingsSoundMusic()) {
+					volume += volumeShift
+				} else {
+					volume = float64(config.GetSettingsSoundMusic())
+				}
 
-				smm.currentMusicPlayer.Player.SetVolume(volume / 100)
+				smm.currentMusicPlayer.Player.SetVolume(volume / float64(config.GetSettingsSoundMusic()))
+
+				tempTicker.Reset(startTempTickerPeriod)
 			}
 		}
 
-		smm.currentMusicPlayerVolumeConfigured = true
-
 		tempTicker.Stop()
-	}()
 
-	go func() {
-		tempTicker := time.NewTicker(tempTickerPeriod)
+		go func() {
+			tempTicker := time.NewTicker(endTempTickerPeriod)
 
-		for {
-			select {
-			case <-tempTicker.C:
-				if smm.currentMusicPlayer.Duration-smm.currentMusicPlayer.Player.Position() <= fadeoutDuration && smm.currentMusicPlayerVolumeConfigured {
-					if smm.currentMusicPlayer.Player.Volume() != 0 {
-						smm.currentMusicPlayer.Player.SetVolume(
-							((smm.currentMusicPlayer.Player.Volume() * 100) - volumeDecrementor) / 100)
-					}
+			for {
+				select {
+				case <-tempTicker.C:
+					tempTicker.Stop()
 
-					if !smm.currentMusicPlayer.Player.IsPlaying() {
-						if err := smm.currentMusicPlayer.Player.Close(); err != nil {
-							logging.GetInstance().Fatal(errors.Wrap(err, common.ErrSoundPlayerAccess.Error()).Error())
+					if smm.currentAmbientPlayer.Duration-smm.currentAmbientPlayer.Player.Position() <= fadeoutDuration {
+						if !smm.ambientProcessingInterruption.Load() {
+							smm.ambientProcessingInterruption.Store(true)
+						}
+
+						select {
+						case interruptionChan <- 1:
+						default:
+						}
+
+						if smm.currentAmbientPlayer.Player.Volume() != 0 {
+							remainingTime := smm.currentAmbientPlayer.Duration - smm.currentAmbientPlayer.Player.Position()
+
+							normalized := float64(remainingTime.Milliseconds()) / float64(fadeoutDuration.Milliseconds())
+
+							fadeFactor := math.Max(0, math.Sin((math.Pi/2)*normalized))
+
+							newVolume := float64(smm.currentAmbientPlayer.Player.Volume()) * fadeFactor
+
+							if smm.currentAmbientPlayer.Player.Volume() >= 0 {
+								smm.currentAmbientPlayer.Player.SetVolume(newVolume)
+							}
 						}
 					}
 
-					tempTicker.Stop()
+					if !smm.currentAmbientPlayer.Player.IsPlaying() {
+						if err := smm.currentAmbientPlayer.Player.Close(); err != nil {
+							logging.GetInstance().Fatal(errors.Wrap(err, common.ErrSoundPlayerAccess.Error()).Error())
+						}
 
-					smm.currentMusicPlayer = nil
+						tempTicker.Stop()
 
-					smm.currentMusicPlayerVolumeConfigured = false
+						smm.ambientProcessingInterruption.Store(false)
 
-					break
+						smm.currentAmbientPlayer = nil
+
+						return
+					}
+
+					tempTicker.Reset(endTempTickerPeriod)
 				}
 			}
-		}
+		}()
 	}()
 }
 
@@ -261,31 +328,41 @@ func (smm *SoundMusicManager) StopMusic() {
 	}
 
 	go func() {
-		tempTicker := time.NewTicker(tempTickerPeriod)
-
-		volume := smm.currentMusicPlayer.Player.Volume() * 100
+		tempTicker := time.NewTicker(endTempTickerPeriod)
 
 		for smm.currentMusicPlayer.Player.Volume() != 0 {
 			select {
 			case <-tempTicker.C:
-				volume -= volumeDecrementor
+				remainingTime := smm.currentMusicPlayer.Duration - smm.currentMusicPlayer.Player.Position()
 
-				smm.currentAmbientPlayer.Player.SetVolume(volume / 100)
+				normalized := float64(remainingTime.Milliseconds()) / float64(fadeoutDuration.Milliseconds())
+
+				fadeFactor := math.Max(0, math.Sin((math.Pi/2)*normalized))
+
+				newVolume := float64(smm.currentMusicPlayer.Player.Volume()) * fadeFactor
+
+				if smm.currentMusicPlayer.Player.Volume() >= 0 {
+					smm.currentMusicPlayer.Player.SetVolume(newVolume)
+				}
 			}
 		}
 
 		smm.currentMusicPlayer.Player.Pause()
 
-		volume = smm.currentAmbientPlayer.Player.Volume() * 100
+		volume := smm.currentAmbientPlayer.Player.Volume() * float64(config.GetSettingsSoundMusic())
 
-		for smm.currentAmbientPlayer.Player.Volume()*100 != 100 {
+		smm.ambientProcessingInterruption.Store(true)
+
+		for smm.currentAmbientPlayer.Player.Volume()*float64(config.GetSettingsSoundMusic()) != float64(config.GetSettingsSoundMusic()) {
 			select {
 			case <-tempTicker.C:
-				volume += volumeDecrementor
+				volume += volumeShift
 
-				smm.currentAmbientPlayer.Player.SetVolume(volume / 100)
+				smm.currentAmbientPlayer.Player.SetVolume(volume / float64(config.GetSettingsSoundMusic()))
 			}
 		}
+
+		smm.ambientProcessingInterruption.Store(false)
 
 		if err := smm.currentMusicPlayer.Player.Close(); err != nil {
 			logging.GetInstance().Fatal(errors.Wrap(err, common.ErrSoundPlayerAccess.Error()).Error())
