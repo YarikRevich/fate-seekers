@@ -266,7 +266,12 @@ func (l *Loader) GetTemplate(name string) []byte {
 func (l *Loader) GetSoundMusic(name string) *mp3.Stream {
 	result, ok := l.sounds.Load(name)
 	if ok {
-		return result.(*mp3.Stream)
+		stream, err := mp3.DecodeF32(bytes.NewReader(result.([]byte)))
+		if err != nil {
+			logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+		}
+
+		return stream
 	}
 
 	file, err := fs.ReadFile(assets.Assets, filepath.Join(SoundsPath, name))
@@ -274,12 +279,12 @@ func (l *Loader) GetSoundMusic(name string) *mp3.Stream {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
 
+	l.sounds.Store(name, file)
+
 	stream, err := mp3.DecodeF32(bytes.NewReader(file))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
-
-	l.sounds.Store(name, stream)
 
 	logging.GetInstance().Debug("Music sound has been loaded", zap.String("name", name))
 
@@ -290,7 +295,12 @@ func (l *Loader) GetSoundMusic(name string) *mp3.Stream {
 func (l *Loader) GetSoundFX(name string) *vorbis.Stream {
 	result, ok := l.sounds.Load(name)
 	if ok {
-		return result.(*vorbis.Stream)
+		stream, err := vorbis.DecodeF32(bytes.NewReader(result.([]byte)))
+		if err != nil {
+			logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+		}
+
+		return stream
 	}
 
 	file, err := fs.ReadFile(assets.Assets, filepath.Join(SoundsPath, name))
@@ -298,12 +308,12 @@ func (l *Loader) GetSoundFX(name string) *vorbis.Stream {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
 
+	l.sounds.Store(name, file)
+
 	stream, err := vorbis.DecodeF32(bytes.NewReader(file))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
-
-	l.sounds.Store(name, stream)
 
 	logging.GetInstance().Debug("FX sound has been loaded", zap.String("name", name))
 

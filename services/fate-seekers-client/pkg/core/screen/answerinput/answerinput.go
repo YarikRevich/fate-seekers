@@ -142,7 +142,8 @@ func newAnswerInputScreen() screen.Screen {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))
 
-		sound.GetInstance().GetSoundFxManager().PushImmediately(loader.TestFXSound)
+		sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
+		sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetAnswerInputQuestionUpdated(value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE))

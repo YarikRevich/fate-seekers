@@ -1,9 +1,10 @@
 package fx
 
 import (
-	"fmt"
+	"math"
 	"time"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
@@ -17,13 +18,16 @@ const (
 	processingTickerPeriod = time.Millisecond * 400
 
 	// Represents temp ticker period.
-	tempTickerPeriod = time.Millisecond * 200
+	startTempTickerPeriod = time.Millisecond * 10
+
+	// Represents temp ticker period.
+	endTempTickerPeriod = time.Millisecond * 120
 
 	// Represents fadeout duration.
-	fadeoutDuration = time.Second * 2
+	fadeoutDuration = time.Millisecond * 1300
 
 	// Represents volume decremention step.
-	volumeDecrementor = 20.0
+	volumeShift = 30.0
 )
 
 // SoundFXManager represents sound FX manager.
@@ -36,9 +40,6 @@ type SoundFXManager struct {
 
 	// Represents processing player batch.
 	processingBatch []*dto.FXSoundUnit
-
-	// Represents check if initial current player volume setup was performed.
-	currentPlayerVolumeConfigured bool
 
 	// Represents currently playing player.
 	currentPlayer *dto.FXSoundUnit
@@ -57,55 +58,79 @@ func (svm *SoundFXManager) Init() {
 
 					svm.currentPlayer.Player.SetVolume(0)
 
+					interruptionChan := make(chan int, 1)
+
 					go func() {
-						tempTicker := time.NewTicker(tempTickerPeriod)
+						tempTicker := time.NewTicker(startTempTickerPeriod)
 
 						var volume float64
 
-						for svm.currentPlayer.Player.Volume()*100 != 100 {
+						for svm.currentPlayer != nil && svm.currentPlayer.Player.Volume()*float64(config.GetSettingsSoundFX()) < float64(config.GetSettingsSoundFX()) {
 							select {
+							case <-interruptionChan:
+								tempTicker.Stop()
+
+								return
 							case <-tempTicker.C:
-								volume += volumeDecrementor
+								tempTicker.Stop()
 
-								fmt.Println(volume/100, svm.currentPlayer)
+								if volume+volumeShift <= float64(config.GetSettingsSoundFX()) {
+									volume += volumeShift
+								} else {
+									volume = float64(config.GetSettingsSoundFX())
+								}
 
-								svm.currentPlayer.Player.SetVolume(volume / 100)
+								svm.currentPlayer.Player.SetVolume(volume / float64(config.GetSettingsSoundFX()))
+
+								tempTicker.Reset(startTempTickerPeriod)
 							}
 						}
-
-						svm.currentPlayerVolumeConfigured = true
-
-						tempTicker.Stop()
 					}()
 
 					svm.currentPlayer.Player.Play()
 
 					go func() {
-						tempTicker := time.NewTicker(tempTickerPeriod)
+						tempTicker := time.NewTicker(endTempTickerPeriod)
 
 						for {
 							select {
 							case <-tempTicker.C:
-								if svm.currentPlayer.Duration-svm.currentPlayer.Player.Position() <= fadeoutDuration && svm.currentPlayerVolumeConfigured {
-									if svm.currentPlayer.Player.Volume() != 0 {
-										svm.currentPlayer.Player.SetVolume(
-											((svm.currentPlayer.Player.Volume() * 100) - volumeDecrementor) / 100)
+								tempTicker.Stop()
+
+								if svm.currentPlayer.Duration-svm.currentPlayer.Player.Position() <= fadeoutDuration {
+									select {
+									case interruptionChan <- 1:
+									default:
 									}
 
-									if !svm.currentPlayer.Player.IsPlaying() {
-										if err := svm.currentPlayer.Player.Close(); err != nil {
-											logging.GetInstance().Fatal(errors.Wrap(err, common.ErrSoundPlayerAccess.Error()).Error())
+									if svm.currentPlayer.Player.Volume() != 0 {
+										remainingTime := svm.currentPlayer.Duration - svm.currentPlayer.Player.Position()
+
+										normalized := float64(remainingTime.Milliseconds()) / float64(fadeoutDuration.Milliseconds())
+
+										fadeFactor := math.Max(0, math.Sin((math.Pi/2)*normalized))
+
+										newVolume := float64(svm.currentPlayer.Player.Volume()) * fadeFactor
+
+										if svm.currentPlayer.Player.Volume() > 0 {
+											svm.currentPlayer.Player.SetVolume(newVolume)
 										}
+									}
+								}
+
+								if !svm.currentPlayer.Player.IsPlaying() {
+									if err := svm.currentPlayer.Player.Close(); err != nil {
+										logging.GetInstance().Fatal(errors.Wrap(err, common.ErrSoundPlayerAccess.Error()).Error())
 									}
 
 									tempTicker.Stop()
 
 									svm.currentPlayer = nil
 
-									svm.currentPlayerVolumeConfigured = false
-
-									break
+									return
 								}
+
+								tempTicker.Reset(endTempTickerPeriod)
 							}
 						}
 					}()
