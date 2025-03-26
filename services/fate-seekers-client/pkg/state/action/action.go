@@ -180,10 +180,18 @@ func NewSetEventEnding(value string) godux.Action {
 	}
 }
 
-// NewSetSoundFxUpdated creates new set sound fx updated action.
+// NewSetSoundFXUpdated creates new set sound fx updated action.
 func NewSetSoundFXUpdated(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_FX_UPDATED_SOUND_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetSoundMusicUpdated creates new set sound music updated action.
+func NewSetSoundMusicUpdated(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_MUSIC_UPDATED_SOUND_ACTION,
 		Value: value,
 	}
 }

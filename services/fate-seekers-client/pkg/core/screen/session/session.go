@@ -138,7 +138,8 @@ func (ss *SessionScreen) HandleInput() error {
 		}
 
 		if ebiten.IsKeyPressed(ebiten.KeyY) {
-			if sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
+			if sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() &&
+				!sound.GetInstance().GetSoundMusicManager().IsMusicStopping() {
 				sound.GetInstance().GetSoundMusicManager().StopMusic()
 			}
 		}

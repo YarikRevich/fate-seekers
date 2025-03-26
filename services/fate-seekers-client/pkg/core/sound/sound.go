@@ -6,6 +6,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound/fx"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound/music"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
@@ -33,9 +34,9 @@ func (sm *SoundManager) GetSoundMusicManager() *music.SoundMusicManager {
 	return sm.soundMusicManager
 }
 
-// initSoundAmbientBatch performs ambient sound players batch initialization.
-func (sm *SoundManager) initSoundAmbientBatch() {
-	// sm.soundMusicManager.PushAmbient(loader.AmbientMusicSound)
+// InitSoundAmbientBatch performs ambient sound players batch initialization.
+func (sm *SoundManager) InitSoundAmbientBatch() {
+	sm.soundMusicManager.PushAmbient(loader.AmbientMusicSound)
 }
 
 // newSoundManager initializes SoundManager.
@@ -52,8 +53,6 @@ func newSoundManager() *SoundManager {
 		soundFxManager:    soundFxManager,
 		soundMusicManager: soundMusicManager,
 	}
-
-	result.initSoundAmbientBatch()
 
 	return result
 }

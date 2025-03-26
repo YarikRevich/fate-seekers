@@ -8,12 +8,14 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/settings"
 	settingsmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/settings"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
@@ -116,6 +118,9 @@ func newSettingsScreen() screen.Screen {
 
 								dispatcher.GetInstance().Dispatch(
 									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
+								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 							}))
 
 						dispatcher.GetInstance().Dispatch(
@@ -124,12 +129,18 @@ func newSettingsScreen() screen.Screen {
 
 								dispatcher.GetInstance().Dispatch(
 									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
+								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 							}))
 					} else {
 						transparentTransitionEffect.Reset()
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+						sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
+						sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 					}
 				})),
 		transparentTransitionEffect: transparentTransitionEffect,

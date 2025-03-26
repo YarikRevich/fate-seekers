@@ -8,6 +8,9 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/host"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 )
 
 // ProcessChanges performs provided changes application.
@@ -28,11 +31,17 @@ func ProcessChanges(soundMusic, soundFX int, networkingHost, language string) bo
 	if config.GetSettingsSoundMusic() != soundMusic {
 		config.SetSettingsSoundMusic(soundMusic)
 
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSoundMusicUpdated(value.SOUND_MUSIC_UPDATED_FALSE_VALUE))
+
 		applied = true
 	}
 
 	if config.GetSettingsSoundFX() != soundFX {
 		config.SetSettingsSoundFX(soundFX)
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSoundFXUpdated(value.SOUND_FX_UPDATED_FALSE_VALUE))
 
 		applied = true
 	}

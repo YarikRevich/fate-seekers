@@ -50,7 +50,7 @@ type SoundFXManager struct {
 	processingBatch []*dto.FXSoundUnit
 
 	// Represents currently playing player.
-	currentPlayer *dto.FXSoundUnit
+	currentPlayer atomic.Pointer[dto.FXSoundUnit]
 
 	// Represents state if volume is configured.
 	volumeConfigured atomic.Bool
@@ -62,14 +62,14 @@ func (svm *SoundFXManager) Init() {
 		for {
 			select {
 			case <-svm.ticker.C:
-				if len(svm.processingBatch) > 0 && svm.currentPlayer == nil {
+				if len(svm.processingBatch) > 0 && svm.currentPlayer.Load() == nil {
 					svm.volumeConfigured.Store(false)
 
-					svm.currentPlayer = svm.processingBatch[0]
+					svm.currentPlayer.Store(svm.processingBatch[0])
 
 					svm.processingBatch = append(svm.processingBatch[:0], svm.processingBatch[1:]...)
 
-					svm.currentPlayer.Player.SetVolume(0)
+					svm.currentPlayer.Load().Player.SetVolume(0)
 
 					interruptionChan := make(chan int, 1)
 
@@ -78,7 +78,7 @@ func (svm *SoundFXManager) Init() {
 
 						var volume float64
 
-						for svm.currentPlayer != nil && svm.currentPlayer.Player.Volume() < float64(config.GetSettingsSoundFX())/100 {
+						for svm.currentPlayer.Load() != nil && svm.currentPlayer.Load().Player.Volume() < float64(config.GetSettingsSoundFX())/100 {
 							select {
 							case <-interruptionChan:
 								tempTicker.Stop()
@@ -95,7 +95,7 @@ func (svm *SoundFXManager) Init() {
 									volume = float64(config.GetSettingsSoundFX())
 								}
 
-								svm.currentPlayer.Player.SetVolume(volume / 100)
+								svm.currentPlayer.Load().Player.SetVolume(volume / 100)
 
 								tempTicker.Reset(startTempTickerPeriod)
 							}
@@ -104,7 +104,7 @@ func (svm *SoundFXManager) Init() {
 						svm.volumeConfigured.Store(true)
 					}()
 
-					svm.currentPlayer.Player.Play()
+					svm.currentPlayer.Load().Player.Play()
 
 					go func() {
 						tempTicker := time.NewTicker(endTempTickerPeriod)
@@ -114,39 +114,39 @@ func (svm *SoundFXManager) Init() {
 							case <-tempTicker.C:
 								tempTicker.Stop()
 
-								if svm.currentPlayer.Duration-svm.currentPlayer.Player.Position() <= fadeoutDuration {
-									svm.volumeConfigured.Store(false)
+								if svm.currentPlayer.Load().Duration-svm.currentPlayer.Load().Player.Position() <= fadeoutDuration {
+									if svm.volumeConfigured.Load() {
+										svm.volumeConfigured.Store(false)
+									}
 
 									select {
 									case interruptionChan <- 1:
 									default:
 									}
 
-									if svm.currentPlayer.Player.Volume() != 0 {
-										remainingTime := svm.currentPlayer.Duration - svm.currentPlayer.Player.Position()
-
-										normalized := float64(remainingTime.Milliseconds()) / float64(fadeoutDuration.Milliseconds())
+									if svm.currentPlayer.Load().Player.Volume() != 0 {
+										normalized := svm.currentPlayer.Load().Player.Volume() / 2
 
 										fadeFactor := math.Max(0, math.Sin((math.Pi/2)*normalized))
 
-										newVolume := float64(svm.currentPlayer.Player.Volume()) * fadeFactor
+										newVolume := float64(svm.currentPlayer.Load().Player.Volume()) * fadeFactor
 
-										if svm.currentPlayer.Player.Volume() >= 0 {
-											svm.currentPlayer.Player.SetVolume(newVolume * float64(config.GetSettingsSoundFX()) / 100)
+										if svm.currentPlayer.Load().Player.Volume() >= 0 {
+											svm.currentPlayer.Load().Player.SetVolume(newVolume * float64(config.GetSettingsSoundFX()) / 100)
 										}
 									}
 								}
 
-								if !svm.currentPlayer.Player.IsPlaying() {
+								if !svm.currentPlayer.Load().Player.IsPlaying() {
 									svm.volumeConfigured.Store(true)
 
-									if err := svm.currentPlayer.Player.Close(); err != nil {
+									if err := svm.currentPlayer.Load().Player.Close(); err != nil {
 										logging.GetInstance().Fatal(errors.Wrap(err, common.ErrSoundPlayerAccess.Error()).Error())
 									}
 
 									tempTicker.Stop()
 
-									svm.currentPlayer = nil
+									svm.currentPlayer.Store(nil)
 
 									return
 								}
@@ -171,7 +171,9 @@ func (svm *SoundFXManager) Init() {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetSoundFXUpdated(value.SOUND_FX_UPDATED_TRUE_VALUE))
 
-						svm.currentPlayer.Player.SetVolume(float64(config.GetSettingsSoundFX()) / 100)
+						if svm.currentPlayer.Load() != nil {
+							svm.currentPlayer.Load().Player.SetVolume(float64(config.GetSettingsSoundFX()) / 100)
+						}
 					}
 				}
 			}
