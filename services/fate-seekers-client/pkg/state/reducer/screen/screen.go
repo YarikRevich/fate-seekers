@@ -10,7 +10,8 @@ import (
 
 // Describes all the available screen reducer store states.
 const (
-	ACTIVE_SCREEN_STATE = "active"
+	ACTIVE_SCREEN_STATE   = "active"
+	PREVIOUS_SCREEN_STATE = "previous"
 )
 
 // ScreenStateReducer represents reducer used for screen state management.
@@ -21,6 +22,7 @@ type ScreenStateReducer struct {
 
 func (ssr *ScreenStateReducer) Init() {
 	ssr.store.SetState(ACTIVE_SCREEN_STATE, value.ACTIVE_SCREEN_INTRO_VALUE)
+	ssr.store.SetState(PREVIOUS_SCREEN_STATE, value.PREVIOUS_SCREEN_EMPTY_VALUE)
 }
 
 func (ssr *ScreenStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -29,6 +31,10 @@ func (ssr *ScreenStateReducer) GetProcessor() func(value godux.Action) interface
 		case action.SET_ACTIVE_SCREEN_ACTION:
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: ACTIVE_SCREEN_STATE, Value: value.Value})
+
+		case action.SET_PREVIOUS_SCREEN_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: PREVIOUS_SCREEN_STATE, Value: value.Value})
 
 		default:
 			return nil

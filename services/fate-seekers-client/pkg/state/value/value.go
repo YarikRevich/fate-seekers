@@ -10,6 +10,10 @@ const (
 	ACTIVE_SCREEN_TRAVEL_VALUE       = "travel"
 	ACTIVE_SCREEN_ANSWER_INPUT_VALUE = "answer_input"
 	ACTIVE_SCREEN_RESUME_VALUE       = "resume"
+
+	PREVIOUS_SCREEN_MENU_VALUE   = "menu"
+	PREVIOUS_SCREEN_RESUME_VALUE = "resume"
+	PREVIOUS_SCREEN_EMPTY_VALUE  = ""
 )
 
 // Describes all the available application reducer store values.

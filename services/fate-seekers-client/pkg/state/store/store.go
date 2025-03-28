@@ -26,6 +26,13 @@ func GetActiveScreen() string {
 	return instance.GetState(screen.ACTIVE_SCREEN_STATE).(string)
 }
 
+// GetPreviousScreen retrieves previous screen state value.
+func GetPreviousScreen() string {
+	instance := GetInstance()
+
+	return instance.GetState(screen.PREVIOUS_SCREEN_STATE).(string)
+}
+
 // GetApplicationExit retrieves exit application state value.
 func GetApplicationExit() string {
 	instance := GetInstance()

@@ -96,6 +96,8 @@ func newMenuScreen() screen.Screen {
 		ui: builder.Build(
 			menu.NewMenuComponent(
 				func() {
+					transparentTransitionEffect.Reset()
+
 					dispatcher.GetInstance().Dispatch(
 						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
 				},
@@ -107,6 +109,9 @@ func newMenuScreen() screen.Screen {
 				},
 				func() {
 					transparentTransitionEffect.Reset()
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_MENU_VALUE))
 
 					dispatcher.GetInstance().Dispatch(
 						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SETTINGS_VALUE))

@@ -13,6 +13,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/intro"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/menu"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/resume"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/session"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/settings"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/travel"
@@ -175,6 +176,9 @@ func (r *Runtime) Update() error {
 
 	case value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE:
 		r.activeScreen = answerinput.GetInstance()
+
+	case value.ACTIVE_SCREEN_RESUME_VALUE:
+		r.activeScreen = resume.GetInstance()
 	}
 
 	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {

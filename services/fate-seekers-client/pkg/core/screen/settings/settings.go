@@ -18,6 +18,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
@@ -101,7 +102,10 @@ func newSettingsScreen() screen.Screen {
 				func(soundMusic, soundFX int, networkingHost, language string) {
 					if settingsmanager.ProcessChanges(soundMusic, soundFX, networkingHost, language) {
 						dispatcher.GetInstance().Dispatch(
-							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+							action.NewSetActiveScreenAction(store.GetPreviousScreen()))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
 					}
 				},
 				func(soundMusic, soundFX int, networkingHost, language string) {
@@ -117,7 +121,10 @@ func newSettingsScreen() screen.Screen {
 								transparentTransitionEffect.Reset()
 
 								dispatcher.GetInstance().Dispatch(
-									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+									action.NewSetActiveScreenAction(store.GetPreviousScreen()))
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
 
 								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
@@ -128,7 +135,10 @@ func newSettingsScreen() screen.Screen {
 								transparentTransitionEffect.Reset()
 
 								dispatcher.GetInstance().Dispatch(
-									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+									action.NewSetActiveScreenAction(store.GetPreviousScreen()))
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
 
 								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
@@ -137,7 +147,10 @@ func newSettingsScreen() screen.Screen {
 						transparentTransitionEffect.Reset()
 
 						dispatcher.GetInstance().Dispatch(
-							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+							action.NewSetActiveScreenAction(store.GetPreviousScreen()))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
 
 						sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 						sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)

@@ -19,6 +19,18 @@
         "one": "Вийти",
         "other": "Вийти"
     },
+    "resume.continue": {
+        "one": "Продовжити",
+        "other": "Продовжити"
+    },
+    "resume.settings": {
+        "one": "Налаштування",
+        "other": "Налаштування"
+    },
+    "resume.exit": {
+        "one": "Вийти",
+        "other": "Вийти"
+    },
     "settings.title": {
         "one": "Налаштування",
         "other": "Налаштування"

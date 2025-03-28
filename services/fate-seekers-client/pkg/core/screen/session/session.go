@@ -129,6 +129,11 @@ type SessionScreen struct {
 }
 
 func (ss *SessionScreen) HandleInput() error {
+	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
+	}
+
 	// Debug statements
 	{
 		if ebiten.IsKeyPressed(ebiten.KeyA) {

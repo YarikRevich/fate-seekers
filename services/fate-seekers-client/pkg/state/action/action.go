@@ -4,7 +4,8 @@ import "github.com/luisvinicius167/godux"
 
 // Describes all the available state actions for screen reducer.
 const (
-	SET_ACTIVE_SCREEN_ACTION = "SET_ACTIVE_SCREEN"
+	SET_ACTIVE_SCREEN_ACTION   = "SET_ACTIVE_SCREEN"
+	SET_PREVIOUS_SCREEN_ACTION = "SET_PREVIOUS_SCREEN"
 )
 
 // Describes all the available state actions for application reducer.
@@ -56,6 +57,14 @@ const (
 func NewSetActiveScreenAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_ACTIVE_SCREEN_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetPreviousScreenAction creates new set previous screen action.
+func NewSetPreviousScreenAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_PREVIOUS_SCREEN_ACTION,
 		Value: value,
 	}
 }

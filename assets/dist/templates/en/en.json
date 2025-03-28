@@ -19,6 +19,18 @@
         "one": "Exit",
         "other": "Exit"
     },
+    "resume.continue": {
+        "one": "Continue",
+        "other": "Continue"
+    },
+    "resume.settings": {
+        "one": "Settings",
+        "other": "Settings"
+    },
+    "resume.exit": {
+        "one": "Exit",
+        "other": "Exit"
+    },
     "settings.title": {
         "one": "Settings",
         "other": "Settings"
