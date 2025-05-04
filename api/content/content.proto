@@ -1,0 +1,36 @@
+syntax = "proto3";
+option go_package = "github.com/YarikRevich/fate-seekers/pkg/core/networking/content/api";
+
+package content;
+
+// Rperesents service used to retrieve user content related data.
+service Content {
+    rpc PingConnection(PingConnectionRequest) returns (PingConnectionResponse) {};
+    rpc GetUserPositions(GetUserPositionsRequest) returns (GetUserPositionsResponse);
+}
+
+// PingConnectionRequest represents  ping connection request message.
+message PingConnectionRequest {
+};
+
+// PingConnectionResponse represents ping connection response message.
+message PingConnectionResponse {
+    bool status = 1;
+};
+
+// Represents common position message.
+message Position {
+    int64 x = 1;
+    int64 y = 2;
+}
+
+// Represents users positions retrieval request message.
+message GetUserPositionsRequest {
+
+};
+
+// Represents users positions retrieval response message.
+message GetUserPositionsResponse {
+    repeated Position positions = 1;
+};
+

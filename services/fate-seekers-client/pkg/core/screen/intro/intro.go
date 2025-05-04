@@ -58,11 +58,6 @@ func (es *IntroScreen) HandleInput() error {
 	return nil
 }
 
-func (is *IntroScreen) HandleNetworking() {
-	// dispatcher.GetInstance().Dispatch(
-	// 	action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
-}
-
 func (is *IntroScreen) HandleRender(screen *ebiten.Image) {
 	var backgroundAnimationGeometry ebiten.GeoM
 
@@ -79,9 +74,6 @@ func (is *IntroScreen) HandleRender(screen *ebiten.Image) {
 	screen.DrawImage(is.world, &ebiten.DrawImageOptions{
 		ColorM: options.GetTransparentDrawOptions(
 			is.transparentTransitionEffect.GetValue()).ColorM})
-}
-
-func (es *IntroScreen) Clean() {
 }
 
 // newIntroScreen initializes IntroScreen.

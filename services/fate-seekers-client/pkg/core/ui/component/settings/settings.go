@@ -261,7 +261,7 @@ func NewSettingsComponent(
 			return false, &newInputText
 		}))
 
-	networkingHostInput.SetText(config.GetSettingsNetworkingHost())
+	networkingHostInput.SetText(config.GetSettingsNetworkingServerHost())
 
 	components.AddChild(networkingHostInput)
 

@@ -73,10 +73,6 @@ func (ais *AnswerInputScreen) HandleInput() error {
 	return nil
 }
 
-func (ais *AnswerInputScreen) HandleNetworking() {
-
-}
-
 func (ais *AnswerInputScreen) HandleRender(screen *ebiten.Image) {
 	ais.world.Clear()
 
@@ -103,10 +99,6 @@ func (ais *AnswerInputScreen) HandleRender(screen *ebiten.Image) {
 	screen.DrawImage(ais.interfaceWorld, &ebiten.DrawImageOptions{
 		ColorM: options.GetTransparentDrawOptions(
 			ais.transparentTransitionEffect.GetValue()).ColorM})
-}
-
-func (ais *AnswerInputScreen) Clean() {
-
 }
 
 // newAnswerInputScreen initializes AnswerInputScreen.

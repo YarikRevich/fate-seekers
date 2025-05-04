@@ -56,7 +56,7 @@ func (i *ImGUI) Update() {
 		imgui.Text(fmt.Sprintf("sound_music: %d", config.GetSettingsSoundMusic()))
 		imgui.Text(fmt.Sprintf("sound_fx: %d", config.GetSettingsSoundFX()))
 		imgui.Text(fmt.Sprintf("language: %s", config.GetSettingsLanguage()))
-		imgui.Text(fmt.Sprintf("host: %s", config.GetSettingsNetworkingHost()))
+		imgui.Text(fmt.Sprintf("host: %s", config.GetSettingsNetworkingServerHost()))
 
 		imgui.EndMenu()
 	}

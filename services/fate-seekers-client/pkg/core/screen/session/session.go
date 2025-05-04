@@ -228,10 +228,6 @@ func (ss *SessionScreen) HandleInput() error {
 	return nil
 }
 
-func (ss *SessionScreen) HandleNetworking() {
-
-}
-
 func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 	ss.world.Clear()
 
@@ -263,10 +259,6 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 
 		screen.DrawImage(ss.eventWorld, &ebiten.DrawImageOptions{})
 	}
-}
-
-func (ss *SessionScreen) Clean() {
-
 }
 
 // newSessionScreen initializes SessionScreen.

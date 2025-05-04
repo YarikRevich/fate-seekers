@@ -225,8 +225,6 @@ func (r *Runtime) Update() error {
 		r.notificationInterface.Update()
 	}
 
-	r.activeScreen.HandleNetworking()
-
 	if config.GetDebug() {
 		imgui.GetInstance().Update()
 	}

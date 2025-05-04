@@ -61,10 +61,6 @@ func (ss *SettingsScreen) HandleInput() error {
 	return nil
 }
 
-func (ss *SettingsScreen) HandleNetworking() {
-
-}
-
 func (ss *SettingsScreen) HandleRender(screen *ebiten.Image) {
 	ss.world.Clear()
 
@@ -87,10 +83,6 @@ func (ss *SettingsScreen) HandleRender(screen *ebiten.Image) {
 			ss.transparentTransitionEffect.GetValue()).ColorM})
 
 	screen.DrawImage(ss.world, &ebiten.DrawImageOptions{})
-}
-
-func (ss *SettingsScreen) Clean() {
-
 }
 
 func newSettingsScreen() screen.Screen {

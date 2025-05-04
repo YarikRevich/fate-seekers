@@ -1,27 +1,60 @@
 package connector
 
 import (
+	"context"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking"
+	"github.com/balacode/udpt"
 )
 
 var (
-	// GetInstance retrieves instance of the netowkring content connector, performing initilization if needed.
+	// GetInstance retrieves instance of the networking content connector, performing initilization if needed.
 	GetInstance = sync.OnceValue[networking.NetworkingConnector](newNetworkingContentConnector)
 )
 
 // NetworkingContentConnector represents networking content connector.
 type NetworkingContentConnector struct {
+	// Represents context for initialized receiver.
+	close context.CancelFunc
 }
 
-func (ncc *NetworkingContentConnector) Reconnect() {
-	// addr := &net.UDPAddr{
-	// 	Port: 1234,
-	// 	IP:   net.ParseIP("127.0.0.1"),
-	// }
+func (ncc *NetworkingContentConnector) Connect() error {
+	ctx, close := context.WithCancel(context.Background())
 
-	// conn, err := net.ListenUDP("udp", addr)
+	err := udpt.Receive(
+		ctx,
+		config.GetSettingsNetworkingReceiverPort(),
+		[]byte(config.GetSettingsNetworkingEncryptionKey()),
+		func(k string, v []byte) error {
+			return nil
+		})
+	if err != nil {
+		close()
+
+		return err
+	}
+
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	go func() {
+		select {
+		case <-sigc:
+			close()
+		}
+	}()
+
+	return nil
+}
+
+func (ncc *NetworkingContentConnector) Close() error {
+	ncc.close()
+
+	return nil
 }
 
 // newNetworkingContentConnector initializes NetworkingContentConnector.

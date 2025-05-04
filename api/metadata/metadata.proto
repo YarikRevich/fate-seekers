@@ -1,0 +1,94 @@
+syntax = "proto3";
+option go_package = "github.com/YarikRevich/fate-seekers/pkg/core/networking/metadata/api";
+
+package metadata;
+
+// Rperesents service used to retrieve user content related data.
+// All the metadata requests require authentication header to be provided,
+// having JWT token saved in it.
+service Metadata {
+    rpc PingConnection(PingConnectionRequest) returns (PingConnectionResponse) {};
+    rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse) {};
+    rpc RemoveSession(RemoveSessionRequest) returns (RemoveSessionResponse) {};
+    rpc JoinToSession(JoinToSessionRequest) returns (JoinToSessionResponse) {};
+    rpc GetChests(GetChestsRequest) returns (GetChestsResponse) {};
+    rpc GetMap(GetMapRequest) returns (stream GetMapResponse) {};
+    rpc GetChat(GetChatRequest) returns (stream GetChatResponse) {};
+}
+
+// PingConnectionRequest represents  ping connection request message.
+message PingConnectionRequest {
+};
+
+// PingConnectionResponse represents ping connection response message.
+message PingConnectionResponse {
+    bool status = 1;
+};
+
+// Position represents common position message.
+message Position {
+    int64 x = 1;
+    int64 y = 2;
+};
+
+// CreateSessionRequest represents create session request.
+// User is allowed to create only 3 sessions in 10 minutes.
+message CreateSessionRequest {
+    string name = 1;
+    
+    // Represents an identifier of the user, which generated during
+    // application installation.
+    string user_id = 2;
+};
+
+// CreateSessionResponse represents create session response.
+message CreateSessionResponse {
+    string id = 1;
+};
+
+// RemoveSessionRequest represents remove session request.
+message RemoveSessionRequest {
+    string id = 1;
+};
+
+// RemoveSessionResponse represents remove session response.
+message RemoveSessionResponse {
+};
+
+// JoinToSessionRequest represents user join to session request.
+message JoinToSessionRequest {
+    string session_id = 1;
+    string user_id = 2;
+};
+
+// JoinToSessionResponse represents user join to session response.
+message JoinToSessionResponse {
+};
+
+// Represents chests retrieval request message.
+message GetChestsRequest {
+};
+
+// Represents chests retrieval response streaming message.
+message GetChestsResponse {
+    repeated Position positions = 1;
+};
+
+// Represents map retrieval request message.
+message GetMapRequest {
+};
+
+// Represents map retrieval response streaming message.
+message GetMapResponse {
+    repeated Position positions = 1;
+};
+
+// Represents chat retrieval request message.
+message GetChatRequest {
+    int64 offset = 1;
+};
+
+// Represents chat retrieval response streaming message.
+message GetChatResponse {
+    repeated string messages = 1;
+};

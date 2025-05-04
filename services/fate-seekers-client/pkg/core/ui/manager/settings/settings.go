@@ -17,7 +17,7 @@ import (
 func ProcessChanges(soundMusic, soundFX int, networkingHost, language string) bool {
 	var applied, demandRestart bool
 
-	if config.GetSettingsNetworkingHost() != networkingHost {
+	if config.GetSettingsNetworkingServerHost() != networkingHost {
 		if !host.Validate(networkingHost) {
 			notification.GetInstance().Push(
 				translation.GetInstance().GetTranslation("settingsmanager.invalid-networking-host"),
@@ -46,7 +46,7 @@ func ProcessChanges(soundMusic, soundFX int, networkingHost, language string) bo
 		applied = true
 	}
 
-	if config.GetSettingsNetworkingHost() != networkingHost {
+	if config.GetSettingsNetworkingServerHost() != networkingHost {
 		config.SetSettingsNetworkingHost(networkingHost)
 
 		applied = true
@@ -80,6 +80,6 @@ func ProcessChanges(soundMusic, soundFX int, networkingHost, language string) bo
 func AnyProvidedChanges(soundMusic, soundFX int, networkingHost, language string) bool {
 	return config.GetSettingsSoundMusic() != soundMusic ||
 		config.GetSettingsSoundFX() != soundFX ||
-		config.GetSettingsNetworkingHost() != networkingHost ||
+		config.GetSettingsNetworkingServerHost() != networkingHost ||
 		config.GetSettingsLanguage() != language
 }

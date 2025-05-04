@@ -7,13 +7,16 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/connector"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
@@ -56,10 +59,6 @@ func (ms *MenuScreen) HandleInput() error {
 	return nil
 }
 
-func (ms *MenuScreen) HandleNetworking() {
-
-}
-
 func (ms *MenuScreen) HandleRender(screen *ebiten.Image) {
 	ms.world.Clear()
 
@@ -85,10 +84,6 @@ func (ms *MenuScreen) HandleRender(screen *ebiten.Image) {
 	screen.DrawImage(ms.world, &ebiten.DrawImageOptions{})
 }
 
-func (ms *MenuScreen) Clean() {
-
-}
-
 func newMenuScreen() screen.Screen {
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
@@ -96,10 +91,31 @@ func newMenuScreen() screen.Screen {
 		ui: builder.Build(
 			menu.NewMenuComponent(
 				func() {
-					transparentTransitionEffect.Reset()
+					// TODO: first point of encryption key validation.
 
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+					if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
+						connector.GetInstance().Connect(func(err error) {
+							// TODO: check if error is related to encryption key.
+
+							logging.GetInstance().Error(err.Error())
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
+
+							if err == nil {
+								transparentTransitionEffect.Reset()
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+							}
+						})
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_TRUE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE))
+					}
 				},
 				func() {
 

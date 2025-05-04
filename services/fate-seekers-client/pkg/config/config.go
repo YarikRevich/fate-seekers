@@ -24,7 +24,8 @@ var (
 	configFile      = flag.String("config", "config.yaml", "a name of configuration file")
 	configDirectory = flag.String("configDirectory", getDefaultConfigDirectory(), "a directory where configuration file is located")
 
-	settingsNetworkingHost string
+	settingsNetworkingReceiverPort                                int
+	settingsNetworkingServerHost, settingsNetworkingEncryptionKey string
 
 	settingsSoundMusic, settingsSoundFX int
 	settingsLanguage                    string
@@ -79,7 +80,7 @@ const (
 func SetupDefaultConfig() {
 	viper.SetDefault("settings.window.width", 1920)
 	viper.SetDefault("settings.window.height", 1080)
-	viper.SetDefault("settings.networking.host", "localhost:8080")
+	viper.SetDefault("settings.networking.server.host", "localhost:8080")
 	viper.SetDefault("settings.sound.music", 100)
 	viper.SetDefault("settings.sound.fx", 100)
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
@@ -105,13 +106,15 @@ func Init() {
 
 	windowWidth := viper.GetInt("settings.window.width")
 	windowHeight := viper.GetInt("settings.window.height")
-	settingsNetworkingHost = viper.GetString("settings.networking.host")
+	settingsNetworkingReceiverPort = viper.GetInt("settings.networking.receiver.port")
+	settingsNetworkingServerHost = viper.GetString("settings.networking.server.host")
+	settingsNetworkingEncryptionKey = viper.GetString("settings.networking.encryption.key")
 
-	if !host.Validate(settingsNetworkingHost) {
+	if !host.Validate(settingsNetworkingServerHost) {
 		log.Fatalln(
 			ErrReadingSettingsNetworkingHostFromConfig.Error(),
 			zap.String("configFile", *configFile),
-			zap.String("settingsLanguage", settingsNetworkingHost))
+			zap.String("settingsNetworkingServerHost", settingsNetworkingServerHost))
 	}
 
 	settingsSoundMusic = viper.GetInt("settings.sound.music")
@@ -162,15 +165,23 @@ func SetSettingsWindowSize(width, height int) {
 }
 
 func SetSettingsNetworkingHost(value string) {
-	viper.Set("settings.networking.host", value)
+	viper.Set("settings.networking.server.host", value)
 
 	viper.WriteConfigAs(viper.ConfigFileUsed())
 
-	settingsNetworkingHost = value
+	settingsNetworkingServerHost = value
 }
 
-func GetSettingsNetworkingHost() string {
-	return settingsNetworkingHost
+func GetSettingsNetworkingReceiverPort() int {
+	return settingsNetworkingReceiverPort
+}
+
+func GetSettingsNetworkingServerHost() string {
+	return settingsNetworkingServerHost
+}
+
+func GetSettingsNetworkingEncryptionKey() string {
+	return settingsNetworkingEncryptionKey
 }
 
 func SetSettingsSoundMusic(value int) {

@@ -3,6 +3,15 @@
 help:
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: generate-proto
+generate-proto: ## Generates ProtocolBuffers API for API Server
+	@protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative api/metadata/metadata.proto && \
+	mv api/metadata/metadata_grpc.pb.go services/fate-seekers-client/pkg/core/networking/metadata/api && \
+	mv api/metadata/metadata.pb.go services/fate-seekers-client/pkg/core/networking/metadata/api
+
+	@protoc --go_out=. --go_opt=paths=source_relative api/content/content.proto && \
+	mv api/content/content.pb.go services/fate-seekers-client/pkg/core/networking/content/api
+
 .PHONY: create-local-client
 create-local-client: ## Creates fate-seekers-client local directory for API Server
 	@mkdir -p $(HOME)/.fate-seekers-client/config

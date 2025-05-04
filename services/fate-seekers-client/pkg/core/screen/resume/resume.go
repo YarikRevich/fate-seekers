@@ -63,10 +63,6 @@ func (rs *ResumeScreen) HandleInput() error {
 	return nil
 }
 
-func (rs *ResumeScreen) HandleNetworking() {
-
-}
-
 func (rs *ResumeScreen) HandleRender(screen *ebiten.Image) {
 	rs.world.Clear()
 
@@ -90,10 +86,6 @@ func (rs *ResumeScreen) HandleRender(screen *ebiten.Image) {
 	})
 
 	screen.DrawImage(rs.world, &ebiten.DrawImageOptions{})
-}
-
-func (rs *ResumeScreen) Clean() {
-
 }
 
 func newResumeScreen() screen.Screen {

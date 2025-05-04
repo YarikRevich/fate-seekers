@@ -11,10 +11,8 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/subtitles"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
@@ -52,37 +50,25 @@ func (es *EntryScreen) HandleInput() error {
 
 	shared.GetInstance().GetBackgroundAnimation().Update()
 
+	// select {
+	// case <-es.stubTimer.C:
+	// 	dispatcher.GetInstance().Dispatch(
+	// 		action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
+
+	dispatcher.GetInstance().Dispatch(
+		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+	// 	subtitles.GetInstance().Push("О, лягушка! Так дивно...", time.Second*6)
+	// 	subtitles.GetInstance().Push("'У багатих свої причуди!'", time.Second*6)
+
+	// 	// notification.GetInstance().Push("Тестове повідомлення!", time.Second*6)
+	// 	// notification.GetInstance().Push("Друге повідомлення!", time.Second*6)
+	// default:
+	// }
+
 	es.ui.Update()
 
 	return nil
-}
-
-func (es *EntryScreen) HandleNetworking() {
-	if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
-		es.stubTimer.Reset(time.Second * 3)
-
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_TRUE_VALUE))
-
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE))
-	}
-
-	select {
-	case <-es.stubTimer.C:
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
-
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
-
-		subtitles.GetInstance().Push("О, лягушка! Так дивно...", time.Second*6)
-		subtitles.GetInstance().Push("'У багатих свої причуди!'", time.Second*6)
-
-		// notification.GetInstance().Push("Тестове повідомлення!", time.Second*6)
-		// notification.GetInstance().Push("Друге повідомлення!", time.Second*6)
-	default:
-	}
 }
 
 func (es *EntryScreen) HandleRender(screen *ebiten.Image) {
@@ -101,9 +87,6 @@ func (es *EntryScreen) HandleRender(screen *ebiten.Image) {
 	screen.DrawImage(es.world, &ebiten.DrawImageOptions{
 		ColorM: options.GetTransparentDrawOptions(
 			es.transparentTransitionEffect.GetValue()).ColorM})
-}
-
-func (es *EntryScreen) Clean() {
 }
 
 // newEntryScreen initializes EntryScreen.

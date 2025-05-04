@@ -30,20 +30,12 @@ func (ts *TravelScreen) HandleInput() error {
 	return nil
 }
 
-func (ts *TravelScreen) HandleNetworking() {
-
-}
-
 func (ts *TravelScreen) HandleRender(screen *ebiten.Image) {
 	ts.world.Clear()
 
 	ts.ui.Draw(ts.world)
 
 	screen.DrawImage(ts.world, &ebiten.DrawImageOptions{})
-}
-
-func (ts *TravelScreen) Clean() {
-
 }
 
 // newTravelScreen initializes TravelScreen.
