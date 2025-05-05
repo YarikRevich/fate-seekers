@@ -59,6 +59,10 @@
         "one": "Host",
         "other": "Host"
     },
+    "settings.encryption-key": {
+        "one": "Server key",
+        "other": "Server key"
+    },
     "settings.close": {
         "one": "Close",
         "other": "Close"
@@ -78,6 +82,10 @@
     "prompt.settings": {
         "one": "There are unsaved changes. Would you like to apply them?",
         "other": "There are unsaved changes. Would you like to apply them?"
+    },
+    "prompt.networking.encryption-key": {
+        "one": "Server key is not set or is not valid. \nProceed with its configuration?",
+        "other": "Server key is not set or is not valid. \nProceed with its configuration?"
     },
     "answerinput.solvetext": {
         "one": "Please solve",
@@ -106,5 +114,9 @@
     "settingsmanager.invalid-networking-host": {
         "one": "Provided host is invalid",
         "other": "Provided host is invalid"
+    },
+    "settingsmanager.invalid-networking-encryption-key": {
+        "one": "Provided encryption key is invalid",
+        "other": "Provided encryption key is invalid"
     }
 }

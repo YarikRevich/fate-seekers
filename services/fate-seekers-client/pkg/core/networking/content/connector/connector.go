@@ -9,6 +9,7 @@ import (
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/balacode/udpt"
 )
 
@@ -26,18 +27,20 @@ type NetworkingContentConnector struct {
 func (ncc *NetworkingContentConnector) Connect() error {
 	ctx, close := context.WithCancel(context.Background())
 
-	err := udpt.Receive(
-		ctx,
-		config.GetSettingsNetworkingReceiverPort(),
-		[]byte(config.GetSettingsNetworkingEncryptionKey()),
-		func(k string, v []byte) error {
-			return nil
-		})
-	if err != nil {
-		close()
+	go func() {
+		err := udpt.Receive(
+			ctx,
+			config.GetSettingsNetworkingReceiverPort(),
+			[]byte(config.GetSettingsNetworkingEncryptionKey()),
+			func(k string, v []byte) error {
+				return nil
+			})
+		if err != nil {
+			close()
 
-		return err
-	}
+			logging.GetInstance().Fatal(err.Error())
+		}
+	}()
 
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -49,6 +52,10 @@ func (ncc *NetworkingContentConnector) Connect() error {
 	}()
 
 	return nil
+}
+
+func (ncc *NetworkingContentConnector) Ping() bool {
+	return false
 }
 
 func (ncc *NetworkingContentConnector) Close() error {

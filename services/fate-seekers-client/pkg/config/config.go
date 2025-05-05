@@ -80,7 +80,9 @@ const (
 func SetupDefaultConfig() {
 	viper.SetDefault("settings.window.width", 1920)
 	viper.SetDefault("settings.window.height", 1080)
+	viper.SetDefault("settings.networking.receiver.port", 8090)
 	viper.SetDefault("settings.networking.server.host", "localhost:8080")
+	viper.SetDefault("settings.networking.encryption.key", "")
 	viper.SetDefault("settings.sound.music", 100)
 	viper.SetDefault("settings.sound.fx", 100)
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
@@ -170,6 +172,14 @@ func SetSettingsNetworkingHost(value string) {
 	viper.WriteConfigAs(viper.ConfigFileUsed())
 
 	settingsNetworkingServerHost = value
+}
+
+func SetSettingsNetworkingEncryptionKey(value string) {
+	viper.Set("settings.networking.encryption.key", value)
+
+	viper.WriteConfigAs(viper.ConfigFileUsed())
+
+	settingsNetworkingEncryptionKey = value
 }
 
 func GetSettingsNetworkingReceiverPort() int {

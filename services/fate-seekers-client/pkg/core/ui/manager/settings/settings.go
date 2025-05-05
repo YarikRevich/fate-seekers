@@ -7,6 +7,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/encryptionkey"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/host"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
@@ -14,13 +15,24 @@ import (
 )
 
 // ProcessChanges performs provided changes application.
-func ProcessChanges(soundMusic, soundFX int, networkingHost, language string) bool {
+func ProcessChanges(soundMusic, soundFX int, networkingHost, networkingEncryptionKey, language string) bool {
 	var applied, demandRestart bool
 
 	if config.GetSettingsNetworkingServerHost() != networkingHost {
 		if !host.Validate(networkingHost) {
 			notification.GetInstance().Push(
 				translation.GetInstance().GetTranslation("settingsmanager.invalid-networking-host"),
+				time.Second*3,
+				common.NotificationErrorTextColor)
+
+			return false
+		}
+	}
+
+	if config.GetSettingsNetworkingEncryptionKey() != networkingEncryptionKey {
+		if !encryptionkey.Validate(networkingEncryptionKey) {
+			notification.GetInstance().Push(
+				translation.GetInstance().GetTranslation("settingsmanager.invalid-networking-encryption-key"),
 				time.Second*3,
 				common.NotificationErrorTextColor)
 
@@ -52,6 +64,12 @@ func ProcessChanges(soundMusic, soundFX int, networkingHost, language string) bo
 		applied = true
 	}
 
+	if config.GetSettingsNetworkingEncryptionKey() != networkingEncryptionKey {
+		config.SetSettingsNetworkingEncryptionKey(networkingEncryptionKey)
+
+		applied = true
+	}
+
 	if config.GetSettingsLanguage() != language {
 		config.SetSettingsLanguage(language)
 
@@ -77,9 +95,10 @@ func ProcessChanges(soundMusic, soundFX int, networkingHost, language string) bo
 }
 
 // AnyProvidedChanges checks if there are any new provided changes.
-func AnyProvidedChanges(soundMusic, soundFX int, networkingHost, language string) bool {
+func AnyProvidedChanges(soundMusic, soundFX int, networkingHost, networkingEncryptionKey, language string) bool {
 	return config.GetSettingsSoundMusic() != soundMusic ||
 		config.GetSettingsSoundFX() != soundFX ||
 		config.GetSettingsNetworkingServerHost() != networkingHost ||
+		config.GetSettingsNetworkingEncryptionKey() != networkingEncryptionKey ||
 		config.GetSettingsLanguage() != language
 }

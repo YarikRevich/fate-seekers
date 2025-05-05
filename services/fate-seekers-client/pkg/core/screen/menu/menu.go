@@ -13,7 +13,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -91,13 +91,37 @@ func newMenuScreen() screen.Screen {
 		ui: builder.Build(
 			menu.NewMenuComponent(
 				func() {
-					// TODO: first point of encryption key validation.
+					if !connector.GetInstance().ValidateKey() {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPromptText(
+								translation.GetInstance().GetTranslation("prompt.networking.encryption-key")))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPromptSubmitCallback(func() {
+								transparentTransitionEffect.Reset()
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SETTINGS_VALUE))
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetPreviousScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+							}))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPromptCancelCallback(func() {
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetActiveScreenAction(store.GetPreviousScreen()))
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
+							}))
+
+						return
+					}
 
 					if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
 						connector.GetInstance().Connect(func(err error) {
 							// TODO: check if error is related to encryption key.
-
-							logging.GetInstance().Error(err.Error())
 
 							dispatcher.GetInstance().Dispatch(
 								action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
