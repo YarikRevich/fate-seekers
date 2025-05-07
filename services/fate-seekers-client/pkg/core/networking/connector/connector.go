@@ -3,7 +3,6 @@ package connector
 import (
 	"sync"
 
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	contentconnector "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/connector"
 	metadataconnector "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/connector"
 )
@@ -15,11 +14,6 @@ var (
 
 // GlobalNetworkingConnector represents global networking connector.
 type GlobalNetworkingConnector struct {
-}
-
-// ValidateKey checks if provided encryption key is valid.
-func (gnc *GlobalNetworkingConnector) ValidateKey() bool {
-	return len(config.GetSettingsNetworkingEncryptionKey()) == 32
 }
 
 // Connect performs a connection for all the API modules.

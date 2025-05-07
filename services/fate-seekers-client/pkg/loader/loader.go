@@ -1,15 +1,18 @@
+//go:build client && shared
+// +build client,shared
+
 package loader
 
 import (
 	"bytes"
 	"encoding/json"
 	"image"
-	"io/fs"
 	"path/filepath"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/assets"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
@@ -109,15 +112,25 @@ const (
 	TestFXSound = "fx/test/test.ogg"
 )
 
-// Decsribes all the embedded files base pathes.
+// Decsribes all the embedded files base pathes in a client bundle.
 const (
-	ShadersPath    = "dist/shaders"
-	FontsPath      = "dist/fonts"
-	ObjectsPath    = "dist/statics"
-	LettersPath    = "dist/letters"
-	TemplatesPath  = "dist/templates"
-	AnimationsPath = "dist/animations"
-	SoundsPath     = "dist/sounds"
+	ShadersClientPath    = "client/shaders"
+	FontsClientPath      = "client/fonts"
+	ObjectsClientPath    = "client/statics"
+	LettersClientPath    = "client/letters"
+	TemplatesClientPath  = "client/templates"
+	AnimationsClientPath = "client/animations"
+	SoundsClientPath     = "client/sounds"
+)
+
+// Decsribes all the embedded files base pathes in a shared bundle.
+const (
+	ShadersSharedPath    = "shared/shaders"
+	FontsSharedPath      = "shared/fonts"
+	ObjectsSharedPath    = "shared/statics"
+	LettersSharedPath    = "shared/letters"
+	TemplatesSharedPath  = "shared/templates"
+	AnimationsSharedPath = "shared/animations"
 )
 
 // Loader represents low level asset loading manager, which operates in a lazy mode manner.
@@ -151,7 +164,7 @@ func (l *Loader) GetStatic(name string) *ebiten.Image {
 		return result.(*ebiten.Image)
 	}
 
-	file, err := fs.ReadFile(assets.Assets, filepath.Join(ObjectsPath, name))
+	file, err := common.ReadFile(filepath.Join(ObjectsPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
@@ -177,7 +190,7 @@ func (l *Loader) GetShader(name string) *ebiten.Shader {
 		return result.(*ebiten.Shader)
 	}
 
-	file, err := fs.ReadFile(assets.Assets, filepath.Join(ShadersPath, name))
+	file, err := common.ReadFile(filepath.Join(ShadersPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
@@ -201,7 +214,7 @@ func (l *Loader) GetFont(name string) *text.GoTextFaceSource {
 		return result.(*text.GoTextFaceSource)
 	}
 
-	file, err := fs.ReadFile(assets.Assets, filepath.Join(FontsPath, name))
+	file, err := common.ReadFile(filepath.Join(FontsPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
@@ -225,7 +238,7 @@ func (l *Loader) GetLetter(name string) dto.LetterLoaderUnit {
 		return result.(dto.LetterLoaderUnit)
 	}
 
-	file, err := fs.ReadFile(assets.Assets, filepath.Join(LettersPath, name))
+	file, err := common.ReadFile(filepath.Join(LettersPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
@@ -251,7 +264,7 @@ func (l *Loader) GetTemplate(name string) []byte {
 		return result.([]byte)
 	}
 
-	file, err := fs.ReadFile(assets.Assets, filepath.Join(TemplatesPath, name))
+	file, err := common.ReadFile(filepath.Join(TemplatesPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
@@ -275,7 +288,7 @@ func (l *Loader) GetSoundMusic(name string) *mp3.Stream {
 		return stream
 	}
 
-	file, err := fs.ReadFile(assets.Assets, filepath.Join(SoundsPath, name))
+	file, err := common.ReadFile(filepath.Join(SoundsPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
@@ -304,7 +317,7 @@ func (l *Loader) GetSoundFX(name string) *vorbis.Stream {
 		return stream
 	}
 
-	file, err := fs.ReadFile(assets.Assets, filepath.Join(SoundsPath, name))
+	file, err := common.ReadFile(filepath.Join(SoundsPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
@@ -332,7 +345,7 @@ func (l *Loader) GetAnimation(name string, shared bool) *asebiten.Animation {
 	}
 
 	animation, err := asebiten.LoadAnimation(
-		assets.Assets, filepath.Join(AnimationsPath, name))
+		assets.AssetsShared, filepath.Join(AnimationsPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingAnimation.Error()).Error())
 	}

@@ -6,11 +6,14 @@ help:
 .PHONY: generate-proto
 generate-proto: ## Generates ProtocolBuffers API for API Server
 	@protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative api/metadata/metadata.proto && \
-	mv api/metadata/metadata_grpc.pb.go services/fate-seekers-client/pkg/core/networking/metadata/api && \
-	mv api/metadata/metadata.pb.go services/fate-seekers-client/pkg/core/networking/metadata/api
+	cp api/metadata/metadata_grpc.pb.go services/fate-seekers-client/pkg/core/networking/metadata/api && \
+	cp api/metadata/metadata.pb.go services/fate-seekers-client/pkg/core/networking/metadata/api && \
+	cp api/metadata/metadata_grpc.pb.go services/fate-seekers-server/pkg/shared/networking/metadata/api && \
+	cp api/metadata/metadata.pb.go services/fate-seekers-server/pkg/shared/networking/metadata/api
 
 	@protoc --go_out=. --go_opt=paths=source_relative api/content/content.proto && \
-	mv api/content/content.pb.go services/fate-seekers-client/pkg/core/networking/content/api
+	cp api/content/content.pb.go services/fate-seekers-client/pkg/core/networking/content/api && \
+	cp api/content/content.pb.go services/fate-seekers-server/pkg/shared/networking/content/api
 
 .PHONY: create-local-client
 create-local-client: ## Creates fate-seekers-client local directory for API Server
@@ -29,10 +32,14 @@ create-local-server: ## Creates fate-seekers-server local directory for API Serv
 clone-server-config: create-local-server ## Clones fate-seekers-server configuration files to local directory
 	@cp -r ./samples/config/fate-seekers-server/config.yaml $(HOME)/.fate-seekers-server/config
 
-.PHONY: build-server
-build-server: clone-server-config ## Builds fate-seekers-server application executable
-	@go build -v -o build/fate-seekers-server ./cmd/fate-seekers-server/...
+.PHONY: build-server-ui
+build-server-ui: clone-server-config ## Builds fate-seekers-server-ui application executable
+	@go build -v -tags="shared" -o build/fate-seekers-server-ui ./cmd/fate-seekers-server-ui/...
+
+.PHONY: build-server-cli
+build-server-cli: clone-server-config ## Builds fate-seekers-server-cli application executable
+	@go build -v -o build/fate-seekers-server-cli ./cmd/fate-seekers-server-cli/...
 
 .PHONY: build-client
 build-client: clone-client-config ## Builds fate-seekers-client application executable
-	@go build -v -o build/fate-seekers-client ./cmd/fate-seekers-client/...
+	@go build -v -tags="client shared" -o build/fate-seekers-client ./cmd/fate-seekers-client/...

@@ -14,6 +14,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/encryptionkey"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -91,7 +92,7 @@ func newMenuScreen() screen.Screen {
 		ui: builder.Build(
 			menu.NewMenuComponent(
 				func() {
-					if !connector.GetInstance().ValidateKey() {
+					if !encryptionkey.Validate(config.GetSettingsNetworkingEncryptionKey()) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptText(
 								translation.GetInstance().GetTranslation("prompt.networking.encryption-key")))

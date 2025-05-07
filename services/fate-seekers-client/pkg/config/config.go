@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/encryptionkey"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/host"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/port"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -15,9 +17,11 @@ import (
 )
 
 var (
-	ErrReadingFromConfig                       = errors.New("err happened during config file read operation")
-	ErrReadingSettingsLanguageFromConfig       = errors.New("err happened during config file settings language read operation")
-	ErrReadingSettingsNetworkingHostFromConfig = errors.New("err happened during config file networking host read operation")
+	ErrReadingFromConfig                                = errors.New("err happened during config file read operation")
+	ErrReadingSettingsLanguageFromConfig                = errors.New("err happened during config file settings language read operation")
+	ErrReadingSettingsNetworkingReceiverPortFromConfig  = errors.New("err happened during config file networking receiver port read operation")
+	ErrReadingSettingsNetworkingServerHostFromConfig    = errors.New("err happened during config file networking server host read operation")
+	ErrReadingSettingsNetworkingEncryptionKeyFromConfig = errors.New("err happened during config file networking encryption key read operation")
 )
 
 var (
@@ -109,14 +113,30 @@ func Init() {
 	windowWidth := viper.GetInt("settings.window.width")
 	windowHeight := viper.GetInt("settings.window.height")
 	settingsNetworkingReceiverPort = viper.GetInt("settings.networking.receiver.port")
+
+	if !port.Validate(settingsNetworkingReceiverPort) {
+		log.Fatalln(
+			ErrReadingSettingsNetworkingReceiverPortFromConfig.Error(),
+			zap.String("configFile", *configFile),
+			zap.Int("settingsNetworkingReceiverPort", settingsNetworkingReceiverPort))
+	}
+
 	settingsNetworkingServerHost = viper.GetString("settings.networking.server.host")
-	settingsNetworkingEncryptionKey = viper.GetString("settings.networking.encryption.key")
 
 	if !host.Validate(settingsNetworkingServerHost) {
 		log.Fatalln(
-			ErrReadingSettingsNetworkingHostFromConfig.Error(),
+			ErrReadingSettingsNetworkingServerHostFromConfig.Error(),
 			zap.String("configFile", *configFile),
 			zap.String("settingsNetworkingServerHost", settingsNetworkingServerHost))
+	}
+
+	settingsNetworkingEncryptionKey = viper.GetString("settings.networking.encryption.key")
+
+	if !encryptionkey.Validate(settingsNetworkingEncryptionKey) {
+		log.Fatalln(
+			ErrReadingSettingsNetworkingEncryptionKeyFromConfig.Error(),
+			zap.String("configFile", *configFile),
+			zap.String("settingsNetworkingEncryptionKey", settingsNetworkingEncryptionKey))
 	}
 
 	settingsSoundMusic = viper.GetInt("settings.sound.music")
