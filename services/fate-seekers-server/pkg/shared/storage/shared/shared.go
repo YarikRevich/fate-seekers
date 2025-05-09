@@ -18,9 +18,6 @@ type SharedStorage struct {
 	// Represents global background animation.
 	backgroundAnimation *combiner.AnimationCombiner
 
-	// Represents global blinking screen animation.
-	blinkingScreenAnimation *combiner.AnimationCombiner
-
 	// Represents global shader start time.
 	shaderStartTime time.Time
 }
@@ -28,11 +25,6 @@ type SharedStorage struct {
 // GetBackgroundAnimation retrieves background animation.
 func (ss *SharedStorage) GetBackgroundAnimation() *combiner.AnimationCombiner {
 	return ss.backgroundAnimation
-}
-
-// GetBlinkingScreenAnimation retrieves blinking screen animation.
-func (ss *SharedStorage) GetBlinkingScreenAnimation() *combiner.AnimationCombiner {
-	return ss.blinkingScreenAnimation
 }
 
 // GetShaderTime represents shader global time.
@@ -50,12 +42,6 @@ func newSharedStorage() *SharedStorage {
 			loader.GetInstance().GetAnimation(loader.Background4Animation, false),
 			loader.GetInstance().GetAnimation(loader.Background5Animation, false),
 			loader.GetInstance().GetAnimation(loader.Background6Animation, false),
-		),
-		blinkingScreenAnimation: combiner.NewAnimationCombiner(
-			loader.GetInstance().GetAnimation(loader.BlinkingScreen1Animation, false),
-			loader.GetInstance().GetAnimation(loader.BlinkingScreen2Animation, false),
-			loader.GetInstance().GetAnimation(loader.BlinkingScreen3Animation, false),
-			loader.GetInstance().GetAnimation(loader.BlinkingScreen4Animation, false),
 		),
 		shaderStartTime: time.Now(),
 	}

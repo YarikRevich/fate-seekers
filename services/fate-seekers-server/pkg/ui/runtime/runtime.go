@@ -5,12 +5,12 @@ import (
 	"time"
 
 	"github.com/Frabjous-Studios/asebiten"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen/menu"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen/settings"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/action"

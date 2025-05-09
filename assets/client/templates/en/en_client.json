@@ -1,0 +1,62 @@
+{
+    "client.menu.credits": {
+        "one": "Credits",
+        "other": "Credits"
+    },
+    "client.menu.collections": {
+        "one": "Collections",
+        "other": "Collections"
+    },
+    "client.resume.continue": {
+        "one": "Continue",
+        "other": "Continue"
+    },
+    "client.resume.settings": {
+        "one": "Settings",
+        "other": "Settings"
+    },
+    "client.resume.exit": {
+        "one": "Exit",
+        "other": "Exit"
+    },
+    "client.settings.sound.fx": {
+        "one": "Sound FX",
+        "other": "Sound FX"
+    },
+    "client.settings.sound.music": {
+        "one": "Music",
+        "other": "Music"
+    },
+    "client.settings.host": {
+        "one": "Host",
+        "other": "Host"
+    },
+    "client.letterimage.close": {
+        "one": "Close",
+        "other": "Close"
+    },
+    "client.prompt.networking.encryption-key": {
+        "one": "Server key is not set or is not valid. \nProceed with its configuration?",
+        "other": "Server key is not set or is not valid. \nProceed with its configuration?"
+    },
+    "client.answerinput.solvetext": {
+        "one": "Please solve",
+        "other": "Please solve"
+    },
+    "client.answerinput.entertext": {
+        "one": "Enter text please",
+        "other": "Enter text please"
+    },
+    "client.answerinput.submit": {
+        "one": "Submit",
+        "other": "Submit"
+    },
+    "client.answerinput.close": {
+        "one": "Close",
+        "other": "Close"
+    },
+    "client.settingsmanager.invalid-networking-server-host": {
+        "one": "Provided server host is invalid",
+        "other": "Provided server host is invalid"
+    }
+}

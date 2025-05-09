@@ -146,7 +146,7 @@ func newPromptComponent() *PromptComponent {
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("prompt.submit"),
+			translation.GetInstance().GetTranslation("shared.prompt.submit"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
@@ -173,7 +173,7 @@ func newPromptComponent() *PromptComponent {
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("prompt.close"),
+			translation.GetInstance().GetTranslation("shared.prompt.close"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(

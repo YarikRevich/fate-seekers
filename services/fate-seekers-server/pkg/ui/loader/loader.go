@@ -1,17 +1,13 @@
-//go:build shared
-// +build shared
-
 package loader
 
 import (
 	"bytes"
 	"image"
-	"io/fs"
 	"path/filepath"
 	"sync"
 
-	"github.com/YarikRevich/fate-seekers/assets"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/loader/common"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/pkg/errors"
@@ -60,30 +56,19 @@ const (
 	TextInputIdle = "ui/text-input-idle.png"
 )
 
-// Describes all the available shaders to be loaded.
-const (
-	ToxicRainShader = "toxic-rain.kage"
-)
-
 // Describes all the available fonts to be loaded.
 const (
 	KyivRegularFont = "kyiv-regular.ttf"
 )
 
-// Describes all the available letters to be loaded.
+// Describes all the available shared templates to be loaded.
 const (
-	LoneManLetter = "lone-man.json"
-)
-
-// Describes all the available templates to be loaded.
-const (
-	EnglishTemplate   = "en/en.json"
-	UkrainianTemplate = "uk/uk.json"
+	EnglishSharedTemplate   = "en/en_shared.json"
+	UkrainianSharedTemplate = "uk/uk_shared.json"
 )
 
 // Describes all the available animations to be loaded.
 const (
-	SkullAnimation  = "skull/skull.json"
 	LogoAnimation   = "logo/logo.json"
 	LoaderAnimation = "loader/loader.json"
 
@@ -93,30 +78,14 @@ const (
 	Background4Animation = "background/4/background-4.json"
 	Background5Animation = "background/5/background-5.json"
 	Background6Animation = "background/6/background-6.json"
-
-	BlinkingScreen1Animation = "blinking-screen/1/blinking-screen-1.json"
-	BlinkingScreen2Animation = "blinking-screen/2/blinking-screen-2.json"
-	BlinkingScreen3Animation = "blinking-screen/3/blinking-screen-3.json"
-	BlinkingScreen4Animation = "blinking-screen/4/blinking-screen-4.json"
 )
 
-// Describes all the available sounds to be loaded.
+// Decsribes all the embedded files base paths.
 const (
-	AmbientMusicSound   = "music/ambient/ambient.mp3"
-	EnergetykMusicSound = "music/energetyk/energetyk.mp3"
-
-	TestFXSound = "fx/test/test.ogg"
-)
-
-// Decsribes all the embedded files base pathes.
-const (
-	ShadersPath    = "dist/shaders"
-	FontsPath      = "dist/fonts"
-	ObjectsPath    = "dist/statics"
-	LettersPath    = "dist/letters"
-	TemplatesPath  = "dist/templates"
-	AnimationsPath = "dist/animations"
-	SoundsPath     = "dist/sounds"
+	FontsPath      = "fonts"
+	StaticsPath    = "statics"
+	TemplatesPath  = "templates"
+	AnimationsPath = "animations"
 )
 
 // Loader represents low level asset loading manager, which operates in a lazy mode manner.
@@ -134,14 +103,14 @@ type Loader struct {
 	animations sync.Map
 }
 
-// GetObject retrieves object content with the given name.
+// GetStatic retrieves static content with the given name.
 func (l *Loader) GetStatic(name string) *ebiten.Image {
 	result, ok := l.statics.Load(name)
 	if ok {
 		return result.(*ebiten.Image)
 	}
 
-	file, err := fs.ReadFile(assets.Assets, filepath.Join(ObjectsPath, name))
+	file, err := common.ReadFile(filepath.Join(StaticsPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
@@ -167,7 +136,7 @@ func (l *Loader) GetFont(name string) *text.GoTextFaceSource {
 		return result.(*text.GoTextFaceSource)
 	}
 
-	file, err := fs.ReadFile(assets.Assets, filepath.Join(FontsPath, name))
+	file, err := common.ReadFile(filepath.Join(FontsPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
@@ -191,7 +160,7 @@ func (l *Loader) GetTemplate(name string) []byte {
 		return result.([]byte)
 	}
 
-	file, err := fs.ReadFile(assets.Assets, filepath.Join(TemplatesPath, name))
+	file, err := common.ReadFile(filepath.Join(TemplatesPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
@@ -213,8 +182,7 @@ func (l *Loader) GetAnimation(name string, shared bool) *asebiten.Animation {
 		}
 	}
 
-	animation, err := asebiten.LoadAnimation(
-		assets.Assets, filepath.Join(AnimationsPath, name))
+	animation, err := common.LoadAnimation(filepath.Join(AnimationsPath, name))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingAnimation.Error()).Error())
 	}

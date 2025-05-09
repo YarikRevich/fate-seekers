@@ -4,12 +4,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/storage/shared"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/effect/transition/transparent"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/dispatcher"
@@ -91,8 +89,8 @@ func newSettingsScreen() screen.Screen {
 	return &SettingsScreen{
 		ui: builder.Build(
 			settings.NewSettingsComponent(
-				func(soundMusic, soundFX int, networkingHost, networkingEncryptionKey, language string) {
-					if settingsmanager.ProcessChanges(soundMusic, soundFX, networkingHost, networkingEncryptionKey, language) {
+				func(networkingServerPort, networkingEncryptionKey, language string) {
+					if settingsmanager.ProcessChanges(networkingServerPort, networkingEncryptionKey, language) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetActiveScreenAction(store.GetPreviousScreen()))
 
@@ -100,15 +98,15 @@ func newSettingsScreen() screen.Screen {
 							action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
 					}
 				},
-				func(soundMusic, soundFX int, networkingHost, networkingEncryptionKey, language string) {
-					if settingsmanager.AnyProvidedChanges(soundMusic, soundFX, networkingHost, networkingEncryptionKey, language) {
+				func(networkingServerPort, networkingEncryptionKey, language string) {
+					if settingsmanager.AnyProvidedChanges(networkingServerPort, networkingEncryptionKey, language) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptText(
-								translation.GetInstance().GetTranslation("prompt.settings")))
+								translation.GetInstance().GetTranslation("shared.prompt.settings")))
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptSubmitCallback(func() {
-								settingsmanager.ProcessChanges(soundMusic, soundFX, networkingHost, networkingEncryptionKey, language)
+								settingsmanager.ProcessChanges(networkingServerPort, networkingEncryptionKey, language)
 
 								transparentTransitionEffect.Reset()
 
@@ -117,8 +115,6 @@ func newSettingsScreen() screen.Screen {
 
 								dispatcher.GetInstance().Dispatch(
 									action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
-
-								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 							}))
 
 						dispatcher.GetInstance().Dispatch(
@@ -130,8 +126,6 @@ func newSettingsScreen() screen.Screen {
 
 								dispatcher.GetInstance().Dispatch(
 									action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
-
-								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 							}))
 					} else {
 						transparentTransitionEffect.Reset()
@@ -141,9 +135,6 @@ func newSettingsScreen() screen.Screen {
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
-
-						sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
-						sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 					}
 				})),
 		transparentTransitionEffect: transparentTransitionEffect,

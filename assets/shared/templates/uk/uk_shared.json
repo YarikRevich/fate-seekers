@@ -1,0 +1,70 @@
+{
+    "shared.menu.start": {
+        "one": "Почати",
+        "other": "Почати"
+    },
+    "shared.menu.settings": {
+        "one": "Налаштування",
+        "other": "Налаштування"
+    },
+    "shared.menu.exit": {
+        "one": "Вийти",
+        "other": "Вийти"
+    },
+    "shared.settings.title": {
+        "one": "Налаштування",
+        "other": "Налаштування"
+    },
+    "shared.settings.language": {
+        "one": "Мова",
+        "other": "Мова"
+    },
+    "shared.settings.language.english": {
+        "one": "Англійська",
+        "other": "Англійська"
+    },
+    "shared.settings.language.ukrainian": {
+        "one": "Українська",
+        "other": "Українська"
+    },
+    "shared.settings.encryption-key": {
+        "one": "Ключ сервера",
+        "other": "Ключ сервера"
+    },
+    "shared.settings.submit": {
+        "one": "Підтвердити",
+        "other": "Підтвердити"
+    },
+    "shared.settings.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
+    "shared.prompt.submit": {
+        "one": "Підтвердити",
+        "other": "Підтвердити"
+    },
+    "shared.prompt.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
+    "shared.prompt.settings": {
+        "one": "Є не затверджені зміни. Чи треба їх застосувати?",
+        "other": "Є не затверджені зміни. Чи треба їх застосувати?"
+    },
+    "shared.prompt.networking.encryption-key": {
+        "one": "Ключ від сервера не вказаний або не є коректним. \nПерейти до його введення?",
+        "other": "Ключ від сервера не вказаний або не є коректним. \nПерейти до його введення?"
+    },
+    "shared.settingsmanager.success": {
+        "one": "Налаштування були змінені",
+        "other": "Налаштування були змінені"
+    },
+    "shared.settingsmanager.restart-demand": {
+        "one": "Налаштування були змінені, але певні з них вимагають перезапуску гри",
+        "other": "Налаштування були змінені, але певні з них вимагають перезапуску гри"
+    },
+    "shared.settingsmanager.invalid-networking-encryption-key": {
+        "one": "Надано некоректний ключ для сервера",
+        "other": "Надано некоректний ключ для сервера"
+    }
+}

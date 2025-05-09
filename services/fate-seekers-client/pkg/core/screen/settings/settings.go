@@ -104,7 +104,7 @@ func newSettingsScreen() screen.Screen {
 					if settingsmanager.AnyProvidedChanges(soundMusic, soundFX, networkingHost, networkingEncryptionKey, language) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptText(
-								translation.GetInstance().GetTranslation("prompt.settings")))
+								translation.GetInstance().GetTranslation("shared.prompt.settings")))
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptSubmitCallback(func() {

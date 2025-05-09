@@ -4,9 +4,6 @@ import (
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/action"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/dispatcher"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/manager/translation"
@@ -15,13 +12,13 @@ import (
 )
 
 // ProcessChanges performs provided changes application.
-func ProcessChanges(networkingPort, networkingEncryptionKey, language string) bool {
+func ProcessChanges(networkingServerPort string, networkingEncryptionKey, language string) bool {
 	var applied, demandRestart bool
 
-	if config.GetSettingsNetworkingServerHost() != networkingPort {
-		if !port.Validate(networkingPort) {
+	if config.GetSettingsNetworkingServerPort() != networkingServerPort {
+		if !port.Validate(networkingServerPort) {
 			notification.GetInstance().Push(
-				translation.GetInstance().GetTranslation("settingsmanager.invalid-networking-host"),
+				translation.GetInstance().GetTranslation("shared.settingsmanager.invalid-networking-server-port"),
 				time.Second*3,
 				common.NotificationErrorTextColor)
 
@@ -32,7 +29,7 @@ func ProcessChanges(networkingPort, networkingEncryptionKey, language string) bo
 	if config.GetSettingsNetworkingEncryptionKey() != networkingEncryptionKey {
 		if !encryptionkey.Validate(networkingEncryptionKey) {
 			notification.GetInstance().Push(
-				translation.GetInstance().GetTranslation("settingsmanager.invalid-networking-encryption-key"),
+				translation.GetInstance().GetTranslation("shared.settingsmanager.invalid-networking-encryption-key"),
 				time.Second*3,
 				common.NotificationErrorTextColor)
 
@@ -40,26 +37,8 @@ func ProcessChanges(networkingPort, networkingEncryptionKey, language string) bo
 		}
 	}
 
-	if config.GetSettingsSoundMusic() != soundMusic {
-		config.SetSettingsSoundMusic(soundMusic)
-
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetSoundMusicUpdated(value.SOUND_MUSIC_UPDATED_FALSE_VALUE))
-
-		applied = true
-	}
-
-	if config.GetSettingsSoundFX() != soundFX {
-		config.SetSettingsSoundFX(soundFX)
-
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetSoundFXUpdated(value.SOUND_FX_UPDATED_FALSE_VALUE))
-
-		applied = true
-	}
-
-	if config.GetSettingsNetworkingServerHost() != networkingHost {
-		config.SetSettingsNetworkingHost(networkingHost)
+	if config.GetSettingsNetworkingServerPort() != networkingServerPort {
+		config.SetSettingsNetworkingServerPort(networkingServerPort)
 
 		applied = true
 	}
@@ -80,12 +59,12 @@ func ProcessChanges(networkingPort, networkingEncryptionKey, language string) bo
 	if applied {
 		if demandRestart {
 			notification.GetInstance().Push(
-				translation.GetInstance().GetTranslation("settingsmanager.restart-demand"),
+				translation.GetInstance().GetTranslation("shared.settingsmanager.restart-demand"),
 				time.Second*3,
 				common.NotificationInfoTextColor)
 		} else {
 			notification.GetInstance().Push(
-				translation.GetInstance().GetTranslation("settingsmanager.success"),
+				translation.GetInstance().GetTranslation("shared.settingsmanager.success"),
 				time.Second*3,
 				common.NotificationInfoTextColor)
 		}
@@ -95,10 +74,8 @@ func ProcessChanges(networkingPort, networkingEncryptionKey, language string) bo
 }
 
 // AnyProvidedChanges checks if there are any new provided changes.
-func AnyProvidedChanges(soundMusic, soundFX int, networkingHost, networkingEncryptionKey, language string) bool {
-	return config.GetSettingsSoundMusic() != soundMusic ||
-		config.GetSettingsSoundFX() != soundFX ||
-		config.GetSettingsNetworkingServerHost() != networkingHost ||
+func AnyProvidedChanges(networkingServerPort, networkingEncryptionKey, language string) bool {
+	return config.GetSettingsNetworkingServerPort() != networkingServerPort ||
 		config.GetSettingsNetworkingEncryptionKey() != networkingEncryptionKey ||
 		config.GetSettingsLanguage() != language
 }

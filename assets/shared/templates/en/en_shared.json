@@ -1,0 +1,70 @@
+{
+    "shared.menu.start": {
+        "one": "Start",
+        "other": "Start"
+    },
+    "shared.menu.settings": {
+        "one": "Settings",
+        "other": "Settings"
+    },
+    "shared.menu.exit": {
+        "one": "Exit",
+        "other": "Exit"
+    },
+    "shared.settings.title": {
+        "one": "Settings",
+        "other": "Settings"
+    },
+    "shared.settings.language": {
+        "one": "Language",
+        "other": "Language"
+    },
+    "shared.settings.language.english": {
+        "one": "English",
+        "other": "English"
+    },
+    "shared.settings.language.ukrainian": {
+        "one": "Ukrainian",
+        "other": "Ukrainian"
+    },
+    "shared.settings.encryption-key": {
+        "one": "Server key",
+        "other": "Server key"
+    },
+    "shared.settings.submit": {
+        "one": "Submit",
+        "other": "Submit"
+    },
+    "shared.settings.close": {
+        "one": "Close",
+        "other": "Close"
+    },
+    "shared.prompt.submit": {
+        "one": "Submit",
+        "other": "Submit"
+    },
+    "shared.prompt.close": {
+        "one": "Close",
+        "other": "Close"
+    },
+    "shared.prompt.settings": {
+        "one": "There are unsaved changes. Would you like to apply them?",
+        "other": "There are unsaved changes. Would you like to apply them?"
+    },
+    "shared.prompt.networking.encryption-key": {
+        "one": "Server key is not set or is not valid. \nProceed with its configuration?",
+        "other": "Server key is not set or is not valid. \nProceed with its configuration?"
+    },
+    "shared.settingsmanager.success": {
+        "one": "Settings have been changed",
+        "other": "Settings have been changed"
+    },
+    "shared.settingsmanager.restart-demand": {
+        "one": "Settings have been changed, but some of them need game restart",
+        "other": "Settings have been changed, but some of them need game restart"
+    },
+    "shared.settingsmanager.invalid-networking-encryption-key": {
+        "one": "Provided encryption key is invalid",
+        "other": "Provided encryption key is invalid"
+    }
+}

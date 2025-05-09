@@ -68,7 +68,7 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("menu.start"),
+			translation.GetInstance().GetTranslation("shared.menu.start"),
 			buttonFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
@@ -94,59 +94,7 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("menu.credits"),
-			buttonFont,
-			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   30,
-			Right:  30,
-			Top:    20,
-			Bottom: 20,
-		}),
-		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			creditsCallback()
-		}),
-	))
-
-	buttonsContainer.AddChild(widget.NewButton(
-		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-			Stretch: true,
-		})),
-		widget.ButtonOpts.Image(&widget.ButtonImage{
-			Idle:         buttonIdleIcon,
-			Hover:        buttonHoverIcon,
-			Pressed:      buttonIdleIcon,
-			PressedHover: buttonIdleIcon,
-			Disabled:     buttonIdleIcon,
-		}),
-		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("menu.collections"),
-			buttonFont,
-			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   30,
-			Right:  30,
-			Top:    20,
-			Bottom: 20,
-		}),
-		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			collectionsCallback()
-		}),
-	))
-
-	buttonsContainer.AddChild(widget.NewButton(
-		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-			Stretch: true,
-		})),
-		widget.ButtonOpts.Image(&widget.ButtonImage{
-			Idle:         buttonIdleIcon,
-			Hover:        buttonHoverIcon,
-			Pressed:      buttonIdleIcon,
-			PressedHover: buttonIdleIcon,
-			Disabled:     buttonIdleIcon,
-		}),
-		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("menu.settings"),
+			translation.GetInstance().GetTranslation("shared.menu.settings"),
 			buttonFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
@@ -172,7 +120,7 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("menu.exit"),
+			translation.GetInstance().GetTranslation("shared.menu.exit"),
 			buttonFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{

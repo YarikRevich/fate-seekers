@@ -95,7 +95,7 @@ func newMenuScreen() screen.Screen {
 					if !encryptionkey.Validate(config.GetSettingsNetworkingEncryptionKey()) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptText(
-								translation.GetInstance().GetTranslation("prompt.networking.encryption-key")))
+								translation.GetInstance().GetTranslation("shared.prompt.networking.encryption-key")))
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptSubmitCallback(func() {

@@ -1,6 +1,8 @@
 package port
 
-import "regexp"
+import (
+	"regexp"
+)
 
 // Describes allowed port validation value.
 const (

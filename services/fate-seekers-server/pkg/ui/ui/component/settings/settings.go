@@ -2,14 +2,13 @@ package settings
 
 import (
 	"image/color"
-	"strconv"
 
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/config"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/core/tools/scaler"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/core/ui/common"
-	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/core/ui/component/common"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/core/ui/manager/translation"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/loader"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/loader"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/tools/scaler"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/common"
+	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/manager/translation"
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -66,7 +65,7 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.title"),
+			translation.GetInstance().GetTranslation("shared.settings.title"),
 			generalFont,
 			color.White)))
 
@@ -88,7 +87,7 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.host"),
+			translation.GetInstance().GetTranslation("shared.settings.server.port"),
 			generalFont,
 			color.White)))
 
@@ -149,7 +148,7 @@ func NewSettingsComponent(
 			return false, &newInputText
 		}))
 
-	networkingPortInput.SetText(strconv.Itoa(config.GetSettingsNetworkingServerPort()))
+	networkingPortInput.SetText(config.GetSettingsNetworkingServerPort())
 
 	components.AddChild(networkingPortInput)
 
@@ -158,7 +157,7 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.encryption-key"),
+			translation.GetInstance().GetTranslation("shared.settings.encryption-key"),
 			generalFont,
 			color.White)))
 
@@ -228,7 +227,7 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.language"),
+			translation.GetInstance().GetTranslation("shared.settings.language"),
 			generalFont,
 			color.White)))
 
@@ -303,9 +302,9 @@ func NewSettingsComponent(
 			func(e any) string {
 				switch e.(string) {
 				case config.SETTINGS_LANGUAGE_ENGLISH:
-					return translation.GetInstance().GetTranslation("settings.language.english")
+					return translation.GetInstance().GetTranslation("shared.settings.language.english")
 				case config.SETTINGS_LANGUAGE_UKRAINIAN:
-					return translation.GetInstance().GetTranslation("settings.language.ukrainian")
+					return translation.GetInstance().GetTranslation("shared.settings.language.ukrainian")
 				default:
 					return e.(string)
 				}
@@ -313,9 +312,9 @@ func NewSettingsComponent(
 			func(e any) string {
 				switch e.(string) {
 				case config.SETTINGS_LANGUAGE_ENGLISH:
-					return translation.GetInstance().GetTranslation("settings.language.english")
+					return translation.GetInstance().GetTranslation("shared.settings.language.english")
 				case config.SETTINGS_LANGUAGE_UKRAINIAN:
-					return translation.GetInstance().GetTranslation("settings.language.ukrainian")
+					return translation.GetInstance().GetTranslation("shared.settings.language.ukrainian")
 				default:
 					return e.(string)
 				}
@@ -370,7 +369,7 @@ func NewSettingsComponent(
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("answerinput.submit"),
+			translation.GetInstance().GetTranslation("shared.settings.submit"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
@@ -401,7 +400,7 @@ func NewSettingsComponent(
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("answerinput.close"),
+			translation.GetInstance().GetTranslation("shared.settings.close"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(

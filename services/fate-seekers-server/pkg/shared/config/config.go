@@ -80,7 +80,7 @@ const (
 func SetupDefaultConfig() {
 	viper.SetDefault("settings.window.width", 1920)
 	viper.SetDefault("settings.window.height", 1080)
-	viper.SetDefault("settings.networking.server.host", "localhost:8080")
+	viper.SetDefault("settings.networking.server.port", "8090")
 	viper.SetDefault("settings.networking.encryption.key", "")
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
 	viper.SetDefault("operation.debug", false)
@@ -162,12 +162,12 @@ func SetSettingsWindowSize(width, height int) {
 	ebiten.SetWindowSize(width, height)
 }
 
-func SetSettingsNetworkingHost(value string) {
-	viper.Set("settings.networking.server.host", value)
+func SetSettingsNetworkingServerPort(value string) {
+	viper.Set("settings.networking.server.port", value)
 
 	viper.WriteConfigAs(viper.ConfigFileUsed())
 
-	settingsNetworkingServerHost = value
+	settingsNetworkingServerPort = value
 }
 
 func SetSettingsNetworkingEncryptionKey(value string) {
@@ -178,11 +178,7 @@ func SetSettingsNetworkingEncryptionKey(value string) {
 	settingsNetworkingEncryptionKey = value
 }
 
-func GetSettingsNetworkingReceiverPort() int {
-	return settingsNetworkingReceiverPort
-}
-
-func GetSettingsNetworkingServerPort() int {
+func GetSettingsNetworkingServerPort() string {
 	return settingsNetworkingServerPort
 }
 

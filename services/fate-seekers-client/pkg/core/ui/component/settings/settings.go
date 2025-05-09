@@ -66,7 +66,7 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.title"),
+			translation.GetInstance().GetTranslation("shared.settings.title"),
 			generalFont,
 			color.White)))
 
@@ -85,7 +85,7 @@ func NewSettingsComponent(
 
 	components.AddChild(widget.NewText(
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.sound.music"),
+			translation.GetInstance().GetTranslation("client.settings.sound.music"),
 			generalFont,
 			color.White)))
 
@@ -141,7 +141,7 @@ func NewSettingsComponent(
 
 	components.AddChild(widget.NewText(
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.sound.fx"),
+			translation.GetInstance().GetTranslation("client.settings.sound.fx"),
 			generalFont,
 			color.White)))
 
@@ -200,7 +200,7 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.host"),
+			translation.GetInstance().GetTranslation("client.settings.host"),
 			generalFont,
 			color.White)))
 
@@ -270,7 +270,7 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.encryption-key"),
+			translation.GetInstance().GetTranslation("shared.settings.encryption-key"),
 			generalFont,
 			color.White)))
 
@@ -340,7 +340,7 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.language"),
+			translation.GetInstance().GetTranslation("shared.settings.language"),
 			generalFont,
 			color.White)))
 
@@ -415,9 +415,9 @@ func NewSettingsComponent(
 			func(e any) string {
 				switch e.(string) {
 				case config.SETTINGS_LANGUAGE_ENGLISH:
-					return translation.GetInstance().GetTranslation("settings.language.english")
+					return translation.GetInstance().GetTranslation("shared.settings.language.english")
 				case config.SETTINGS_LANGUAGE_UKRAINIAN:
-					return translation.GetInstance().GetTranslation("settings.language.ukrainian")
+					return translation.GetInstance().GetTranslation("shared.settings.language.ukrainian")
 				default:
 					return e.(string)
 				}
@@ -425,9 +425,9 @@ func NewSettingsComponent(
 			func(e any) string {
 				switch e.(string) {
 				case config.SETTINGS_LANGUAGE_ENGLISH:
-					return translation.GetInstance().GetTranslation("settings.language.english")
+					return translation.GetInstance().GetTranslation("shared.settings.language.english")
 				case config.SETTINGS_LANGUAGE_UKRAINIAN:
-					return translation.GetInstance().GetTranslation("settings.language.ukrainian")
+					return translation.GetInstance().GetTranslation("shared.settings.language.ukrainian")
 				default:
 					return e.(string)
 				}
@@ -482,7 +482,7 @@ func NewSettingsComponent(
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("answerinput.submit"),
+			translation.GetInstance().GetTranslation("shared.settings.submit"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
@@ -515,7 +515,7 @@ func NewSettingsComponent(
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("answerinput.close"),
+			translation.GetInstance().GetTranslation("shared.settings.close"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(

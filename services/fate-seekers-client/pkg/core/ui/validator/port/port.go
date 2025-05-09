@@ -2,7 +2,6 @@ package port
 
 import (
 	"regexp"
-	"strconv"
 )
 
 // Describes allowed port validation value.
@@ -11,8 +10,8 @@ const (
 )
 
 // Validate performs provided port value validation.
-func Validate(value int) bool {
-	match, err := regexp.MatchString(allowedPattern, strconv.Itoa(value))
+func Validate(value string) bool {
+	match, err := regexp.MatchString(allowedPattern, value)
 	if err != nil {
 		return false
 	}

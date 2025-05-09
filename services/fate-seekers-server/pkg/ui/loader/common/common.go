@@ -12,7 +12,7 @@ import (
 
 // Represents all the available base paths.
 const (
-	ClientBasePath = "client"
+	ServerBasePath = "server"
 	SharedBasePath = "shared"
 )
 
@@ -20,7 +20,7 @@ const (
 func ReadFile(path string) ([]byte, error) {
 	file, err := fs.ReadFile(assets.AssetsShared, filepath.Join(SharedBasePath, path))
 	if errors.Is(err, os.ErrNotExist) {
-		file, err = fs.ReadFile(assets.AssetsClient, filepath.Join(ClientBasePath, path))
+		file, err = fs.ReadFile(assets.AssetsServer, filepath.Join(ServerBasePath, path))
 		if err != nil {
 			return nil, err
 		}
@@ -37,7 +37,7 @@ func LoadAnimation(path string) (*asebiten.Animation, error) {
 		assets.AssetsShared, filepath.Join(SharedBasePath, path))
 	if errors.Is(err, os.ErrNotExist) {
 		animation, err = asebiten.LoadAnimation(
-			assets.AssetsClient, filepath.Join(ClientBasePath, path))
+			assets.AssetsServer, filepath.Join(ServerBasePath, path))
 		if err != nil {
 			return nil, err
 		}

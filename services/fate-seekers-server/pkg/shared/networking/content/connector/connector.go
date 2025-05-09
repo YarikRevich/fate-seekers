@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"syscall"
 
@@ -25,12 +26,17 @@ type NetworkingContentConnector struct {
 }
 
 func (ncc *NetworkingContentConnector) Connect() error {
+	networkingServerPortInt, err := strconv.Atoi(config.GetSettingsNetworkingServerPort())
+	if err != nil {
+		return err
+	}
+
 	ctx, close := context.WithCancel(context.Background())
 
-	go func() {
+	go func(ctx context.Context, close context.CancelFunc) {
 		err := udpt.Receive(
 			ctx,
-			config.GetSettingsNetworkingReceiverPort(),
+			networkingServerPortInt,
 			[]byte(config.GetSettingsNetworkingEncryptionKey()),
 			func(k string, v []byte) error {
 				return nil
@@ -40,16 +46,16 @@ func (ncc *NetworkingContentConnector) Connect() error {
 
 			logging.GetInstance().Fatal(err.Error())
 		}
-	}()
+	}(ctx, close)
 
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	go func() {
+	go func(close context.CancelFunc) {
 		select {
 		case <-sigc:
 			close()
 		}
-	}()
+	}(close)
 
 	return nil
 }

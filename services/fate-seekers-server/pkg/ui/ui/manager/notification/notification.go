@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/core/ui/component/notification"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/dto"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/notification"
 )
 
 var (

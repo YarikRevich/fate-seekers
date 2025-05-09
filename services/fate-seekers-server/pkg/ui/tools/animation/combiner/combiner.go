@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/Frabjous-Studios/asebiten"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 

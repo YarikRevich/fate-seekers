@@ -4,8 +4,8 @@ import (
 	"errors"
 	"image/color"
 
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/core/tools/scaler"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/tools/scaler"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 

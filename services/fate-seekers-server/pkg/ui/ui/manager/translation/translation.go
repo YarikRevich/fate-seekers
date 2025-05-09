@@ -37,10 +37,10 @@ func newTranslationManager() *TranslationManager {
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
 	bundle.MustParseMessageFileBytes(
-		loader.GetInstance().GetTemplate(loader.EnglishTemplate), loader.EnglishTemplate)
+		loader.GetInstance().GetTemplate(loader.EnglishSharedTemplate), loader.EnglishSharedTemplate)
 
 	bundle.MustParseMessageFileBytes(
-		loader.GetInstance().GetTemplate(loader.UkrainianTemplate), loader.UkrainianTemplate)
+		loader.GetInstance().GetTemplate(loader.UkrainianSharedTemplate), loader.UkrainianSharedTemplate)
 
 	var localizer *i18n.Localizer
 

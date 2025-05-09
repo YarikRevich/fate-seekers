@@ -27,6 +27,7 @@ clone-client-config: create-local-client ## Clones fate-seekers-client configura
 .PHONY: create-local-server
 create-local-server: ## Creates fate-seekers-server local directory for API Server
 	@mkdir -p $(HOME)/.fate-seekers-server/config
+	@mkdir -p $(HOME)/.fate-seekers-server/internal/database
 
 .PHONY: clone-server-config
 clone-server-config: create-local-server ## Clones fate-seekers-server configuration files to local directory
@@ -34,11 +35,11 @@ clone-server-config: create-local-server ## Clones fate-seekers-server configura
 
 .PHONY: build-server-ui
 build-server-ui: clone-server-config ## Builds fate-seekers-server-ui application executable
-	@go build -v -tags="shared" -o build/fate-seekers-server-ui ./cmd/fate-seekers-server-ui/...
+	@go build -v -tags="server shared" -o build/fate-seekers-server-ui ./cmd/fate-seekers-server-ui/...
 
 .PHONY: build-server-cli
 build-server-cli: clone-server-config ## Builds fate-seekers-server-cli application executable
-	@go build -v -o build/fate-seekers-server-cli ./cmd/fate-seekers-server-cli/...
+	@go build -v -tags="server shared" -o build/fate-seekers-server-cli ./cmd/fate-seekers-server-cli/...
 
 .PHONY: build-client
 build-client: clone-client-config ## Builds fate-seekers-client application executable

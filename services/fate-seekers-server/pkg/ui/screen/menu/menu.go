@@ -95,7 +95,7 @@ func newMenuScreen() screen.Screen {
 					if !encryptionkey.Validate(config.GetSettingsNetworkingEncryptionKey()) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptText(
-								translation.GetInstance().GetTranslation("prompt.networking.encryption-key")))
+								translation.GetInstance().GetTranslation("client.prompt.networking.encryption-key")))
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptSubmitCallback(func() {
@@ -130,8 +130,8 @@ func newMenuScreen() screen.Screen {
 							if err == nil {
 								transparentTransitionEffect.Reset()
 
-								dispatcher.GetInstance().Dispatch(
-									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+								// dispatcher.GetInstance().Dispatch(
+								// 	action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
 							}
 						})
 

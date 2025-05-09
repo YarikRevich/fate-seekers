@@ -15,13 +15,13 @@ import (
 )
 
 // ProcessChanges performs provided changes application.
-func ProcessChanges(soundMusic, soundFX int, networkingHost, networkingEncryptionKey, language string) bool {
+func ProcessChanges(soundMusic, soundFX int, networkingServerHost, networkingEncryptionKey, language string) bool {
 	var applied, demandRestart bool
 
-	if config.GetSettingsNetworkingServerHost() != networkingHost {
-		if !host.Validate(networkingHost) {
+	if config.GetSettingsNetworkingServerHost() != networkingServerHost {
+		if !host.Validate(networkingServerHost) {
 			notification.GetInstance().Push(
-				translation.GetInstance().GetTranslation("settingsmanager.invalid-networking-host"),
+				translation.GetInstance().GetTranslation("client.settingsmanager.invalid-networking-server-host"),
 				time.Second*3,
 				common.NotificationErrorTextColor)
 
@@ -32,7 +32,7 @@ func ProcessChanges(soundMusic, soundFX int, networkingHost, networkingEncryptio
 	if config.GetSettingsNetworkingEncryptionKey() != networkingEncryptionKey {
 		if !encryptionkey.Validate(networkingEncryptionKey) {
 			notification.GetInstance().Push(
-				translation.GetInstance().GetTranslation("settingsmanager.invalid-networking-encryption-key"),
+				translation.GetInstance().GetTranslation("shared.settingsmanager.invalid-networking-encryption-key"),
 				time.Second*3,
 				common.NotificationErrorTextColor)
 
@@ -58,8 +58,8 @@ func ProcessChanges(soundMusic, soundFX int, networkingHost, networkingEncryptio
 		applied = true
 	}
 
-	if config.GetSettingsNetworkingServerHost() != networkingHost {
-		config.SetSettingsNetworkingHost(networkingHost)
+	if config.GetSettingsNetworkingServerHost() != networkingServerHost {
+		config.SetSettingsNetworkingServerHost(networkingServerHost)
 
 		applied = true
 	}
@@ -80,12 +80,12 @@ func ProcessChanges(soundMusic, soundFX int, networkingHost, networkingEncryptio
 	if applied {
 		if demandRestart {
 			notification.GetInstance().Push(
-				translation.GetInstance().GetTranslation("settingsmanager.restart-demand"),
+				translation.GetInstance().GetTranslation("shared.settingsmanager.restart-demand"),
 				time.Second*3,
 				common.NotificationInfoTextColor)
 		} else {
 			notification.GetInstance().Push(
-				translation.GetInstance().GetTranslation("settingsmanager.success"),
+				translation.GetInstance().GetTranslation("shared.settingsmanager.success"),
 				time.Second*3,
 				common.NotificationInfoTextColor)
 		}

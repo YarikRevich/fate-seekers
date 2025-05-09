@@ -1,4 +1,4 @@
-package intro
+package entry
 
 import (
 	"sync"
@@ -20,12 +20,12 @@ import (
 )
 
 var (
-	// GetInstance retrieves instance of the intro screen, performing initilization if needed.
-	GetInstance = sync.OnceValue[screen.Screen](newIntroScreen)
+	// GetInstance retrieves instance of the entry screen, performing initilization if needed.
+	GetInstance = sync.OnceValue[screen.Screen](newEntryScreen)
 )
 
-// IntroScreen represents intro screen implementation.
-type IntroScreen struct {
+// EntryScreen represents entry screen implementation.
+type EntryScreen struct {
 	// Represents attached user interface.
 	ui *ebitenui.UI
 
@@ -34,15 +34,12 @@ type IntroScreen struct {
 
 	// Represents global world view.
 	world *ebiten.Image
+
+	// Represents stub timer, which is used to emulate some delay before screne switch.
+	stubTimer *time.Timer
 }
 
-func (es *IntroScreen) HandleInput() error {
-	// TODO: check if intro scene has already been played
-	// repository.GetFlagsRepository().GetByName()
-
-	dispatcher.GetInstance().Dispatch(
-		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ENTRY_VALUE))
-
+func (es *EntryScreen) HandleInput() error {
 	if !es.transparentTransitionEffect.Done() {
 		if !es.transparentTransitionEffect.OnEnd() {
 			es.transparentTransitionEffect.Update()
@@ -53,34 +50,55 @@ func (es *IntroScreen) HandleInput() error {
 
 	shared.GetInstance().GetBackgroundAnimation().Update()
 
+	// select {
+	// case <-es.stubTimer.C:
+	// 	dispatcher.GetInstance().Dispatch(
+	// 		action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
+
+	dispatcher.GetInstance().Dispatch(
+		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+	// 	subtitles.GetInstance().Push("О, лягушка! Так дивно...", time.Second*6)
+	// 	subtitles.GetInstance().Push("'У багатих свої причуди!'", time.Second*6)
+
+	// 	// notification.GetInstance().Push("Тестове повідомлення!", time.Second*6)
+	// 	// notification.GetInstance().Push("Друге повідомлення!", time.Second*6)
+	// default:
+	// }
+
 	es.ui.Update()
 
 	return nil
 }
 
-func (is *IntroScreen) HandleRender(screen *ebiten.Image) {
+func (es *EntryScreen) HandleRender(screen *ebiten.Image) {
 	var backgroundAnimationGeometry ebiten.GeoM
 
 	backgroundAnimationGeometry.Scale(
 		scaler.GetScaleFactor(config.GetMinStaticWidth(), config.GetWorldWidth()),
 		scaler.GetScaleFactor(config.GetMinStaticHeight(), config.GetWorldHeight()))
 
-	shared.GetInstance().GetBackgroundAnimation().DrawTo(is.world, &ebiten.DrawImageOptions{
+	shared.GetInstance().GetBackgroundAnimation().DrawTo(es.world, &ebiten.DrawImageOptions{
 		GeoM: backgroundAnimationGeometry,
 	})
 
-	is.ui.Draw(is.world)
+	es.ui.Draw(es.world)
 
-	screen.DrawImage(is.world, &ebiten.DrawImageOptions{
+	screen.DrawImage(es.world, &ebiten.DrawImageOptions{
 		ColorM: options.GetTransparentDrawOptions(
-			is.transparentTransitionEffect.GetValue()).ColorM})
+			es.transparentTransitionEffect.GetValue()).ColorM})
 }
 
-// newIntroScreen initializes IntroScreen.
-func newIntroScreen() screen.Screen {
-	return &IntroScreen{
+// newEntryScreen initializes EntryScreen.
+func newEntryScreen() screen.Screen {
+	stubTimer := time.NewTimer(time.Minute)
+
+	stubTimer.Stop()
+
+	return &EntryScreen{
 		ui:                          builder.Build(),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10),
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		stubTimer:                   stubTimer,
 	}
 }

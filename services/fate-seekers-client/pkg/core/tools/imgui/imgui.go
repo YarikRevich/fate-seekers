@@ -56,7 +56,9 @@ func (i *ImGUI) Update() {
 		imgui.Text(fmt.Sprintf("sound_music: %d", config.GetSettingsSoundMusic()))
 		imgui.Text(fmt.Sprintf("sound_fx: %d", config.GetSettingsSoundFX()))
 		imgui.Text(fmt.Sprintf("language: %s", config.GetSettingsLanguage()))
-		imgui.Text(fmt.Sprintf("host: %s", config.GetSettingsNetworkingServerHost()))
+		imgui.Text(fmt.Sprintf("receiver_port: %s", config.GetSettingsNetworkingReceiverPort()))
+		imgui.Text(fmt.Sprintf("server_host: %s", config.GetSettingsNetworkingServerHost()))
+		imgui.Text(fmt.Sprintf("encryption_key: %s", config.GetSettingsNetworkingEncryptionKey()))
 
 		imgui.EndMenu()
 	}

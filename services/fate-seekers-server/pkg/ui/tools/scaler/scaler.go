@@ -1,7 +1,7 @@
 package scaler
 
 import (
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 

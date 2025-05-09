@@ -68,7 +68,7 @@ func NewResumeComponent(continueCallback, settingsCallback, exitCallback func())
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("resume.continue"),
+			translation.GetInstance().GetTranslation("client.resume.continue"),
 			buttonFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
@@ -94,7 +94,7 @@ func NewResumeComponent(continueCallback, settingsCallback, exitCallback func())
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("resume.settings"),
+			translation.GetInstance().GetTranslation("client.resume.settings"),
 			buttonFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
@@ -120,7 +120,7 @@ func NewResumeComponent(continueCallback, settingsCallback, exitCallback func())
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("resume.exit"),
+			translation.GetInstance().GetTranslation("client.resume.exit"),
 			buttonFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{

@@ -28,8 +28,7 @@ var (
 	configFile      = flag.String("config", "config.yaml", "a name of configuration file")
 	configDirectory = flag.String("configDirectory", getDefaultConfigDirectory(), "a directory where configuration file is located")
 
-	settingsNetworkingReceiverPort                                int
-	settingsNetworkingServerHost, settingsNetworkingEncryptionKey string
+	settingsNetworkingReceiverPort, settingsNetworkingServerHost, settingsNetworkingEncryptionKey string
 
 	settingsSoundMusic, settingsSoundFX int
 	settingsLanguage                    string
@@ -112,13 +111,13 @@ func Init() {
 
 	windowWidth := viper.GetInt("settings.window.width")
 	windowHeight := viper.GetInt("settings.window.height")
-	settingsNetworkingReceiverPort = viper.GetInt("settings.networking.receiver.port")
+	settingsNetworkingReceiverPort = viper.GetString("settings.networking.receiver.port")
 
 	if !port.Validate(settingsNetworkingReceiverPort) {
 		log.Fatalln(
 			ErrReadingSettingsNetworkingReceiverPortFromConfig.Error(),
 			zap.String("configFile", *configFile),
-			zap.Int("settingsNetworkingReceiverPort", settingsNetworkingReceiverPort))
+			zap.String("settingsNetworkingReceiverPort", settingsNetworkingReceiverPort))
 	}
 
 	settingsNetworkingServerHost = viper.GetString("settings.networking.server.host")
@@ -186,7 +185,7 @@ func SetSettingsWindowSize(width, height int) {
 	ebiten.SetWindowSize(width, height)
 }
 
-func SetSettingsNetworkingHost(value string) {
+func SetSettingsNetworkingServerHost(value string) {
 	viper.Set("settings.networking.server.host", value)
 
 	viper.WriteConfigAs(viper.ConfigFileUsed())
@@ -202,7 +201,7 @@ func SetSettingsNetworkingEncryptionKey(value string) {
 	settingsNetworkingEncryptionKey = value
 }
 
-func GetSettingsNetworkingReceiverPort() int {
+func GetSettingsNetworkingReceiverPort() string {
 	return settingsNetworkingReceiverPort
 }
 

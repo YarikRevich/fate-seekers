@@ -1,12 +1,13 @@
 package db
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
 
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/config"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/db/migrator"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/db/migrator"
 	"github.com/pkg/errors"
 	"github.com/pressly/goose/v3"
 	"gorm.io/driver/sqlite"
@@ -49,6 +50,8 @@ func connect() (*gorm.DB, error) {
 
 	for range retryTicker.C {
 		retryTicker.Stop()
+
+		fmt.Println(config.GetDatabaseName())
 
 		connection, err = gorm.Open(sqlite.Open(config.GetDatabaseName()), &gorm.Config{
 			DisableForeignKeyConstraintWhenMigrating: true,

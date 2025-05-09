@@ -1,0 +1,6 @@
+{
+    "server.settings.server.port": {
+        "one": "Порт",
+        "other": "Порт"
+    }
+}

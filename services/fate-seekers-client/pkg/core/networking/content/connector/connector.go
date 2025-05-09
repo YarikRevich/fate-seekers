@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"syscall"
 
@@ -25,12 +26,17 @@ type NetworkingContentConnector struct {
 }
 
 func (ncc *NetworkingContentConnector) Connect() error {
+	networkingReceiverPortInt, err := strconv.Atoi(config.GetSettingsNetworkingReceiverPort())
+	if err != nil {
+		return err
+	}
+
 	ctx, close := context.WithCancel(context.Background())
 
 	go func() {
 		err := udpt.Receive(
 			ctx,
-			config.GetSettingsNetworkingReceiverPort(),
+			networkingReceiverPortInt,
 			[]byte(config.GetSettingsNetworkingEncryptionKey()),
 			func(k string, v []byte) error {
 				return nil

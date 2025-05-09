@@ -7,6 +7,6 @@ import "embed"
 
 var (
 	// Represents client assets to be embedded to the application executable.
-	//go:embed shared
+	//go:embed client
 	AssetsClient embed.FS
 )
