@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -121,7 +122,10 @@ func newMenuScreen() screen.Screen {
 					}
 
 					if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
+						fmt.Println("BEFORE CONNECT")
+
 						connector.GetInstance().Connect(func(err error) {
+							fmt.Println("AFTER CONNECT")
 							// TODO: check if error is related to encryption key.
 
 							dispatcher.GetInstance().Dispatch(

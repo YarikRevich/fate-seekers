@@ -55,8 +55,20 @@
         "one": "Close",
         "other": "Close"
     },
+    "client.answerinput.success": {
+        "one": "Answer is correct!",
+        "other": "Answer is correct!"
+    },
+    "client.answerinput.failure": {
+        "one": "Answer is incorrect!",
+        "other": "Answer is incorrect!"
+    },
     "client.settingsmanager.invalid-networking-server-host": {
         "one": "Provided server host is invalid",
         "other": "Provided server host is invalid"
+    },
+    "client.networking.ping-connection-fail": {
+        "one": "Unable to connect to a server",
+        "other": "Unable to connect to a server"
     }
 }

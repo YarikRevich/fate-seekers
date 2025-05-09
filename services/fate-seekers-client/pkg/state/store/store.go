@@ -54,6 +54,13 @@ func GetEntryHandshakeStartedNetworking() string {
 	return instance.GetState(networking.ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE).(string)
 }
 
+// GetPingConnectionStartedNetworking retrieves ping connection started networking state value.
+func GetPingConnectionStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.PING_CONNECTION_STARTED_NETWORKING_STATE).(string)
+}
+
 // GetLetterUpdated retrieves letter updated state value.
 func GetLetterUpdated() string {
 	instance := GetInstance()

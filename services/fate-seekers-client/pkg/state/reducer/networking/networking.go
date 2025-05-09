@@ -12,6 +12,7 @@ import (
 const (
 	SESSION_HANDSHAKE_STARTED_NETWORKING_STATE = "session_handshake_started"
 	ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE   = "entry_handshake_started"
+	PING_CONNECTION_STARTED_NETWORKING_STATE   = "ping_connection_started"
 )
 
 // NetworkingStateReducer represents reducer used for networking state management.
@@ -23,6 +24,8 @@ type NetworkingStateReducer struct {
 func (nsr *NetworkingStateReducer) Init() {
 	nsr.store.SetState(
 		ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE, value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE)
+	nsr.store.SetState(
+		PING_CONNECTION_STARTED_NETWORKING_STATE, value.PING_CONNECTION_STARTED_NETWORKING_FALSE_VALUE)
 }
 
 func (nsr *NetworkingStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -32,6 +35,11 @@ func (nsr *NetworkingStateReducer) GetProcessor() func(value godux.Action) inter
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{
 					Key: ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE, Value: value.Value})
+
+		case action.SET_PING_CONNECTION_STARTED_NETWORKING_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: PING_CONNECTION_STARTED_NETWORKING_STATE, Value: value.Value})
 
 		default:
 			return nil

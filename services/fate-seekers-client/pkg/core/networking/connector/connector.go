@@ -39,8 +39,6 @@ func (gnc *GlobalNetworkingConnector) Connect(callback func(err error)) {
 			return
 		}
 
-		// TODO: perform health check calls.
-
 		callback(nil)
 	}()
 }

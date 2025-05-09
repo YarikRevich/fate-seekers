@@ -8,11 +8,14 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/connector"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/encryptionkey"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
@@ -121,25 +124,60 @@ func newMenuScreen() screen.Screen {
 					}
 
 					if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
-						connector.GetInstance().Connect(func(err error) {
-							// TODO: check if error is related to encryption key.
-
-							dispatcher.GetInstance().Dispatch(
-								action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
-
-							if err == nil {
-								transparentTransitionEffect.Reset()
-
-								dispatcher.GetInstance().Dispatch(
-									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
-							}
-						})
-
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_TRUE_VALUE))
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE))
+
+						connector.GetInstance().Connect(func(err error) {
+							// TODO: check if error is related to encryption key.
+
+							if err == nil {
+								handler.GetInstance().PerformPingConnection(func(err error) {
+									dispatcher.GetInstance().Dispatch(
+										action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
+
+									if err != nil {
+										notification.GetInstance().Push(
+											translation.GetInstance().GetTranslation("client.networking.ping-connection-fail"),
+											time.Second*2,
+											common.NotificationErrorTextColor)
+
+										return
+									}
+
+									transparentTransitionEffect.Reset()
+
+									dispatcher.GetInstance().Dispatch(
+										action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+
+								})
+							}
+						})
+					} else if store.GetPingConnectionStartedNetworking() == value.PING_CONNECTION_STARTED_NETWORKING_FALSE_VALUE {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_TRUE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPingConnectionStartedNetworkingAction(value.PING_CONNECTION_STARTED_NETWORKING_TRUE_VALUE))
+
+						handler.GetInstance().PerformPingConnection(func(err error) {
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetPingConnectionStartedNetworkingAction(value.PING_CONNECTION_STARTED_NETWORKING_FALSE_VALUE))
+
+							if err != nil {
+								notification.GetInstance().Push(
+									translation.GetInstance().GetTranslation("client.networking.ping-connection-fail"),
+									time.Second*2,
+									common.NotificationErrorTextColor)
+
+								return
+							}
+						})
 					}
 				},
 				func() {

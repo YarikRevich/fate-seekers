@@ -2,6 +2,7 @@ package connector
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"strconv"
@@ -39,6 +40,8 @@ func (ncc *NetworkingContentConnector) Connect() error {
 			networkingReceiverPortInt,
 			[]byte(config.GetSettingsNetworkingEncryptionKey()),
 			func(k string, v []byte) error {
+				fmt.Println(k, string(v))
+
 				return nil
 			})
 		if err != nil {

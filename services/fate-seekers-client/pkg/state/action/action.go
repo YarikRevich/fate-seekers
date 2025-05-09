@@ -17,6 +17,7 @@ const (
 // Describes all the available state actions for networking reducer.
 const (
 	SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION = "SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION"
+	SET_PING_CONNECTION_STARTED_NETWORKING_ACTION = "SET_PING_CONNECTION_STARTED_NETWORKING_ACTION"
 )
 
 // Describes all the available state actions for letter reducer.
@@ -89,6 +90,14 @@ func NewSetLoadingApplicationAction(value string) godux.Action {
 func NewSetEntryHandshakeStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetPingConnectionStartedNetworkingAction creates new set ping connection started networking action.
+func NewSetPingConnectionStartedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_PING_CONNECTION_STARTED_NETWORKING_ACTION,
 		Value: value,
 	}
 }
