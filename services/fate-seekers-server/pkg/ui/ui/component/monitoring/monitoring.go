@@ -1,4 +1,4 @@
-package menu
+package monitoring
 
 import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
@@ -11,8 +11,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
-// NewMenuComponent creates new main menu component.
-func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsCallback, exitCallback func()) *widget.Container {
+// NewMonitoringComponent creates new monitoring menu component.
+func NewMonitoringComponent(startCallback, stopCallback, detailsCallback, backCallback func()) *widget.Container {
 	result := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
@@ -22,7 +22,7 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			widget.WidgetOpts.TrackHover(false),
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				Padding: widget.Insets{
-					Left: scaler.GetPercentageOf(config.GetWorldWidth(), 17),
+					Left: scaler.GetPercentageOf(config.GetWorldWidth(), 19),
 				},
 				VerticalPosition:  widget.AnchorLayoutPositionCenter,
 				StretchHorizontal: false,
@@ -68,7 +68,7 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("shared.menu.start"),
+			translation.GetInstance().GetTranslation("server.monitoring.start"),
 			buttonFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
@@ -94,7 +94,7 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("server.menu.stop"),
+			translation.GetInstance().GetTranslation("server.monitoring.stop"),
 			buttonFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
@@ -120,7 +120,7 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("server.menu.monitoring"),
+			translation.GetInstance().GetTranslation("server.monitoring.details"),
 			buttonFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
@@ -130,7 +130,7 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			monitoringCallback()
+			detailsCallback()
 		}),
 	))
 
@@ -146,7 +146,7 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("shared.menu.settings"),
+			translation.GetInstance().GetTranslation("server.monitoring.back"),
 			buttonFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.TextPadding(widget.Insets{
@@ -156,33 +156,7 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			settingsCallback()
-		}),
-	))
-
-	buttonsContainer.AddChild(widget.NewButton(
-		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-			Stretch: true,
-		})),
-		widget.ButtonOpts.Image(&widget.ButtonImage{
-			Idle:         buttonIdleIcon,
-			Hover:        buttonHoverIcon,
-			Pressed:      buttonIdleIcon,
-			PressedHover: buttonIdleIcon,
-			Disabled:     buttonIdleIcon,
-		}),
-		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("shared.menu.exit"),
-			buttonFont,
-			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   30,
-			Right:  30,
-			Top:    20,
-			Bottom: 20,
-		}),
-		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			exitCallback()
+			backCallback()
 		}),
 	))
 

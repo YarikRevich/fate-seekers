@@ -12,6 +12,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen/menu"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen/monitoring"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen/settings"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/dispatcher"
@@ -22,6 +23,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/info"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/prompt"
 	notificationmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/manager/notification"
@@ -37,11 +39,17 @@ type Runtime struct {
 	// Represents attached prompt user interface.
 	promptInterface *ebitenui.UI
 
+	// Represents attached info user interface.
+	infoInterface *ebitenui.UI
+
 	// Represents transparent transition effect used for notification component.
 	notificationTransparentTransitionEffect transition.TransitionEffect
 
 	// Represents transparent transition effect used for prompt component.
 	promptTransparentTransitionEffect transition.TransitionEffect
+
+	// Represents transparent transition effect used for info component.
+	infoTransparentTransitionEffect transition.TransitionEffect
 
 	// Represents notification interface world view.
 	notificationInterfaceWorld *ebiten.Image
@@ -51,6 +59,12 @@ type Runtime struct {
 
 	// Represents prompt interface mask.
 	promptInterfaceMask *ebiten.Image
+
+	// Represents info interface world view.
+	infoInterfaceWorld *ebiten.Image
+
+	// Represents info interface mask.
+	infoInterfaceMask *ebiten.Image
 
 	// Represents currently active screen.
 	activeScreen screen.Screen
@@ -65,7 +79,7 @@ func (r *Runtime) Update() error {
 		return ebiten.Termination
 	}
 
-	if store.GetApplicationLoading() == value.LOADING_APPLICATION_TRUE_VALUE {
+	if store.GetApplicationLoading() > value.LOADING_APPLICATION_EMPTY_VALUE {
 		r.loaderAnimation.Update()
 	}
 
@@ -97,9 +111,22 @@ func (r *Runtime) Update() error {
 		}
 	}
 
+	if store.GetInfoText() != value.INFO_TEXT_EMPTY_VALUE {
+		if !r.infoTransparentTransitionEffect.Done() {
+			if !r.infoTransparentTransitionEffect.OnEnd() {
+				r.infoTransparentTransitionEffect.Update()
+			} else {
+				r.infoTransparentTransitionEffect.Clean()
+			}
+		}
+	}
+
 	switch store.GetActiveScreen() {
 	case value.ACTIVE_SCREEN_MENU_VALUE:
 		r.activeScreen = menu.GetInstance()
+
+	case value.ACTIVE_SCREEN_MONITORING_VALUE:
+		r.activeScreen = monitoring.GetInstance()
 
 	case value.ACTIVE_SCREEN_SETTINGS_VALUE:
 		r.activeScreen = settings.GetInstance()
@@ -114,6 +141,17 @@ func (r *Runtime) Update() error {
 		}
 
 		r.promptInterface.Update()
+	}
+
+	if store.GetInfoText() != value.INFO_TEXT_EMPTY_VALUE {
+		if store.GetInfoUpdated() == value.INFO_UPDATED_FALSE_VALUE {
+			info.GetInstance().SetText(store.GetInfoText())
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetInfoUpdated(value.INFO_UPDATED_TRUE_VALUE))
+		}
+
+		r.infoInterface.Update()
 	}
 
 	err := r.activeScreen.HandleInput()
@@ -142,9 +180,13 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 		r.promptInterfaceWorld.Clear()
 	}
 
+	if store.GetInfoText() != value.INFO_TEXT_EMPTY_VALUE {
+		r.infoInterfaceWorld.Clear()
+	}
+
 	r.activeScreen.HandleRender(screen)
 
-	if store.GetApplicationLoading() == value.LOADING_APPLICATION_TRUE_VALUE {
+	if store.GetApplicationLoading() > value.LOADING_APPLICATION_EMPTY_VALUE {
 		var loadingAnimationGeometry ebiten.GeoM
 
 		loadingAnimationGeometry.Translate(
@@ -172,6 +214,18 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 		screen.DrawImage(r.promptInterfaceWorld, &ebiten.DrawImageOptions{
 			ColorM: options.GetTransparentDrawOptions(
 				r.promptTransparentTransitionEffect.GetValue()).ColorM})
+	}
+
+	if store.GetInfoText() != value.INFO_TEXT_EMPTY_VALUE {
+		screen.DrawImage(r.infoInterfaceMask, &ebiten.DrawImageOptions{
+			ColorM: mask.GetMaskEffect(80).ColorM,
+		})
+
+		r.infoInterface.Draw(r.infoInterfaceWorld)
+
+		screen.DrawImage(r.infoInterfaceWorld, &ebiten.DrawImageOptions{
+			ColorM: options.GetTransparentDrawOptions(
+				r.infoTransparentTransitionEffect.GetValue()).ColorM})
 	}
 
 	if config.GetDebug() {
@@ -231,18 +285,46 @@ func NewRuntime() *Runtime {
 		promptTransparentTransitionEffect.Reset()
 	})
 
+	infoTransparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
+
+	infoInterfaceMask := ebiten.NewImage(
+		config.GetWorldWidth(), config.GetWorldHeight())
+
+	infoInterfaceMask.Fill(color.Black)
+
+	info.GetInstance().SetCloseCallback(func() {
+		store.GetInfoCancelCallback()()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetInfoCancelCallback(value.INFO_CANCEL_CALLBACK_EMPTY_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetInfoText(value.INFO_TEXT_EMPTY_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetInfoUpdated(value.INFO_UPDATED_FALSE_VALUE))
+
+		infoTransparentTransitionEffect.Reset()
+	})
+
 	return &Runtime{
 		notificationInterface: builder.Build(
 			notification.GetInstance().GetContainer()),
 		promptInterface: builder.Build(
 			prompt.GetInstance().GetContainer()),
+		infoInterface: builder.Build(
+			info.GetInstance().GetContainer()),
 		notificationTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10),
 		promptTransparentTransitionEffect:       promptTransparentTransitionEffect,
+		infoTransparentTransitionEffect:         infoTransparentTransitionEffect,
 		notificationInterfaceWorld: ebiten.NewImage(
 			config.GetWorldWidth(), config.GetWorldHeight()),
 		promptInterfaceWorld: ebiten.NewImage(
 			config.GetWorldWidth(), config.GetWorldHeight()),
 		promptInterfaceMask: promptInterfaceMask,
+		infoInterfaceWorld: ebiten.NewImage(
+			config.GetWorldWidth(), config.GetWorldHeight()),
+		infoInterfaceMask: infoInterfaceMask,
 
 		// Guarantees non blocking rendering, if state management fails.
 		activeScreen:    entry.GetInstance(),

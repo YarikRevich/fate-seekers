@@ -1,6 +1,34 @@
 {
+    "server.menu.stop": {
+        "one": "Stop",
+        "other": "Stop"
+    },
+    "server.menu.monitoring": {
+        "one": "Monitoring",
+        "other": "Monitoring"
+    },
+    "server.monitoring.start": {
+        "one": "Start",
+        "other": "Start"
+    },
+    "server.monitoring.stop": {
+        "one": "Stop",
+        "other": "Stop"
+    },
+    "server.monitoring.details": {
+        "one": "Details",
+        "other": "Details"
+    },
+    "server.monitoring.back": {
+        "one": "Back",
+        "other": "Back"
+    },
     "server.settings.server.port": {
         "one": "Port",
         "other": "Port"
+    },
+    "server.info.close": {
+        "one": "Close",
+        "other": "Close"
     }
 }

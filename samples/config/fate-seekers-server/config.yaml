@@ -18,7 +18,19 @@ settings:
     # Represents sector used for networking encryption properties.
     encryption:
       # Represents encryption key used for all the networking communication.
-      key: ""
+      key: "hello"
+  
+  # Represents sector used for monitoring settings description.
+  monitoring:
+    # Represents sector used for Grafana properties.
+    grafana:
+      # Represents a name property used for Grafana container creation.
+      name: "fate-seekers-server-grafana"
+
+    # Represents sector used for Prometheus properties.
+    prometheus:
+      # Represents a name property used for Prometheus container creation.
+      name: "fate-seekers-server-prometheus"
 
   # Represents language selected for the interface.
   language: "en"

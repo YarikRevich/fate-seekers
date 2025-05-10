@@ -1,13 +1,13 @@
 package menu
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/connector"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/storage/shared"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/validator/encryptionkey"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen"
@@ -20,7 +20,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/menu"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/manager/translation"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/validator/encryptionkey"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -122,35 +121,34 @@ func newMenuScreen() screen.Screen {
 					}
 
 					if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
-						fmt.Println("BEFORE CONNECT")
+						dispatcher.GetInstance().Dispatch(
+							action.NewIncrementLoadingApplicationAction())
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE))
 
 						connector.GetInstance().Connect(func(err error) {
-							fmt.Println("AFTER CONNECT")
 							// TODO: check if error is related to encryption key.
 
 							dispatcher.GetInstance().Dispatch(
-								action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
+								action.NewDecrementLoadingApplicationAction())
 
 							if err == nil {
-								transparentTransitionEffect.Reset()
-
 								// dispatcher.GetInstance().Dispatch(
 								// 	action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
 							}
 						})
-
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_TRUE_VALUE))
-
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE))
 					}
 				},
 				func() {
 
 				},
 				func() {
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MONITORING_VALUE))
+					// monitoringmanager.GetInstance().Deploy(func(err error) {
 
+					// })
 				},
 				func() {
 					transparentTransitionEffect.Reset()

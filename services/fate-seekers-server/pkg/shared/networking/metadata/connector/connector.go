@@ -1,16 +1,9 @@
 package connector
 
 import (
-	"sync"
-
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/api"
 	"google.golang.org/grpc"
-)
-
-var (
-	// GetInstance retrieves instance of the networking metadata connector, performing initilization if needed.
-	GetInstance = sync.OnceValue[networking.NetworkingConnector](newNetworkingMetadataConnector)
 )
 
 // NetworkingMetadataConnector represents networking metadata connector.
@@ -59,7 +52,7 @@ func (nmc *NetworkingMetadataConnector) Close() error {
 	return nmc.conn.Close()
 }
 
-// newNetworkingMetadataConnector initializes NetworkingMetadataConnector.
-func newNetworkingMetadataConnector() networking.NetworkingConnector {
+// NewNetworkingMetadataConnector initializes NetworkingMetadataConnector.
+func NewNetworkingMetadataConnector() networking.NetworkingConnector {
 	return new(NetworkingMetadataConnector)
 }

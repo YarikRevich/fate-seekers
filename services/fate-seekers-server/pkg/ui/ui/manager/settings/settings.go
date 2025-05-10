@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/validator/encryptionkey"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/validator/port"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/manager/translation"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/validator/encryptionkey"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/validator/port"
 )
 
 // ProcessChanges performs provided changes application.

@@ -67,6 +67,12 @@ const (
 	UkrainianSharedTemplate = "uk/uk_shared.json"
 )
 
+// Describes all the available server templates to be loaded.
+const (
+	EnglishServerTemplate   = "en/en_server.json"
+	UkrainianServerTemplate = "uk/uk_server.json"
+)
+
 // Describes all the available animations to be loaded.
 const (
 	LogoAnimation   = "logo/logo.json"

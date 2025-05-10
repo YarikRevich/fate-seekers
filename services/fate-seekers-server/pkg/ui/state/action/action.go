@@ -10,8 +10,9 @@ const (
 
 // Describes all the available state actions for application reducer.
 const (
-	SET_EXIT_APPLICATION_ACTION    = "SET_EXIT_APPLICATION_ACTION"
-	SET_LOADING_APPLICATION_ACTION = "SET_LOADING_APPLICATION_ACTION"
+	SET_EXIT_APPLICATION_ACTION          = "SET_EXIT_APPLICATION_ACTION"
+	INCREMENT_LOADING_APPLICATION_ACTION = "INCREMENT_LOADING_APPLICATION_ACTION"
+	DECREMENT_LOADING_APPLICATION_ACTION = "DECREMENT_LOADING_APPLICATION_ACTION"
 )
 
 // Describes all the available state actions for networking reducer.
@@ -38,6 +39,13 @@ const (
 	SET_TEXT_PROMPT_ACTION            = "SET_TEXT_PROMPT_ACTION"
 	SET_SUBMIT_CALLBACK_PROMPT_ACTION = "SET_SUBMIT_CALLBACK_PROMPT_ACTION"
 	SET_CANCEL_CALLBACK_PROMPT_ACTION = "SET_CANCEL_CALLBACK_PROMPT_ACTION"
+)
+
+// Describes all the available state actions for info reducer.
+const (
+	SET_UPDATED_INFO_ACTION         = "SET_UPDATED_INFO_ACTION"
+	SET_TEXT_INFO_ACTION            = "SET_TEXT_INFO_ACTION"
+	SET_CANCEL_CALLBACK_INFO_ACTION = "SET_CANCEL_CALLBACK_INFO_ACTION"
 )
 
 // Describes all the available state actions for event reducer.
@@ -77,11 +85,17 @@ func NewSetExitApplicationAction(value string) godux.Action {
 	}
 }
 
-// NewSetLoadingApplicationAction creates new set loading application action.
-func NewSetLoadingApplicationAction(value string) godux.Action {
+// NewIncrementLoadingApplicationAction creates new increment loading application action.
+func NewIncrementLoadingApplicationAction() godux.Action {
 	return godux.Action{
-		Type:  SET_LOADING_APPLICATION_ACTION,
-		Value: value,
+		Type: INCREMENT_LOADING_APPLICATION_ACTION,
+	}
+}
+
+// NewDecrementLoadingApplicationAction creates new decrement loading application action.
+func NewDecrementLoadingApplicationAction() godux.Action {
+	return godux.Action{
+		Type: DECREMENT_LOADING_APPLICATION_ACTION,
 	}
 }
 
@@ -161,6 +175,30 @@ func NewSetPromptSubmitCallback(value func()) godux.Action {
 func NewSetPromptCancelCallback(value func()) godux.Action {
 	return godux.Action{
 		Type:  SET_CANCEL_CALLBACK_PROMPT_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetInfoUpdated creates new set info updated action.
+func NewSetInfoUpdated(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_UPDATED_INFO_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetInfoText creates new set info text action.
+func NewSetInfoText(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_TEXT_INFO_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetInfoCancelCallback creates new set info cancel callback action.
+func NewSetInfoCancelCallback(value func()) godux.Action {
+	return godux.Action{
+		Type:  SET_CANCEL_CALLBACK_INFO_ACTION,
 		Value: value,
 	}
 }

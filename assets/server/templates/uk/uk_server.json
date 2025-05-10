@@ -1,4 +1,28 @@
 {
+    "server.menu.stop": {
+        "one": "Стоп",
+        "other": "Стоп"
+    },
+    "server.menu.monitoring": {
+        "one": "Моніторинг",
+        "other": "Моніторинг"
+    },
+    "server.monitoring.start": {
+        "one": "Старт",
+        "other": "Старт"
+    },
+    "server.monitoring.stop": {
+        "one": "Стоп",
+        "other": "Стоп"
+    },
+    "server.monitoring.details": {
+        "one": "Деталі",
+        "other": "Деталі"
+    },
+    "server.monitoring.back": {
+        "one": "Назад",
+        "other": "Назад"
+    },
     "server.settings.server.port": {
         "one": "Порт",
         "other": "Порт"

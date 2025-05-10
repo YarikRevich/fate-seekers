@@ -3,6 +3,7 @@ package connector
 import (
 	"sync"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking"
 	contentconnector "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/content/connector"
 	metadataconnector "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/connector"
 )
@@ -14,21 +15,26 @@ var (
 
 // GlobalNetworkingConnector represents global networking connector.
 type GlobalNetworkingConnector struct {
+	// Represents networking content connector.
+	contentConnector networking.NetworkingConnector
+
+	// Represents networking metadata connector.
+	metadataConnector networking.NetworkingConnector
 }
 
 // Connect performs a connection for all the API modules.
 func (gnc *GlobalNetworkingConnector) Connect(callback func(err error)) {
 	go func() {
-		err := contentconnector.GetInstance().Connect()
+		err := gnc.contentConnector.Connect()
 		if err != nil {
 			callback(err)
 
 			return
 		}
 
-		err = metadataconnector.GetInstance().Connect()
+		err = gnc.metadataConnector.Connect()
 		if err != nil {
-			if err := contentconnector.GetInstance().Close(); err != nil {
+			if err := gnc.contentConnector.Close(); err != nil {
 				callback(err)
 
 				return
@@ -47,18 +53,21 @@ func (gnc *GlobalNetworkingConnector) Connect(callback func(err error)) {
 
 func (gnc *GlobalNetworkingConnector) Close(callback func(err error)) {
 	go func() {
-		err := contentconnector.GetInstance().Close()
+		err := gnc.contentConnector.Close()
 		if err != nil {
 			callback(err)
 
 			return
 		}
 
-		callback(metadataconnector.GetInstance().Close())
+		callback(gnc.metadataConnector.Close())
 	}()
 }
 
 // newGlobalNetworkingConnector initializes GlobalNetworkingConnector.
 func newGlobalNetworkingConnector() *GlobalNetworkingConnector {
-	return new(GlobalNetworkingConnector)
+	return &GlobalNetworkingConnector{
+		contentConnector:  contentconnector.NewNetworkingContentConnector(),
+		metadataConnector: metadataconnector.NewNetworkingMetadataConnector(),
+	}
 }

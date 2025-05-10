@@ -7,7 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/validator/port"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/validator/encryptionkey"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/validator/port"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -27,8 +28,9 @@ var (
 
 	settingsNetworkingServerPort, settingsNetworkingEncryptionKey string
 
-	settingsSoundMusic, settingsSoundFX int
-	settingsLanguage                    string
+	settingsMonitoringGrafanaName, settingsMonitoringPrometheusName string
+
+	settingsLanguage string
 
 	settingsInitialLanguage string
 
@@ -82,6 +84,8 @@ func SetupDefaultConfig() {
 	viper.SetDefault("settings.window.height", 1080)
 	viper.SetDefault("settings.networking.server.port", "8090")
 	viper.SetDefault("settings.networking.encryption.key", "")
+	viper.SetDefault("settings.monitoring.grafana.name", "fate-seekers-server-grafana")
+	viper.SetDefault("settings.monitoring.prometheus.name", "fate-seekers-server-prometheus")
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
 	viper.SetDefault("operation.debug", false)
 	viper.SetDefault("database.name", "fate_seekers.db")
@@ -105,8 +109,8 @@ func Init() {
 
 	windowWidth := viper.GetInt("settings.window.width")
 	windowHeight := viper.GetInt("settings.window.height")
+
 	settingsNetworkingServerPort = viper.GetString("settings.networking.server.port")
-	settingsNetworkingEncryptionKey = viper.GetString("settings.networking.encryption.key")
 
 	if !port.Validate(settingsNetworkingServerPort) {
 		log.Fatalln(
@@ -115,8 +119,17 @@ func Init() {
 			zap.String("settingsNetworkingServerPort", settingsNetworkingServerPort))
 	}
 
-	settingsSoundMusic = viper.GetInt("settings.sound.music")
-	settingsSoundFX = viper.GetInt("settings.sound.fx")
+	settingsNetworkingEncryptionKey = viper.GetString("settings.networking.encryption.key")
+
+	if !encryptionkey.Validate(settingsNetworkingEncryptionKey) {
+		log.Fatalln(
+			ErrReadingSettingsNetworkingEncryptionKeyFromConfig.Error(),
+			zap.String("configFile", *configFile),
+			zap.String("settingsNetworkingEncryptionKey", settingsNetworkingEncryptionKey))
+	}
+
+	settingsMonitoringGrafanaName = viper.GetString("settings.monitoring.grafana.name")
+	settingsMonitoringPrometheusName = viper.GetString("settings.monitoring.prometheus.name")
 	settingsLanguage = viper.GetString("settings.language")
 
 	if settingsLanguage != SETTINGS_LANGUAGE_ENGLISH &&
@@ -170,6 +183,10 @@ func SetSettingsNetworkingServerPort(value string) {
 	settingsNetworkingServerPort = value
 }
 
+func GetSettingsNetworkingServerPort() string {
+	return settingsNetworkingServerPort
+}
+
 func SetSettingsNetworkingEncryptionKey(value string) {
 	viper.Set("settings.networking.encryption.key", value)
 
@@ -178,12 +195,16 @@ func SetSettingsNetworkingEncryptionKey(value string) {
 	settingsNetworkingEncryptionKey = value
 }
 
-func GetSettingsNetworkingServerPort() string {
-	return settingsNetworkingServerPort
-}
-
 func GetSettingsNetworkingEncryptionKey() string {
 	return settingsNetworkingEncryptionKey
+}
+
+func GetSettingsMonitoringGrafanaName() string {
+	return settingsMonitoringGrafanaName
+}
+
+func GetSettingsMonitoringPrometheusName() string {
+	return settingsMonitoringPrometheusName
 }
 
 func SetSettingsLanguage(value string) {

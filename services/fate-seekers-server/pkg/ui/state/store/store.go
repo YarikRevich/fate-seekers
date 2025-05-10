@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/reducer/application"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/reducer/info"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/reducer/networking"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/reducer/prompt"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/reducer/screen"
@@ -37,10 +38,10 @@ func GetApplicationExit() string {
 }
 
 // GetApplicationLoading retrieves loading application state value.
-func GetApplicationLoading() string {
+func GetApplicationLoading() int {
 	instance := GetInstance()
 
-	return instance.GetState(application.LOADING_APPLICATION_STATE).(string)
+	return instance.GetState(application.LOADING_APPLICATION_STATE).(int)
 }
 
 // GetEntryHandshakeStartedNetworking retrieves entry handshake started networking state value.
@@ -78,6 +79,27 @@ func GetPromptCancelCallback() func() {
 	return instance.GetState(prompt.CANCEL_CALLBACK_PROMPT_STATE).(func())
 }
 
+// GetInfoUpdated retrieves info updated state value.
+func GetInfoUpdated() string {
+	instance := GetInstance()
+
+	return instance.GetState(info.UPDATED_INFO_STATE).(string)
+}
+
+// GetInfoText retrieves info text state value.
+func GetInfoText() string {
+	instance := GetInstance()
+
+	return instance.GetState(info.TEXT_INFO_STATE).(string)
+}
+
+// GetInfoCancelCallback retrieves info cancel callback state value.
+func GetInfoCancelCallback() func() {
+	instance := GetInstance()
+
+	return instance.GetState(info.CANCEL_CALLBACK_INFO_STATE).(func())
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()
@@ -93,6 +115,9 @@ func newStore() *godux.Store {
 
 	promptReducer := prompt.NewPromptStateReducer(store)
 	promptReducer.Init()
+
+	infoReducer := info.NewInfoStateReducer(store)
+	infoReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
@@ -111,6 +136,11 @@ func newStore() *godux.Store {
 		}
 
 		result = promptReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = infoReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
@@ -87,7 +88,7 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("shared.settings.server.port"),
+			translation.GetInstance().GetTranslation("server.settings.server.port"),
 			generalFont,
 			color.White)))
 
@@ -153,9 +154,14 @@ func NewSettingsComponent(
 	components.AddChild(networkingPortInput)
 
 	components.AddChild(widget.NewText(
-		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-			Stretch: true,
-		})),
+		widget.TextOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Stretch: true,
+			}),
+			widget.WidgetOpts.MouseButtonPressedHandler(func(args *widget.WidgetMouseButtonPressedEventArgs) {
+				fmt.Println("CLICKED ON LABEL")
+			}),
+		),
 		widget.TextOpts.Text(
 			translation.GetInstance().GetTranslation("shared.settings.encryption-key"),
 			generalFont,

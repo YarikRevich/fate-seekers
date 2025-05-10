@@ -23,7 +23,7 @@ settings:
     # Represents sector used for networking encryption properties.
     encryption:
       # Represents encryption key used for all the networking communication.
-      key: "bccbbbacaaabccbcbacbaaacbcbcbaba" #"aA2Xh41FiC4Wtj3e5b2LbytMdn6on7P0"
+      key: "hello"
 
   # Represents language selected for the interface.
   language: "en"

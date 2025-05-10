@@ -42,6 +42,12 @@ func newTranslationManager() *TranslationManager {
 	bundle.MustParseMessageFileBytes(
 		loader.GetInstance().GetTemplate(loader.UkrainianSharedTemplate), loader.UkrainianSharedTemplate)
 
+	bundle.MustParseMessageFileBytes(
+		loader.GetInstance().GetTemplate(loader.EnglishServerTemplate), loader.EnglishServerTemplate)
+
+	bundle.MustParseMessageFileBytes(
+		loader.GetInstance().GetTemplate(loader.UkrainianServerTemplate), loader.UkrainianServerTemplate)
+
 	var localizer *i18n.Localizer
 
 	switch config.GetSettingsLanguage() {

@@ -13,6 +13,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/balacode/udpt"
+	"golang.org/x/crypto/blake2b"
 )
 
 var (
@@ -32,13 +33,18 @@ func (ncc *NetworkingContentConnector) Connect() error {
 		return err
 	}
 
+	networkingEncryptionKeyHash, err := blake2b.New256([]byte(config.GetSettingsNetworkingEncryptionKey()))
+	if err != nil {
+		return err
+	}
+
 	ctx, close := context.WithCancel(context.Background())
 
 	go func() {
 		err := udpt.Receive(
 			ctx,
 			networkingReceiverPortInt,
-			[]byte(config.GetSettingsNetworkingEncryptionKey()),
+			networkingEncryptionKeyHash.Sum(nil),
 			func(k string, v []byte) error {
 				fmt.Println(k, string(v))
 
