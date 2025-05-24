@@ -1,6 +1,8 @@
 package menu
 
 import (
+	"sync"
+
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/tools/scaler"
@@ -11,9 +13,93 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
-// NewMenuComponent creates new main menu component.
-func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsCallback, exitCallback func()) *widget.Container {
-	result := widget.NewContainer(
+var (
+	// GetInstance retrieves instance of the menu component, performing initial creation if needed.
+	GetInstance = sync.OnceValue[*MenuComponent](newMenuComponent)
+)
+
+// MenuComponent represents component, which contains menu statement.
+type MenuComponent struct {
+	// Represents start button widget.
+	startButtonWidget *widget.Button
+
+	// Represents stop button widget.
+	stopButtonWidget *widget.Button
+
+	// Represents start callback.
+	startCallback func()
+
+	// Represents stop callback.
+	stopCallback func()
+
+	// Represents monitoring callback.
+	monitoringCallback func()
+
+	// Represents settings callback.
+	settingsCallback func()
+
+	// Represents exit callback.
+	exitCallback func()
+
+	// Represents container widget.
+	container *widget.Container
+}
+
+// EnableStartButton enables start button component in the container.
+func (mc *MenuComponent) EnableStartButton() {
+	mc.startButtonWidget.GetWidget().Disabled = false
+}
+
+// DisableStartButton disables start button component in the container.
+func (mc *MenuComponent) DisableStartButton() {
+	mc.startButtonWidget.GetWidget().Disabled = true
+}
+
+// EnableStopButton enables stop button component in the container.
+func (mc *MenuComponent) EnableStopButton() {
+	mc.stopButtonWidget.GetWidget().Disabled = false
+}
+
+// DisableStopButton disables stop button component in the container.
+func (mc *MenuComponent) DisableStopButton() {
+	mc.stopButtonWidget.GetWidget().Disabled = true
+}
+
+// SetStartCallback modified start callback in the container.
+func (mc *MenuComponent) SetStartCallback(callback func()) {
+	mc.startCallback = callback
+}
+
+// SetStopCallback modified stop callback in the container.
+func (mc *MenuComponent) SetStopCallback(callback func()) {
+	mc.stopCallback = callback
+}
+
+// SetMonitoringCallback modified monitoring callback in the container.
+func (mc *MenuComponent) SetMonitoringCallback(callback func()) {
+	mc.monitoringCallback = callback
+}
+
+// SetSettingsCallback modified settings callback in the container.
+func (mc *MenuComponent) SetSettingsCallback(callback func()) {
+	mc.settingsCallback = callback
+}
+
+// SetExitCallback modified exit callback in the container.
+func (mc *MenuComponent) SetExitCallback(callback func()) {
+	mc.exitCallback = callback
+}
+
+// GetContainer retrieves container widget.
+func (mc *MenuComponent) GetContainer() *widget.Container {
+	return mc.container
+}
+
+// newMenuComponent creates menu component.
+func newMenuComponent() *MenuComponent {
+	var result *MenuComponent
+
+	container := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
 				scaler.GetPercentageOf(config.GetWorldWidth(), 20),
@@ -56,7 +142,7 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 		Size:   20,
 	}
 
-	buttonsContainer.AddChild(widget.NewButton(
+	startButtonWidget := widget.NewButton(
 		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
@@ -78,11 +164,13 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			startCallback()
+			result.startCallback()
 		}),
-	))
+	)
 
-	buttonsContainer.AddChild(widget.NewButton(
+	buttonsContainer.AddChild(startButtonWidget)
+
+	stopButtonWidget := widget.NewButton(
 		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
@@ -104,9 +192,11 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			stopCallback()
+			result.stopCallback()
 		}),
-	))
+	)
+
+	buttonsContainer.AddChild(stopButtonWidget)
 
 	buttonsContainer.AddChild(widget.NewButton(
 		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
@@ -130,7 +220,7 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			monitoringCallback()
+			result.monitoringCallback()
 		}),
 	))
 
@@ -156,7 +246,7 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			settingsCallback()
+			result.settingsCallback()
 		}),
 	))
 
@@ -182,11 +272,19 @@ func NewMenuComponent(startCallback, stopCallback, monitoringCallback, settingsC
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			exitCallback()
+			result.exitCallback()
 		}),
 	))
 
-	result.AddChild(buttonsContainer)
+	container.AddChild(buttonsContainer)
+
+	result = &MenuComponent{
+		startButtonWidget: startButtonWidget,
+		stopButtonWidget:  stopButtonWidget,
+		container:         container,
+	}
+
+	result.DisableStopButton()
 
 	return result
 }

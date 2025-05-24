@@ -89,6 +89,7 @@ func newMonitoringScreen() screen.Screen {
 		ui: builder.Build(
 			monitoring.NewMonitoringComponent(
 				func() {
+
 					// if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
 					// 	dispatcher.GetInstance().Dispatch(
 					// 		action.NewIncrementLoadingApplicationAction())

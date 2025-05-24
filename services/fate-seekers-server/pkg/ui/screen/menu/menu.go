@@ -88,81 +88,82 @@ func (ms *MenuScreen) HandleRender(screen *ebiten.Image) {
 func newMenuScreen() screen.Screen {
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
-	return &MenuScreen{
-		ui: builder.Build(
-			menu.NewMenuComponent(
-				func() {
-					if !encryptionkey.Validate(config.GetSettingsNetworkingEncryptionKey()) {
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetPromptText(
-								translation.GetInstance().GetTranslation("client.prompt.networking.encryption-key")))
+	menu.GetInstance().SetStartCallback(func() {
+		if !encryptionkey.Validate(config.GetSettingsNetworkingEncryptionKey()) {
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetPromptText(
+					translation.GetInstance().GetTranslation("client.prompt.networking.encryption-key")))
 
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetPromptSubmitCallback(func() {
-								transparentTransitionEffect.Reset()
-
-								dispatcher.GetInstance().Dispatch(
-									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SETTINGS_VALUE))
-
-								dispatcher.GetInstance().Dispatch(
-									action.NewSetPreviousScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
-							}))
-
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetPromptCancelCallback(func() {
-								dispatcher.GetInstance().Dispatch(
-									action.NewSetActiveScreenAction(store.GetPreviousScreen()))
-
-								dispatcher.GetInstance().Dispatch(
-									action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
-							}))
-
-						return
-					}
-
-					if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
-						dispatcher.GetInstance().Dispatch(
-							action.NewIncrementLoadingApplicationAction())
-
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE))
-
-						connector.GetInstance().Connect(func(err error) {
-							// TODO: check if error is related to encryption key.
-
-							dispatcher.GetInstance().Dispatch(
-								action.NewDecrementLoadingApplicationAction())
-
-							if err == nil {
-								// dispatcher.GetInstance().Dispatch(
-								// 	action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
-							}
-						})
-					}
-				},
-				func() {
-
-				},
-				func() {
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MONITORING_VALUE))
-					// monitoringmanager.GetInstance().Deploy(func(err error) {
-
-					// })
-				},
-				func() {
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetPromptSubmitCallback(func() {
 					transparentTransitionEffect.Reset()
 
 					dispatcher.GetInstance().Dispatch(
-						action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_MENU_VALUE))
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SETTINGS_VALUE))
 
 					dispatcher.GetInstance().Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SETTINGS_VALUE))
-				},
-				func() {
+						action.NewSetPreviousScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+				}))
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetPromptCancelCallback(func() {
 					dispatcher.GetInstance().Dispatch(
-						action.NewSetExitApplicationAction(value.EXIT_APPLICATION_TRUE_VALUE))
-				})),
+						action.NewSetActiveScreenAction(store.GetPreviousScreen()))
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
+				}))
+
+			return
+		}
+
+		if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
+			dispatcher.GetInstance().Dispatch(
+				action.NewIncrementLoadingApplicationAction())
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE))
+
+			connector.GetInstance().Connect(func(err error) {
+				dispatcher.GetInstance().Dispatch(
+					action.NewDecrementLoadingApplicationAction())
+
+				if err == nil {
+					menu.GetInstance().DisableStartButton()
+
+					menu.GetInstance().EnableStopButton()
+				}
+			})
+		}
+	})
+
+	menu.GetInstance().SetStopCallback(func() {})
+
+	menu.GetInstance().SetMonitoringCallback(func() {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MONITORING_VALUE))
+		// monitoringmanager.GetInstance().Deploy(func(err error) {
+
+		// })
+	})
+
+	menu.GetInstance().SetSettingsCallback(func() {
+		transparentTransitionEffect.Reset()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_MENU_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SETTINGS_VALUE))
+	})
+
+	menu.GetInstance().SetExitCallback(func() {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetExitApplicationAction(value.EXIT_APPLICATION_TRUE_VALUE))
+	})
+
+	return &MenuScreen{
+		ui:                          builder.Build(menu.GetInstance().GetContainer()),
 		transparentTransitionEffect: transparentTransitionEffect,
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		interfaceWorld:              ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),

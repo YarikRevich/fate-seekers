@@ -39,7 +39,7 @@ func (pc *PromptComponent) SetText(value string) {
 	pc.text.Label = value
 }
 
-// SetAttachmentCallback modified close callback in the container.
+// SetAttachmentCallback modified submit callback in the container.
 func (pc *PromptComponent) SetSubmitCallback(callback func()) {
 	pc.submitCallback = callback
 }
