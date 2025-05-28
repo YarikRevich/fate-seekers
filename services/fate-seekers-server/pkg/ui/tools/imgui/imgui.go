@@ -31,7 +31,7 @@ func (i *ImGUI) Update() {
 
 	if imgui.BeginMenu("States") {
 		imgui.Text(fmt.Sprintf("active_screen: %s", store.GetActiveScreen()))
-		imgui.Text(fmt.Sprintf("entry_handshake_started_networking: %s", store.GetEntryHandshakeStartedNetworking()))
+		imgui.Text(fmt.Sprintf("listener_started_networking: %s", store.GetListenerStartedNetworking()))
 		imgui.Text(fmt.Sprintf("application_exit: %s", store.GetApplicationExit()))
 		imgui.Text(fmt.Sprintf("application_loading: %s", store.GetApplicationLoading()))
 		imgui.Text(fmt.Sprintf("prompt_text: %s", store.GetPromptText()))

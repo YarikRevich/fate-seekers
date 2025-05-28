@@ -44,11 +44,11 @@ func GetApplicationLoading() int {
 	return instance.GetState(application.LOADING_APPLICATION_STATE).(int)
 }
 
-// GetEntryHandshakeStartedNetworking retrieves entry handshake started networking state value.
-func GetEntryHandshakeStartedNetworking() string {
+// GetListenerStartedNetworking retrieves listener started networking state value.
+func GetListenerStartedNetworking() string {
 	instance := GetInstance()
 
-	return instance.GetState(networking.ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE).(string)
+	return instance.GetState(networking.LISTENER_STARTED_NETWORKING_STATE).(string)
 }
 
 // GetPromptUpdated retrieves prompt updated state value.

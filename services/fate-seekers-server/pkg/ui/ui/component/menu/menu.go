@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"image/color"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
@@ -9,6 +10,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/manager/translation"
+	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
@@ -142,10 +144,53 @@ func newMenuComponent() *MenuComponent {
 		Size:   20,
 	}
 
-	startButtonWidget := widget.NewButton(
-		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+	startButtonTooltipContainer := widget.NewContainer(
+		widget.ContainerOpts.BackgroundImage(
+			image.NewNineSlice(loader.GetInstance().GetStatic(loader.ToolTip), [3]int{19, 6, 13}, [3]int{19, 5, 13})),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Padding(widget.Insets{
+				Left:   15,
+				Right:  15,
+				Top:    10,
+				Bottom: 10,
+			}),
+			widget.RowLayoutOpts.Spacing(2),
+		)))
+
+	generalFont := &text.GoTextFace{
+		Source: loader.GetInstance().GetFont(loader.KyivRegularFont),
+		Size:   20,
+	}
+
+	startButtonTooltipContainer.AddChild(widget.NewText(
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("server.menu.start.disabled"),
+			generalFont,
+			color.White)))
+
+	var startButtonWidget *widget.Button
+
+	startButtonWidget = widget.NewButton(
+		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Stretch: true,
+			}),
+			widget.WidgetOpts.ToolTip(widget.NewToolTip(
+				widget.ToolTipOpts.Content(startButtonTooltipContainer),
+				widget.ToolTipOpts.ToolTipUpdater(func(c *widget.Container) {
+					if !startButtonWidget.GetWidget().Disabled &&
+						c.GetWidget().Visibility != widget.Visibility_Hide {
+						c.GetWidget().Visibility = widget.Visibility_Hide
+					} else if startButtonWidget.GetWidget().Disabled && c.GetWidget().Visibility != widget.Visibility_Show {
+						c.GetWidget().Visibility = widget.Visibility_Show
+					}
+				}),
+			)),
+		),
 		widget.ButtonOpts.Image(&widget.ButtonImage{
 			Idle:         buttonIdleIcon,
 			Hover:        buttonHoverIcon,
@@ -170,10 +215,48 @@ func newMenuComponent() *MenuComponent {
 
 	buttonsContainer.AddChild(startButtonWidget)
 
-	stopButtonWidget := widget.NewButton(
-		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+	stopButtonTooltipContainer := widget.NewContainer(
+		widget.ContainerOpts.BackgroundImage(
+			image.NewNineSlice(loader.GetInstance().GetStatic(loader.ToolTip), [3]int{19, 6, 13}, [3]int{19, 5, 13})),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Padding(widget.Insets{
+				Left:   15,
+				Right:  15,
+				Top:    10,
+				Bottom: 10,
+			}),
+			widget.RowLayoutOpts.Spacing(2),
+		)))
+
+	stopButtonTooltipContainer.AddChild(widget.NewText(
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("server.menu.stop.disabled"),
+			generalFont,
+			color.White)))
+
+	var stopButtonWidget *widget.Button
+
+	stopButtonWidget = widget.NewButton(
+		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Stretch: true,
+			}),
+			widget.WidgetOpts.ToolTip(widget.NewToolTip(
+				widget.ToolTipOpts.Content(stopButtonTooltipContainer),
+				widget.ToolTipOpts.ToolTipUpdater(func(c *widget.Container) {
+					if !stopButtonWidget.GetWidget().Disabled &&
+						c.GetWidget().Visibility != widget.Visibility_Hide {
+						c.GetWidget().Visibility = widget.Visibility_Hide
+					} else if stopButtonWidget.GetWidget().Disabled && c.GetWidget().Visibility != widget.Visibility_Show {
+						c.GetWidget().Visibility = widget.Visibility_Show
+					}
+				}),
+			)),
+		),
 		widget.ButtonOpts.Image(&widget.ButtonImage{
 			Idle:         buttonIdleIcon,
 			Hover:        buttonHoverIcon,

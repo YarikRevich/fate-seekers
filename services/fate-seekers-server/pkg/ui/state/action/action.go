@@ -17,7 +17,7 @@ const (
 
 // Describes all the available state actions for networking reducer.
 const (
-	SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION = "SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION"
+	SET_LISTENER_STARTED_NETWORKING_ACTION = "SET_LISTENER_STARTED_NETWORKING_ACTION"
 )
 
 // Describes all the available state actions for letter reducer.
@@ -99,10 +99,10 @@ func NewDecrementLoadingApplicationAction() godux.Action {
 	}
 }
 
-// NewSetEntryHandshakeStartedNetworkingAction creates new set entry handshake started networking action.
-func NewSetEntryHandshakeStartedNetworkingAction(value string) godux.Action {
+// NewSetListenerStartedNetworkingAction creates new set listener started networking action.
+func NewSetListenerStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
-		Type:  SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION,
+		Type:  SET_LISTENER_STARTED_NETWORKING_ACTION,
 		Value: value,
 	}
 }

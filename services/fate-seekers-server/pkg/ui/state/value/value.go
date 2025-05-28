@@ -23,8 +23,8 @@ const (
 
 // Describes all the available networking reducer store values.
 const (
-	ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE  = "true"
-	ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE = "false"
+	LISTENER_STARTED_NETWORKING_STATE_TRUE_VALUE  = "true"
+	LISTENER_STARTED_NETWORKING_STATE_FALSE_VALUE = "false"
 )
 
 // Describes available prompt reducer store values.

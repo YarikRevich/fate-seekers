@@ -10,8 +10,7 @@ import (
 
 // Describes all the available networking reducer store states.
 const (
-	SESSION_HANDSHAKE_STARTED_NETWORKING_STATE = "session_handshake_started"
-	ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE   = "entry_handshake_started"
+	LISTENER_STARTED_NETWORKING_STATE = "listener_started"
 )
 
 // NetworkingStateReducer represents reducer used for networking state management.
@@ -22,16 +21,16 @@ type NetworkingStateReducer struct {
 
 func (nsr *NetworkingStateReducer) Init() {
 	nsr.store.SetState(
-		ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE, value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE)
+		LISTENER_STARTED_NETWORKING_STATE, value.LISTENER_STARTED_NETWORKING_STATE_FALSE_VALUE)
 }
 
 func (nsr *NetworkingStateReducer) GetProcessor() func(value godux.Action) interface{} {
 	return func(value godux.Action) interface{} {
 		switch value.Type {
-		case action.SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION:
+		case action.SET_LISTENER_STARTED_NETWORKING_ACTION:
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{
-					Key: ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE, Value: value.Value})
+					Key: LISTENER_STARTED_NETWORKING_STATE, Value: value.Value})
 
 		default:
 			return nil

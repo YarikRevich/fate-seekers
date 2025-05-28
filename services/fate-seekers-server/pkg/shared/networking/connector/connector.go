@@ -3,7 +3,6 @@ package connector
 import (
 	"sync"
 
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking"
 	contentconnector "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/content/connector"
 	metadataconnector "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/connector"
 )
@@ -16,10 +15,10 @@ var (
 // GlobalNetworkingConnector represents global networking connector.
 type GlobalNetworkingConnector struct {
 	// Represents networking content connector.
-	contentConnector networking.NetworkingConnector
+	contentConnector *contentconnector.NetworkingContentConnector
 
 	// Represents networking metadata connector.
-	metadataConnector networking.NetworkingConnector
+	metadataConnector *metadataconnector.NetworkingMetadataConnector
 }
 
 // Connect performs a connection for all the API modules.
@@ -32,22 +31,21 @@ func (gnc *GlobalNetworkingConnector) Connect(callback func(err error)) {
 			return
 		}
 
-		err = gnc.metadataConnector.Connect()
-		if err != nil {
-			if err := gnc.contentConnector.Close(); err != nil {
+		gnc.metadataConnector.Connect(func(err error) {
+			if err != nil {
+				if err := gnc.contentConnector.Close(); err != nil {
+					callback(err)
+
+					return
+				}
+
 				callback(err)
 
 				return
 			}
 
-			callback(err)
-
-			return
-		}
-
-		// TODO: perform health check calls.
-
-		callback(nil)
+			callback(nil)
+		})
 	}()
 }
 

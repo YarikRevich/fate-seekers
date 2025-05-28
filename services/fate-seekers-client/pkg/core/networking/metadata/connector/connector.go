@@ -23,7 +23,7 @@ var (
 
 // NetworkingMetadataConnector represents networking metadata connector.
 type NetworkingMetadataConnector struct {
-	// Represents establushed connection instance.
+	// Represents established connection instance.
 	conn *grpc.ClientConn
 
 	// Represents established client connection instance.

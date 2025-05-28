@@ -18,7 +18,7 @@ func ProcessChanges(networkingServerPort string, networkingEncryptionKey, langua
 	if config.GetSettingsNetworkingServerPort() != networkingServerPort {
 		if !port.Validate(networkingServerPort) {
 			notification.GetInstance().Push(
-				translation.GetInstance().GetTranslation("shared.settingsmanager.invalid-networking-server-port"),
+				translation.GetInstance().GetTranslation("server.settingsmanager.invalid-networking-server-port"),
 				time.Second*3,
 				common.NotificationErrorTextColor)
 

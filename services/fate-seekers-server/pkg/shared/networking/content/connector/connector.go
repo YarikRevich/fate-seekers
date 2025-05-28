@@ -10,7 +10,6 @@ import (
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking"
 	"github.com/balacode/udpt"
 	"golang.org/x/crypto/blake2b"
 )
@@ -32,7 +31,9 @@ func (ncc *NetworkingContentConnector) Connect() error {
 		return err
 	}
 
-	ctx, close := context.WithCancel(context.Background())
+	var ctx context.Context
+
+	ctx, ncc.close = context.WithCancel(context.Background())
 
 	go func(ctx context.Context, close context.CancelFunc) {
 		err := udpt.Receive(
@@ -49,7 +50,7 @@ func (ncc *NetworkingContentConnector) Connect() error {
 
 			logging.GetInstance().Fatal(err.Error())
 		}
-	}(ctx, close)
+	}(ctx, ncc.close)
 
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -58,13 +59,9 @@ func (ncc *NetworkingContentConnector) Connect() error {
 		case <-sigc:
 			close()
 		}
-	}(close)
+	}(ncc.close)
 
 	return nil
-}
-
-func (ncc *NetworkingContentConnector) Ping() bool {
-	return false
 }
 
 func (ncc *NetworkingContentConnector) Close() error {
@@ -74,6 +71,6 @@ func (ncc *NetworkingContentConnector) Close() error {
 }
 
 // NewNetworkingContentConnector initializes NetworkingContentConnector.
-func NewNetworkingContentConnector() networking.NetworkingConnector {
+func NewNetworkingContentConnector() *NetworkingContentConnector {
 	return new(NetworkingContentConnector)
 }

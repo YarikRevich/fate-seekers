@@ -18,7 +18,9 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/menu"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/manager/translation"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -117,27 +119,76 @@ func newMenuScreen() screen.Screen {
 			return
 		}
 
-		if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
+		if store.GetListenerStartedNetworking() == value.LISTENER_STARTED_NETWORKING_STATE_FALSE_VALUE {
 			dispatcher.GetInstance().Dispatch(
 				action.NewIncrementLoadingApplicationAction())
 
 			dispatcher.GetInstance().Dispatch(
-				action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE))
+				action.NewSetListenerStartedNetworkingAction(value.LISTENER_STARTED_NETWORKING_STATE_TRUE_VALUE))
 
 			connector.GetInstance().Connect(func(err error) {
 				dispatcher.GetInstance().Dispatch(
 					action.NewDecrementLoadingApplicationAction())
 
-				if err == nil {
+				if err != nil {
+					notification.GetInstance().Push(
+						common.ComposeMessage(
+							translation.GetInstance().GetTranslation("server.networking.start-failure"),
+							err.Error()),
+						time.Second*3,
+						common.NotificationErrorTextColor)
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetListenerStartedNetworkingAction(value.LISTENER_STARTED_NETWORKING_STATE_FALSE_VALUE))
+				} else {
 					menu.GetInstance().DisableStartButton()
 
 					menu.GetInstance().EnableStopButton()
+
+					notification.GetInstance().Push(
+						translation.GetInstance().GetTranslation("server.networking.start-success"),
+						time.Second*3,
+						common.NotificationInfoTextColor)
 				}
 			})
 		}
 	})
 
-	menu.GetInstance().SetStopCallback(func() {})
+	menu.GetInstance().SetStopCallback(func() {
+		if store.GetListenerStartedNetworking() == value.LISTENER_STARTED_NETWORKING_STATE_TRUE_VALUE {
+			dispatcher.GetInstance().Dispatch(
+				action.NewIncrementLoadingApplicationAction())
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetListenerStartedNetworkingAction(value.LISTENER_STARTED_NETWORKING_STATE_FALSE_VALUE))
+
+			connector.GetInstance().Close(func(err error) {
+				dispatcher.GetInstance().Dispatch(
+					action.NewDecrementLoadingApplicationAction())
+
+				if err != nil {
+					notification.GetInstance().Push(
+						common.ComposeMessage(
+							translation.GetInstance().GetTranslation("server.networking.stop-failure"),
+							err.Error()),
+						time.Second*3,
+						common.NotificationErrorTextColor)
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetListenerStartedNetworkingAction(value.LISTENER_STARTED_NETWORKING_STATE_TRUE_VALUE))
+				} else {
+					menu.GetInstance().DisableStopButton()
+
+					menu.GetInstance().EnableStartButton()
+
+					notification.GetInstance().Push(
+						translation.GetInstance().GetTranslation("server.networking.stop-success"),
+						time.Second*3,
+						common.NotificationInfoTextColor)
+				}
+			})
+		}
+	})
 
 	menu.GetInstance().SetMonitoringCallback(func() {
 		dispatcher.GetInstance().Dispatch(

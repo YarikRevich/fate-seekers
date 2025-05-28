@@ -1,7 +1,15 @@
 {
+    "server.menu.start.disabled": {
+        "one": "Server has already been started",
+        "other": "Server has already been started"
+    },
     "server.menu.stop": {
         "one": "Stop",
         "other": "Stop"
+    },
+    "server.menu.stop.disabled": {
+        "one": "Server has not been started yet",
+        "other": "Server has not been started yet"
     },
     "server.menu.monitoring": {
         "one": "Monitoring",
@@ -27,8 +35,28 @@
         "one": "Port",
         "other": "Port"
     },
+    "server.settingsmanager.invalid-networking-server-port": {
+        "one": "Provided server port is invalid",
+        "other": "Provided server port is invalid"
+    },
     "server.info.close": {
         "one": "Close",
         "other": "Close"
+    },
+    "server.networking.start-failure": {
+        "one": "Failed to start server",
+        "other": "Failed to start server"
+    },
+    "server.networking.start-success": {
+        "one": "Server was successfully started",
+        "other": "Server was successfully started"
+    },
+    "server.networking.stop-failure": {
+        "one": "Failed to stop server",
+        "other": "Failed to stop server"
+    },
+    "server.networking.stop-success": {
+        "one": "Server was successfully stopped",
+        "other": "Server was successfully stopped"
     }
 }

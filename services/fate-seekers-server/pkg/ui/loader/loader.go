@@ -54,6 +54,8 @@ const (
 	ComboIdleButton      = "ui/combo-button-idle.png"
 
 	TextInputIdle = "ui/text-input-idle.png"
+
+	ToolTip = "ui/tool-tip.png"
 )
 
 // Describes all the available fonts to be loaded.
