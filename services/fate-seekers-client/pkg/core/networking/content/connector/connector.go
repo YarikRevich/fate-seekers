@@ -6,19 +6,11 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
-	"sync"
 	"syscall"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/balacode/udpt"
 	"golang.org/x/crypto/blake2b"
-)
-
-var (
-	// GetInstance retrieves instance of the networking content connector, performing initilization if needed.
-	GetInstance = sync.OnceValue[networking.NetworkingConnector](newNetworkingContentConnector)
 )
 
 // NetworkingContentConnector represents networking content connector.
@@ -27,7 +19,9 @@ type NetworkingContentConnector struct {
 	close context.CancelFunc
 }
 
-func (ncc *NetworkingContentConnector) Connect() error {
+// Connect performs connection attempt. Requires failover callback which is used for the
+// case when initialized connection is interrupted by some error.
+func (ncc *NetworkingContentConnector) Connect(failover func(err error)) error {
 	networkingReceiverPortInt, err := strconv.Atoi(config.GetSettingsNetworkingReceiverPort())
 	if err != nil {
 		return err
@@ -38,7 +32,9 @@ func (ncc *NetworkingContentConnector) Connect() error {
 		return err
 	}
 
-	ctx, close := context.WithCancel(context.Background())
+	var ctx context.Context
+
+	ctx, ncc.close = context.WithCancel(context.Background())
 
 	go func() {
 		err := udpt.Receive(
@@ -51,9 +47,9 @@ func (ncc *NetworkingContentConnector) Connect() error {
 				return nil
 			})
 		if err != nil {
-			close()
+			ncc.close()
 
-			logging.GetInstance().Fatal(err.Error())
+			failover(err)
 		}
 	}()
 
@@ -62,7 +58,7 @@ func (ncc *NetworkingContentConnector) Connect() error {
 	go func() {
 		select {
 		case <-sigc:
-			close()
+			ncc.close()
 		}
 	}()
 
@@ -79,7 +75,7 @@ func (ncc *NetworkingContentConnector) Close() error {
 	return nil
 }
 
-// newNetworkingContentConnector initializes NetworkingContentConnector.
-func newNetworkingContentConnector() networking.NetworkingConnector {
+// NewNetworkingContentConnector initializes NetworkingContentConnector.
+func NewNetworkingContentConnector() *NetworkingContentConnector {
 	return new(NetworkingContentConnector)
 }

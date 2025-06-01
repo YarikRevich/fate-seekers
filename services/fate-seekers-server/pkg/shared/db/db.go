@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -50,8 +49,6 @@ func connect() (*gorm.DB, error) {
 
 	for range retryTicker.C {
 		retryTicker.Stop()
-
-		fmt.Println(config.GetDatabaseName())
 
 		connection, err = gorm.Open(sqlite.Open(config.GetDatabaseName()), &gorm.Config{
 			DisableForeignKeyConstraintWhenMigrating: true,

@@ -59,8 +59,12 @@
         "one": "Надано некоректний хост сервера",
         "other": "Надано некоректний хост сервера`"
     },
-    "client.networking.ping-connection-fail": {
+    "client.networking.ping-connection-failure": {
         "one": "Неможливо підʼєднатися до сервера",
         "other": "Неможливо підʼєднатися до сервера"
+    },
+    "client.networking.close-failure": {
+        "one": "Зʼєднання конектора не вдалося перервати",
+        "other": "Зʼєднання конектора не вдалося перервати"
     }
 }

@@ -41,10 +41,10 @@ func GetApplicationExit() string {
 }
 
 // GetApplicationLoading retrieves loading application state value.
-func GetApplicationLoading() string {
+func GetApplicationLoading() int {
 	instance := GetInstance()
 
-	return instance.GetState(application.LOADING_APPLICATION_STATE).(string)
+	return instance.GetState(application.LOADING_APPLICATION_STATE).(int)
 }
 
 // GetEntryHandshakeStartedNetworking retrieves entry handshake started networking state value.

@@ -124,54 +124,80 @@ func newMenuScreen() screen.Screen {
 					}
 
 					if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_TRUE_VALUE))
+						dispatcher.GetInstance().Dispatch(action.NewIncrementLoadingApplicationAction())
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE))
 
-						connector.GetInstance().Connect(func(err error) {
-							// TODO: check if error is related to encryption key.
+						connector.GetInstance().Connect(
+							func(err error) {
+								// TODO: check if error is related to encryption key.
 
-							if err == nil {
-								handler.GetInstance().PerformPingConnection(func(err error) {
-									dispatcher.GetInstance().Dispatch(
-										action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
+								if err == nil {
+									handler.GetInstance().PerformPingConnection(func(err error) {
+										dispatcher.GetInstance().Dispatch(
+											action.NewDecrementLoadingApplicationAction())
 
+										if err != nil {
+											notification.GetInstance().Push(
+												translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
+												time.Second*2,
+												common.NotificationErrorTextColor)
+
+											return
+										}
+
+										transparentTransitionEffect.Reset()
+
+										dispatcher.GetInstance().Dispatch(
+											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+
+									})
+								}
+							},
+							func(err error) {
+								notification.GetInstance().Push(
+									err.Error(),
+									time.Second*2,
+									common.NotificationErrorTextColor)
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewIncrementLoadingApplicationAction())
+
+								connector.GetInstance().Close(func(err error) {
 									if err != nil {
 										notification.GetInstance().Push(
-											translation.GetInstance().GetTranslation("client.networking.ping-connection-fail"),
+											translation.GetInstance().GetTranslation("client.networking.close-failure"),
 											time.Second*2,
 											common.NotificationErrorTextColor)
-
-										return
 									}
 
-									transparentTransitionEffect.Reset()
+									dispatcher.GetInstance().Dispatch(
+										action.NewDecrementLoadingApplicationAction())
 
 									dispatcher.GetInstance().Dispatch(
-										action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+										action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
 
+									dispatcher.GetInstance().Dispatch(
+										action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 								})
-							}
-						})
+							})
 					} else if store.GetPingConnectionStartedNetworking() == value.PING_CONNECTION_STARTED_NETWORKING_FALSE_VALUE {
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_TRUE_VALUE))
+						dispatcher.GetInstance().Dispatch(action.NewIncrementLoadingApplicationAction())
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPingConnectionStartedNetworkingAction(value.PING_CONNECTION_STARTED_NETWORKING_TRUE_VALUE))
 
 						handler.GetInstance().PerformPingConnection(func(err error) {
 							dispatcher.GetInstance().Dispatch(
-								action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
+								action.NewDecrementLoadingApplicationAction())
 
 							dispatcher.GetInstance().Dispatch(
 								action.NewSetPingConnectionStartedNetworkingAction(value.PING_CONNECTION_STARTED_NETWORKING_FALSE_VALUE))
 
 							if err != nil {
 								notification.GetInstance().Push(
-									translation.GetInstance().GetTranslation("client.networking.ping-connection-fail"),
+									translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
 									time.Second*2,
 									common.NotificationErrorTextColor)
 

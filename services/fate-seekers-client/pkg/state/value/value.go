@@ -23,8 +23,7 @@ const (
 
 	EXIT_APPLICATION_TRUE_VALUE = "true"
 
-	LOADING_APPLICATION_TRUE_VALUE  = "true"
-	LOADING_APPLICATION_FALSE_VALUE = "false"
+	LOADING_APPLICATION_EMPTY_VALUE = 0
 )
 
 // Describes all the available networking reducer store values.

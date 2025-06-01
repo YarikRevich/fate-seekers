@@ -10,8 +10,9 @@ const (
 
 // Describes all the available state actions for application reducer.
 const (
-	SET_EXIT_APPLICATION_ACTION    = "SET_EXIT_APPLICATION_ACTION"
-	SET_LOADING_APPLICATION_ACTION = "SET_LOADING_APPLICATION_ACTION"
+	SET_EXIT_APPLICATION_ACTION          = "SET_EXIT_APPLICATION_ACTION"
+	INCREMENT_LOADING_APPLICATION_ACTION = "INCREMENT_LOADING_APPLICATION_ACTION"
+	DECREMENT_LOADING_APPLICATION_ACTION = "DECREMENT_LOADING_APPLICATION_ACTION"
 )
 
 // Describes all the available state actions for networking reducer.
@@ -78,11 +79,17 @@ func NewSetExitApplicationAction(value string) godux.Action {
 	}
 }
 
-// NewSetLoadingApplicationAction creates new set loading application action.
-func NewSetLoadingApplicationAction(value string) godux.Action {
+// NewIncrementLoadingApplicationAction creates new increment loading application action.
+func NewIncrementLoadingApplicationAction() godux.Action {
 	return godux.Action{
-		Type:  SET_LOADING_APPLICATION_ACTION,
-		Value: value,
+		Type: INCREMENT_LOADING_APPLICATION_ACTION,
+	}
+}
+
+// NewDecrementLoadingApplicationAction creates new decrement loading application action.
+func NewDecrementLoadingApplicationAction() godux.Action {
+	return godux.Action{
+		Type: DECREMENT_LOADING_APPLICATION_ACTION,
 	}
 }
 

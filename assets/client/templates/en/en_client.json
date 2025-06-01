@@ -67,8 +67,12 @@
         "one": "Provided server host is invalid",
         "other": "Provided server host is invalid"
     },
-    "client.networking.ping-connection-fail": {
+    "client.networking.ping-connection-failure": {
         "one": "Unable to connect to a server",
         "other": "Unable to connect to a server"
+    },
+    "client.networking.close-failure": {
+        "one": "Connector close operation failed",
+        "other": "Connector close operation failed"
     }
 }
