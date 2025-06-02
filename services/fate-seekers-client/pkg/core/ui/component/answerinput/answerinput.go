@@ -45,7 +45,7 @@ type AnswerInputComponent struct {
 func (aic *AnswerInputComponent) SetText(value string) {
 	aic.text.Label = fmt.Sprintf(
 		"%s:   %s",
-		translation.GetInstance().GetTranslation("answerinput.solvetext"),
+		translation.GetInstance().GetTranslation("client.answerinput.solvetext"),
 		value)
 }
 
@@ -161,7 +161,7 @@ func newAnswerInputComponent() *AnswerInputComponent {
 
 			return false, &newInputText
 		}),
-		widget.TextInputOpts.Placeholder(translation.GetInstance().GetTranslation("answerinput.entertext")))
+		widget.TextInputOpts.Placeholder(translation.GetInstance().GetTranslation("client.answerinput.entertext")))
 
 	container.AddChild(answerInput)
 
@@ -208,7 +208,7 @@ func newAnswerInputComponent() *AnswerInputComponent {
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("answerinput.submit"),
+			translation.GetInstance().GetTranslation("client.answerinput.submit"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
@@ -235,7 +235,7 @@ func newAnswerInputComponent() *AnswerInputComponent {
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("answerinput.close"),
+			translation.GetInstance().GetTranslation("client.answerinput.close"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(

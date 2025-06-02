@@ -57,7 +57,7 @@ func NewLetterImageComponent(closeCallback func()) *widget.Container {
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("letterimage.close"),
+			translation.GetInstance().GetTranslation("client.letterimage.close"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(

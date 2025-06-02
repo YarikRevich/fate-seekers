@@ -7,25 +7,31 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/encryptionkey"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/host"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/port"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/blake2b"
 )
 
 var (
-	ErrReadingFromConfig                       = errors.New("err happened during config file read operation")
-	ErrReadingSettingsLanguageFromConfig       = errors.New("err happened during config file settings language read operation")
-	ErrReadingSettingsNetworkingHostFromConfig = errors.New("err happened during config file networking host read operation")
+	ErrReadingFromConfig                                = errors.New("err happened during config file read operation")
+	ErrReadingSettingsLanguageFromConfig                = errors.New("err happened during config file settings language read operation")
+	ErrReadingSettingsNetworkingReceiverPortFromConfig  = errors.New("err happened during config file networking receiver port read operation")
+	ErrReadingSettingsNetworkingServerHostFromConfig    = errors.New("err happened during config file networking server host read operation")
+	ErrReadingSettingsNetworkingEncryptionKeyFromConfig = errors.New("err happened during config file networking encryption key read operation")
 )
 
 var (
 	configFile      = flag.String("config", "config.yaml", "a name of configuration file")
 	configDirectory = flag.String("configDirectory", getDefaultConfigDirectory(), "a directory where configuration file is located")
 
-	settingsNetworkingReceiverPort                                int
-	settingsNetworkingServerHost, settingsNetworkingEncryptionKey string
+	settingsNetworkingReceiverPort, settingsNetworkingServerHost, settingsNetworkingEncryptionKey string
+
+	settingsParsedNetworkingEncryptionKey []byte
 
 	settingsSoundMusic, settingsSoundFX int
 	settingsLanguage                    string
@@ -80,7 +86,9 @@ const (
 func SetupDefaultConfig() {
 	viper.SetDefault("settings.window.width", 1920)
 	viper.SetDefault("settings.window.height", 1080)
+	viper.SetDefault("settings.networking.receiver.port", 8090)
 	viper.SetDefault("settings.networking.server.host", "localhost:8080")
+	viper.SetDefault("settings.networking.encryption.key", "")
 	viper.SetDefault("settings.sound.music", 100)
 	viper.SetDefault("settings.sound.fx", 100)
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
@@ -106,15 +114,38 @@ func Init() {
 
 	windowWidth := viper.GetInt("settings.window.width")
 	windowHeight := viper.GetInt("settings.window.height")
-	settingsNetworkingReceiverPort = viper.GetInt("settings.networking.receiver.port")
+	settingsNetworkingReceiverPort = viper.GetString("settings.networking.receiver.port")
+
+	if !port.Validate(settingsNetworkingReceiverPort) {
+		log.Fatalln(
+			ErrReadingSettingsNetworkingReceiverPortFromConfig.Error(),
+			zap.String("configFile", *configFile),
+			zap.String("settingsNetworkingReceiverPort", settingsNetworkingReceiverPort))
+	}
+
 	settingsNetworkingServerHost = viper.GetString("settings.networking.server.host")
-	settingsNetworkingEncryptionKey = viper.GetString("settings.networking.encryption.key")
 
 	if !host.Validate(settingsNetworkingServerHost) {
 		log.Fatalln(
-			ErrReadingSettingsNetworkingHostFromConfig.Error(),
+			ErrReadingSettingsNetworkingServerHostFromConfig.Error(),
 			zap.String("configFile", *configFile),
 			zap.String("settingsNetworkingServerHost", settingsNetworkingServerHost))
+	}
+
+	settingsNetworkingEncryptionKey = viper.GetString("settings.networking.encryption.key")
+
+	networkingEncryptionKeyHash, err := blake2b.New256([]byte(settingsNetworkingEncryptionKey))
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	settingsParsedNetworkingEncryptionKey = networkingEncryptionKeyHash.Sum(nil)
+
+	if !encryptionkey.Validate(settingsNetworkingEncryptionKey) {
+		log.Fatalln(
+			ErrReadingSettingsNetworkingEncryptionKeyFromConfig.Error(),
+			zap.String("configFile", *configFile),
+			zap.String("settingsNetworkingEncryptionKey", settingsNetworkingEncryptionKey))
 	}
 
 	settingsSoundMusic = viper.GetInt("settings.sound.music")
@@ -164,7 +195,7 @@ func SetSettingsWindowSize(width, height int) {
 	ebiten.SetWindowSize(width, height)
 }
 
-func SetSettingsNetworkingHost(value string) {
+func SetSettingsNetworkingServerHost(value string) {
 	viper.Set("settings.networking.server.host", value)
 
 	viper.WriteConfigAs(viper.ConfigFileUsed())
@@ -172,7 +203,22 @@ func SetSettingsNetworkingHost(value string) {
 	settingsNetworkingServerHost = value
 }
 
-func GetSettingsNetworkingReceiverPort() int {
+func SetSettingsNetworkingEncryptionKey(value string) {
+	viper.Set("settings.networking.encryption.key", value)
+
+	viper.WriteConfigAs(viper.ConfigFileUsed())
+
+	settingsNetworkingEncryptionKey = value
+
+	networkingEncryptionKeyHash, err := blake2b.New256([]byte(value))
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	settingsParsedNetworkingEncryptionKey = networkingEncryptionKeyHash.Sum(nil)
+}
+
+func GetSettingsNetworkingReceiverPort() string {
 	return settingsNetworkingReceiverPort
 }
 
@@ -182,6 +228,10 @@ func GetSettingsNetworkingServerHost() string {
 
 func GetSettingsNetworkingEncryptionKey() string {
 	return settingsNetworkingEncryptionKey
+}
+
+func GetSettingsParsedNetworkingEncryptionKey() []byte {
+	return settingsParsedNetworkingEncryptionKey
 }
 
 func SetSettingsSoundMusic(value int) {

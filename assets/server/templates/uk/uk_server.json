@@ -1,0 +1,54 @@
+{
+    "server.menu.stop": {
+        "one": "Стоп",
+        "other": "Стоп"
+    },
+    "server.menu.monitoring": {
+        "one": "Моніторинг",
+        "other": "Моніторинг"
+    },
+    "server.monitoring.start": {
+        "one": "Старт",
+        "other": "Старт"
+    },
+    "server.monitoring.stop": {
+        "one": "Стоп",
+        "other": "Стоп"
+    },
+    "server.monitoring.details": {
+        "one": "Деталі",
+        "other": "Деталі"
+    },
+    "server.monitoring.back": {
+        "one": "Назад",
+        "other": "Назад"
+    },
+    "server.settings.server.port": {
+        "one": "Порт",
+        "other": "Порт"
+    },
+    "server.settingsmanager.invalid-networking-server-port": {
+        "one": "Надано некоректний порт сервера",
+        "other": "Надано некоректний порт сервера"
+    },
+    "server.info.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
+    "server.networking.start-failure": {
+        "one": "Невдалося запустити сервер",
+        "other": "Невдалося запустити сервер"
+    },
+    "server.networking.start-success": {
+        "one": "Сервер був успішно запущений",
+        "other": "Сервер був успішно запущений"
+    },
+    "server.networking.stop-failure": {
+        "one": "Невдалося зупинити сервер",
+        "other": "Невдалося зупинити сервер"
+    },
+    "server.networking.stop-success": {
+        "one": "Сервер був успішно зупинений",
+        "other": "Сервер був успішно зупинений"
+    }
+}

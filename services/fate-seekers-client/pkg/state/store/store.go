@@ -41,10 +41,10 @@ func GetApplicationExit() string {
 }
 
 // GetApplicationLoading retrieves loading application state value.
-func GetApplicationLoading() string {
+func GetApplicationLoading() int {
 	instance := GetInstance()
 
-	return instance.GetState(application.LOADING_APPLICATION_STATE).(string)
+	return instance.GetState(application.LOADING_APPLICATION_STATE).(int)
 }
 
 // GetEntryHandshakeStartedNetworking retrieves entry handshake started networking state value.
@@ -52,6 +52,13 @@ func GetEntryHandshakeStartedNetworking() string {
 	instance := GetInstance()
 
 	return instance.GetState(networking.ENTRY_HANDSHAKE_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetPingConnectionStartedNetworking retrieves ping connection started networking state value.
+func GetPingConnectionStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.PING_CONNECTION_STARTED_NETWORKING_STATE).(string)
 }
 
 // GetLetterUpdated retrieves letter updated state value.

@@ -13,6 +13,9 @@ type NetworkingConnector interface {
 	// Can be used for reconnection as well.
 	Connect() error
 
+	// Ping performs health check operation for the established connection.
+	Ping() bool
+
 	// Close performs networking connector connection close operation.
 	Close() error
 }

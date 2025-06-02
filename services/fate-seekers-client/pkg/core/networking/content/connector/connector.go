@@ -2,19 +2,14 @@ package connector
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
-	"sync"
+	"strconv"
 	"syscall"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking"
 	"github.com/balacode/udpt"
-)
-
-var (
-	// GetInstance retrieves instance of the networking content connector, performing initilization if needed.
-	GetInstance = sync.OnceValue[networking.NetworkingConnector](newNetworkingContentConnector)
 )
 
 // NetworkingContentConnector represents networking content connector.
@@ -23,28 +18,41 @@ type NetworkingContentConnector struct {
 	close context.CancelFunc
 }
 
-func (ncc *NetworkingContentConnector) Connect() error {
-	ctx, close := context.WithCancel(context.Background())
-
-	err := udpt.Receive(
-		ctx,
-		config.GetSettingsNetworkingReceiverPort(),
-		[]byte(config.GetSettingsNetworkingEncryptionKey()),
-		func(k string, v []byte) error {
-			return nil
-		})
+// Connect performs connection attempt. Requires failover callback which is used for the
+// case when initialized connection is interrupted by some error.
+func (ncc *NetworkingContentConnector) Connect(failover func(err error)) error {
+	networkingReceiverPortInt, err := strconv.Atoi(config.GetSettingsNetworkingReceiverPort())
 	if err != nil {
-		close()
-
 		return err
 	}
+
+	var ctx context.Context
+
+	ctx, ncc.close = context.WithCancel(context.Background())
+
+	go func() {
+		err := udpt.Receive(
+			ctx,
+			networkingReceiverPortInt,
+			config.GetSettingsParsedNetworkingEncryptionKey(),
+			func(k string, v []byte) error {
+				fmt.Println(k, string(v))
+
+				return nil
+			})
+		if err != nil {
+			ncc.close()
+
+			failover(err)
+		}
+	}()
 
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		select {
 		case <-sigc:
-			close()
+			ncc.close()
 		}
 	}()
 
@@ -52,12 +60,14 @@ func (ncc *NetworkingContentConnector) Connect() error {
 }
 
 func (ncc *NetworkingContentConnector) Close() error {
-	ncc.close()
+	if ncc.close != nil {
+		ncc.close()
+	}
 
 	return nil
 }
 
-// newNetworkingContentConnector initializes NetworkingContentConnector.
-func newNetworkingContentConnector() networking.NetworkingConnector {
+// NewNetworkingContentConnector initializes NetworkingContentConnector.
+func NewNetworkingContentConnector() *NetworkingContentConnector {
 	return new(NetworkingContentConnector)
 }

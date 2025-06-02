@@ -91,8 +91,8 @@ func newSettingsScreen() screen.Screen {
 	return &SettingsScreen{
 		ui: builder.Build(
 			settings.NewSettingsComponent(
-				func(soundMusic, soundFX int, networkingHost, language string) {
-					if settingsmanager.ProcessChanges(soundMusic, soundFX, networkingHost, language) {
+				func(soundMusic, soundFX int, networkingHost, networkingEncryptionKey, language string) {
+					if settingsmanager.ProcessChanges(soundMusic, soundFX, networkingHost, networkingEncryptionKey, language) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetActiveScreenAction(store.GetPreviousScreen()))
 
@@ -100,15 +100,15 @@ func newSettingsScreen() screen.Screen {
 							action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
 					}
 				},
-				func(soundMusic, soundFX int, networkingHost, language string) {
-					if settingsmanager.AnyProvidedChanges(soundMusic, soundFX, networkingHost, language) {
+				func(soundMusic, soundFX int, networkingHost, networkingEncryptionKey, language string) {
+					if settingsmanager.AnyProvidedChanges(soundMusic, soundFX, networkingHost, networkingEncryptionKey, language) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptText(
-								translation.GetInstance().GetTranslation("prompt.settings")))
+								translation.GetInstance().GetTranslation("shared.prompt.settings")))
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptSubmitCallback(func() {
-								settingsmanager.ProcessChanges(soundMusic, soundFX, networkingHost, language)
+								settingsmanager.ProcessChanges(soundMusic, soundFX, networkingHost, networkingEncryptionKey, language)
 
 								transparentTransitionEffect.Reset()
 
@@ -118,7 +118,6 @@ func newSettingsScreen() screen.Screen {
 								dispatcher.GetInstance().Dispatch(
 									action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
 
-								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 							}))
 
@@ -132,7 +131,6 @@ func newSettingsScreen() screen.Screen {
 								dispatcher.GetInstance().Dispatch(
 									action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
 
-								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 								sound.GetInstance().GetSoundFxManager().Push(loader.TestFXSound)
 							}))
 					} else {

@@ -16,6 +16,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	answerinputmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -109,20 +110,26 @@ func newAnswerInputScreen() screen.Screen {
 		result, err := strconv.Atoi(valueRaw)
 		if err != nil {
 			notification.GetInstance().Push(
-				"Answer is incorrect!", time.Second*2, common.NotificationErrorTextColor)
+				translation.GetInstance().GetTranslation("client.answerinput.failure"),
+				time.Second*2,
+				common.NotificationErrorTextColor)
 
 			return
 		}
 
 		if answerinputmanager.GetInstance().GetGeneratedQuestion().Answer == result {
 			notification.GetInstance().Push(
-				"Answer is correct!", time.Second*2, common.NotificationInfoTextColor)
+				translation.GetInstance().GetTranslation("client.answerinput.success"),
+				time.Second*2,
+				common.NotificationInfoTextColor)
 
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetAnswerInputQuestionUpdated(value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE))
 		} else {
 			notification.GetInstance().Push(
-				"Answer is incorrect!", time.Second*2, common.NotificationErrorTextColor)
+				translation.GetInstance().GetTranslation("client.answerinput.failure"),
+				time.Second*2,
+				common.NotificationErrorTextColor)
 		}
 	})
 

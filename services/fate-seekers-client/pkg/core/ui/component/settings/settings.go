@@ -29,8 +29,8 @@ var (
 
 // NewSettingsComponent creates new main settings component.
 func NewSettingsComponent(
-	submitCallback func(soundMusic, soundFX int, networkingHost, language string),
-	closeCallback func(soundMusic, soundFX int, networkingHost, language string)) *widget.Container {
+	submitCallback func(soundMusic, soundFX int, networkingHost, networkingEncryptionKey, language string),
+	closeCallback func(soundMusic, soundFX int, networkingHost, networkingEncryptionKey, language string)) *widget.Container {
 	result := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
@@ -66,7 +66,7 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.title"),
+			translation.GetInstance().GetTranslation("shared.settings.title"),
 			generalFont,
 			color.White)))
 
@@ -85,7 +85,7 @@ func NewSettingsComponent(
 
 	components.AddChild(widget.NewText(
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.sound.music"),
+			translation.GetInstance().GetTranslation("client.settings.sound.music"),
 			generalFont,
 			color.White)))
 
@@ -141,7 +141,7 @@ func NewSettingsComponent(
 
 	components.AddChild(widget.NewText(
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.sound.fx"),
+			translation.GetInstance().GetTranslation("client.settings.sound.fx"),
 			generalFont,
 			color.White)))
 
@@ -200,7 +200,7 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.host"),
+			translation.GetInstance().GetTranslation("client.settings.host"),
 			generalFont,
 			color.White)))
 
@@ -270,7 +270,77 @@ func NewSettingsComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("settings.language"),
+			translation.GetInstance().GetTranslation("shared.settings.encryption-key"),
+			generalFont,
+			color.White)))
+
+	var networkingEncryptionKeyInput *widget.TextInput
+
+	networkingEncryptionKeyInput = widget.NewTextInput(
+		widget.TextInputOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(
+				scaler.GetPercentageOf(config.GetWorldWidth(), 20), 0),
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				VerticalPosition:   widget.AnchorLayoutPositionCenter,
+				HorizontalPosition: widget.AnchorLayoutPositionCenter,
+				StretchHorizontal:  false,
+				StretchVertical:    false,
+				Padding: widget.Insets{
+					Bottom: scaler.GetPercentageOf(config.GetWorldHeight(), 20),
+				},
+			})),
+		widget.TextInputOpts.Image(&widget.TextInputImage{
+			Idle:     image.NewNineSlice(loader.GetInstance().GetStatic(loader.TextInputIdle), [3]int{9, 14, 6}, [3]int{9, 14, 6}),
+			Disabled: image.NewNineSlice(loader.GetInstance().GetStatic(loader.TextInputIdle), [3]int{9, 14, 6}, [3]int{9, 14, 6}),
+		}),
+		widget.TextInputOpts.Color(&widget.TextInputColor{
+			Idle:          color.White,
+			Disabled:      color.White,
+			Caret:         color.White,
+			DisabledCaret: color.White,
+		}),
+		widget.TextInputOpts.Padding(widget.Insets{
+			Left:   13,
+			Right:  13,
+			Top:    13,
+			Bottom: 13,
+		}),
+		widget.TextInputOpts.Face(&text.GoTextFace{
+			Source: loader.GetInstance().GetFont(loader.KyivRegularFont),
+			Size:   20,
+		}),
+		widget.TextInputOpts.CaretOpts(
+			widget.CaretOpts.Size(generalFont, 4),
+		),
+		widget.TextInputOpts.AllowDuplicateSubmit(false),
+		widget.TextInputOpts.Validation(func(newInputTextRaw string) (bool, *string) {
+			newInputText := newInputTextRaw
+
+			parsedNewInputText := newInputText[len(networkingEncryptionKeyInput.GetText()):]
+
+			if len(parsedNewInputText) > 1 {
+				newInputText = networkingEncryptionKeyInput.GetText() + parsedNewInputText[:1]
+			}
+
+			if len(newInputText) >= maxInputSymbols {
+				replacement := networkingEncryptionKeyInput.GetText()
+
+				return false, &replacement
+			}
+
+			return false, &newInputText
+		}))
+
+	networkingEncryptionKeyInput.SetText(config.GetSettingsNetworkingEncryptionKey())
+
+	components.AddChild(networkingEncryptionKeyInput)
+
+	components.AddChild(widget.NewText(
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+			Stretch: true,
+		})),
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("shared.settings.language"),
 			generalFont,
 			color.White)))
 
@@ -345,9 +415,9 @@ func NewSettingsComponent(
 			func(e any) string {
 				switch e.(string) {
 				case config.SETTINGS_LANGUAGE_ENGLISH:
-					return translation.GetInstance().GetTranslation("settings.language.english")
+					return translation.GetInstance().GetTranslation("shared.settings.language.english")
 				case config.SETTINGS_LANGUAGE_UKRAINIAN:
-					return translation.GetInstance().GetTranslation("settings.language.ukrainian")
+					return translation.GetInstance().GetTranslation("shared.settings.language.ukrainian")
 				default:
 					return e.(string)
 				}
@@ -355,9 +425,9 @@ func NewSettingsComponent(
 			func(e any) string {
 				switch e.(string) {
 				case config.SETTINGS_LANGUAGE_ENGLISH:
-					return translation.GetInstance().GetTranslation("settings.language.english")
+					return translation.GetInstance().GetTranslation("shared.settings.language.english")
 				case config.SETTINGS_LANGUAGE_UKRAINIAN:
-					return translation.GetInstance().GetTranslation("settings.language.ukrainian")
+					return translation.GetInstance().GetTranslation("shared.settings.language.ukrainian")
 				default:
 					return e.(string)
 				}
@@ -412,7 +482,7 @@ func NewSettingsComponent(
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("answerinput.submit"),
+			translation.GetInstance().GetTranslation("shared.settings.submit"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
@@ -431,6 +501,7 @@ func NewSettingsComponent(
 				soundMusicSlider.Current,
 				soundFXSlider.Current,
 				networkingHostInput.GetText(),
+				networkingEncryptionKeyInput.GetText(),
 				languageComboButton.SelectedEntry().(string))
 		}),
 	))
@@ -444,7 +515,7 @@ func NewSettingsComponent(
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("answerinput.close"),
+			translation.GetInstance().GetTranslation("shared.settings.close"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
@@ -462,6 +533,7 @@ func NewSettingsComponent(
 				soundMusicSlider.Current,
 				soundFXSlider.Current,
 				networkingHostInput.GetText(),
+				networkingEncryptionKeyInput.GetText(),
 				languageComboButton.SelectedEntry().(string))
 		}),
 	))

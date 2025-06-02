@@ -8,12 +8,16 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/connector"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/encryptionkey"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -91,30 +95,128 @@ func newMenuScreen() screen.Screen {
 		ui: builder.Build(
 			menu.NewMenuComponent(
 				func() {
-					// TODO: first point of encryption key validation.
+					if !encryptionkey.Validate(config.GetSettingsNetworkingEncryptionKey()) {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPromptText(
+								translation.GetInstance().GetTranslation("shared.prompt.networking.encryption-key")))
 
-					if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
-						connector.GetInstance().Connect(func(err error) {
-							// TODO: check if error is related to encryption key.
-
-							logging.GetInstance().Error(err.Error())
-
-							dispatcher.GetInstance().Dispatch(
-								action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
-
-							if err == nil {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPromptSubmitCallback(func() {
 								transparentTransitionEffect.Reset()
 
 								dispatcher.GetInstance().Dispatch(
-									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
-							}
-						})
+									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SETTINGS_VALUE))
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetPreviousScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+							}))
 
 						dispatcher.GetInstance().Dispatch(
-							action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_TRUE_VALUE))
+							action.NewSetPromptCancelCallback(func() {
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetActiveScreenAction(store.GetPreviousScreen()))
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
+							}))
+
+						return
+					}
+
+					if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
+						dispatcher.GetInstance().Dispatch(action.NewIncrementLoadingApplicationAction())
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE))
+
+						connector.GetInstance().Clean(func() {
+							connector.GetInstance().Connect(
+								func(err1 error) {
+									if err1 != nil {
+										notification.GetInstance().Push(
+											common.ComposeMessage(
+												translation.GetInstance().GetTranslation("client.networking.connection-failure"),
+												err1.Error()),
+											time.Second*2,
+											common.NotificationErrorTextColor)
+
+										return
+									}
+
+									handler.GetInstance().PerformPingConnection(func(err2 error) {
+										dispatcher.GetInstance().Dispatch(
+											action.NewDecrementLoadingApplicationAction())
+
+										if err2 != nil {
+											notification.GetInstance().Push(
+												common.ComposeMessage(
+													translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
+													err2.Error()),
+												time.Second*2,
+												common.NotificationErrorTextColor)
+
+											return
+										}
+
+										transparentTransitionEffect.Reset()
+
+										dispatcher.GetInstance().Dispatch(
+											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+
+									})
+								},
+								func(err error) {
+									notification.GetInstance().Push(
+										err.Error(),
+										time.Second*2,
+										common.NotificationErrorTextColor)
+
+									dispatcher.GetInstance().Dispatch(
+										action.NewIncrementLoadingApplicationAction())
+
+									connector.GetInstance().Close(func(err error) {
+										if err != nil {
+											notification.GetInstance().Push(
+												translation.GetInstance().GetTranslation("client.networking.close-failure"),
+												time.Second*2,
+												common.NotificationErrorTextColor)
+										}
+
+										dispatcher.GetInstance().Dispatch(
+											action.NewDecrementLoadingApplicationAction())
+
+										dispatcher.GetInstance().Dispatch(
+											action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
+
+										dispatcher.GetInstance().Dispatch(
+											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+									})
+								})
+						})
+					} else if store.GetPingConnectionStartedNetworking() == value.PING_CONNECTION_STARTED_NETWORKING_FALSE_VALUE {
+						dispatcher.GetInstance().Dispatch(action.NewIncrementLoadingApplicationAction())
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetPingConnectionStartedNetworkingAction(value.PING_CONNECTION_STARTED_NETWORKING_TRUE_VALUE))
+
+						handler.GetInstance().PerformPingConnection(func(err error) {
+							dispatcher.GetInstance().Dispatch(
+								action.NewDecrementLoadingApplicationAction())
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetPingConnectionStartedNetworkingAction(value.PING_CONNECTION_STARTED_NETWORKING_FALSE_VALUE))
+
+							if err != nil {
+								notification.GetInstance().Push(
+									common.ComposeMessage(
+										translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
+										err.Error()),
+									time.Second*2,
+									common.NotificationErrorTextColor)
+
+								return
+							}
+						})
 					}
 				},
 				func() {

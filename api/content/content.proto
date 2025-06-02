@@ -11,6 +11,7 @@ service Content {
 
 // PingConnectionRequest represents  ping connection request message.
 message PingConnectionRequest {
+    string token = 1;
 };
 
 // PingConnectionResponse represents ping connection response message.
@@ -26,7 +27,7 @@ message Position {
 
 // Represents users positions retrieval request message.
 message GetUserPositionsRequest {
-
+    string token = 1;
 };
 
 // Represents users positions retrieval response message.

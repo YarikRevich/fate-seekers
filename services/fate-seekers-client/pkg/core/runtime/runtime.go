@@ -101,7 +101,7 @@ func (r *Runtime) Update() error {
 		return ebiten.Termination
 	}
 
-	if store.GetApplicationLoading() == value.LOADING_APPLICATION_TRUE_VALUE {
+	if store.GetApplicationLoading() != value.LOADING_APPLICATION_EMPTY_VALUE {
 		r.loaderAnimation.Update()
 	}
 
@@ -252,7 +252,7 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 
 	r.activeScreen.HandleRender(screen)
 
-	if store.GetApplicationLoading() == value.LOADING_APPLICATION_TRUE_VALUE {
+	if store.GetApplicationLoading() != value.LOADING_APPLICATION_EMPTY_VALUE {
 		var loadingAnimationGeometry ebiten.GeoM
 
 		loadingAnimationGeometry.Translate(

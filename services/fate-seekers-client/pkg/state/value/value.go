@@ -2,8 +2,12 @@ package value
 
 // Describes all the available screen reducer store values.
 const (
-	ACTIVE_SCREEN_INTRO_VALUE        = "intro"
-	ACTIVE_SCREEN_ENTRY_VALUE        = "entry"
+	ACTIVE_SCREEN_LOGO_VALUE  = "logo"
+	ACTIVE_SCREEN_INTRO_VALUE = "intro"
+
+	// Entry screen is expected to be used for initialization operations.
+	ACTIVE_SCREEN_ENTRY_VALUE = "entry"
+
 	ACTIVE_SCREEN_MENU_VALUE         = "menu"
 	ACTIVE_SCREEN_SETTINGS_VALUE     = "settings"
 	ACTIVE_SCREEN_SESSION_VALUE      = "session"
@@ -23,14 +27,16 @@ const (
 
 	EXIT_APPLICATION_TRUE_VALUE = "true"
 
-	LOADING_APPLICATION_TRUE_VALUE  = "true"
-	LOADING_APPLICATION_FALSE_VALUE = "false"
+	LOADING_APPLICATION_EMPTY_VALUE = 0
 )
 
 // Describes all the available networking reducer store values.
 const (
 	ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE  = "true"
 	ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE = "false"
+
+	PING_CONNECTION_STARTED_NETWORKING_TRUE_VALUE  = "true"
+	PING_CONNECTION_STARTED_NETWORKING_FALSE_VALUE = "false"
 )
 
 // Describes all the available letter reducer store values.

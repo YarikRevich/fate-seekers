@@ -1,6 +1,8 @@
 package action
 
-import "github.com/luisvinicius167/godux"
+import (
+	"github.com/luisvinicius167/godux"
+)
 
 // Describes all the available state actions for screen reducer.
 const (
@@ -10,13 +12,15 @@ const (
 
 // Describes all the available state actions for application reducer.
 const (
-	SET_EXIT_APPLICATION_ACTION    = "SET_EXIT_APPLICATION_ACTION"
-	SET_LOADING_APPLICATION_ACTION = "SET_LOADING_APPLICATION_ACTION"
+	SET_EXIT_APPLICATION_ACTION          = "SET_EXIT_APPLICATION_ACTION"
+	INCREMENT_LOADING_APPLICATION_ACTION = "INCREMENT_LOADING_APPLICATION_ACTION"
+	DECREMENT_LOADING_APPLICATION_ACTION = "DECREMENT_LOADING_APPLICATION_ACTION"
 )
 
 // Describes all the available state actions for networking reducer.
 const (
 	SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION = "SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION"
+	SET_PING_CONNECTION_STARTED_NETWORKING_ACTION = "SET_PING_CONNECTION_STARTED_NETWORKING_ACTION"
 )
 
 // Describes all the available state actions for letter reducer.
@@ -77,11 +81,17 @@ func NewSetExitApplicationAction(value string) godux.Action {
 	}
 }
 
-// NewSetLoadingApplicationAction creates new set loading application action.
-func NewSetLoadingApplicationAction(value string) godux.Action {
+// NewIncrementLoadingApplicationAction creates new increment loading application action.
+func NewIncrementLoadingApplicationAction() godux.Action {
 	return godux.Action{
-		Type:  SET_LOADING_APPLICATION_ACTION,
-		Value: value,
+		Type: INCREMENT_LOADING_APPLICATION_ACTION,
+	}
+}
+
+// NewDecrementLoadingApplicationAction creates new decrement loading application action.
+func NewDecrementLoadingApplicationAction() godux.Action {
+	return godux.Action{
+		Type: DECREMENT_LOADING_APPLICATION_ACTION,
 	}
 }
 
@@ -89,6 +99,14 @@ func NewSetLoadingApplicationAction(value string) godux.Action {
 func NewSetEntryHandshakeStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetPingConnectionStartedNetworkingAction creates new set ping connection started networking action.
+func NewSetPingConnectionStartedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_PING_CONNECTION_STARTED_NETWORKING_ACTION,
 		Value: value,
 	}
 }

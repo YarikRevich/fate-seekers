@@ -1,0 +1,63 @@
+package translation
+
+import (
+	"encoding/json"
+	"sync"
+
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/loader"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"golang.org/x/text/language"
+)
+
+var (
+	// GetInstance retrieves instance of the answer input manager, performing initial creation if needed.
+	GetInstance = sync.OnceValue[*TranslationManager](newTranslationManager)
+)
+
+// TranslationManager represents translation manager, which acts as a holder
+type TranslationManager struct {
+	// Represents localizer used for currently selected language.
+	localizer *i18n.Localizer
+}
+
+// GetTranslation returns translated text for the given key, using currently
+// selected language. It also accepts optional template arguments.
+func (tm *TranslationManager) GetTranslation(key string, args ...map[string]interface{}) string {
+	return tm.localizer.MustLocalize(&i18n.LocalizeConfig{
+		MessageID:    key,
+		TemplateData: args,
+	})
+}
+
+// newSubtitlesManager initializes SubtitlesManager.
+func newTranslationManager() *TranslationManager {
+	bundle := i18n.NewBundle(language.English)
+
+	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
+
+	bundle.MustParseMessageFileBytes(
+		loader.GetInstance().GetTemplate(loader.EnglishSharedTemplate), loader.EnglishSharedTemplate)
+
+	bundle.MustParseMessageFileBytes(
+		loader.GetInstance().GetTemplate(loader.UkrainianSharedTemplate), loader.UkrainianSharedTemplate)
+
+	bundle.MustParseMessageFileBytes(
+		loader.GetInstance().GetTemplate(loader.EnglishServerTemplate), loader.EnglishServerTemplate)
+
+	bundle.MustParseMessageFileBytes(
+		loader.GetInstance().GetTemplate(loader.UkrainianServerTemplate), loader.UkrainianServerTemplate)
+
+	var localizer *i18n.Localizer
+
+	switch config.GetSettingsLanguage() {
+	case config.SETTINGS_LANGUAGE_ENGLISH:
+		localizer = i18n.NewLocalizer(bundle, config.SETTINGS_LANGUAGE_ENGLISH)
+
+	case config.SETTINGS_LANGUAGE_UKRAINIAN:
+		localizer = i18n.NewLocalizer(bundle, config.SETTINGS_LANGUAGE_UKRAINIAN)
+
+	}
+
+	return &TranslationManager{localizer: localizer}
+}
