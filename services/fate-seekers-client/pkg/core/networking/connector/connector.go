@@ -21,7 +21,7 @@ type GlobalNetworkingConnector struct {
 	metadataConnector *metadataconnector.NetworkingMetadataConnector
 }
 
-// Connect performs a connection for all the API modules.
+// Connect performs connection establishment for all the API modules.
 func (gnc *GlobalNetworkingConnector) Connect(callback func(err error), failover func(err error)) {
 	go func() {
 		err := gnc.contentConnector.Connect(failover)
@@ -48,6 +48,7 @@ func (gnc *GlobalNetworkingConnector) Connect(callback func(err error), failover
 	}()
 }
 
+// Close performs connection close operation for all the API modules.
 func (gnc *GlobalNetworkingConnector) Close(callback func(err error)) {
 	go func() {
 		err := gnc.contentConnector.Close()
@@ -58,6 +59,17 @@ func (gnc *GlobalNetworkingConnector) Close(callback func(err error)) {
 		}
 
 		callback(gnc.metadataConnector.Close())
+	}()
+}
+
+// Clean performs must close connection operation.
+func (gnc *GlobalNetworkingConnector) Clean(callback func()) {
+	go func() {
+		gnc.contentConnector.Close()
+
+		gnc.metadataConnector.Close()
+
+		callback()
 	}()
 }
 

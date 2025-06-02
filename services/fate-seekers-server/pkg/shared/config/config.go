@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/blake2b"
 )
 
 var (
@@ -27,6 +28,8 @@ var (
 	configDirectory = flag.String("configDirectory", getDefaultConfigDirectory(), "a directory where configuration file is located")
 
 	settingsNetworkingServerPort, settingsNetworkingEncryptionKey string
+
+	settingsParsedNetworkingEncryptionKey []byte
 
 	settingsMonitoringGrafanaName, settingsMonitoringPrometheusName string
 
@@ -121,6 +124,13 @@ func Init() {
 
 	settingsNetworkingEncryptionKey = viper.GetString("settings.networking.encryption.key")
 
+	networkingEncryptionKeyHash, err := blake2b.New256([]byte(settingsNetworkingEncryptionKey))
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	settingsParsedNetworkingEncryptionKey = networkingEncryptionKeyHash.Sum(nil)
+
 	if !encryptionkey.Validate(settingsNetworkingEncryptionKey) {
 		log.Fatalln(
 			ErrReadingSettingsNetworkingEncryptionKeyFromConfig.Error(),
@@ -193,10 +203,21 @@ func SetSettingsNetworkingEncryptionKey(value string) {
 	viper.WriteConfigAs(viper.ConfigFileUsed())
 
 	settingsNetworkingEncryptionKey = value
+
+	networkingEncryptionKeyHash, err := blake2b.New256([]byte(value))
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	settingsParsedNetworkingEncryptionKey = networkingEncryptionKeyHash.Sum(nil)
 }
 
 func GetSettingsNetworkingEncryptionKey() string {
 	return settingsNetworkingEncryptionKey
+}
+
+func GetSettingsParsedNetworkingEncryptionKey() []byte {
+	return settingsParsedNetworkingEncryptionKey
 }
 
 func GetSettingsMonitoringGrafanaName() string {

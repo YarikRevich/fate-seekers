@@ -71,6 +71,10 @@
         "one": "Unable to connect to a server",
         "other": "Unable to connect to a server"
     },
+    "client.networking.connection-failure": {
+        "one": "Connector connect operation failed",
+        "other": "Connector connect operation failed"
+    },
     "client.networking.close-failure": {
         "one": "Connector close operation failed",
         "other": "Connector close operation failed"

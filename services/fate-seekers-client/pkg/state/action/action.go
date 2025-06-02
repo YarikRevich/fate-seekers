@@ -1,6 +1,8 @@
 package action
 
-import "github.com/luisvinicius167/godux"
+import (
+	"github.com/luisvinicius167/godux"
+)
 
 // Describes all the available state actions for screen reducer.
 const (

@@ -11,7 +11,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
 	"github.com/balacode/udpt"
-	"golang.org/x/crypto/blake2b"
 )
 
 // NetworkingContentConnector represents networking content connector.
@@ -26,11 +25,6 @@ func (ncc *NetworkingContentConnector) Connect() error {
 		return err
 	}
 
-	networkingEncryptionKeyHash, err := blake2b.New256([]byte(config.GetSettingsNetworkingEncryptionKey()))
-	if err != nil {
-		return err
-	}
-
 	var ctx context.Context
 
 	ctx, ncc.close = context.WithCancel(context.Background())
@@ -39,7 +33,7 @@ func (ncc *NetworkingContentConnector) Connect() error {
 		err := udpt.Receive(
 			ctx,
 			networkingServerPortInt,
-			networkingEncryptionKeyHash.Sum(nil),
+			config.GetSettingsParsedNetworkingEncryptionKey(),
 			func(k string, v []byte) error {
 				fmt.Println(k, string(v))
 

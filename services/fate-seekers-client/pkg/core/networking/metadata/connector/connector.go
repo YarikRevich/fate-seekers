@@ -51,14 +51,12 @@ func (nmc *NetworkingMetadataConnector) Connect() error {
 	return nil
 }
 
-func (nmc *NetworkingMetadataConnector) Ping() bool {
-	// nmc.client.PingConnection()
-
-	return false
-}
-
 func (nmc *NetworkingMetadataConnector) Close() error {
-	return nmc.conn.Close()
+	if nmc.conn != nil {
+		return nmc.conn.Close()
+	}
+
+	return nil
 }
 
 // NewNetworkingMetadataConnector initializes NetworkingMetadataConnector.

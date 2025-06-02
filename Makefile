@@ -37,10 +37,22 @@ clone-server-config: create-local-server ## Clones fate-seekers-server configura
 build-server-ui: clone-server-config ## Builds fate-seekers-server-ui application executable
 	@go build -v -tags="server shared" -o build/fate-seekers-server-ui ./cmd/fate-seekers-server-ui/...
 
+.PHONY: build-server-ui-debug
+build-server-ui-debug: clone-server-config ## Builds fate-seekers-server-ui application executable in DEBUG mode
+	@go build -v -race -tags="server shared" -o build/fate-seekers-server-ui ./cmd/fate-seekers-server-ui/...
+
 .PHONY: build-server-cli
 build-server-cli: clone-server-config ## Builds fate-seekers-server-cli application executable
 	@go build -v -tags="server shared" -o build/fate-seekers-server-cli ./cmd/fate-seekers-server-cli/...
 
+.PHONY: build-server-cli-debug
+build-server-cli-debug: clone-server-config ## Builds fate-seekers-server-cli application executable in DEBUG mode
+	@go build -v -race -tags="server shared" -o build/fate-seekers-server-cli ./cmd/fate-seekers-server-cli/...
+
 .PHONY: build-client
 build-client: clone-client-config ## Builds fate-seekers-client application executable
 	@go build -v -tags="client shared" -o build/fate-seekers-client ./cmd/fate-seekers-client/...
+
+.PHONY: build-client-debug
+build-client-debug: clone-client-config ## Builds fate-seekers-client application executable in DEBUG mode
+	@go build -v -race -tags="client shared" -o build/fate-seekers-client ./cmd/fate-seekers-client/...

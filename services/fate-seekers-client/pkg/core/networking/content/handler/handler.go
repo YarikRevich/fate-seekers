@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -30,9 +31,11 @@ func (ch *ContentHandler) send(key string, value []byte) error {
 		config.GetSettingsNetworkingServerHost(),
 		"tjkjtkr",
 		[]byte("jgkfjgkfjg"),
-		[]byte(config.GetSettingsNetworkingEncryptionKey()),
+		config.GetSettingsParsedNetworkingEncryptionKey(),
 		ch.configuration)
 	if err != nil {
+		fmt.Println(err)
+
 		return ErrSendRequest
 	}
 

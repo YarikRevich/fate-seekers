@@ -1,6 +1,9 @@
 package common
 
-import "image/color"
+import (
+	"fmt"
+	"image/color"
+)
 
 var (
 	// Represents common button text color.
@@ -12,3 +15,8 @@ var (
 	// Represents common notification info text color.
 	NotificationInfoTextColor = color.White
 )
+
+// ComposeMessage performs message composition.
+func ComposeMessage(err string, details string) string {
+	return fmt.Sprintf("%s\n Details: %s", err, details)
+}

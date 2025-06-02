@@ -129,18 +129,29 @@ func newMenuScreen() screen.Screen {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE))
 
-						connector.GetInstance().Connect(
-							func(err error) {
-								// TODO: check if error is related to encryption key.
+						connector.GetInstance().Clean(func() {
+							connector.GetInstance().Connect(
+								func(err1 error) {
+									if err1 != nil {
+										notification.GetInstance().Push(
+											common.ComposeMessage(
+												translation.GetInstance().GetTranslation("client.networking.connection-failure"),
+												err1.Error()),
+											time.Second*2,
+											common.NotificationErrorTextColor)
 
-								if err == nil {
-									handler.GetInstance().PerformPingConnection(func(err error) {
+										return
+									}
+
+									handler.GetInstance().PerformPingConnection(func(err2 error) {
 										dispatcher.GetInstance().Dispatch(
 											action.NewDecrementLoadingApplicationAction())
 
-										if err != nil {
+										if err2 != nil {
 											notification.GetInstance().Push(
-												translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
+												common.ComposeMessage(
+													translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
+													err2.Error()),
 												time.Second*2,
 												common.NotificationErrorTextColor)
 
@@ -153,35 +164,35 @@ func newMenuScreen() screen.Screen {
 											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
 
 									})
-								}
-							},
-							func(err error) {
-								notification.GetInstance().Push(
-									err.Error(),
-									time.Second*2,
-									common.NotificationErrorTextColor)
-
-								dispatcher.GetInstance().Dispatch(
-									action.NewIncrementLoadingApplicationAction())
-
-								connector.GetInstance().Close(func(err error) {
-									if err != nil {
-										notification.GetInstance().Push(
-											translation.GetInstance().GetTranslation("client.networking.close-failure"),
-											time.Second*2,
-											common.NotificationErrorTextColor)
-									}
+								},
+								func(err error) {
+									notification.GetInstance().Push(
+										err.Error(),
+										time.Second*2,
+										common.NotificationErrorTextColor)
 
 									dispatcher.GetInstance().Dispatch(
-										action.NewDecrementLoadingApplicationAction())
+										action.NewIncrementLoadingApplicationAction())
 
-									dispatcher.GetInstance().Dispatch(
-										action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
+									connector.GetInstance().Close(func(err error) {
+										if err != nil {
+											notification.GetInstance().Push(
+												translation.GetInstance().GetTranslation("client.networking.close-failure"),
+												time.Second*2,
+												common.NotificationErrorTextColor)
+										}
 
-									dispatcher.GetInstance().Dispatch(
-										action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+										dispatcher.GetInstance().Dispatch(
+											action.NewDecrementLoadingApplicationAction())
+
+										dispatcher.GetInstance().Dispatch(
+											action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
+
+										dispatcher.GetInstance().Dispatch(
+											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+									})
 								})
-							})
+						})
 					} else if store.GetPingConnectionStartedNetworking() == value.PING_CONNECTION_STARTED_NETWORKING_FALSE_VALUE {
 						dispatcher.GetInstance().Dispatch(action.NewIncrementLoadingApplicationAction())
 
@@ -197,7 +208,9 @@ func newMenuScreen() screen.Screen {
 
 							if err != nil {
 								notification.GetInstance().Push(
-									translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
+									common.ComposeMessage(
+										translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
+										err.Error()),
 									time.Second*2,
 									common.NotificationErrorTextColor)
 

@@ -2,8 +2,12 @@ package value
 
 // Describes all the available screen reducer store values.
 const (
-	ACTIVE_SCREEN_INTRO_VALUE        = "intro"
-	ACTIVE_SCREEN_ENTRY_VALUE        = "entry"
+	ACTIVE_SCREEN_LOGO_VALUE  = "logo"
+	ACTIVE_SCREEN_INTRO_VALUE = "intro"
+
+	// Entry screen is expected to be used for initialization operations.
+	ACTIVE_SCREEN_ENTRY_VALUE = "entry"
+
 	ACTIVE_SCREEN_MENU_VALUE         = "menu"
 	ACTIVE_SCREEN_SETTINGS_VALUE     = "settings"
 	ACTIVE_SCREEN_SESSION_VALUE      = "session"
