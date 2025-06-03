@@ -11,6 +11,8 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
@@ -37,8 +39,7 @@ type LogoScreen struct {
 }
 
 func (ls *LogoScreen) HandleInput() error {
-	// TODO: check if intro scene has already been played
-	// repository.GetFlagsRepository().GetByName()
+	_, ok, err := repository.GetFlagsRepository().GetByName(common.UUID_FLAG_NAME)
 
 	dispatcher.GetInstance().Dispatch(
 		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ENTRY_VALUE))

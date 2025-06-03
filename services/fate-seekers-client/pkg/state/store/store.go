@@ -9,6 +9,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/networking"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/prompt"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/sound"
 	"github.com/luisvinicius167/godux"
@@ -45,6 +46,20 @@ func GetApplicationLoading() int {
 	instance := GetInstance()
 
 	return instance.GetState(application.LOADING_APPLICATION_STATE).(int)
+}
+
+// GetRepositoryUUIDChecked retrieves uuid checked repository state value.
+func GetRepositoryUUIDChecked() string {
+	instance := GetInstance()
+
+	return instance.GetState(repository.UUID_CHECKED_REPOSITORY_STATE).(string)
+}
+
+// GetRepositoryIntroChecked retrieves intro checked repository state value.
+func GetRepositoryIntroChecked() string {
+	instance := GetInstance()
+
+	return instance.GetState(repository.INTRO_CHECKED_REPOSITORY_STATE).(string)
 }
 
 // GetEntryHandshakeStartedNetworking retrieves entry handshake started networking state value.
@@ -162,6 +177,9 @@ func newStore() *godux.Store {
 	applicationStateReducer := application.NewApplicationStateReducer(store)
 	applicationStateReducer.Init()
 
+	repositoryStateReducer := repository.NewRepositoryStateReducer(store)
+	repositoryStateReducer.Init()
+
 	networkingStateReducer := networking.NewNetworkingStateReducer(store)
 	networkingStateReducer.Init()
 
@@ -187,6 +205,11 @@ func newStore() *godux.Store {
 		}
 
 		result = applicationStateReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = repositoryStateReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

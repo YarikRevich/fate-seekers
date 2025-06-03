@@ -8,7 +8,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/connector"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/handler"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"

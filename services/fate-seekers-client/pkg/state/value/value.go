@@ -30,6 +30,15 @@ const (
 	LOADING_APPLICATION_EMPTY_VALUE = 0
 )
 
+// Describes all the available repository reducer store values.
+const (
+	UUID_CHECKED_REPOSITORY_TRUE_VALUE  = "true"
+	UUID_CHECKED_REPOSITORY_FALSE_VALUE = "false"
+
+	INTRO_CHECKED_REPOSITORY_TRUE_VALUE  = "true"
+	INTRO_CHECKED_REPOSITORY_FALSE_VALUE = "false"
+)
+
 // Describes all the available networking reducer store values.
 const (
 	ENTRY_HANDSHAKE_STARTED_NETWORKING_TRUE_VALUE  = "true"

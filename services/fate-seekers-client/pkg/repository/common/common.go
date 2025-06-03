@@ -4,6 +4,7 @@ package common
 const (
 	ENTRY_FLAG_NAME   = "entry"
 	CREDITS_FLAG_NAME = "credits"
+	UUID_FLAG_NAME    = "uuid"
 )
 
 // Describes all the values for flags repository.

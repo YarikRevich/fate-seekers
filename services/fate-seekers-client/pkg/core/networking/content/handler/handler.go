@@ -2,50 +2,54 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/api"
 	"github.com/balacode/udpt"
+	"google.golang.org/protobuf/proto"
 )
 
 var (
-	// GetInstance retrieves instance of the content handler, performing initilization if needed.
-	GetInstance = sync.OnceValue[*ContentHandler](newContentHandler)
+	// GetInstance retrieves instance of the handler, performing initilization if needed.
+	GetInstance = sync.OnceValue[*Handler](newHandler)
 )
 
 var (
 	ErrSendRequest = errors.New("err happened during request send operation")
 )
 
-// ContentHandler represents content data handler.
-type ContentHandler struct {
+// Handler represents content data handler.
+type Handler struct {
 	// Represents global UDP configuration used for send requests.
 	configuration *udpt.Configuration
 }
 
 // send performs low level UDP send operation using udpt wrapper.
-func (ch *ContentHandler) send(key string, value []byte) error {
+func (h *Handler) send(key string, value []byte) error {
 	err := udpt.Send(
 		config.GetSettingsNetworkingServerHost(),
-		"tjkjtkr",
-		[]byte("jgkfjgkfjg"),
+		key,
+		value,
 		config.GetSettingsParsedNetworkingEncryptionKey(),
-		ch.configuration)
+		h.configuration)
 	if err != nil {
-		fmt.Println(err)
-
 		return ErrSendRequest
 	}
 
 	return nil
 }
 
-// PerformPingConnection performs ping connection
-func (ch *ContentHandler) PerformPingConnection(callback func(err error)) {
+// PerformGetUserPosition performs get user positions retrieval
+func (h *Handler) PerformGetUserPositions(callback func(err error)) {
+	proto.Marshal(&api.GetUserPositionsRequest{
+		Issuer:  "itworks",
+		Session: "",
+	})
+
 	go func() {
-		err := ch.send("jkj", []byte("gjfkgjfk"))
+		err := h.send(api.GET_USER_POSITIONS, []byte("gjfkgjfk"))
 		if err != nil {
 			callback(err)
 
@@ -56,8 +60,8 @@ func (ch *ContentHandler) PerformPingConnection(callback func(err error)) {
 	}()
 }
 
-// newContentHandler initializes ContentHandler.
-func newContentHandler() *ContentHandler {
+// newHandler initializes Handler.
+func newHandler() *Handler {
 	configuration := udpt.NewDefaultConfig()
 
 	configuration.ReplyTimeout = 100 * time.Millisecond
@@ -65,7 +69,7 @@ func newContentHandler() *ContentHandler {
 	configuration.SendRetries = 2
 	configuration.WriteTimeout = 25 * time.Millisecond
 
-	return &ContentHandler{
+	return &Handler{
 		configuration: configuration,
 	}
 }

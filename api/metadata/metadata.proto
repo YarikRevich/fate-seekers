@@ -3,11 +3,14 @@ option go_package = "github.com/YarikRevich/fate-seekers/pkg/core/networking/met
 
 package metadata;
 
-// Rperesents service used to retrieve user content related data.
+// Represents service used to retrieve user content related data.
 // All the metadata requests require authentication header to be provided,
 // having JWT token saved in it.
 service Metadata {
+    // Performs ping connection and creates user record on the server side at the same time, if such
+    // does not exist.
     rpc PingConnection(PingConnectionRequest) returns (PingConnectionResponse) {};
+    
     rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse) {};
     rpc RemoveSession(RemoveSessionRequest) returns (RemoveSessionResponse) {};
     rpc JoinToSession(JoinToSessionRequest) returns (JoinToSessionResponse) {};

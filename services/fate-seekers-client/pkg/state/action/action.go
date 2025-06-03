@@ -17,6 +17,12 @@ const (
 	DECREMENT_LOADING_APPLICATION_ACTION = "DECREMENT_LOADING_APPLICATION_ACTION"
 )
 
+// Describes all the available state actions for repository reducer.
+const (
+	SET_UUID_CHECKED_REPOSITORY_ACTION  = "SET_UUID_CHECKED_REPOSITORY_ACTION"
+	SET_INTRO_CHECKED_REPOSITORY_ACTION = "SET_INTRO_CHECKED_REPOSITORY_ACTION"
+)
+
 // Describes all the available state actions for networking reducer.
 const (
 	SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION = "SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION"
@@ -77,6 +83,22 @@ func NewSetPreviousScreenAction(value string) godux.Action {
 func NewSetExitApplicationAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_EXIT_APPLICATION_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetUUIDCheckedRepositoryAction creates new set uuid checked repository action.
+func NewSetUUIDCheckedRepositoryAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_UUID_CHECKED_REPOSITORY_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetIntroCheckedRepositoryAction creates new set intro checked repository action.
+func NewSetIntroCheckedRepositoryAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_INTRO_CHECKED_REPOSITORY_ACTION,
 		Value: value,
 	}
 }

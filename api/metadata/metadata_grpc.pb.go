@@ -32,10 +32,12 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// Rperesents service used to retrieve user content related data.
+// Represents service used to retrieve user content related data.
 // All the metadata requests require authentication header to be provided,
 // having JWT token saved in it.
 type MetadataClient interface {
+	// Performs ping connection and creates user record on the server side at the same time, if such
+	// does not exist.
 	PingConnection(ctx context.Context, in *PingConnectionRequest, opts ...grpc.CallOption) (*PingConnectionResponse, error)
 	CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*CreateSessionResponse, error)
 	RemoveSession(ctx context.Context, in *RemoveSessionRequest, opts ...grpc.CallOption) (*RemoveSessionResponse, error)
@@ -145,10 +147,12 @@ type Metadata_GetChatClient = grpc.ServerStreamingClient[GetChatResponse]
 // All implementations must embed UnimplementedMetadataServer
 // for forward compatibility.
 //
-// Rperesents service used to retrieve user content related data.
+// Represents service used to retrieve user content related data.
 // All the metadata requests require authentication header to be provided,
 // having JWT token saved in it.
 type MetadataServer interface {
+	// Performs ping connection and creates user record on the server side at the same time, if such
+	// does not exist.
 	PingConnection(context.Context, *PingConnectionRequest) (*PingConnectionResponse, error)
 	CreateSession(context.Context, *CreateSessionRequest) (*CreateSessionResponse, error)
 	RemoveSession(context.Context, *RemoveSessionRequest) (*RemoveSessionResponse, error)
