@@ -143,7 +143,7 @@ func newMenuScreen() screen.Screen {
 										return
 									}
 
-									handler.GetInstance().PerformPingConnection(func(err2 error) {
+									handler.PerformPingConnection(func(err2 error) {
 										dispatcher.GetInstance().Dispatch(
 											action.NewDecrementLoadingApplicationAction())
 
@@ -199,7 +199,7 @@ func newMenuScreen() screen.Screen {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPingConnectionStartedNetworkingAction(value.PING_CONNECTION_STARTED_NETWORKING_TRUE_VALUE))
 
-						handler.GetInstance().PerformPingConnection(func(err error) {
+						handler.PerformPingConnection(func(err error) {
 							dispatcher.GetInstance().Dispatch(
 								action.NewDecrementLoadingApplicationAction())
 

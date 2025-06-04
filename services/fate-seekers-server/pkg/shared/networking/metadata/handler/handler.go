@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/api"
 	"google.golang.org/grpc"
@@ -12,7 +13,9 @@ type Handler struct {
 	api.UnimplementedMetadataServer
 }
 
-func (h *Handler) PingConnection(context.Context, *api.PingConnectionRequest) (*api.PingConnectionResponse, error) {
+func (h *Handler) PingConnection(ctx context.Context, request *api.PingConnectionRequest) (*api.PingConnectionResponse, error) {
+	fmt.Println(request.Issuer, "REQUEST")
+
 	return nil, nil
 }
 

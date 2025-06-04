@@ -11,13 +11,16 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
+	"github.com/google/uuid"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -39,10 +42,46 @@ type LogoScreen struct {
 }
 
 func (ls *LogoScreen) HandleInput() error {
-	_, ok, err := repository.GetFlagsRepository().GetByName(common.UUID_FLAG_NAME)
+	if store.GetRepositoryUUIDChecked() == value.UUID_CHECKED_REPOSITORY_FALSE_VALUE {
+		_, ok, err := repository.GetFlagsRepository().GetByName(common.UUID_FLAG_NAME)
+		if err != nil {
+			logging.GetInstance().Fatal(err.Error())
+		}
 
-	dispatcher.GetInstance().Dispatch(
-		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ENTRY_VALUE))
+		if !ok {
+			uuidRaw := uuid.New().String()
+
+			err = repository.GetFlagsRepository().InsertOrUpdate(common.UUID_FLAG_NAME, uuidRaw)
+			if err != nil {
+				logging.GetInstance().Fatal(err.Error())
+			}
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetUUIDRepositoryAction(uuidRaw))
+		}
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetUUIDCheckedRepositoryAction(value.UUID_CHECKED_REPOSITORY_TRUE_VALUE))
+	}
+
+	// TODO: check when logo animation is finished
+	// _, ok, err := repository.GetFlagsRepository().GetByName(common.INTRO_FLAG_NAME)
+	// if err != nil {
+	// 	logging.GetInstance().Fatal(err.Error())
+	// }
+
+	// if !ok {
+	// 	dispatcher.GetInstance().Dispatch(
+	// 		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_INTRO_VALUE))
+
+	// 	err = repository.GetFlagsRepository().InsertOrUpdate(common.INTRO_FLAG_NAME, common.INTRO_FLAG_TRUE_VALUE)
+	// 	if err != nil {
+	// 		logging.GetInstance().Fatal(err.Error())
+	// 	}
+	// } else {
+	// 	dispatcher.GetInstance().Dispatch(
+	// 		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ENTRY_VALUE))
+	// }
 
 	if !ls.transparentTransitionEffect.Done() {
 		if !ls.transparentTransitionEffect.OnEnd() {

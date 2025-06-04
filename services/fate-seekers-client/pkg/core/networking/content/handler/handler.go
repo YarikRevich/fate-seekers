@@ -7,6 +7,7 @@ import (
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/balacode/udpt"
 	"google.golang.org/protobuf/proto"
 )
@@ -44,7 +45,7 @@ func (h *Handler) send(key string, value []byte) error {
 // PerformGetUserPosition performs get user positions retrieval
 func (h *Handler) PerformGetUserPositions(callback func(err error)) {
 	proto.Marshal(&api.GetUserPositionsRequest{
-		Issuer:  "itworks",
+		Issuer:  store.GetRepositoryUUID(),
 		Session: "",
 	})
 

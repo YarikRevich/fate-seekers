@@ -12,6 +12,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/intro"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/logo"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/menu"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/resume"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/session"
@@ -156,6 +157,9 @@ func (r *Runtime) Update() error {
 	}
 
 	switch store.GetActiveScreen() {
+	case value.ACTIVE_SCREEN_LOGO_VALUE:
+		r.activeScreen = logo.GetInstance()
+
 	case value.ACTIVE_SCREEN_INTRO_VALUE:
 		r.activeScreen = intro.GetInstance()
 

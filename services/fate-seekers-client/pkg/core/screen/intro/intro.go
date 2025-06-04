@@ -11,16 +11,8 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository/common"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
-	"github.com/google/uuid"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -42,26 +34,6 @@ type IntroScreen struct {
 }
 
 func (es *IntroScreen) HandleInput() error {
-	// TODO: check if intro scene has already been played
-	// repository.GetFlagsRepository().GetByName()
-
-	if store.GetRepositoryUUIDChecked() == value.UUID_CHECKED_REPOSITORY_FALSE_VALUE {
-		_, ok, err := repository.GetFlagsRepository().GetByName(common.UUID_FLAG_NAME)
-		if err != nil {
-			logging.GetInstance().Fatal(err.Error())
-		}
-
-		if !ok {
-			err = repository.GetFlagsRepository().InsertOrUpdate(common.UUID_FLAG_NAME, uuid.New().String())
-			if err != nil {
-				logging.GetInstance().Fatal(err.Error())
-			}
-		}
-
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetUUIDCheckedRepositoryAction(value.UUID_CHECKED_REPOSITORY_TRUE_VALUE))
-	}
-
 	if !es.transparentTransitionEffect.Done() {
 		if !es.transparentTransitionEffect.OnEnd() {
 			es.transparentTransitionEffect.Update()

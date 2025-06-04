@@ -31,7 +31,6 @@ message PingConnectionRequest {
 
 // PingConnectionResponse represents ping connection response message.
 message PingConnectionResponse {
-    bool status = 1;
 };
 
 // GetSessionsRequest represents get sesssions request.
