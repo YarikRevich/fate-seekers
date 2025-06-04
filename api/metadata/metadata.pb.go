@@ -9,6 +9,7 @@ package api
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -24,6 +25,7 @@ const (
 // PingConnectionRequest represents  ping connection request message.
 type PingConnectionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Issuer        string                 `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -56,6 +58,13 @@ func (x *PingConnectionRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use PingConnectionRequest.ProtoReflect.Descriptor instead.
 func (*PingConnectionRequest) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *PingConnectionRequest) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
 }
 
 // PingConnectionResponse represents ping connection response message.
@@ -103,6 +112,457 @@ func (x *PingConnectionResponse) GetStatus() bool {
 	return false
 }
 
+// GetSessionsRequest represents get sesssions request.
+type GetSessionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSessionsRequest) Reset() {
+	*x = GetSessionsRequest{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSessionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSessionsRequest) ProtoMessage() {}
+
+func (x *GetSessionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSessionsRequest.ProtoReflect.Descriptor instead.
+func (*GetSessionsRequest) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{2}
+}
+
+// Session represents common session retrieval message.
+type Session struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Session) Reset() {
+	*x = Session{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Session) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Session) ProtoMessage() {}
+
+func (x *Session) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Session.ProtoReflect.Descriptor instead.
+func (*Session) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Session) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *Session) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+// GetSessionsResponse represents get sesssions response.
+type GetSessionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sessions      []*Session             `protobuf:"bytes,1,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSessionsResponse) Reset() {
+	*x = GetSessionsResponse{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSessionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSessionsResponse) ProtoMessage() {}
+
+func (x *GetSessionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSessionsResponse.ProtoReflect.Descriptor instead.
+func (*GetSessionsResponse) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetSessionsResponse) GetSessions() []*Session {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
+// CreateSessionRequest represents create session request.
+// User is allowed to create only 3 sessions in 10 minutes.
+type CreateSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Issuer        string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateSessionRequest) Reset() {
+	*x = CreateSessionRequest{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateSessionRequest) ProtoMessage() {}
+
+func (x *CreateSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateSessionRequest.ProtoReflect.Descriptor instead.
+func (*CreateSessionRequest) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CreateSessionRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateSessionRequest) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+// CreateSessionResponse represents create session response.
+type CreateSessionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateSessionResponse) Reset() {
+	*x = CreateSessionResponse{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateSessionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateSessionResponse) ProtoMessage() {}
+
+func (x *CreateSessionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateSessionResponse.ProtoReflect.Descriptor instead.
+func (*CreateSessionResponse) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CreateSessionResponse) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+// RemoveSessionRequest represents remove session request.
+type RemoveSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveSessionRequest) Reset() {
+	*x = RemoveSessionRequest{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveSessionRequest) ProtoMessage() {}
+
+func (x *RemoveSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveSessionRequest.ProtoReflect.Descriptor instead.
+func (*RemoveSessionRequest) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *RemoveSessionRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+// RemoveSessionResponse represents remove session response.
+type RemoveSessionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveSessionResponse) Reset() {
+	*x = RemoveSessionResponse{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveSessionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveSessionResponse) ProtoMessage() {}
+
+func (x *RemoveSessionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveSessionResponse.ProtoReflect.Descriptor instead.
+func (*RemoveSessionResponse) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{8}
+}
+
+// JoinToSessionRequest represents user join to session request.
+type JoinToSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Issuer        string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinToSessionRequest) Reset() {
+	*x = JoinToSessionRequest{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinToSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinToSessionRequest) ProtoMessage() {}
+
+func (x *JoinToSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinToSessionRequest.ProtoReflect.Descriptor instead.
+func (*JoinToSessionRequest) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *JoinToSessionRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *JoinToSessionRequest) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+// JoinToSessionResponse represents user join to session response.
+type JoinToSessionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinToSessionResponse) Reset() {
+	*x = JoinToSessionResponse{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinToSessionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinToSessionResponse) ProtoMessage() {}
+
+func (x *JoinToSessionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinToSessionResponse.ProtoReflect.Descriptor instead.
+func (*JoinToSessionResponse) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{10}
+}
+
+// Represents chests retrieval request message.
+type GetChestsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetChestsRequest) Reset() {
+	*x = GetChestsRequest{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetChestsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetChestsRequest) ProtoMessage() {}
+
+func (x *GetChestsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetChestsRequest.ProtoReflect.Descriptor instead.
+func (*GetChestsRequest) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetChestsRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
 // Position represents common position message.
 type Position struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -114,7 +574,7 @@ type Position struct {
 
 func (x *Position) Reset() {
 	*x = Position{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[2]
+	mi := &file_api_metadata_metadata_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -126,7 +586,7 @@ func (x *Position) String() string {
 func (*Position) ProtoMessage() {}
 
 func (x *Position) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[2]
+	mi := &file_api_metadata_metadata_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -139,7 +599,7 @@ func (x *Position) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Position.ProtoReflect.Descriptor instead.
 func (*Position) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{2}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *Position) GetX() int64 {
@@ -156,316 +616,6 @@ func (x *Position) GetY() int64 {
 	return 0
 }
 
-// CreateSessionRequest represents create session request.
-// User is allowed to create only 3 sessions in 10 minutes.
-type CreateSessionRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// Represents an identifier of the user, which generated during
-	// application installation.
-	UserId        string `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateSessionRequest) Reset() {
-	*x = CreateSessionRequest{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateSessionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateSessionRequest) ProtoMessage() {}
-
-func (x *CreateSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateSessionRequest.ProtoReflect.Descriptor instead.
-func (*CreateSessionRequest) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *CreateSessionRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *CreateSessionRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-// CreateSessionResponse represents create session response.
-type CreateSessionResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateSessionResponse) Reset() {
-	*x = CreateSessionResponse{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateSessionResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateSessionResponse) ProtoMessage() {}
-
-func (x *CreateSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateSessionResponse.ProtoReflect.Descriptor instead.
-func (*CreateSessionResponse) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *CreateSessionResponse) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-// RemoveSessionRequest represents remove session request.
-type RemoveSessionRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RemoveSessionRequest) Reset() {
-	*x = RemoveSessionRequest{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RemoveSessionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RemoveSessionRequest) ProtoMessage() {}
-
-func (x *RemoveSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RemoveSessionRequest.ProtoReflect.Descriptor instead.
-func (*RemoveSessionRequest) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *RemoveSessionRequest) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-// RemoveSessionResponse represents remove session response.
-type RemoveSessionResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RemoveSessionResponse) Reset() {
-	*x = RemoveSessionResponse{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RemoveSessionResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RemoveSessionResponse) ProtoMessage() {}
-
-func (x *RemoveSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RemoveSessionResponse.ProtoReflect.Descriptor instead.
-func (*RemoveSessionResponse) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{6}
-}
-
-// JoinToSessionRequest represents user join to session request.
-type JoinToSessionRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *JoinToSessionRequest) Reset() {
-	*x = JoinToSessionRequest{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *JoinToSessionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*JoinToSessionRequest) ProtoMessage() {}
-
-func (x *JoinToSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use JoinToSessionRequest.ProtoReflect.Descriptor instead.
-func (*JoinToSessionRequest) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *JoinToSessionRequest) GetSessionId() string {
-	if x != nil {
-		return x.SessionId
-	}
-	return ""
-}
-
-func (x *JoinToSessionRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-// JoinToSessionResponse represents user join to session response.
-type JoinToSessionResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *JoinToSessionResponse) Reset() {
-	*x = JoinToSessionResponse{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *JoinToSessionResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*JoinToSessionResponse) ProtoMessage() {}
-
-func (x *JoinToSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use JoinToSessionResponse.ProtoReflect.Descriptor instead.
-func (*JoinToSessionResponse) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{8}
-}
-
-// Represents chests retrieval request message.
-type GetChestsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetChestsRequest) Reset() {
-	*x = GetChestsRequest{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetChestsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetChestsRequest) ProtoMessage() {}
-
-func (x *GetChestsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetChestsRequest.ProtoReflect.Descriptor instead.
-func (*GetChestsRequest) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{9}
-}
-
 // Represents chests retrieval response streaming message.
 type GetChestsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -476,7 +626,7 @@ type GetChestsResponse struct {
 
 func (x *GetChestsResponse) Reset() {
 	*x = GetChestsResponse{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[10]
+	mi := &file_api_metadata_metadata_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -488,7 +638,7 @@ func (x *GetChestsResponse) String() string {
 func (*GetChestsResponse) ProtoMessage() {}
 
 func (x *GetChestsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[10]
+	mi := &file_api_metadata_metadata_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -501,7 +651,7 @@ func (x *GetChestsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChestsResponse.ProtoReflect.Descriptor instead.
 func (*GetChestsResponse) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{10}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetChestsResponse) GetPositions() []*Position {
@@ -514,13 +664,14 @@ func (x *GetChestsResponse) GetPositions() []*Position {
 // Represents map retrieval request message.
 type GetMapRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetMapRequest) Reset() {
 	*x = GetMapRequest{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[11]
+	mi := &file_api_metadata_metadata_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -532,7 +683,7 @@ func (x *GetMapRequest) String() string {
 func (*GetMapRequest) ProtoMessage() {}
 
 func (x *GetMapRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[11]
+	mi := &file_api_metadata_metadata_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -545,7 +696,14 @@ func (x *GetMapRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMapRequest.ProtoReflect.Descriptor instead.
 func (*GetMapRequest) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{11}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetMapRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
 }
 
 // Represents map retrieval response streaming message.
@@ -558,7 +716,7 @@ type GetMapResponse struct {
 
 func (x *GetMapResponse) Reset() {
 	*x = GetMapResponse{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[12]
+	mi := &file_api_metadata_metadata_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -570,7 +728,7 @@ func (x *GetMapResponse) String() string {
 func (*GetMapResponse) ProtoMessage() {}
 
 func (x *GetMapResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[12]
+	mi := &file_api_metadata_metadata_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -583,7 +741,7 @@ func (x *GetMapResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMapResponse.ProtoReflect.Descriptor instead.
 func (*GetMapResponse) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{12}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetMapResponse) GetPositions() []*Position {
@@ -596,14 +754,15 @@ func (x *GetMapResponse) GetPositions() []*Position {
 // Represents chat retrieval request message.
 type GetChatRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Offset        int64                  `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Offset        int64                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetChatRequest) Reset() {
 	*x = GetChatRequest{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[13]
+	mi := &file_api_metadata_metadata_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -615,7 +774,7 @@ func (x *GetChatRequest) String() string {
 func (*GetChatRequest) ProtoMessage() {}
 
 func (x *GetChatRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[13]
+	mi := &file_api_metadata_metadata_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -628,7 +787,14 @@ func (x *GetChatRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChatRequest.ProtoReflect.Descriptor instead.
 func (*GetChatRequest) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{13}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GetChatRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
 }
 
 func (x *GetChatRequest) GetOffset() int64 {
@@ -636,6 +802,67 @@ func (x *GetChatRequest) GetOffset() int64 {
 		return x.Offset
 	}
 	return 0
+}
+
+// ChatMessage represents common chat retrieval message.
+type ChatMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Content       string                 `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
+	Issuer        string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	Timestamp     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatMessage) Reset() {
+	*x = ChatMessage{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatMessage) ProtoMessage() {}
+
+func (x *ChatMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatMessage.ProtoReflect.Descriptor instead.
+func (*ChatMessage) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ChatMessage) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *ChatMessage) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+func (x *ChatMessage) GetTimestamp() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Timestamp
+	}
+	return nil
 }
 
 // Represents chat retrieval response streaming message.
@@ -648,7 +875,7 @@ type GetChatResponse struct {
 
 func (x *GetChatResponse) Reset() {
 	*x = GetChatResponse{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[14]
+	mi := &file_api_metadata_metadata_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -660,7 +887,7 @@ func (x *GetChatResponse) String() string {
 func (*GetChatResponse) ProtoMessage() {}
 
 func (x *GetChatResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[14]
+	mi := &file_api_metadata_metadata_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -673,7 +900,7 @@ func (x *GetChatResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChatResponse.ProtoReflect.Descriptor instead.
 func (*GetChatResponse) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{14}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GetChatResponse) GetMessages() []string {
@@ -687,38 +914,59 @@ var File_api_metadata_metadata_proto protoreflect.FileDescriptor
 
 const file_api_metadata_metadata_proto_rawDesc = "" +
 	"\n" +
-	"\x1bapi/metadata/metadata.proto\x12\bmetadata\"\x17\n" +
-	"\x15PingConnectionRequest\"0\n" +
+	"\x1bapi/metadata/metadata.proto\x12\bmetadata\x1a\x1fgoogle/protobuf/timestamp.proto\"/\n" +
+	"\x15PingConnectionRequest\x12\x16\n" +
+	"\x06issuer\x18\x01 \x01(\tR\x06issuer\"0\n" +
 	"\x16PingConnectionResponse\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\bR\x06status\"&\n" +
-	"\bPosition\x12\f\n" +
-	"\x01x\x18\x01 \x01(\x03R\x01x\x12\f\n" +
-	"\x01y\x18\x02 \x01(\x03R\x01y\"C\n" +
+	"\x06status\x18\x01 \x01(\bR\x06status\"\x14\n" +
+	"\x12GetSessionsRequest\"<\n" +
+	"\aSession\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"D\n" +
+	"\x13GetSessionsResponse\x12-\n" +
+	"\bsessions\x18\x01 \x03(\v2\x11.metadata.SessionR\bsessions\"B\n" +
 	"\x14CreateSessionRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"'\n" +
-	"\x15CreateSessionResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"&\n" +
-	"\x14RemoveSessionRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\x17\n" +
-	"\x15RemoveSessionResponse\"N\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"6\n" +
+	"\x15CreateSessionResponse\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\"5\n" +
+	"\x14RemoveSessionRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\"\x17\n" +
+	"\x15RemoveSessionResponse\"M\n" +
 	"\x14JoinToSessionRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"\x17\n" +
-	"\x15JoinToSessionResponse\"\x12\n" +
-	"\x10GetChestsRequest\"E\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x16\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"\x17\n" +
+	"\x15JoinToSessionResponse\"1\n" +
+	"\x10GetChestsRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\"&\n" +
+	"\bPosition\x12\f\n" +
+	"\x01x\x18\x01 \x01(\x03R\x01x\x12\f\n" +
+	"\x01y\x18\x02 \x01(\x03R\x01y\"E\n" +
 	"\x11GetChestsResponse\x120\n" +
-	"\tpositions\x18\x01 \x03(\v2\x12.metadata.PositionR\tpositions\"\x0f\n" +
-	"\rGetMapRequest\"B\n" +
+	"\tpositions\x18\x01 \x03(\v2\x12.metadata.PositionR\tpositions\".\n" +
+	"\rGetMapRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\"B\n" +
 	"\x0eGetMapResponse\x120\n" +
-	"\tpositions\x18\x01 \x03(\v2\x12.metadata.PositionR\tpositions\"(\n" +
-	"\x0eGetChatRequest\x12\x16\n" +
-	"\x06offset\x18\x01 \x01(\x03R\x06offset\"-\n" +
+	"\tpositions\x18\x01 \x03(\v2\x12.metadata.PositionR\tpositions\"G\n" +
+	"\x0eGetChatRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x16\n" +
+	"\x06offset\x18\x02 \x01(\x03R\x06offset\"y\n" +
+	"\vChatMessage\x12\x18\n" +
+	"\acontent\x18\x01 \x01(\tR\acontent\x12\x16\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\x128\n" +
+	"\ttimestamp\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"-\n" +
 	"\x0fGetChatResponse\x12\x1a\n" +
-	"\bmessages\x18\x01 \x03(\tR\bmessages2\xaa\x04\n" +
+	"\bmessages\x18\x01 \x03(\tR\bmessages2\xf8\x04\n" +
 	"\bMetadata\x12U\n" +
-	"\x0ePingConnection\x12\x1f.metadata.PingConnectionRequest\x1a .metadata.PingConnectionResponse\"\x00\x12R\n" +
+	"\x0ePingConnection\x12\x1f.metadata.PingConnectionRequest\x1a .metadata.PingConnectionResponse\"\x00\x12L\n" +
+	"\vGetSessions\x12\x1c.metadata.GetSessionsRequest\x1a\x1d.metadata.GetSessionsResponse\"\x00\x12R\n" +
 	"\rCreateSession\x12\x1e.metadata.CreateSessionRequest\x1a\x1f.metadata.CreateSessionResponse\"\x00\x12R\n" +
 	"\rRemoveSession\x12\x1e.metadata.RemoveSessionRequest\x1a\x1f.metadata.RemoveSessionResponse\"\x00\x12R\n" +
 	"\rJoinToSession\x12\x1e.metadata.JoinToSessionRequest\x1a\x1f.metadata.JoinToSessionResponse\"\x00\x12F\n" +
@@ -738,46 +986,55 @@ func file_api_metadata_metadata_proto_rawDescGZIP() []byte {
 	return file_api_metadata_metadata_proto_rawDescData
 }
 
-var file_api_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_api_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_api_metadata_metadata_proto_goTypes = []any{
 	(*PingConnectionRequest)(nil),  // 0: metadata.PingConnectionRequest
 	(*PingConnectionResponse)(nil), // 1: metadata.PingConnectionResponse
-	(*Position)(nil),               // 2: metadata.Position
-	(*CreateSessionRequest)(nil),   // 3: metadata.CreateSessionRequest
-	(*CreateSessionResponse)(nil),  // 4: metadata.CreateSessionResponse
-	(*RemoveSessionRequest)(nil),   // 5: metadata.RemoveSessionRequest
-	(*RemoveSessionResponse)(nil),  // 6: metadata.RemoveSessionResponse
-	(*JoinToSessionRequest)(nil),   // 7: metadata.JoinToSessionRequest
-	(*JoinToSessionResponse)(nil),  // 8: metadata.JoinToSessionResponse
-	(*GetChestsRequest)(nil),       // 9: metadata.GetChestsRequest
-	(*GetChestsResponse)(nil),      // 10: metadata.GetChestsResponse
-	(*GetMapRequest)(nil),          // 11: metadata.GetMapRequest
-	(*GetMapResponse)(nil),         // 12: metadata.GetMapResponse
-	(*GetChatRequest)(nil),         // 13: metadata.GetChatRequest
-	(*GetChatResponse)(nil),        // 14: metadata.GetChatResponse
+	(*GetSessionsRequest)(nil),     // 2: metadata.GetSessionsRequest
+	(*Session)(nil),                // 3: metadata.Session
+	(*GetSessionsResponse)(nil),    // 4: metadata.GetSessionsResponse
+	(*CreateSessionRequest)(nil),   // 5: metadata.CreateSessionRequest
+	(*CreateSessionResponse)(nil),  // 6: metadata.CreateSessionResponse
+	(*RemoveSessionRequest)(nil),   // 7: metadata.RemoveSessionRequest
+	(*RemoveSessionResponse)(nil),  // 8: metadata.RemoveSessionResponse
+	(*JoinToSessionRequest)(nil),   // 9: metadata.JoinToSessionRequest
+	(*JoinToSessionResponse)(nil),  // 10: metadata.JoinToSessionResponse
+	(*GetChestsRequest)(nil),       // 11: metadata.GetChestsRequest
+	(*Position)(nil),               // 12: metadata.Position
+	(*GetChestsResponse)(nil),      // 13: metadata.GetChestsResponse
+	(*GetMapRequest)(nil),          // 14: metadata.GetMapRequest
+	(*GetMapResponse)(nil),         // 15: metadata.GetMapResponse
+	(*GetChatRequest)(nil),         // 16: metadata.GetChatRequest
+	(*ChatMessage)(nil),            // 17: metadata.ChatMessage
+	(*GetChatResponse)(nil),        // 18: metadata.GetChatResponse
+	(*timestamppb.Timestamp)(nil),  // 19: google.protobuf.Timestamp
 }
 var file_api_metadata_metadata_proto_depIdxs = []int32{
-	2,  // 0: metadata.GetChestsResponse.positions:type_name -> metadata.Position
-	2,  // 1: metadata.GetMapResponse.positions:type_name -> metadata.Position
-	0,  // 2: metadata.Metadata.PingConnection:input_type -> metadata.PingConnectionRequest
-	3,  // 3: metadata.Metadata.CreateSession:input_type -> metadata.CreateSessionRequest
-	5,  // 4: metadata.Metadata.RemoveSession:input_type -> metadata.RemoveSessionRequest
-	7,  // 5: metadata.Metadata.JoinToSession:input_type -> metadata.JoinToSessionRequest
-	9,  // 6: metadata.Metadata.GetChests:input_type -> metadata.GetChestsRequest
-	11, // 7: metadata.Metadata.GetMap:input_type -> metadata.GetMapRequest
-	13, // 8: metadata.Metadata.GetChat:input_type -> metadata.GetChatRequest
-	1,  // 9: metadata.Metadata.PingConnection:output_type -> metadata.PingConnectionResponse
-	4,  // 10: metadata.Metadata.CreateSession:output_type -> metadata.CreateSessionResponse
-	6,  // 11: metadata.Metadata.RemoveSession:output_type -> metadata.RemoveSessionResponse
-	8,  // 12: metadata.Metadata.JoinToSession:output_type -> metadata.JoinToSessionResponse
-	10, // 13: metadata.Metadata.GetChests:output_type -> metadata.GetChestsResponse
-	12, // 14: metadata.Metadata.GetMap:output_type -> metadata.GetMapResponse
-	14, // 15: metadata.Metadata.GetChat:output_type -> metadata.GetChatResponse
-	9,  // [9:16] is the sub-list for method output_type
-	2,  // [2:9] is the sub-list for method input_type
-	2,  // [2:2] is the sub-list for extension type_name
-	2,  // [2:2] is the sub-list for extension extendee
-	0,  // [0:2] is the sub-list for field type_name
+	3,  // 0: metadata.GetSessionsResponse.sessions:type_name -> metadata.Session
+	12, // 1: metadata.GetChestsResponse.positions:type_name -> metadata.Position
+	12, // 2: metadata.GetMapResponse.positions:type_name -> metadata.Position
+	19, // 3: metadata.ChatMessage.timestamp:type_name -> google.protobuf.Timestamp
+	0,  // 4: metadata.Metadata.PingConnection:input_type -> metadata.PingConnectionRequest
+	2,  // 5: metadata.Metadata.GetSessions:input_type -> metadata.GetSessionsRequest
+	5,  // 6: metadata.Metadata.CreateSession:input_type -> metadata.CreateSessionRequest
+	7,  // 7: metadata.Metadata.RemoveSession:input_type -> metadata.RemoveSessionRequest
+	9,  // 8: metadata.Metadata.JoinToSession:input_type -> metadata.JoinToSessionRequest
+	11, // 9: metadata.Metadata.GetChests:input_type -> metadata.GetChestsRequest
+	14, // 10: metadata.Metadata.GetMap:input_type -> metadata.GetMapRequest
+	16, // 11: metadata.Metadata.GetChat:input_type -> metadata.GetChatRequest
+	1,  // 12: metadata.Metadata.PingConnection:output_type -> metadata.PingConnectionResponse
+	4,  // 13: metadata.Metadata.GetSessions:output_type -> metadata.GetSessionsResponse
+	6,  // 14: metadata.Metadata.CreateSession:output_type -> metadata.CreateSessionResponse
+	8,  // 15: metadata.Metadata.RemoveSession:output_type -> metadata.RemoveSessionResponse
+	10, // 16: metadata.Metadata.JoinToSession:output_type -> metadata.JoinToSessionResponse
+	13, // 17: metadata.Metadata.GetChests:output_type -> metadata.GetChestsResponse
+	15, // 18: metadata.Metadata.GetMap:output_type -> metadata.GetMapResponse
+	18, // 19: metadata.Metadata.GetChat:output_type -> metadata.GetChatResponse
+	12, // [12:20] is the sub-list for method output_type
+	4,  // [4:12] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_api_metadata_metadata_proto_init() }
@@ -791,7 +1048,7 @@ func file_api_metadata_metadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_metadata_metadata_proto_rawDesc), len(file_api_metadata_metadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   15,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

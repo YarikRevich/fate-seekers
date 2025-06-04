@@ -16,9 +16,6 @@ var (
 type GlobalNetworkingConnector struct {
 	// Represents networking content connector.
 	contentConnector *contentconnector.NetworkingContentConnector
-
-	// Represents networking metadata connector.
-	metadataConnector *metadataconnector.NetworkingMetadataConnector
 }
 
 // Connect performs connection establishment for all the API modules.
@@ -31,7 +28,7 @@ func (gnc *GlobalNetworkingConnector) Connect(callback func(err error), failover
 			return
 		}
 
-		err = gnc.metadataConnector.Connect()
+		err = metadataconnector.GetInstance().Connect()
 		if err != nil {
 			if err := gnc.contentConnector.Close(); err != nil {
 				callback(err)
@@ -58,7 +55,7 @@ func (gnc *GlobalNetworkingConnector) Close(callback func(err error)) {
 			return
 		}
 
-		callback(gnc.metadataConnector.Close())
+		callback(metadataconnector.GetInstance().Close())
 	}()
 }
 
@@ -67,7 +64,7 @@ func (gnc *GlobalNetworkingConnector) Clean(callback func()) {
 	go func() {
 		gnc.contentConnector.Close()
 
-		gnc.metadataConnector.Close()
+		metadataconnector.GetInstance().Close()
 
 		callback()
 	}()
@@ -76,7 +73,6 @@ func (gnc *GlobalNetworkingConnector) Clean(callback func()) {
 // newGlobalNetworkingConnector initializes GlobalNetworkingConnector.
 func newGlobalNetworkingConnector() *GlobalNetworkingConnector {
 	return &GlobalNetworkingConnector{
-		contentConnector:  contentconnector.NewNetworkingContentConnector(),
-		metadataConnector: metadataconnector.NewNetworkingMetadataConnector(),
+		contentConnector: contentconnector.NewNetworkingContentConnector(),
 	}
 }
