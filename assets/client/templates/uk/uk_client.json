@@ -31,6 +31,22 @@
         "one": "Хост",
         "other": "Хост"
     },
+    "client.selector.title": {
+        "one": "Селектор сесії",
+        "other": "Селектор сесії"
+    },
+    "client.selector.submit": {
+        "one": "Підтвердити",
+        "other": "Підтвердити"
+    },
+    "client.selector.create": {
+        "one": "Створити",
+        "other": "Створити"
+    },
+    "client.selector.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
     "client.letterimage.close": {
         "one": "Закрити",
         "other": "Закрити"

@@ -31,6 +31,22 @@
         "one": "Host",
         "other": "Host"
     },
+    "client.selector.title": {
+        "one": "Session selector",
+        "other": "Session selector"
+    },
+    "client.selector.submit": {
+        "one": "Submit",
+        "other": "Submit"
+    },
+    "client.selector.create": {
+        "one": "Create",
+        "other": "Create"
+    },
+    "client.selector.close": {
+        "one": "Close",
+        "other": "Close"
+    },
     "client.letterimage.close": {
         "one": "Close",
         "other": "Close"

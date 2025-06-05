@@ -11,6 +11,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/selector"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -71,8 +72,16 @@ func (ss *SelectorScreen) HandleRender(screen *ebiten.Image) {
 func newSelectorScreen() screen.Screen {
 	return &SelectorScreen{
 		ui: builder.Build(
-		// TODO: add selector initialization
-		),
+			selector.NewSelectorComponent(
+				func(sessionID string) {
+
+				},
+				func() {
+
+				},
+				func() {
+
+				})),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10),
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 	}

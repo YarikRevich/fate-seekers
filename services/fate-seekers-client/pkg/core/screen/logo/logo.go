@@ -83,6 +83,9 @@ func (ls *LogoScreen) HandleInput() error {
 	// 		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ENTRY_VALUE))
 	// }
 
+	dispatcher.GetInstance().Dispatch(
+		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
 	if !ls.transparentTransitionEffect.Done() {
 		if !ls.transparentTransitionEffect.OnEnd() {
 			ls.transparentTransitionEffect.Update()

@@ -155,14 +155,16 @@ func newMenuScreen() screen.Screen {
 												time.Second*2,
 												common.NotificationErrorTextColor)
 
+											dispatcher.GetInstance().Dispatch(
+												action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
+
 											return
 										}
 
 										transparentTransitionEffect.Reset()
 
 										dispatcher.GetInstance().Dispatch(
-											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
-
+											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
 									})
 								},
 								func(err error) {
@@ -214,8 +216,14 @@ func newMenuScreen() screen.Screen {
 									time.Second*2,
 									common.NotificationErrorTextColor)
 
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
+
 								return
 							}
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
 						})
 					}
 				},
