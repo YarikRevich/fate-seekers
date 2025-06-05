@@ -1,4 +1,4 @@
-package lobby
+package selector
 
 import (
 	"sync"
@@ -17,12 +17,12 @@ import (
 )
 
 var (
-	// GetInstance retrieves instance of the lobby screen, performing initilization if needed.
-	GetInstance = sync.OnceValue[screen.Screen](newLobbyScreen)
+	// GetInstance retrieves instance of the selector screen, performing initilization if needed.
+	GetInstance = sync.OnceValue[screen.Screen](newSelectorScreen)
 )
 
-// LobbyScreen represents lobby screen implementation.
-type LobbyScreen struct {
+// SelectorScreen represents selector screen implementation.
+type SelectorScreen struct {
 	// Represents attached user interface.
 	ui *ebitenui.UI
 
@@ -33,45 +33,45 @@ type LobbyScreen struct {
 	world *ebiten.Image
 }
 
-func (ls *LobbyScreen) HandleInput() error {
-	if !ls.transparentTransitionEffect.Done() {
-		if !ls.transparentTransitionEffect.OnEnd() {
-			ls.transparentTransitionEffect.Update()
+func (ss *SelectorScreen) HandleInput() error {
+	if !ss.transparentTransitionEffect.Done() {
+		if !ss.transparentTransitionEffect.OnEnd() {
+			ss.transparentTransitionEffect.Update()
 		} else {
-			ls.transparentTransitionEffect.Clean()
+			ss.transparentTransitionEffect.Clean()
 		}
 	}
 
 	shared.GetInstance().GetBackgroundAnimation().Update()
 
-	ls.ui.Update()
+	ss.ui.Update()
 
 	return nil
 }
 
-func (ls *LobbyScreen) HandleRender(screen *ebiten.Image) {
+func (ss *SelectorScreen) HandleRender(screen *ebiten.Image) {
 	var backgroundAnimationGeometry ebiten.GeoM
 
 	backgroundAnimationGeometry.Scale(
 		scaler.GetScaleFactor(config.GetMinStaticWidth(), config.GetWorldWidth()),
 		scaler.GetScaleFactor(config.GetMinStaticHeight(), config.GetWorldHeight()))
 
-	shared.GetInstance().GetBackgroundAnimation().DrawTo(ls.world, &ebiten.DrawImageOptions{
+	shared.GetInstance().GetBackgroundAnimation().DrawTo(ss.world, &ebiten.DrawImageOptions{
 		GeoM: backgroundAnimationGeometry,
 	})
 
-	ls.ui.Draw(ls.world)
+	ss.ui.Draw(ss.world)
 
-	screen.DrawImage(ls.world, &ebiten.DrawImageOptions{
+	screen.DrawImage(ss.world, &ebiten.DrawImageOptions{
 		ColorM: options.GetTransparentDrawOptions(
-			ls.transparentTransitionEffect.GetValue()).ColorM})
+			ss.transparentTransitionEffect.GetValue()).ColorM})
 }
 
-// newLobbyScreen initializes LobbyScreen.
-func newLobbyScreen() screen.Screen {
-	return &LobbyScreen{
+// newSelectorScreen initializes SelectorScreen.
+func newSelectorScreen() screen.Screen {
+	return &SelectorScreen{
 		ui: builder.Build(
-		// TODO: add lobby initialization
+		// TODO: add selector initialization
 		),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10),
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),

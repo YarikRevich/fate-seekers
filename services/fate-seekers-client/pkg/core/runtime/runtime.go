@@ -12,9 +12,11 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/intro"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/lobby"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/logo"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/menu"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/resume"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/selector"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/session"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/settings"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/travel"
@@ -171,6 +173,12 @@ func (r *Runtime) Update() error {
 
 	case value.ACTIVE_SCREEN_SETTINGS_VALUE:
 		r.activeScreen = settings.GetInstance()
+
+	case value.ACTIVE_SCREEN_SELECTOR_VALUE:
+		r.activeScreen = selector.GetInstance()
+
+	case value.ACTIVE_SCREEN_LOBBY_VALUE:
+		r.activeScreen = lobby.GetInstance()
 
 	case value.ACTIVE_SCREEN_SESSION_VALUE:
 		r.activeScreen = session.GetInstance()

@@ -8,9 +8,10 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/animation/combiner"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository/common"
@@ -19,7 +20,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
-	"github.com/ebitenui/ebitenui"
 	"github.com/google/uuid"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -31,11 +31,11 @@ var (
 
 // LogoScreen represents logo screen implementation.
 type LogoScreen struct {
-	// Represents attached user interface.
-	ui *ebitenui.UI
-
 	// Represents transparent transition effect.
 	transparentTransitionEffect transition.TransitionEffect
+
+	// Represents local logo animation.
+	logoAnimation *combiner.AnimationCombiner
 
 	// Represents global world view.
 	world *ebiten.Image
@@ -93,8 +93,6 @@ func (ls *LogoScreen) HandleInput() error {
 
 	shared.GetInstance().GetBackgroundAnimation().Update()
 
-	ls.ui.Update()
-
 	return nil
 }
 
@@ -105,11 +103,9 @@ func (ls *LogoScreen) HandleRender(screen *ebiten.Image) {
 		scaler.GetScaleFactor(config.GetMinStaticWidth(), config.GetWorldWidth()),
 		scaler.GetScaleFactor(config.GetMinStaticHeight(), config.GetWorldHeight()))
 
-	shared.GetInstance().GetBackgroundAnimation().DrawTo(ls.world, &ebiten.DrawImageOptions{
+	ls.logoAnimation.DrawTo(ls.world, &ebiten.DrawImageOptions{
 		GeoM: backgroundAnimationGeometry,
 	})
-
-	ls.ui.Draw(ls.world)
 
 	screen.DrawImage(ls.world, &ebiten.DrawImageOptions{
 		ColorM: options.GetTransparentDrawOptions(
@@ -119,7 +115,14 @@ func (ls *LogoScreen) HandleRender(screen *ebiten.Image) {
 // newLogoScreen initializes LogoScreen.
 func newLogoScreen() screen.Screen {
 	return &LogoScreen{
-		ui:                          builder.Build(),
+		logoAnimation: combiner.NewAnimationCombiner(
+			loader.GetInstance().GetAnimation(loader.Background1Animation, false),
+			loader.GetInstance().GetAnimation(loader.Background2Animation, false),
+			loader.GetInstance().GetAnimation(loader.Background3Animation, false),
+			loader.GetInstance().GetAnimation(loader.Background4Animation, false),
+			loader.GetInstance().GetAnimation(loader.Background5Animation, false),
+			loader.GetInstance().GetAnimation(loader.Background6Animation, false),
+		),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10),
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 	}
