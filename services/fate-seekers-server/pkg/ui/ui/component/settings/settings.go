@@ -375,6 +375,36 @@ func NewSettingsComponent(
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("shared.settings.close"),
+			generalFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Position: widget.RowLayoutPositionEnd,
+			})),
+		widget.ButtonOpts.TextPadding(widget.Insets{
+			Left:   30,
+			Right:  30,
+			Top:    20,
+			Bottom: 20,
+		}),
+		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			closeCallback(
+				networkingPortInput.GetText(),
+				networkingEncryptionKeyInput.GetText(),
+				languageComboButton.SelectedEntry().(string))
+		}),
+	))
+
+	buttonsContainer.AddChild(widget.NewButton(
+		widget.ButtonOpts.Image(&widget.ButtonImage{
+			Idle:         buttonIdleIcon,
+			Hover:        buttonHoverIcon,
+			Pressed:      buttonIdleIcon,
+			PressedHover: buttonIdleIcon,
+			Disabled:     buttonIdleIcon,
+		}),
+		widget.ButtonOpts.Text(
 			translation.GetInstance().GetTranslation("shared.settings.submit"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
@@ -391,36 +421,6 @@ func NewSettingsComponent(
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
 			submitCallback(
-				networkingPortInput.GetText(),
-				networkingEncryptionKeyInput.GetText(),
-				languageComboButton.SelectedEntry().(string))
-		}),
-	))
-
-	buttonsContainer.AddChild(widget.NewButton(
-		widget.ButtonOpts.Image(&widget.ButtonImage{
-			Idle:         buttonIdleIcon,
-			Hover:        buttonHoverIcon,
-			Pressed:      buttonIdleIcon,
-			PressedHover: buttonIdleIcon,
-			Disabled:     buttonIdleIcon,
-		}),
-		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("shared.settings.close"),
-			generalFont,
-			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
-		widget.ButtonOpts.WidgetOpts(
-			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-				Position: widget.RowLayoutPositionEnd,
-			})),
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   30,
-			Right:  30,
-			Top:    20,
-			Bottom: 20,
-		}),
-		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			closeCallback(
 				networkingPortInput.GetText(),
 				networkingEncryptionKeyInput.GetText(),
 				languageComboButton.SelectedEntry().(string))

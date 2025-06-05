@@ -88,13 +88,13 @@ func NewSelectorComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.settings.host"),
+			translation.GetInstance().GetTranslation("client.selector.session_id"),
 			generalFont,
 			color.White)))
 
-	var networkingHostInput *widget.TextInput
+	var sessionIDInput *widget.TextInput
 
-	networkingHostInput = widget.NewTextInput(
+	sessionIDInput = widget.NewTextInput(
 		widget.TextInputOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
 				scaler.GetPercentageOf(config.GetWorldWidth(), 20), 0),
@@ -134,14 +134,14 @@ func NewSelectorComponent(
 		widget.TextInputOpts.Validation(func(newInputTextRaw string) (bool, *string) {
 			newInputText := newInputTextRaw
 
-			parsedNewInputText := newInputText[len(networkingHostInput.GetText()):]
+			parsedNewInputText := newInputText[len(sessionIDInput.GetText()):]
 
 			if len(parsedNewInputText) > 1 {
-				newInputText = networkingHostInput.GetText() + parsedNewInputText[:1]
+				newInputText = sessionIDInput.GetText() + parsedNewInputText[:1]
 			}
 
 			if len(newInputText) >= maxInputSymbols {
-				replacement := networkingHostInput.GetText()
+				replacement := sessionIDInput.GetText()
 
 				return false, &replacement
 			}
@@ -149,11 +149,78 @@ func NewSelectorComponent(
 			return false, &newInputText
 		}))
 
-	networkingHostInput.SetText(config.GetSettingsNetworkingServerHost())
+	components.AddChild(sessionIDInput)
 
-	components.AddChild(networkingHostInput)
+	result.AddChild(components)
 
 	buttonsContainer := widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(
+				result.GetWidget().MinWidth,
+				result.GetWidget().MinHeight),
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				VerticalPosition:   widget.AnchorLayoutPositionEnd,
+				HorizontalPosition: widget.AnchorLayoutPositionEnd,
+				StretchHorizontal:  false,
+				StretchVertical:    false,
+			}),
+		),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
+			// widget.RowLayoutOpts.Spacing(13),
+		)),
+	)
+
+	closeButtonsContainer := widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(
+				result.GetWidget().MinWidth,
+				result.GetWidget().MinHeight),
+			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+				VerticalPosition:   widget.AnchorLayoutPositionEnd,
+				HorizontalPosition: widget.AnchorLayoutPositionEnd,
+				StretchHorizontal:  false,
+				StretchVertical:    false,
+			}),
+		),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
+		)),
+	)
+
+	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 15)
+	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 15)
+
+	closeButtonsContainer.AddChild(widget.NewButton(
+		widget.ButtonOpts.Image(&widget.ButtonImage{
+			Idle:         buttonIdleIcon,
+			Hover:        buttonHoverIcon,
+			Pressed:      buttonIdleIcon,
+			PressedHover: buttonIdleIcon,
+			Disabled:     buttonIdleIcon,
+		}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("client.selector.close"),
+			generalFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Position: widget.RowLayoutPositionEnd,
+			})),
+		widget.ButtonOpts.TextPadding(widget.Insets{
+			Left:   30,
+			Right:  30,
+			Top:    20,
+			Bottom: 20,
+		}),
+		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			backCallback()
+		}),
+	))
+
+	buttonsContainer.AddChild(closeButtonsContainer)
+
+	actionButtonContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
 				result.GetWidget().MinWidth,
@@ -171,38 +238,7 @@ func NewSelectorComponent(
 		)),
 	)
 
-	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 15)
-	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 15)
-
-	buttonsContainer.AddChild(widget.NewButton(
-		widget.ButtonOpts.Image(&widget.ButtonImage{
-			Idle:         buttonIdleIcon,
-			Hover:        buttonHoverIcon,
-			Pressed:      buttonIdleIcon,
-			PressedHover: buttonIdleIcon,
-			Disabled:     buttonIdleIcon,
-		}),
-		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("client.selector.submit"),
-			generalFont,
-			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
-		widget.ButtonOpts.WidgetOpts(
-			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-				Position: widget.RowLayoutPositionEnd,
-			}),
-		),
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   30,
-			Right:  30,
-			Top:    20,
-			Bottom: 20,
-		}),
-		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			submitCallback("it works")
-		}),
-	))
-
-	buttonsContainer.AddChild(widget.NewButton(
+	actionButtonContainer.AddChild(widget.NewButton(
 		widget.ButtonOpts.Image(&widget.ButtonImage{
 			Idle:         buttonIdleIcon,
 			Hover:        buttonHoverIcon,
@@ -230,7 +266,7 @@ func NewSelectorComponent(
 		}),
 	))
 
-	buttonsContainer.AddChild(widget.NewButton(
+	actionButtonContainer.AddChild(widget.NewButton(
 		widget.ButtonOpts.Image(&widget.ButtonImage{
 			Idle:         buttonIdleIcon,
 			Hover:        buttonHoverIcon,
@@ -239,13 +275,14 @@ func NewSelectorComponent(
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("client.selector.close"),
+			translation.GetInstance().GetTranslation("client.selector.submit"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 				Position: widget.RowLayoutPositionEnd,
-			})),
+			}),
+		),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,
@@ -253,11 +290,15 @@ func NewSelectorComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			backCallback()
+			submitCallback(sessionIDInput.GetText())
 		}),
 	))
 
+	buttonsContainer.AddChild(actionButtonContainer)
+
 	result.AddChild(buttonsContainer)
+
+	// TODO: should add a list of sessions created by the user.
 
 	return result
 }

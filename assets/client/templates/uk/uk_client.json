@@ -47,6 +47,10 @@
         "one": "Закрити",
         "other": "Закрити"
     },
+    "client.selector.session_id": {
+        "one": "Ідентифікатор сесії",
+        "other": "Ідентифікатор сесії"
+    },
     "client.letterimage.close": {
         "one": "Закрити",
         "other": "Закрити"
@@ -70,6 +74,10 @@
     "client.answerinput.close": {
         "one": "Закрити",
         "other": "Закрити"
+    },
+    "client.selectormanager.invalid-session-id": {
+        "one": "Надано некоректний ідентифікатор сесії",
+        "other": "Надано некоректний ідентифікатор сесії"
     },
     "client.settingsmanager.invalid-networking-server-host": {
         "one": "Надано некоректний хост сервера",

@@ -47,6 +47,10 @@
         "one": "Close",
         "other": "Close"
     },
+    "client.selector.session_id": {
+        "one": "Session ID",
+        "other": "Session ID"
+    },
     "client.letterimage.close": {
         "one": "Close",
         "other": "Close"
@@ -78,6 +82,10 @@
     "client.answerinput.failure": {
         "one": "Answer is incorrect!",
         "other": "Answer is incorrect!"
+    },
+    "client.selectormanager.invalid-session-id": {
+        "one": "Provided session ID is invalid",
+        "other": "Provided session ID is invalid"
     },
     "client.settingsmanager.invalid-networking-server-host": {
         "one": "Provided server host is invalid",
