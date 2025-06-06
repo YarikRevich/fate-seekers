@@ -250,9 +250,19 @@ func NewSettingsComponent(
 
 			if len(parsedNewInputText) > 1 {
 				newInputText = networkingHostInput.GetText() + parsedNewInputText[:1]
+			} else if len(parsedNewInputText) == 0 {
+				return false, &newInputText
 			}
 
-			if len(newInputText) >= maxInputSymbols {
+			parsedNewInputTextSymbol := rune(parsedNewInputText[0])
+
+			if parsedNewInputTextSymbol < 32 && parsedNewInputTextSymbol > 127 {
+				replacement := networkingHostInput.GetText()
+
+				return false, &replacement
+			}
+
+			if len(newInputText) > maxInputSymbols {
 				replacement := networkingHostInput.GetText()
 
 				return false, &replacement

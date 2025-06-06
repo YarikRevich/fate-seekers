@@ -1,7 +1,6 @@
 package settings
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
@@ -138,9 +137,19 @@ func NewSettingsComponent(
 
 			if len(parsedNewInputText) > 1 {
 				newInputText = networkingPortInput.GetText() + parsedNewInputText[:1]
+			} else if len(parsedNewInputText) == 0 {
+				return false, &newInputText
 			}
 
-			if len(newInputText) >= maxInputSymbols {
+			parsedNewInputTextSymbol := rune(parsedNewInputText[0])
+
+			if parsedNewInputTextSymbol < 32 && parsedNewInputTextSymbol > 127 {
+				replacement := networkingPortInput.GetText()
+
+				return false, &replacement
+			}
+
+			if len(newInputText) > maxInputSymbols {
 				replacement := networkingPortInput.GetText()
 
 				return false, &replacement
@@ -157,9 +166,6 @@ func NewSettingsComponent(
 		widget.TextOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 				Stretch: true,
-			}),
-			widget.WidgetOpts.MouseButtonPressedHandler(func(args *widget.WidgetMouseButtonPressedEventArgs) {
-				fmt.Println("CLICKED ON LABEL")
 			}),
 		),
 		widget.TextOpts.Text(
@@ -213,9 +219,19 @@ func NewSettingsComponent(
 
 			if len(parsedNewInputText) > 1 {
 				newInputText = networkingEncryptionKeyInput.GetText() + parsedNewInputText[:1]
+			} else if len(parsedNewInputText) == 0 {
+				return false, &newInputText
 			}
 
-			if len(newInputText) >= maxInputSymbols {
+			parsedNewInputTextSymbol := rune(parsedNewInputText[0])
+
+			if parsedNewInputTextSymbol < 32 && parsedNewInputTextSymbol > 127 {
+				replacement := networkingEncryptionKeyInput.GetText()
+
+				return false, &replacement
+			}
+
+			if len(newInputText) > maxInputSymbols {
 				replacement := networkingEncryptionKeyInput.GetText()
 
 				return false, &replacement

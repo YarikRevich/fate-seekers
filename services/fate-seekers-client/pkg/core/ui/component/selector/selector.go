@@ -16,7 +16,7 @@ import (
 
 const (
 	// Describes max amount of symbols, which can be entered to input component.
-	maxInputSymbols = 30
+	maxInputSymbols = 8
 )
 
 // Describes all the colors used for list combo definition.
@@ -34,12 +34,12 @@ func NewSelectorComponent(
 	result := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
-				scaler.GetPercentageOf(config.GetWorldWidth(), 40),
+				scaler.GetPercentageOf(config.GetWorldWidth(), 20),
 				scaler.GetPercentageOf(config.GetWorldHeight(), 30)),
 			widget.WidgetOpts.TrackHover(false),
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				Padding: widget.Insets{
-					Left: scaler.GetPercentageOf(config.GetWorldWidth(), 9),
+					Left: scaler.GetPercentageOf(config.GetWorldWidth(), 6),
 				},
 				VerticalPosition:  widget.AnchorLayoutPositionCenter,
 				StretchHorizontal: false,
@@ -96,8 +96,6 @@ func NewSelectorComponent(
 
 	sessionIDInput = widget.NewTextInput(
 		widget.TextInputOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(
-				scaler.GetPercentageOf(config.GetWorldWidth(), 20), 0),
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionCenter,
 				HorizontalPosition: widget.AnchorLayoutPositionCenter,
@@ -138,9 +136,19 @@ func NewSelectorComponent(
 
 			if len(parsedNewInputText) > 1 {
 				newInputText = sessionIDInput.GetText() + parsedNewInputText[:1]
+			} else if len(parsedNewInputText) == 0 {
+				return false, &newInputText
 			}
 
-			if len(newInputText) >= maxInputSymbols {
+			parsedNewInputTextSymbol := rune(parsedNewInputText[0])
+
+			if parsedNewInputTextSymbol < 32 && parsedNewInputTextSymbol > 127 {
+				replacement := sessionIDInput.GetText()
+
+				return false, &replacement
+			}
+
+			if len(newInputText) > maxInputSymbols {
 				replacement := sessionIDInput.GetText()
 
 				return false, &replacement
@@ -152,6 +160,15 @@ func NewSelectorComponent(
 	components.AddChild(sessionIDInput)
 
 	result.AddChild(components)
+
+	// listsContainer := widget.NewContainer(
+	// 	widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+	// 		Stretch: true,
+	// 	})),
+	// 	widget.ContainerOpts.Layout(widget.NewGridLayout(
+	// 		widget.GridLayoutOpts.Columns(3),
+	// 		widget.GridLayoutOpts.Stretch([]bool{true, false, true}, []bool{true}),
+	// 		widget.GridLayoutOpts.Spacing(10, 0))))
 
 	buttonsContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
@@ -167,7 +184,6 @@ func NewSelectorComponent(
 		),
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
-			// widget.RowLayoutOpts.Spacing(13),
 		)),
 	)
 
@@ -235,6 +251,9 @@ func NewSelectorComponent(
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
 			widget.RowLayoutOpts.Spacing(13),
+			widget.RowLayoutOpts.Padding(widget.Insets{
+				Left: scaler.GetPercentageOf(config.GetWorldWidth(), 4),
+			}),
 		)),
 	)
 
@@ -299,6 +318,65 @@ func NewSelectorComponent(
 	result.AddChild(buttonsContainer)
 
 	// TODO: should add a list of sessions created by the user.
+
+	// 	listsContainer := widget.NewContainer(
+	// 	widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+	// 		Stretch: true,
+	// 	})),
+	// 	widget.ContainerOpts.Layout(widget.NewGridLayout(
+	// 		widget.GridLayoutOpts.Columns(3),
+	// 		widget.GridLayoutOpts.Stretch([]bool{true, false, true}, []bool{true}),
+	// 		widget.GridLayoutOpts.Spacing(10, 0))))
+	// c.AddChild(listsContainer)
+
+	// entries1 := []interface{}{"One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"}
+	// list1 := newList(entries1, res, widget.WidgetOpts.LayoutData(widget.GridLayoutData{
+	// 	MaxHeight: 220,
+	// }))
+	// listsContainer.AddChild(list1)
+
+	// buttonsContainer := widget.NewContainer(
+	// 	widget.ContainerOpts.Layout(widget.NewRowLayout(
+	// 		widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+	// 		widget.RowLayoutOpts.Spacing(10),
+	// 	)))
+	// listsContainer.AddChild(buttonsContainer)
+
+	// bs := []*widget.Button{}
+	// for i := 0; i < 3; i++ {
+	// 	b := widget.NewButton(
+	// 		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+	// 			Stretch: true,
+	// 		})),
+	// 		widget.ButtonOpts.Image(res.button.image),
+	// 		widget.ButtonOpts.TextPadding(res.button.padding),
+	// 		widget.ButtonOpts.Text(fmt.Sprintf("Action %d", i+1), res.button.face, res.button.text))
+	// 	buttonsContainer.AddChild(b)
+	// 	bs = append(bs, b)
+	// }
+
+	// entries2 := []interface{}{"Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty"}
+	// list2 := newList(entries2, res, widget.WidgetOpts.LayoutData(widget.GridLayoutData{
+	// 	MaxHeight: 220,
+	// }))
+	// listsContainer.AddChild(list2)
+
+	// c.AddChild(newSeparator(res, widget.RowLayoutData{
+	// 	Stretch: true,
+	// }))
+
+	// c.AddChild(newCheckbox("Disabled", func(args *widget.CheckboxChangedEventArgs) {
+	// 	list1.GetWidget().Disabled = args.State == widget.WidgetChecked
+	// 	list2.GetWidget().Disabled = args.State == widget.WidgetChecked
+	// 	for _, b := range bs {
+	// 		b.GetWidget().Disabled = args.State == widget.WidgetChecked
+	// 	}
+	// }, res))
+
+	// return &page{
+	// 	title:   "List",
+	// 	content: c,
+	// }
 
 	return result
 }

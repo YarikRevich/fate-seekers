@@ -151,9 +151,19 @@ func newAnswerInputComponent() *AnswerInputComponent {
 
 			if len(parsedNewInputText) > 1 {
 				newInputText = answerInput.GetText() + parsedNewInputText[:1]
+			} else if len(parsedNewInputText) == 0 {
+				return false, &newInputText
 			}
 
-			if len(newInputText) >= maxInputSymbols {
+			parsedNewInputTextSymbol := rune(parsedNewInputText[0])
+
+			if parsedNewInputTextSymbol < 32 && parsedNewInputTextSymbol > 127 {
+				replacement := answerInput.GetText()
+
+				return false, &replacement
+			}
+
+			if len(newInputText) > maxInputSymbols {
 				replacement := answerInput.GetText()
 
 				return false, &replacement

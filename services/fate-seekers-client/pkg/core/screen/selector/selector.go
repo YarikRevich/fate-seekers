@@ -36,6 +36,9 @@ type SelectorScreen struct {
 
 	// Represents global world view.
 	world *ebiten.Image
+
+	// Represents interface world view.
+	interfaceWorld *ebiten.Image
 }
 
 func (ss *SelectorScreen) HandleInput() error {
@@ -55,6 +58,10 @@ func (ss *SelectorScreen) HandleInput() error {
 }
 
 func (ss *SelectorScreen) HandleRender(screen *ebiten.Image) {
+	ss.world.Clear()
+
+	ss.interfaceWorld.Clear()
+
 	var backgroundAnimationGeometry ebiten.GeoM
 
 	backgroundAnimationGeometry.Scale(
@@ -65,11 +72,13 @@ func (ss *SelectorScreen) HandleRender(screen *ebiten.Image) {
 		GeoM: backgroundAnimationGeometry,
 	})
 
-	ss.ui.Draw(ss.world)
+	ss.ui.Draw(ss.interfaceWorld)
 
-	screen.DrawImage(ss.world, &ebiten.DrawImageOptions{
+	ss.world.DrawImage(ss.interfaceWorld, &ebiten.DrawImageOptions{
 		ColorM: options.GetTransparentDrawOptions(
 			ss.transparentTransitionEffect.GetValue()).ColorM})
+
+	screen.DrawImage(ss.world, &ebiten.DrawImageOptions{})
 }
 
 // newSelectorScreen initializes SelectorScreen.
@@ -101,5 +110,7 @@ func newSelectorScreen() screen.Screen {
 				})),
 		transparentTransitionEffect: transparentTransitionEffect,
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		interfaceWorld: ebiten.NewImage(
+			config.GetWorldWidth(), config.GetWorldHeight()),
 	}
 }
