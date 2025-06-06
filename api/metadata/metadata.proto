@@ -1,13 +1,21 @@
 syntax = "proto3";
 option go_package = "github.com/YarikRevich/fate-seekers/pkg/core/networking/metadata/api";
 
+import "google/protobuf/timestamp.proto";
+
 package metadata;
 
-// Rperesents service used to retrieve user content related data.
-// All the metadata requests require authentication header to be provided,
-// having JWT token saved in it.
+// Represents service used to retrieve user content related data.
+// All the metadata requests require authentication header to be provided, having JWT token saved in it.
 service Metadata {
+    // PingConnection performs ping connection and creates user record on the server side at the same time, 
+    // if such does not exist.
     rpc PingConnection(PingConnectionRequest) returns (PingConnectionResponse) {};
+
+    // GetSessions performs existing sessions retrieval operation by the configured user.
+    rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse) {};
+
+    // CreateSession performs session creation operation by the configured user.
     rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse) {};
     rpc RemoveSession(RemoveSessionRequest) returns (RemoveSessionResponse) {};
     rpc JoinToSession(JoinToSessionRequest) returns (JoinToSessionResponse) {};
@@ -18,37 +26,43 @@ service Metadata {
 
 // PingConnectionRequest represents  ping connection request message.
 message PingConnectionRequest {
+    string issuer = 1;
 };
 
 // PingConnectionResponse represents ping connection response message.
 message PingConnectionResponse {
-    bool status = 1;
 };
 
-// Position represents common position message.
-message Position {
-    int64 x = 1;
-    int64 y = 2;
+// GetSessionsRequest represents get sesssions request.
+message GetSessionsRequest {
+};
+
+// Session represents common session retrieval message.
+message Session {
+    string session_id = 1; 
+    string name = 2;
+}
+
+// GetSessionsResponse represents get sesssions response.
+message GetSessionsResponse {
+    repeated Session sessions = 1;
 };
 
 // CreateSessionRequest represents create session request.
 // User is allowed to create only 3 sessions in 10 minutes.
 message CreateSessionRequest {
     string name = 1;
-    
-    // Represents an identifier of the user, which generated during
-    // application installation.
-    string user_id = 2;
+    string issuer = 2;
 };
 
 // CreateSessionResponse represents create session response.
 message CreateSessionResponse {
-    string id = 1;
+    string session_id = 1;
 };
 
 // RemoveSessionRequest represents remove session request.
 message RemoveSessionRequest {
-    string id = 1;
+    string session_id = 1;
 };
 
 // RemoveSessionResponse represents remove session response.
@@ -58,7 +72,7 @@ message RemoveSessionResponse {
 // JoinToSessionRequest represents user join to session request.
 message JoinToSessionRequest {
     string session_id = 1;
-    string user_id = 2;
+    string issuer = 2;
 };
 
 // JoinToSessionResponse represents user join to session response.
@@ -67,6 +81,13 @@ message JoinToSessionResponse {
 
 // Represents chests retrieval request message.
 message GetChestsRequest {
+    string session_id = 1;
+};
+
+// Position represents common position message.
+message Position {
+    int64 x = 1;
+    int64 y = 2;
 };
 
 // Represents chests retrieval response streaming message.
@@ -76,6 +97,7 @@ message GetChestsResponse {
 
 // Represents map retrieval request message.
 message GetMapRequest {
+    string session_id = 1;
 };
 
 // Represents map retrieval response streaming message.
@@ -85,7 +107,15 @@ message GetMapResponse {
 
 // Represents chat retrieval request message.
 message GetChatRequest {
-    int64 offset = 1;
+    string session_id = 1;
+    int64 offset = 2;
+};
+
+// ChatMessage represents common chat retrieval message.
+message ChatMessage {
+    string content = 1;
+    string issuer = 2;
+    google.protobuf.Timestamp timestamp = 3;
 };
 
 // Represents chat retrieval response streaming message.

@@ -51,11 +51,13 @@ func (w *collectionsRepositoryImpl) Exists(name string) (bool, error) {
 		Where("name = ?", name).
 		First(&entity.CollectionEntity{}).Error
 
-	if err != nil {
-		return false, err
+	if err != gorm.ErrRecordNotFound {
+		return true, nil
+	} else if err == gorm.ErrRecordNotFound {
+		return false, nil
 	}
 
-	return err != gorm.ErrRecordNotFound, nil
+	return false, err
 }
 
 // IsEmpty checks if any collection is set.
@@ -121,11 +123,13 @@ func (w *flagsRepositoryImpl) GetByName(name string) (*entity.FlagsEntity, bool,
 		Where("name = ?", name).
 		First(&result).Error
 
-	if err != nil {
-		return nil, false, err
+	if err != gorm.ErrRecordNotFound {
+		return result, true, nil
+	} else if err == gorm.ErrRecordNotFound {
+		return nil, false, nil
 	}
 
-	return result, err != gorm.ErrRecordNotFound, nil
+	return nil, false, err
 }
 
 // createFlagsRepository initializes flagsRepositoryImpl.

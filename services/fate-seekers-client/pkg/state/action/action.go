@@ -17,10 +17,20 @@ const (
 	DECREMENT_LOADING_APPLICATION_ACTION = "DECREMENT_LOADING_APPLICATION_ACTION"
 )
 
+// Describes all the available state actions for repository reducer.
+const (
+	SET_UUID_REPOSITORY_ACTION         = "SET_UUID_REPOSITORY_ACTION"
+	SET_UUID_CHECKED_REPOSITORY_ACTION = "SET_UUID_CHECKED_REPOSITORY_ACTION"
+)
+
 // Describes all the available state actions for networking reducer.
 const (
-	SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION = "SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION"
-	SET_PING_CONNECTION_STARTED_NETWORKING_ACTION = "SET_PING_CONNECTION_STARTED_NETWORKING_ACTION"
+	SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION   = "SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION"
+	SET_PING_CONNECTION_STARTED_NETWORKING_ACTION   = "SET_PING_CONNECTION_STARTED_NETWORKING_ACTION"
+	SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION = "SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION"
+	SET_SESSION_CREATION_STARTED_NETWORKING_ACTION  = "SET_SESSION_CREATION_STARTED_NETWORKING_ACTION"
+	SET_SESSION_JOINING_STARTED_NETWORKING_ACTION   = "SET_SESSION_JOINING_STARTED_NETWORKING_ACTION"
+	SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION   = "SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION"
 )
 
 // Describes all the available state actions for letter reducer.
@@ -81,6 +91,22 @@ func NewSetExitApplicationAction(value string) godux.Action {
 	}
 }
 
+// NewSetUUIDRepositoryAction creates new set uuid repository action.
+func NewSetUUIDRepositoryAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_UUID_REPOSITORY_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetUUIDCheckedRepositoryAction creates new set uuid checked repository action.
+func NewSetUUIDCheckedRepositoryAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_UUID_CHECKED_REPOSITORY_ACTION,
+		Value: value,
+	}
+}
+
 // NewIncrementLoadingApplicationAction creates new increment loading application action.
 func NewIncrementLoadingApplicationAction() godux.Action {
 	return godux.Action{
@@ -107,6 +133,38 @@ func NewSetEntryHandshakeStartedNetworkingAction(value string) godux.Action {
 func NewSetPingConnectionStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_PING_CONNECTION_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetSessionRetrievalStartedNetworkingAction creates new set session retrieval started networking action.
+func NewSetSessionRetrievalStartedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetSessionCreationStartedNetworkingAction creates new set session creation started networking action.
+func NewSetSessionCreationStartedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_SESSION_CREATION_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetSessionJoiningStartedNetworkingAction creates new set session joining started networking action.
+func NewSetSessionJoiningStartedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_SESSION_JOINING_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetSessionRemovalStartedNetworkingAction creates new set session removal started networking action.
+func NewSetSessionRemovalStartedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION,
 		Value: value,
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/networking"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/prompt"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/sound"
 	"github.com/luisvinicius167/godux"
@@ -47,6 +48,20 @@ func GetApplicationLoading() int {
 	return instance.GetState(application.LOADING_APPLICATION_STATE).(int)
 }
 
+// GetRepositoryUUID retrieves uuid repository state value.
+func GetRepositoryUUID() string {
+	instance := GetInstance()
+
+	return instance.GetState(repository.UUID_REPOSITORY_STATE).(string)
+}
+
+// GetRepositoryUUIDChecked retrieves uuid checked repository state value.
+func GetRepositoryUUIDChecked() string {
+	instance := GetInstance()
+
+	return instance.GetState(repository.UUID_CHECKED_REPOSITORY_STATE).(string)
+}
+
 // GetEntryHandshakeStartedNetworking retrieves entry handshake started networking state value.
 func GetEntryHandshakeStartedNetworking() string {
 	instance := GetInstance()
@@ -59,6 +74,34 @@ func GetPingConnectionStartedNetworking() string {
 	instance := GetInstance()
 
 	return instance.GetState(networking.PING_CONNECTION_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetSessionRetrievalStartedNetworking retrieves session retrieval started networking state value.
+func GetSessionRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.SESSION_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetSessionCreationStartedNetworking retrieves session creation started networking state value.
+func GetSessionCreationStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.SESSION_CREATION_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetSessionJoiningStartedNetworking retrieves session joining started networking state value.
+func GetSessionJoiningStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.SESSION_JOINING_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetSessionRemovalStartedNetworking retrieves session removal started networking state value.
+func GetSessionRemovalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.SESSION_REMOVAL_STARTED_NETWORKING_STATE).(string)
 }
 
 // GetLetterUpdated retrieves letter updated state value.
@@ -162,6 +205,9 @@ func newStore() *godux.Store {
 	applicationStateReducer := application.NewApplicationStateReducer(store)
 	applicationStateReducer.Init()
 
+	repositoryStateReducer := repository.NewRepositoryStateReducer(store)
+	repositoryStateReducer.Init()
+
 	networkingStateReducer := networking.NewNetworkingStateReducer(store)
 	networkingStateReducer.Init()
 
@@ -187,6 +233,11 @@ func newStore() *godux.Store {
 		}
 
 		result = applicationStateReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = repositoryStateReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

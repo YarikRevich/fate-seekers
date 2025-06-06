@@ -21,96 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// PingConnectionRequest represents  ping connection request message.
-type PingConnectionRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PingConnectionRequest) Reset() {
-	*x = PingConnectionRequest{}
-	mi := &file_api_content_content_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PingConnectionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PingConnectionRequest) ProtoMessage() {}
-
-func (x *PingConnectionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_content_content_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PingConnectionRequest.ProtoReflect.Descriptor instead.
-func (*PingConnectionRequest) Descriptor() ([]byte, []int) {
-	return file_api_content_content_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *PingConnectionRequest) GetToken() string {
-	if x != nil {
-		return x.Token
-	}
-	return ""
-}
-
-// PingConnectionResponse represents ping connection response message.
-type PingConnectionResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        bool                   `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PingConnectionResponse) Reset() {
-	*x = PingConnectionResponse{}
-	mi := &file_api_content_content_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PingConnectionResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PingConnectionResponse) ProtoMessage() {}
-
-func (x *PingConnectionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_content_content_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PingConnectionResponse.ProtoReflect.Descriptor instead.
-func (*PingConnectionResponse) Descriptor() ([]byte, []int) {
-	return file_api_content_content_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *PingConnectionResponse) GetStatus() bool {
-	if x != nil {
-		return x.Status
-	}
-	return false
-}
-
 // Represents common position message.
 type Position struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -122,7 +32,7 @@ type Position struct {
 
 func (x *Position) Reset() {
 	*x = Position{}
-	mi := &file_api_content_content_proto_msgTypes[2]
+	mi := &file_api_content_content_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -134,7 +44,7 @@ func (x *Position) String() string {
 func (*Position) ProtoMessage() {}
 
 func (x *Position) ProtoReflect() protoreflect.Message {
-	mi := &file_api_content_content_proto_msgTypes[2]
+	mi := &file_api_content_content_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -147,7 +57,7 @@ func (x *Position) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Position.ProtoReflect.Descriptor instead.
 func (*Position) Descriptor() ([]byte, []int) {
-	return file_api_content_content_proto_rawDescGZIP(), []int{2}
+	return file_api_content_content_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Position) GetX() int64 {
@@ -167,14 +77,15 @@ func (x *Position) GetY() int64 {
 // Represents users positions retrieval request message.
 type GetUserPositionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Issuer        string                 `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	Session       string                 `protobuf:"bytes,2,opt,name=session,proto3" json:"session,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetUserPositionsRequest) Reset() {
 	*x = GetUserPositionsRequest{}
-	mi := &file_api_content_content_proto_msgTypes[3]
+	mi := &file_api_content_content_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -186,7 +97,7 @@ func (x *GetUserPositionsRequest) String() string {
 func (*GetUserPositionsRequest) ProtoMessage() {}
 
 func (x *GetUserPositionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_content_content_proto_msgTypes[3]
+	mi := &file_api_content_content_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -199,12 +110,19 @@ func (x *GetUserPositionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserPositionsRequest.ProtoReflect.Descriptor instead.
 func (*GetUserPositionsRequest) Descriptor() ([]byte, []int) {
-	return file_api_content_content_proto_rawDescGZIP(), []int{3}
+	return file_api_content_content_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetUserPositionsRequest) GetToken() string {
+func (x *GetUserPositionsRequest) GetIssuer() string {
 	if x != nil {
-		return x.Token
+		return x.Issuer
+	}
+	return ""
+}
+
+func (x *GetUserPositionsRequest) GetSession() string {
+	if x != nil {
+		return x.Session
 	}
 	return ""
 }
@@ -219,7 +137,7 @@ type GetUserPositionsResponse struct {
 
 func (x *GetUserPositionsResponse) Reset() {
 	*x = GetUserPositionsResponse{}
-	mi := &file_api_content_content_proto_msgTypes[4]
+	mi := &file_api_content_content_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -231,7 +149,7 @@ func (x *GetUserPositionsResponse) String() string {
 func (*GetUserPositionsResponse) ProtoMessage() {}
 
 func (x *GetUserPositionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_content_content_proto_msgTypes[4]
+	mi := &file_api_content_content_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -244,7 +162,7 @@ func (x *GetUserPositionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserPositionsResponse.ProtoReflect.Descriptor instead.
 func (*GetUserPositionsResponse) Descriptor() ([]byte, []int) {
-	return file_api_content_content_proto_rawDescGZIP(), []int{4}
+	return file_api_content_content_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetUserPositionsResponse) GetPositions() []*Position {
@@ -254,25 +172,178 @@ func (x *GetUserPositionsResponse) GetPositions() []*Position {
 	return nil
 }
 
+// Represents users metadata retrieval request message.
+type GetUserMetadataRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Issuer        string                 `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	Session       string                 `protobuf:"bytes,2,opt,name=session,proto3" json:"session,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserMetadataRequest) Reset() {
+	*x = GetUserMetadataRequest{}
+	mi := &file_api_content_content_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserMetadataRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserMetadataRequest) ProtoMessage() {}
+
+func (x *GetUserMetadataRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_content_content_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserMetadataRequest.ProtoReflect.Descriptor instead.
+func (*GetUserMetadataRequest) Descriptor() ([]byte, []int) {
+	return file_api_content_content_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetUserMetadataRequest) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+func (x *GetUserMetadataRequest) GetSession() string {
+	if x != nil {
+		return x.Session
+	}
+	return ""
+}
+
+// Represents common metadata message.
+type Metadata struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Skin          string                 `protobuf:"bytes,2,opt,name=skin,proto3" json:"skin,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Metadata) Reset() {
+	*x = Metadata{}
+	mi := &file_api_content_content_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Metadata) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Metadata) ProtoMessage() {}
+
+func (x *Metadata) ProtoReflect() protoreflect.Message {
+	mi := &file_api_content_content_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Metadata.ProtoReflect.Descriptor instead.
+func (*Metadata) Descriptor() ([]byte, []int) {
+	return file_api_content_content_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Metadata) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Metadata) GetSkin() string {
+	if x != nil {
+		return x.Skin
+	}
+	return ""
+}
+
+// Represents users positions retrieval response message.
+type GetUserMetadataResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Metadata      []*Metadata            `protobuf:"bytes,1,rep,name=metadata,proto3" json:"metadata,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserMetadataResponse) Reset() {
+	*x = GetUserMetadataResponse{}
+	mi := &file_api_content_content_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserMetadataResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserMetadataResponse) ProtoMessage() {}
+
+func (x *GetUserMetadataResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_content_content_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserMetadataResponse.ProtoReflect.Descriptor instead.
+func (*GetUserMetadataResponse) Descriptor() ([]byte, []int) {
+	return file_api_content_content_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetUserMetadataResponse) GetMetadata() []*Metadata {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
 var File_api_content_content_proto protoreflect.FileDescriptor
 
 const file_api_content_content_proto_rawDesc = "" +
 	"\n" +
-	"\x19api/content/content.proto\x12\acontent\"-\n" +
-	"\x15PingConnectionRequest\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\"0\n" +
-	"\x16PingConnectionResponse\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\bR\x06status\"&\n" +
+	"\x19api/content/content.proto\x12\acontent\"&\n" +
 	"\bPosition\x12\f\n" +
 	"\x01x\x18\x01 \x01(\x03R\x01x\x12\f\n" +
-	"\x01y\x18\x02 \x01(\x03R\x01y\"/\n" +
-	"\x17GetUserPositionsRequest\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\"K\n" +
+	"\x01y\x18\x02 \x01(\x03R\x01y\"K\n" +
+	"\x17GetUserPositionsRequest\x12\x16\n" +
+	"\x06issuer\x18\x01 \x01(\tR\x06issuer\x12\x18\n" +
+	"\asession\x18\x02 \x01(\tR\asession\"K\n" +
 	"\x18GetUserPositionsResponse\x12/\n" +
-	"\tpositions\x18\x01 \x03(\v2\x11.content.PositionR\tpositions2\xb7\x01\n" +
-	"\aContent\x12S\n" +
-	"\x0ePingConnection\x12\x1e.content.PingConnectionRequest\x1a\x1f.content.PingConnectionResponse\"\x00\x12W\n" +
-	"\x10GetUserPositions\x12 .content.GetUserPositionsRequest\x1a!.content.GetUserPositionsResponseBEZCgithub.com/YarikRevich/fate-seekers/pkg/core/networking/content/apib\x06proto3"
+	"\tpositions\x18\x01 \x03(\v2\x11.content.PositionR\tpositions\"J\n" +
+	"\x16GetUserMetadataRequest\x12\x16\n" +
+	"\x06issuer\x18\x01 \x01(\tR\x06issuer\x12\x18\n" +
+	"\asession\x18\x02 \x01(\tR\asession\".\n" +
+	"\bMetadata\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04skin\x18\x02 \x01(\tR\x04skin\"H\n" +
+	"\x17GetUserMetadataResponse\x12-\n" +
+	"\bmetadata\x18\x01 \x03(\v2\x11.content.MetadataR\bmetadataBEZCgithub.com/YarikRevich/fate-seekers/pkg/core/networking/content/apib\x06proto3"
 
 var (
 	file_api_content_content_proto_rawDescOnce sync.Once
@@ -286,25 +357,23 @@ func file_api_content_content_proto_rawDescGZIP() []byte {
 	return file_api_content_content_proto_rawDescData
 }
 
-var file_api_content_content_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_api_content_content_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_api_content_content_proto_goTypes = []any{
-	(*PingConnectionRequest)(nil),    // 0: content.PingConnectionRequest
-	(*PingConnectionResponse)(nil),   // 1: content.PingConnectionResponse
-	(*Position)(nil),                 // 2: content.Position
-	(*GetUserPositionsRequest)(nil),  // 3: content.GetUserPositionsRequest
-	(*GetUserPositionsResponse)(nil), // 4: content.GetUserPositionsResponse
+	(*Position)(nil),                 // 0: content.Position
+	(*GetUserPositionsRequest)(nil),  // 1: content.GetUserPositionsRequest
+	(*GetUserPositionsResponse)(nil), // 2: content.GetUserPositionsResponse
+	(*GetUserMetadataRequest)(nil),   // 3: content.GetUserMetadataRequest
+	(*Metadata)(nil),                 // 4: content.Metadata
+	(*GetUserMetadataResponse)(nil),  // 5: content.GetUserMetadataResponse
 }
 var file_api_content_content_proto_depIdxs = []int32{
-	2, // 0: content.GetUserPositionsResponse.positions:type_name -> content.Position
-	0, // 1: content.Content.PingConnection:input_type -> content.PingConnectionRequest
-	3, // 2: content.Content.GetUserPositions:input_type -> content.GetUserPositionsRequest
-	1, // 3: content.Content.PingConnection:output_type -> content.PingConnectionResponse
-	4, // 4: content.Content.GetUserPositions:output_type -> content.GetUserPositionsResponse
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 0: content.GetUserPositionsResponse.positions:type_name -> content.Position
+	4, // 1: content.GetUserMetadataResponse.metadata:type_name -> content.Metadata
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_api_content_content_proto_init() }
@@ -318,9 +387,9 @@ func file_api_content_content_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_content_content_proto_rawDesc), len(file_api_content_content_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   0,
 		},
 		GoTypes:           file_api_content_content_proto_goTypes,
 		DependencyIndexes: file_api_content_content_proto_depIdxs,

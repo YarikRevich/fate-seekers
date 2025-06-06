@@ -8,7 +8,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/connector"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/handler"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
@@ -143,7 +143,7 @@ func newMenuScreen() screen.Screen {
 										return
 									}
 
-									handler.GetInstance().PerformPingConnection(func(err2 error) {
+									handler.PerformPingConnection(func(err2 error) {
 										dispatcher.GetInstance().Dispatch(
 											action.NewDecrementLoadingApplicationAction())
 
@@ -155,14 +155,16 @@ func newMenuScreen() screen.Screen {
 												time.Second*2,
 												common.NotificationErrorTextColor)
 
+											dispatcher.GetInstance().Dispatch(
+												action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
+
 											return
 										}
 
 										transparentTransitionEffect.Reset()
 
 										dispatcher.GetInstance().Dispatch(
-											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
-
+											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
 									})
 								},
 								func(err error) {
@@ -199,7 +201,7 @@ func newMenuScreen() screen.Screen {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPingConnectionStartedNetworkingAction(value.PING_CONNECTION_STARTED_NETWORKING_TRUE_VALUE))
 
-						handler.GetInstance().PerformPingConnection(func(err error) {
+						handler.PerformPingConnection(func(err error) {
 							dispatcher.GetInstance().Dispatch(
 								action.NewDecrementLoadingApplicationAction())
 
@@ -214,8 +216,14 @@ func newMenuScreen() screen.Screen {
 									time.Second*2,
 									common.NotificationErrorTextColor)
 
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
+
 								return
 							}
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
 						})
 					}
 				},

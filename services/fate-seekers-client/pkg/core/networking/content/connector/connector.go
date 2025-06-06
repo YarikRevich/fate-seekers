@@ -2,13 +2,13 @@ package connector
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/receiver"
 	"github.com/balacode/udpt"
 )
 
@@ -35,10 +35,8 @@ func (ncc *NetworkingContentConnector) Connect(failover func(err error)) error {
 			ctx,
 			networkingReceiverPortInt,
 			config.GetSettingsParsedNetworkingEncryptionKey(),
-			func(k string, v []byte) error {
-				fmt.Println(k, string(v))
-
-				return nil
+			func(key string, value []byte) error {
+				return receiver.Process(key, value)
 			})
 		if err != nil {
 			ncc.close()

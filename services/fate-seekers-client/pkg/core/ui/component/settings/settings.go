@@ -250,9 +250,19 @@ func NewSettingsComponent(
 
 			if len(parsedNewInputText) > 1 {
 				newInputText = networkingHostInput.GetText() + parsedNewInputText[:1]
+			} else if len(parsedNewInputText) == 0 {
+				return false, &newInputText
 			}
 
-			if len(newInputText) >= maxInputSymbols {
+			parsedNewInputTextSymbol := rune(parsedNewInputText[0])
+
+			if parsedNewInputTextSymbol < 32 && parsedNewInputTextSymbol > 127 {
+				replacement := networkingHostInput.GetText()
+
+				return false, &replacement
+			}
+
+			if len(newInputText) > maxInputSymbols {
 				replacement := networkingHostInput.GetText()
 
 				return false, &replacement
@@ -482,14 +492,13 @@ func NewSettingsComponent(
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("shared.settings.submit"),
+			translation.GetInstance().GetTranslation("shared.settings.close"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 				Position: widget.RowLayoutPositionEnd,
-			}),
-		),
+			})),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,
@@ -497,7 +506,7 @@ func NewSettingsComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			submitCallback(
+			closeCallback(
 				soundMusicSlider.Current,
 				soundFXSlider.Current,
 				networkingHostInput.GetText(),
@@ -515,13 +524,14 @@ func NewSettingsComponent(
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("shared.settings.close"),
+			translation.GetInstance().GetTranslation("shared.settings.submit"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 				Position: widget.RowLayoutPositionEnd,
-			})),
+			}),
+		),
 		widget.ButtonOpts.TextPadding(widget.Insets{
 			Left:   30,
 			Right:  30,
@@ -529,7 +539,7 @@ func NewSettingsComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			closeCallback(
+			submitCallback(
 				soundMusicSlider.Current,
 				soundFXSlider.Current,
 				networkingHostInput.GetText(),

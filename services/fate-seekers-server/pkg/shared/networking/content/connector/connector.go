@@ -2,7 +2,6 @@ package connector
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"strconv"
@@ -10,11 +9,15 @@ import (
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/content/handler"
 	"github.com/balacode/udpt"
 )
 
 // NetworkingContentConnector represents networking content connector.
 type NetworkingContentConnector struct {
+	// Represents handler for initialized receiver.
+	handler *handler.Handler
+
 	// Represents context for initialized receiver.
 	close context.CancelFunc
 }
@@ -34,10 +37,8 @@ func (ncc *NetworkingContentConnector) Connect() error {
 			ctx,
 			networkingServerPortInt,
 			config.GetSettingsParsedNetworkingEncryptionKey(),
-			func(k string, v []byte) error {
-				fmt.Println(k, string(v))
-
-				return nil
+			func(key string, value []byte) error {
+				return ncc.handler.Process(key, value)
 			})
 		if err != nil {
 			close()
@@ -66,5 +67,7 @@ func (ncc *NetworkingContentConnector) Close() error {
 
 // NewNetworkingContentConnector initializes NetworkingContentConnector.
 func NewNetworkingContentConnector() *NetworkingContentConnector {
-	return new(NetworkingContentConnector)
+	return &NetworkingContentConnector{
+		handler: handler.NewHandler(),
+	}
 }

@@ -11,9 +11,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -37,12 +34,6 @@ type IntroScreen struct {
 }
 
 func (es *IntroScreen) HandleInput() error {
-	// TODO: check if intro scene has already been played
-	// repository.GetFlagsRepository().GetByName()
-
-	dispatcher.GetInstance().Dispatch(
-		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_ENTRY_VALUE))
-
 	if !es.transparentTransitionEffect.Done() {
 		if !es.transparentTransitionEffect.OnEnd() {
 			es.transparentTransitionEffect.Update()

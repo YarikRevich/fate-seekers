@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	Metadata_PingConnection_FullMethodName = "/metadata.Metadata/PingConnection"
+	Metadata_GetSessions_FullMethodName    = "/metadata.Metadata/GetSessions"
 	Metadata_CreateSession_FullMethodName  = "/metadata.Metadata/CreateSession"
 	Metadata_RemoveSession_FullMethodName  = "/metadata.Metadata/RemoveSession"
 	Metadata_JoinToSession_FullMethodName  = "/metadata.Metadata/JoinToSession"
@@ -32,11 +33,15 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// Rperesents service used to retrieve user content related data.
-// All the metadata requests require authentication header to be provided,
-// having JWT token saved in it.
+// Represents service used to retrieve user content related data.
+// All the metadata requests require authentication header to be provided, having JWT token saved in it.
 type MetadataClient interface {
+	// PingConnection performs ping connection and creates user record on the server side at the same time,
+	// if such does not exist.
 	PingConnection(ctx context.Context, in *PingConnectionRequest, opts ...grpc.CallOption) (*PingConnectionResponse, error)
+	// GetSessions performs existing sessions retrieval operation by the configured user.
+	GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error)
+	// CreateSession performs session creation operation by the configured user.
 	CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*CreateSessionResponse, error)
 	RemoveSession(ctx context.Context, in *RemoveSessionRequest, opts ...grpc.CallOption) (*RemoveSessionResponse, error)
 	JoinToSession(ctx context.Context, in *JoinToSessionRequest, opts ...grpc.CallOption) (*JoinToSessionResponse, error)
@@ -57,6 +62,16 @@ func (c *metadataClient) PingConnection(ctx context.Context, in *PingConnectionR
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PingConnectionResponse)
 	err := c.cc.Invoke(ctx, Metadata_PingConnection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metadataClient) GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSessionsResponse)
+	err := c.cc.Invoke(ctx, Metadata_GetSessions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -145,11 +160,15 @@ type Metadata_GetChatClient = grpc.ServerStreamingClient[GetChatResponse]
 // All implementations must embed UnimplementedMetadataServer
 // for forward compatibility.
 //
-// Rperesents service used to retrieve user content related data.
-// All the metadata requests require authentication header to be provided,
-// having JWT token saved in it.
+// Represents service used to retrieve user content related data.
+// All the metadata requests require authentication header to be provided, having JWT token saved in it.
 type MetadataServer interface {
+	// PingConnection performs ping connection and creates user record on the server side at the same time,
+	// if such does not exist.
 	PingConnection(context.Context, *PingConnectionRequest) (*PingConnectionResponse, error)
+	// GetSessions performs existing sessions retrieval operation by the configured user.
+	GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error)
+	// CreateSession performs session creation operation by the configured user.
 	CreateSession(context.Context, *CreateSessionRequest) (*CreateSessionResponse, error)
 	RemoveSession(context.Context, *RemoveSessionRequest) (*RemoveSessionResponse, error)
 	JoinToSession(context.Context, *JoinToSessionRequest) (*JoinToSessionResponse, error)
@@ -168,6 +187,9 @@ type UnimplementedMetadataServer struct{}
 
 func (UnimplementedMetadataServer) PingConnection(context.Context, *PingConnectionRequest) (*PingConnectionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PingConnection not implemented")
+}
+func (UnimplementedMetadataServer) GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSessions not implemented")
 }
 func (UnimplementedMetadataServer) CreateSession(context.Context, *CreateSessionRequest) (*CreateSessionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSession not implemented")
@@ -222,6 +244,24 @@ func _Metadata_PingConnection_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MetadataServer).PingConnection(ctx, req.(*PingConnectionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Metadata_GetSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSessionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).GetSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_GetSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).GetSessions(ctx, req.(*GetSessionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -330,6 +370,10 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PingConnection",
 			Handler:    _Metadata_PingConnection_Handler,
+		},
+		{
+			MethodName: "GetSessions",
+			Handler:    _Metadata_GetSessions_Handler,
 		},
 		{
 			MethodName: "CreateSession",

@@ -1,7 +1,6 @@
 package settings
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
@@ -138,9 +137,19 @@ func NewSettingsComponent(
 
 			if len(parsedNewInputText) > 1 {
 				newInputText = networkingPortInput.GetText() + parsedNewInputText[:1]
+			} else if len(parsedNewInputText) == 0 {
+				return false, &newInputText
 			}
 
-			if len(newInputText) >= maxInputSymbols {
+			parsedNewInputTextSymbol := rune(parsedNewInputText[0])
+
+			if parsedNewInputTextSymbol < 32 && parsedNewInputTextSymbol > 127 {
+				replacement := networkingPortInput.GetText()
+
+				return false, &replacement
+			}
+
+			if len(newInputText) > maxInputSymbols {
 				replacement := networkingPortInput.GetText()
 
 				return false, &replacement
@@ -157,9 +166,6 @@ func NewSettingsComponent(
 		widget.TextOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 				Stretch: true,
-			}),
-			widget.WidgetOpts.MouseButtonPressedHandler(func(args *widget.WidgetMouseButtonPressedEventArgs) {
-				fmt.Println("CLICKED ON LABEL")
 			}),
 		),
 		widget.TextOpts.Text(
@@ -213,9 +219,19 @@ func NewSettingsComponent(
 
 			if len(parsedNewInputText) > 1 {
 				newInputText = networkingEncryptionKeyInput.GetText() + parsedNewInputText[:1]
+			} else if len(parsedNewInputText) == 0 {
+				return false, &newInputText
 			}
 
-			if len(newInputText) >= maxInputSymbols {
+			parsedNewInputTextSymbol := rune(parsedNewInputText[0])
+
+			if parsedNewInputTextSymbol < 32 && parsedNewInputTextSymbol > 127 {
+				replacement := networkingEncryptionKeyInput.GetText()
+
+				return false, &replacement
+			}
+
+			if len(newInputText) > maxInputSymbols {
 				replacement := networkingEncryptionKeyInput.GetText()
 
 				return false, &replacement
@@ -375,6 +391,36 @@ func NewSettingsComponent(
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("shared.settings.close"),
+			generalFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Position: widget.RowLayoutPositionEnd,
+			})),
+		widget.ButtonOpts.TextPadding(widget.Insets{
+			Left:   30,
+			Right:  30,
+			Top:    20,
+			Bottom: 20,
+		}),
+		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			closeCallback(
+				networkingPortInput.GetText(),
+				networkingEncryptionKeyInput.GetText(),
+				languageComboButton.SelectedEntry().(string))
+		}),
+	))
+
+	buttonsContainer.AddChild(widget.NewButton(
+		widget.ButtonOpts.Image(&widget.ButtonImage{
+			Idle:         buttonIdleIcon,
+			Hover:        buttonHoverIcon,
+			Pressed:      buttonIdleIcon,
+			PressedHover: buttonIdleIcon,
+			Disabled:     buttonIdleIcon,
+		}),
+		widget.ButtonOpts.Text(
 			translation.GetInstance().GetTranslation("shared.settings.submit"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
@@ -391,36 +437,6 @@ func NewSettingsComponent(
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
 			submitCallback(
-				networkingPortInput.GetText(),
-				networkingEncryptionKeyInput.GetText(),
-				languageComboButton.SelectedEntry().(string))
-		}),
-	))
-
-	buttonsContainer.AddChild(widget.NewButton(
-		widget.ButtonOpts.Image(&widget.ButtonImage{
-			Idle:         buttonIdleIcon,
-			Hover:        buttonHoverIcon,
-			Pressed:      buttonIdleIcon,
-			PressedHover: buttonIdleIcon,
-			Disabled:     buttonIdleIcon,
-		}),
-		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("shared.settings.close"),
-			generalFont,
-			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
-		widget.ButtonOpts.WidgetOpts(
-			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-				Position: widget.RowLayoutPositionEnd,
-			})),
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   30,
-			Right:  30,
-			Top:    20,
-			Bottom: 20,
-		}),
-		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			closeCallback(
 				networkingPortInput.GetText(),
 				networkingEncryptionKeyInput.GetText(),
 				languageComboButton.SelectedEntry().(string))

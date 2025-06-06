@@ -3,6 +3,7 @@ package connector
 import (
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
@@ -15,15 +16,21 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+var (
+	// GetInstance retrieves instance of the networking content connector, performing initilization if needed.
+	GetInstance = sync.OnceValue[*NetworkingMetadataConnector](newNetworkingMetadataConnector)
+)
+
 // NetworkingMetadataConnector represents networking metadata connector.
 type NetworkingMetadataConnector struct {
 	// Represents established connection instance.
 	conn *grpc.ClientConn
 
-	// Represents established client connection instance.
+	// Represents metadata connector client.
 	client api.MetadataClient
 }
 
+// Connecto performs connect operation.
 func (nmc *NetworkingMetadataConnector) Connect() error {
 	var err error
 
@@ -51,6 +58,7 @@ func (nmc *NetworkingMetadataConnector) Connect() error {
 	return nil
 }
 
+// Close performs close operation.
 func (nmc *NetworkingMetadataConnector) Close() error {
 	if nmc.conn != nil {
 		return nmc.conn.Close()
@@ -59,7 +67,12 @@ func (nmc *NetworkingMetadataConnector) Close() error {
 	return nil
 }
 
-// NewNetworkingMetadataConnector initializes NetworkingMetadataConnector.
-func NewNetworkingMetadataConnector() *NetworkingMetadataConnector {
+// GetConnection retrieves metadata client connection instance.
+func (ncm *NetworkingMetadataConnector) GetClient() api.MetadataClient {
+	return ncm.client
+}
+
+// newNetworkingMetadataConnector initializes NetworkingMetadataConnector.
+func newNetworkingMetadataConnector() *NetworkingMetadataConnector {
 	return new(NetworkingMetadataConnector)
 }
