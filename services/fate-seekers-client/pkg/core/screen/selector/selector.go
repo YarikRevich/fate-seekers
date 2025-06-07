@@ -85,29 +85,31 @@ func (ss *SelectorScreen) HandleRender(screen *ebiten.Image) {
 func newSelectorScreen() screen.Screen {
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
+	selector.GetInstance().SetSubmitCallback(func(sessionID string) {
+		if selectormanager.ProcessChanges(sessionID) {
+			transparentTransitionEffect.Reset()
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
+		}
+	})
+
+	selector.GetInstance().SetCreateCallback(func() {
+		transparentTransitionEffect.Reset()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_CREATOR_VALUE))
+	})
+
+	selector.GetInstance().SetBackCallback(func() {
+		transparentTransitionEffect.Reset()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+	})
+
 	return &SelectorScreen{
-		ui: builder.Build(
-			selector.NewSelectorComponent(
-				func(sessionID string) {
-					if selectormanager.ProcessChanges(sessionID) {
-						transparentTransitionEffect.Reset()
-
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
-					}
-				},
-				func() {
-					transparentTransitionEffect.Reset()
-
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_CREATOR_VALUE))
-				},
-				func() {
-					transparentTransitionEffect.Reset()
-
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
-				})),
+		ui:                          builder.Build(selector.GetInstance().GetContainer()),
 		transparentTransitionEffect: transparentTransitionEffect,
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		interfaceWorld: ebiten.NewImage(

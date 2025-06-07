@@ -53,6 +53,7 @@ message GetSessionsResponse {
 message CreateSessionRequest {
     string name = 1;
     string issuer = 2;
+    optional int64 seed = 3;
 };
 
 // CreateSessionResponse represents create session response.
