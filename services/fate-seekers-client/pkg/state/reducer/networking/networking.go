@@ -52,6 +52,26 @@ func (nsr *NetworkingStateReducer) GetProcessor() func(value godux.Action) inter
 				dto.ReducerResultUnit{
 					Key: PING_CONNECTION_STARTED_NETWORKING_STATE, Value: value.Value})
 
+		case action.SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: SESSION_RETRIEVAL_STARTED_NETWORKING_STATE, Value: value.Value})
+
+		case action.SET_SESSION_CREATION_STARTED_NETWORKING_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: SESSION_CREATION_STARTED_NETWORKING_STATE, Value: value.Value})
+
+		case action.SET_SESSION_JOINING_STARTED_NETWORKING_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: SESSION_JOINING_STARTED_NETWORKING_STATE, Value: value.Value})
+
+		case action.SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: SESSION_REMOVAL_STARTED_NETWORKING_STATE, Value: value.Value})
+
 		default:
 			return nil
 		}

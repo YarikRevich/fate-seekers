@@ -19,14 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Metadata_PingConnection_FullMethodName = "/metadata.Metadata/PingConnection"
-	Metadata_GetSessions_FullMethodName    = "/metadata.Metadata/GetSessions"
-	Metadata_CreateSession_FullMethodName  = "/metadata.Metadata/CreateSession"
-	Metadata_RemoveSession_FullMethodName  = "/metadata.Metadata/RemoveSession"
-	Metadata_JoinToSession_FullMethodName  = "/metadata.Metadata/JoinToSession"
-	Metadata_GetChests_FullMethodName      = "/metadata.Metadata/GetChests"
-	Metadata_GetMap_FullMethodName         = "/metadata.Metadata/GetMap"
-	Metadata_GetChat_FullMethodName        = "/metadata.Metadata/GetChat"
+	Metadata_PingConnection_FullMethodName    = "/metadata.Metadata/PingConnection"
+	Metadata_GetSessions_FullMethodName       = "/metadata.Metadata/GetSessions"
+	Metadata_CreateSession_FullMethodName     = "/metadata.Metadata/CreateSession"
+	Metadata_RemoveSession_FullMethodName     = "/metadata.Metadata/RemoveSession"
+	Metadata_JoinToSession_FullMethodName     = "/metadata.Metadata/JoinToSession"
+	Metadata_GetChests_FullMethodName         = "/metadata.Metadata/GetChests"
+	Metadata_GetMap_FullMethodName            = "/metadata.Metadata/GetMap"
+	Metadata_GetChat_FullMethodName           = "/metadata.Metadata/GetChat"
+	Metadata_CreateChatMessage_FullMethodName = "/metadata.Metadata/CreateChatMessage"
 )
 
 // MetadataClient is the client API for Metadata service.
@@ -43,11 +44,18 @@ type MetadataClient interface {
 	GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error)
 	// CreateSession performs session creation operation by the configured user.
 	CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*CreateSessionResponse, error)
+	// RemoveSession performs session removal operation by the configured user. Allowed only for session owner.
 	RemoveSession(ctx context.Context, in *RemoveSessionRequest, opts ...grpc.CallOption) (*RemoveSessionResponse, error)
+	// JoinToSession performs session join request by the configured user.
 	JoinToSession(ctx context.Context, in *JoinToSessionRequest, opts ...grpc.CallOption) (*JoinToSessionResponse, error)
+	// GetChest performs chests retrieval for the selected session by the configured user.
 	GetChests(ctx context.Context, in *GetChestsRequest, opts ...grpc.CallOption) (*GetChestsResponse, error)
+	// GetMap performs map retrieval for the selected session by the configured user.
 	GetMap(ctx context.Context, in *GetMapRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetMapResponse], error)
+	// GetChat performs chat retrieval for the selected session by the configured user.
 	GetChat(ctx context.Context, in *GetChatRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetChatResponse], error)
+	// CreateChatMessage performs chat message creation for the selected session by the configured user.
+	CreateChatMessage(ctx context.Context, in *CreateChatMessageRequest, opts ...grpc.CallOption) (*CreateChatMessageResponse, error)
 }
 
 type metadataClient struct {
@@ -156,6 +164,16 @@ func (c *metadataClient) GetChat(ctx context.Context, in *GetChatRequest, opts .
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Metadata_GetChatClient = grpc.ServerStreamingClient[GetChatResponse]
 
+func (c *metadataClient) CreateChatMessage(ctx context.Context, in *CreateChatMessageRequest, opts ...grpc.CallOption) (*CreateChatMessageResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateChatMessageResponse)
+	err := c.cc.Invoke(ctx, Metadata_CreateChatMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MetadataServer is the server API for Metadata service.
 // All implementations must embed UnimplementedMetadataServer
 // for forward compatibility.
@@ -170,11 +188,18 @@ type MetadataServer interface {
 	GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error)
 	// CreateSession performs session creation operation by the configured user.
 	CreateSession(context.Context, *CreateSessionRequest) (*CreateSessionResponse, error)
+	// RemoveSession performs session removal operation by the configured user. Allowed only for session owner.
 	RemoveSession(context.Context, *RemoveSessionRequest) (*RemoveSessionResponse, error)
+	// JoinToSession performs session join request by the configured user.
 	JoinToSession(context.Context, *JoinToSessionRequest) (*JoinToSessionResponse, error)
+	// GetChest performs chests retrieval for the selected session by the configured user.
 	GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error)
+	// GetMap performs map retrieval for the selected session by the configured user.
 	GetMap(*GetMapRequest, grpc.ServerStreamingServer[GetMapResponse]) error
+	// GetChat performs chat retrieval for the selected session by the configured user.
 	GetChat(*GetChatRequest, grpc.ServerStreamingServer[GetChatResponse]) error
+	// CreateChatMessage performs chat message creation for the selected session by the configured user.
+	CreateChatMessage(context.Context, *CreateChatMessageRequest) (*CreateChatMessageResponse, error)
 	mustEmbedUnimplementedMetadataServer()
 }
 
@@ -208,6 +233,9 @@ func (UnimplementedMetadataServer) GetMap(*GetMapRequest, grpc.ServerStreamingSe
 }
 func (UnimplementedMetadataServer) GetChat(*GetChatRequest, grpc.ServerStreamingServer[GetChatResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method GetChat not implemented")
+}
+func (UnimplementedMetadataServer) CreateChatMessage(context.Context, *CreateChatMessageRequest) (*CreateChatMessageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateChatMessage not implemented")
 }
 func (UnimplementedMetadataServer) mustEmbedUnimplementedMetadataServer() {}
 func (UnimplementedMetadataServer) testEmbeddedByValue()                  {}
@@ -360,6 +388,24 @@ func _Metadata_GetChat_Handler(srv interface{}, stream grpc.ServerStream) error 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Metadata_GetChatServer = grpc.ServerStreamingServer[GetChatResponse]
 
+func _Metadata_CreateChatMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateChatMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).CreateChatMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_CreateChatMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).CreateChatMessage(ctx, req.(*CreateChatMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Metadata_ServiceDesc is the grpc.ServiceDesc for Metadata service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -390,6 +436,10 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetChests",
 			Handler:    _Metadata_GetChests_Handler,
+		},
+		{
+			MethodName: "CreateChatMessage",
+			Handler:    _Metadata_CreateChatMessage_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

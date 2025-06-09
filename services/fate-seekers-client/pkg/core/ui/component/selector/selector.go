@@ -223,9 +223,21 @@ func newSelectorComponent() *SelectorComponent {
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
 			widget.RowLayoutOpts.Padding(widget.Insets{
-				Top: 50,
+				Top: 40,
 			}),
 		)))
+
+	listsContainer.AddChild(widget.NewText(
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+			Stretch: true,
+		})),
+		widget.TextOpts.Insets(widget.Insets{
+			Bottom: 20,
+		}),
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("client.selector.sessions"),
+			generalFont,
+			color.White)))
 
 	list := widget.NewList(
 		widget.ListOpts.ContainerOpts(
@@ -262,7 +274,7 @@ func newSelectorComponent() *SelectorComponent {
 		),
 		widget.ListOpts.AllowReselect(),
 		widget.ListOpts.HideHorizontalSlider(),
-		widget.ListOpts.Entries([]interface{}{"One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"}),
+		widget.ListOpts.Entries([]interface{}{}),
 		widget.ListOpts.EntryLabelFunc(func(e interface{}) string {
 			return e.(string)
 		}),
@@ -306,6 +318,9 @@ func newSelectorComponent() *SelectorComponent {
 		),
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
+			widget.RowLayoutOpts.Padding(widget.Insets{
+				Top: -scaler.GetPercentageOf(config.GetWorldHeight(), 10),
+			}),
 		)),
 	)
 

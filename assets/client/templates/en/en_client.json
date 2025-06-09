@@ -51,6 +51,10 @@
         "one": "Session ID",
         "other": "Session ID"
     },
+    "client.selector.sessions": {
+        "one": "User created sessions",
+        "other": "User created sessions"
+    },
     "client.letterimage.close": {
         "one": "Close",
         "other": "Close"

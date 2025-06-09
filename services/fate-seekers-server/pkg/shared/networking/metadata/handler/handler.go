@@ -13,6 +13,11 @@ type Handler struct {
 }
 
 func (h *Handler) PingConnection(ctx context.Context, request *api.PingConnectionRequest) (*api.PingConnectionResponse, error) {
+
+	return nil, nil
+}
+
+func (h *Handler) GetSessions(context.Context, *api.GetSessionsRequest) (*api.GetSessionsResponse, error) {
 	return nil, nil
 }
 
@@ -38,6 +43,10 @@ func (h *Handler) GetMap(*api.GetMapRequest, grpc.ServerStreamingServer[api.GetM
 
 func (h *Handler) GetChat(*api.GetChatRequest, grpc.ServerStreamingServer[api.GetChatResponse]) error {
 	return nil
+}
+
+func (h *Handler) CreateChatMessage(context.Context, *api.CreateChatMessageRequest) (*api.CreateChatMessageResponse, error) {
+	return nil, nil
 }
 
 // NewHandler initializes implementation of api.MetadataServer.

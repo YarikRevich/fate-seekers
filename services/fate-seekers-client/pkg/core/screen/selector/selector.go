@@ -1,12 +1,15 @@
 package selector
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
@@ -15,6 +18,7 @@ import (
 	selectormanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/selector"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
@@ -42,6 +46,15 @@ type SelectorScreen struct {
 }
 
 func (ss *SelectorScreen) HandleInput() error {
+	if store.GetSessionRetrievalStartedNetworking() == value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
+
+		handler.PerformGetSessions(func(response *api.GetSessionsResponse, err error) {
+			fmt.Println(response.GetSessions(), err)
+		})
+	}
+
 	if !ss.transparentTransitionEffect.Done() {
 		if !ss.transparentTransitionEffect.OnEnd() {
 			ss.transparentTransitionEffect.Update()
@@ -90,6 +103,9 @@ func newSelectorScreen() screen.Screen {
 			transparentTransitionEffect.Reset()
 
 			dispatcher.GetInstance().Dispatch(
+				action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
+
+			dispatcher.GetInstance().Dispatch(
 				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
 		}
 	})
@@ -98,11 +114,17 @@ func newSelectorScreen() screen.Screen {
 		transparentTransitionEffect.Reset()
 
 		dispatcher.GetInstance().Dispatch(
+			action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_CREATOR_VALUE))
 	})
 
 	selector.GetInstance().SetBackCallback(func() {
 		transparentTransitionEffect.Reset()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))

@@ -17,11 +17,24 @@ service Metadata {
 
     // CreateSession performs session creation operation by the configured user.
     rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse) {};
+
+    // RemoveSession performs session removal operation by the configured user. Allowed only for session owner.
     rpc RemoveSession(RemoveSessionRequest) returns (RemoveSessionResponse) {};
+
+    // JoinToSession performs session join request by the configured user.
     rpc JoinToSession(JoinToSessionRequest) returns (JoinToSessionResponse) {};
+
+    // GetChest performs chests retrieval for the selected session by the configured user.
     rpc GetChests(GetChestsRequest) returns (GetChestsResponse) {};
+
+    // GetMap performs map retrieval for the selected session by the configured user.
     rpc GetMap(GetMapRequest) returns (stream GetMapResponse) {};
+    
+    // GetChat performs chat retrieval for the selected session by the configured user.
     rpc GetChat(GetChatRequest) returns (stream GetChatResponse) {};
+
+    // CreateChatMessage performs chat message creation for the selected session by the configured user.
+    rpc CreateChatMessage(CreateChatMessageRequest) returns (CreateChatMessageResponse) {};
 }
 
 // PingConnectionRequest represents  ping connection request message.
@@ -35,6 +48,7 @@ message PingConnectionResponse {
 
 // GetSessionsRequest represents get sesssions request.
 message GetSessionsRequest {
+    string issuer = 1;
 };
 
 // Session represents common session retrieval message.
@@ -80,7 +94,7 @@ message JoinToSessionRequest {
 message JoinToSessionResponse {
 };
 
-// Represents chests retrieval request message.
+// GetChestsRequest represents chests retrieval request message.
 message GetChestsRequest {
     string session_id = 1;
 };
@@ -91,22 +105,22 @@ message Position {
     int64 y = 2;
 };
 
-// Represents chests retrieval response streaming message.
+// GetChestsResponse represents chests retrieval response streaming message.
 message GetChestsResponse {
     repeated Position positions = 1;
 };
 
-// Represents map retrieval request message.
+// GetMapRequest represents map retrieval request message.
 message GetMapRequest {
     string session_id = 1;
 };
 
-// Represents map retrieval response streaming message.
+// GetMapResponse represents map retrieval response streaming message.
 message GetMapResponse {
     repeated Position positions = 1;
 };
 
-// Represents chat retrieval request message.
+// GetChatRequest represents chat retrieval request message.
 message GetChatRequest {
     string session_id = 1;
     int64 offset = 2;
@@ -119,7 +133,17 @@ message ChatMessage {
     google.protobuf.Timestamp timestamp = 3;
 };
 
-// Represents chat retrieval response streaming message.
+// GetChatResponse represents chat retrieval response streaming message.
 message GetChatResponse {
     repeated string messages = 1;
+};
+
+// CreateChatMessageRequest represents chat message creation request message.
+message CreateChatMessageRequest {
+    string session_id = 1;
+    int64 offset = 2;
+};
+
+// CreateChatMessageResponse represents chat message creation request message.
+message CreateChatMessageResponse {
 };
