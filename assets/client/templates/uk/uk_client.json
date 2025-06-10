@@ -55,6 +55,18 @@
         "one": "Сесії створені гравцем",
         "other": "Сесії створені гравцем"
     },
+    "client.creator.title": {
+        "one": "Створення сесії",
+        "other": "Створення сесії"
+    },
+    "client.creator.session_name": {
+        "one": "Назва",
+        "other": "Назва"
+    },
+    "client.creator.session_seed": {
+        "one": "Сід",
+        "other": "Сід"
+    },
     "client.letterimage.close": {
         "one": "Закрити",
         "other": "Закрити"
@@ -82,6 +94,14 @@
     "client.selectormanager.invalid-session-id": {
         "one": "Надано некоректний ідентифікатор сесії",
         "other": "Надано некоректний ідентифікатор сесії"
+    },
+    "client.creatormanager.invalid-session-name": {
+        "one": "Надано некоректну назву сесії",
+        "other": "Надано некоректну назву сесії"
+    },
+    "client.creatormanager.invalid-session-seed": {
+        "one": "Надано некоректний сід сесії",
+        "other": "Надано некоректний сід сесії"
     },
     "client.settingsmanager.invalid-networking-server-host": {
         "one": "Надано некоректний хост сервера",

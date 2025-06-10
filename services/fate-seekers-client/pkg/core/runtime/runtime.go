@@ -10,6 +10,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/answerinput"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/creator"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/intro"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/lobby"
@@ -176,6 +177,9 @@ func (r *Runtime) Update() error {
 
 	case value.ACTIVE_SCREEN_SELECTOR_VALUE:
 		r.activeScreen = selector.GetInstance()
+
+	case value.ACTIVE_SCREEN_CREATOR_VALUE:
+		r.activeScreen = creator.GetInstance()
 
 	case value.ACTIVE_SCREEN_LOBBY_VALUE:
 		r.activeScreen = lobby.GetInstance()

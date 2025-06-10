@@ -55,6 +55,18 @@
         "one": "User created sessions",
         "other": "User created sessions"
     },
+    "client.creator.title": {
+        "one": "Session creator",
+        "other": "Session creator"
+    },
+    "client.creator.session_name": {
+        "one": "Name",
+        "other": "Name"
+    },
+    "client.creator.session_seed": {
+        "one": "Seed",
+        "other": "Seed"
+    },
     "client.letterimage.close": {
         "one": "Close",
         "other": "Close"
@@ -90,6 +102,14 @@
     "client.selectormanager.invalid-session-id": {
         "one": "Provided session ID is invalid",
         "other": "Provided session ID is invalid"
+    },
+    "client.creatormanager.invalid-session-name": {
+        "one": "Provided session name is invalid",
+        "other": "Provided session name is invalid"
+    },
+    "client.creatormanager.invalid-session-seed": {
+        "one": "Provided session seed is invalid",
+        "other": "Provided session seed is invalid"
     },
     "client.settingsmanager.invalid-networking-server-host": {
         "one": "Provided server host is invalid",

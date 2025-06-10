@@ -9,7 +9,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/sessionid"
 )
 
-// ProcessChanges performs provided changes application.
+// ProcessChanges performs provided changes validation.
 func ProcessChanges(sessionID string) bool {
 	if !sessionid.Validate(sessionID) {
 		notification.GetInstance().Push(
