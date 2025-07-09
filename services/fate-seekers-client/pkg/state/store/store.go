@@ -5,6 +5,7 @@ import (
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/creator"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/event"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/networking"
@@ -226,6 +227,9 @@ func newStore() *godux.Store {
 	soundReducer := sound.NewEventStateReducer(store)
 	soundReducer.Init()
 
+	creatorReducer := creator.NewCreatorStateReducer(store)
+	creatorReducer.Init()
+
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
 		if result != nil {
@@ -268,6 +272,11 @@ func newStore() *godux.Store {
 		}
 
 		result = soundReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = creatorReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

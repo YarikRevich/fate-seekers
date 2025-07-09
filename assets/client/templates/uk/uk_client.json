@@ -103,6 +103,10 @@
         "one": "Надано некоректний сід сесії",
         "other": "Надано некоректний сід сесії"
     },
+    "client.creatormanager.in-progress": {
+        "one": "Відбувається створення сесії",
+        "other": "Відбувається створення сесії"
+    },
     "client.settingsmanager.invalid-networking-server-host": {
         "one": "Надано некоректний хост сервера",
         "other": "Надано некоректний хост сервера`"

@@ -50,6 +50,8 @@ require (
 	github.com/go-text/typesetting v0.2.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/hajimehoshi/go-mp3 v0.3.4 // indirect
+	github.com/hashicorp/golang-lru v1.0.2 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jezek/xgb v1.1.1 // indirect

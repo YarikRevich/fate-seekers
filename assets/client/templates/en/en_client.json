@@ -111,6 +111,10 @@
         "one": "Provided session seed is invalid",
         "other": "Provided session seed is invalid"
     },
+    "client.creatormanager.in-progress": {
+        "one": "Session creation is in progress",
+        "other": "Session creation is in progress"
+    },
     "client.settingsmanager.invalid-networking-server-host": {
         "one": "Provided server host is invalid",
         "other": "Provided server host is invalid"

@@ -2,24 +2,24 @@
 -- +goose StatementBegin
 
 --
--- Name: collections; Type: TABLE; Schema: public; 
+-- Name: sessions; Type: TABLE; Schema: public; 
 --
 
-CREATE TABLE collections (
+CREATE TABLE sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
-    created_at TIMESTAMP NOT NULL
+    issuer INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (issuer) REFERENCES users(id)
 );
 
 --
--- Name: flags; Type: TABLE; Schema: public; 
+-- Name: users; Type: TABLE; Schema: public; 
 --
 
-CREATE TABLE flags (
+CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
-    value TEXT NOT NULL UNIQUE DEFAULT "",
-    updated_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL
 );
 

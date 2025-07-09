@@ -50,14 +50,10 @@ type CreatorComponent struct {
 	container *widget.Container
 }
 
-// SetNameInput sets value to the name input widget.
-func (cc *CreatorComponent) SetNameInput(value string) {
-	cc.nameInput.SetText(value)
-}
-
-// SetSeedInput sets value to the seed input widget.
-func (cc *CreatorComponent) SetSeedInput(value string) {
-	cc.seedInput.SetText(value)
+// CleanInputs cleans all the inputs in the container.
+func (cc *CreatorComponent) CleanInputs() {
+	cc.nameInput.SetText("")
+	cc.seedInput.SetText("")
 }
 
 // SetSubmitCallback modified submit callback in the container.

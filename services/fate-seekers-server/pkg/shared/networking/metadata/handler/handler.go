@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/cache"
 	"google.golang.org/grpc"
 )
 
@@ -13,15 +14,27 @@ type Handler struct {
 }
 
 func (h *Handler) PingConnection(ctx context.Context, request *api.PingConnectionRequest) (*api.PingConnectionResponse, error) {
+	// Leave empty. Used to simulation external call to check if client configuration is correct.
 
 	return nil, nil
 }
 
-func (h *Handler) GetSessions(context.Context, *api.GetSessionsRequest) (*api.GetSessionsResponse, error) {
+func (h *Handler) GetSessions(ctx context.Context, request *api.GetSessionsRequest) (*api.GetSessionsResponse, error) {
+	// Should use LRU cache over here for safety
+
+	value, ok := cache.GetInstance().
+		GetSessions().
+		Get(request.GetIssuer())
+
+	if !ok {
+
+	}
+
 	return nil, nil
 }
 
-func (h *Handler) CreateSession(context.Context, *api.CreateSessionRequest) (*api.CreateSessionResponse, error) {
+func (h *Handler) CreateSession(ctx context.Context, request *api.CreateSessionRequest) (*api.CreateSessionResponse, error) {
+
 	return nil, nil
 }
 
@@ -42,10 +55,14 @@ func (h *Handler) GetMap(*api.GetMapRequest, grpc.ServerStreamingServer[api.GetM
 }
 
 func (h *Handler) GetChat(*api.GetChatRequest, grpc.ServerStreamingServer[api.GetChatResponse]) error {
+	// TODO: messages would be retrieved from memory(not lru cache??????)
+
 	return nil
 }
 
 func (h *Handler) CreateChatMessage(context.Context, *api.CreateChatMessageRequest) (*api.CreateChatMessageResponse, error) {
+	// TODO: add to a delayed batch, not to overload the database.
+
 	return nil, nil
 }
 

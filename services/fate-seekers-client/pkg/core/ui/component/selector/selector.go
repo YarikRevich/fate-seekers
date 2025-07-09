@@ -34,6 +34,9 @@ var (
 
 // SelectorComponent represents component, which contains selector menu.
 type SelectorComponent struct {
+	// Represents name input widget.
+	sessionIDInput *widget.TextInput
+
 	// Represents list widget.
 	list *widget.List
 
@@ -48,6 +51,11 @@ type SelectorComponent struct {
 
 	// Represents container widget.
 	container *widget.Container
+}
+
+// CleanInputs cleans all the inputs in the container.
+func (sc *SelectorComponent) CleanInputs() {
+	sc.sessionIDInput.SetText("")
 }
 
 // SetListsEntries sets lists entries to the list widget.
@@ -455,8 +463,9 @@ func newSelectorComponent() *SelectorComponent {
 	container.AddChild(buttonsContainer)
 
 	result = &SelectorComponent{
-		list:      list,
-		container: container,
+		sessionIDInput: sessionIDInput,
+		list:           list,
+		container:      container,
 	}
 
 	return result

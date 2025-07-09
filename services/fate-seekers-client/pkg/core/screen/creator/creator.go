@@ -1,20 +1,26 @@
 package creator
 
 import (
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/creator"
 	creatormanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/creator"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
@@ -42,8 +48,6 @@ type CreatorScreen struct {
 }
 
 func (cs *CreatorScreen) HandleInput() error {
-	// TODO: check if form has been updated
-
 	if !cs.transparentTransitionEffect.Done() {
 		if !cs.transparentTransitionEffect.OnEnd() {
 			cs.transparentTransitionEffect.Update()
@@ -89,35 +93,52 @@ func newCreatorScreen() screen.Screen {
 
 	creator.GetInstance().SetSubmitCallback(func(name, seed string) {
 		if creatormanager.ProcessChanges(name, seed) {
-			// if store.GetSessionRetrievalStartedNetworking() == value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE {
-			// 	dispatcher.GetInstance().Dispatch(
-			// 		action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
-
-			// 	handler.PerformGetSessions(func(response *api.GetSessionsResponse, err error) {
-			// 		fmt.Println(response.GetSessions(), err)
-			// 	})
-			// }
-
 			transparentTransitionEffect.Reset()
 
-			dispatcher.GetInstance().Dispatch(
-				action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
+			if store.GetSessionCreationStartedNetworking() == value.SESSION_CREATION_STARTED_NETWORKING_FALSE_VALUE {
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetSessionCreationStartedNetworkingAction(
+						value.SESSION_CREATION_STARTED_NETWORKING_TRUE_VALUE))
 
-			dispatcher.GetInstance().Dispatch(
-				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
+				seedInt, err := strconv.ParseInt(seed, 10, 64)
+				if err != nil {
+					notification.GetInstance().Push(
+						translation.GetInstance().GetTranslation("client.creatormanager.invalid-session-seed"),
+						time.Second*3,
+						common.NotificationErrorTextColor)
+				} else {
+					notification.GetInstance().Push(
+						translation.GetInstance().GetTranslation("client.creatormanager.in-progress"),
+						time.Second*4,
+						common.NotificationInfoTextColor)
+
+					handler.PerformCreateSession(name, seedInt, func(err error) {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetSessionCreationStartedNetworkingAction(
+								value.SESSION_CREATION_STARTED_NETWORKING_TRUE_VALUE))
+
+						creator.GetInstance().CleanInputs()
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
+					})
+				}
+			}
 		}
-
-		transparentTransitionEffect.Reset()
-
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
 	})
 
 	creator.GetInstance().SetBackCallback(func() {
-		transparentTransitionEffect.Reset()
+		if store.GetSessionCreationStartedNetworking() == value.SESSION_CREATION_STARTED_NETWORKING_FALSE_VALUE {
+			transparentTransitionEffect.Reset()
 
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
+			creator.GetInstance().CleanInputs()
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
+		}
 	})
 
 	return &CreatorScreen{

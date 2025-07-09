@@ -4,7 +4,7 @@ import "regexp"
 
 // Describes allowed session seed validation value.
 const (
-	allowedPattern = `^[a-zA-Z0-9-]{8}\b$`
+	allowedPattern = `^[0-9-]{8}\b$`
 )
 
 // Validate performs provided session seed value validation.

@@ -19,7 +19,7 @@ var (
 	// GetCollectionsRepository retrieves instance of the collections repository, performing initial creation if needed.
 	GetCollectionsRepository = sync.OnceValue[CollectionsRepository](createCollectionsRepository)
 
-	// GetFlagsRepository retrieves instance of the collections repository, performing initial creation if needed.
+	// GetFlagsRepository retrieves instance of the flags repository, performing initial creation if needed.
 	GetFlagsRepository = sync.OnceValue[FlagsRepository](createFlagsRepository)
 )
 

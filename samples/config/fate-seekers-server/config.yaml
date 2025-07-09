@@ -43,7 +43,7 @@ operation:
   # Represents database properties description.
   database:
     # Represents name of the sqlite3 database file.
-    name: "fate_seekers.db"
+    name: "fate_seekers_server.db"
 
     # Represents connection retry delay used for retry operations.
     connection-retry-delay: 3s
@@ -57,7 +57,7 @@ operation:
     console: true
 
     # Represents output file name.
-    name: "fate_seekers.log"
+    name: "fate_seekers_server.log"
 
     # Represents output file directory.
     directory: "log"
