@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
 	lru "github.com/hashicorp/golang-lru/v2"
 )
@@ -24,7 +25,7 @@ const (
 // NetworkingCache represents networking cache.
 type NetworkingCache struct {
 	// Represents sessions cache instance.
-	sessions *lru.Cache[string, []string]
+	sessions *lru.Cache[string, []dto.CacheSessionEntity]
 
 	// Represents expirable messages cache, which contains offset for the message table.
 	// If user stops request messages, all the messages would be retrieved.
@@ -35,12 +36,12 @@ type NetworkingCache struct {
 }
 
 // AddSession adds session cache instance with the provided key and value.
-func (nc *NetworkingCache) AddSessions(key string, value []string) {
+func (nc *NetworkingCache) AddSessions(key string, value []dto.CacheSessionEntity) {
 	nc.sessions.Add(key, value)
 }
 
 // GetSession retrieves session cache instance by the provided key.
-func (nc *NetworkingCache) GetSessions(key string) (any, bool) {
+func (nc *NetworkingCache) GetSessions(key string) ([]dto.CacheSessionEntity, bool) {
 	return nc.sessions.Get(key)
 }
 
@@ -73,7 +74,7 @@ func (nc *NetworkingCache) GetUsers(key string) (int64, bool) {
 
 // newNetworkingCache initializes NetworkingCache.
 func newNetworkingCache() *NetworkingCache {
-	sessions, err := lru.New[string, []string](config.GetOperationMaxSessionsAmount())
+	sessions, err := lru.New[string, []dto.CacheSessionEntity](config.GetOperationMaxSessionsAmount())
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
 	}

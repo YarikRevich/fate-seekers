@@ -12,7 +12,7 @@ message Position {
 // Represents users positions retrieval request message.
 message GetUserPositionsRequest {
     string issuer = 1;
-    string session_id = 2;
+    int64 session_id = 2;
 };
 
 // Represents users positions retrieval response message.

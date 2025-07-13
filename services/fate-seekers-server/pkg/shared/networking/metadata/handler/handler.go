@@ -3,8 +3,10 @@ package handler
 import (
 	"context"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/cache"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/api"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/cache"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository"
 	"google.golang.org/grpc"
 )
 
@@ -20,17 +22,68 @@ func (h *Handler) PingConnection(ctx context.Context, request *api.PingConnectio
 }
 
 func (h *Handler) GetSessions(ctx context.Context, request *api.GetSessionsRequest) (*api.GetSessionsResponse, error) {
-	// Should use LRU cache over here for safety
+	var response *api.GetSessionsResponse
 
-	value, ok := cache.GetInstance().
-		GetSessions().
-		Get(request.GetIssuer())
+	cachedSessions, ok := cache.
+		GetInstance().
+		GetSessions(request.GetIssuer())
+	if ok {
+		for _, cachedSession := range cachedSessions {
+			response.Sessions = append(response.Sessions, &api.Session{
+				Id:   cachedSession.ID,
+				Name: cachedSession.Name,
+			})
+		}
+	} else {
+		var userID int64
 
-	if !ok {
+		cachedUserID, ok := cache.
+			GetInstance().
+			GetUsers(request.GetIssuer())
+		if ok {
+			userID = cachedUserID
+		} else {
+			user, _, err := repository.
+				GetUsersRepository().
+				GetByName(request.GetIssuer())
+			if err != nil {
+				return nil, err
+			}
 
+			userID = user.ID
+
+			cache.
+				GetInstance().
+				AddUser(request.GetIssuer(), userID)
+		}
+
+		rawSessions, err := repository.
+			GetSessionsRepository().
+			GetByIssuer(userID)
+		if err != nil {
+			return nil, err
+		}
+
+		var sessions []dto.CacheSessionEntity
+
+		for _, rawSession := range rawSessions {
+			response.Sessions = append(response.Sessions, &api.Session{
+				Id:   rawSession.ID,
+				Name: rawSession.Name,
+			})
+
+			sessions = append(sessions, dto.CacheSessionEntity{
+				ID:   rawSession.ID,
+				Name: rawSession.Name,
+			})
+		}
+
+		cache.
+			GetInstance().
+			AddSessions(request.GetIssuer(), sessions)
 	}
 
-	return nil, nil
+	return response, nil
 }
 
 func (h *Handler) CreateSession(ctx context.Context, request *api.CreateSessionRequest) (*api.CreateSessionResponse, error) {

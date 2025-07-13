@@ -78,7 +78,7 @@ func (x *Position) GetY() int64 {
 type GetUserPositionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Issuer        string                 `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
-	Session       string                 `protobuf:"bytes,2,opt,name=session,proto3" json:"session,omitempty"`
+	SessionId     int64                  `protobuf:"varint,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -120,11 +120,11 @@ func (x *GetUserPositionsRequest) GetIssuer() string {
 	return ""
 }
 
-func (x *GetUserPositionsRequest) GetSession() string {
+func (x *GetUserPositionsRequest) GetSessionId() int64 {
 	if x != nil {
-		return x.Session
+		return x.SessionId
 	}
-	return ""
+	return 0
 }
 
 // Represents users positions retrieval response message.
@@ -179,10 +179,11 @@ const file_api_content_content_proto_rawDesc = "" +
 	"\x19api/content/content.proto\x12\acontent\"&\n" +
 	"\bPosition\x12\f\n" +
 	"\x01x\x18\x01 \x01(\x03R\x01x\x12\f\n" +
-	"\x01y\x18\x02 \x01(\x03R\x01y\"K\n" +
+	"\x01y\x18\x02 \x01(\x03R\x01y\"P\n" +
 	"\x17GetUserPositionsRequest\x12\x16\n" +
-	"\x06issuer\x18\x01 \x01(\tR\x06issuer\x12\x18\n" +
-	"\asession\x18\x02 \x01(\tR\asession\"K\n" +
+	"\x06issuer\x18\x01 \x01(\tR\x06issuer\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\x03R\tsessionId\"K\n" +
 	"\x18GetUserPositionsResponse\x12/\n" +
 	"\tpositions\x18\x01 \x03(\v2\x11.content.PositionR\tpositionsBEZCgithub.com/YarikRevich/fate-seekers/pkg/core/networking/content/apib\x06proto3"
 

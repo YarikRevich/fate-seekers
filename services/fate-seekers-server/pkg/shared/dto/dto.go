@@ -133,3 +133,9 @@ func ComposeReducerResult(units ...ReducerResultUnit) ReducerResult {
 
 	return result
 }
+
+// CacheSessionEntity represent cache session entity used by global networking cache.
+type CacheSessionEntity struct {
+	ID   int64
+	Name string
+}

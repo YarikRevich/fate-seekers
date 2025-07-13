@@ -152,7 +152,7 @@ func (x *GetSessionsRequest) GetIssuer() string {
 // Session represents common session retrieval message.
 type Session struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -188,11 +188,11 @@ func (*Session) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *Session) GetSessionId() string {
+func (x *Session) GetId() int64 {
 	if x != nil {
-		return x.SessionId
+		return x.Id
 	}
-	return ""
+	return 0
 }
 
 func (x *Session) GetName() string {
@@ -312,7 +312,7 @@ func (x *CreateSessionRequest) GetSeed() int64 {
 // CreateSessionResponse represents create session response.
 type CreateSessionResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -347,17 +347,17 @@ func (*CreateSessionResponse) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *CreateSessionResponse) GetSessionId() string {
+func (x *CreateSessionResponse) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
 	}
-	return ""
+	return 0
 }
 
 // RemoveSessionRequest represents remove session request.
 type RemoveSessionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -392,11 +392,11 @@ func (*RemoveSessionRequest) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *RemoveSessionRequest) GetSessionId() string {
+func (x *RemoveSessionRequest) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
 	}
-	return ""
+	return 0
 }
 
 // RemoveSessionResponse represents remove session response.
@@ -439,7 +439,7 @@ func (*RemoveSessionResponse) Descriptor() ([]byte, []int) {
 // JoinToSessionRequest represents user join to session request.
 type JoinToSessionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Issuer        string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -475,11 +475,11 @@ func (*JoinToSessionRequest) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *JoinToSessionRequest) GetSessionId() string {
+func (x *JoinToSessionRequest) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
 	}
-	return ""
+	return 0
 }
 
 func (x *JoinToSessionRequest) GetIssuer() string {
@@ -529,7 +529,7 @@ func (*JoinToSessionResponse) Descriptor() ([]byte, []int) {
 // Represents users metadata retrieval request message.
 type GetUserMetadataRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Issuer        string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -565,11 +565,11 @@ func (*GetUserMetadataRequest) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *GetUserMetadataRequest) GetSessionId() string {
+func (x *GetUserMetadataRequest) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
 	}
-	return ""
+	return 0
 }
 
 func (x *GetUserMetadataRequest) GetIssuer() string {
@@ -680,7 +680,7 @@ func (x *GetUserMetadataResponse) GetUserMetadata() []*UserMetadata {
 // GetChestsRequest represents chests retrieval request message.
 type GetChestsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -715,11 +715,11 @@ func (*GetChestsRequest) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{14}
 }
 
-func (x *GetChestsRequest) GetSessionId() string {
+func (x *GetChestsRequest) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
 	}
-	return ""
+	return 0
 }
 
 // Position represents common position message.
@@ -823,7 +823,7 @@ func (x *GetChestsResponse) GetPositions() []*Position {
 // GetMapRequest represents map retrieval request message.
 type GetMapRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -858,11 +858,11 @@ func (*GetMapRequest) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{17}
 }
 
-func (x *GetMapRequest) GetSessionId() string {
+func (x *GetMapRequest) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
 	}
-	return ""
+	return 0
 }
 
 // GetMapResponse represents map retrieval response streaming message.
@@ -913,7 +913,7 @@ func (x *GetMapResponse) GetPositions() []*Position {
 // GetChatRequest represents chat retrieval request message.
 type GetChatRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Offset        int64                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -949,11 +949,11 @@ func (*GetChatRequest) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{19}
 }
 
-func (x *GetChatRequest) GetSessionId() string {
+func (x *GetChatRequest) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
 	}
-	return ""
+	return 0
 }
 
 func (x *GetChatRequest) GetOffset() int64 {
@@ -1072,7 +1072,7 @@ func (x *GetChatResponse) GetMessages() []string {
 // CreateChatMessageRequest represents chat message creation request message.
 type CreateChatMessageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Offset        int64                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1108,11 +1108,11 @@ func (*CreateChatMessageRequest) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{22}
 }
 
-func (x *CreateChatMessageRequest) GetSessionId() string {
+func (x *CreateChatMessageRequest) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
 	}
-	return ""
+	return 0
 }
 
 func (x *CreateChatMessageRequest) GetOffset() int64 {
@@ -1168,10 +1168,9 @@ const file_api_metadata_metadata_proto_rawDesc = "" +
 	"\x06issuer\x18\x01 \x01(\tR\x06issuer\"\x18\n" +
 	"\x16PingConnectionResponse\",\n" +
 	"\x12GetSessionsRequest\x12\x16\n" +
-	"\x06issuer\x18\x01 \x01(\tR\x06issuer\"<\n" +
-	"\aSession\x12\x1d\n" +
-	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x12\n" +
+	"\x06issuer\x18\x01 \x01(\tR\x06issuer\"-\n" +
+	"\aSession\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\"D\n" +
 	"\x13GetSessionsResponse\x12-\n" +
 	"\bsessions\x18\x01 \x03(\v2\x11.metadata.SessionR\bsessions\"d\n" +
@@ -1182,19 +1181,19 @@ const file_api_metadata_metadata_proto_rawDesc = "" +
 	"\x05_seed\"6\n" +
 	"\x15CreateSessionResponse\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\"5\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\"5\n" +
 	"\x14RemoveSessionRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\"\x17\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\"\x17\n" +
 	"\x15RemoveSessionResponse\"M\n" +
 	"\x14JoinToSessionRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x16\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
 	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"\x17\n" +
 	"\x15JoinToSessionResponse\"O\n" +
 	"\x16GetUserMetadataRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x16\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
 	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"2\n" +
 	"\fUserMetadata\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
@@ -1203,7 +1202,7 @@ const file_api_metadata_metadata_proto_rawDesc = "" +
 	"\ruser_metadata\x18\x01 \x03(\v2\x16.metadata.UserMetadataR\fuserMetadata\"1\n" +
 	"\x10GetChestsRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\"&\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\"&\n" +
 	"\bPosition\x12\f\n" +
 	"\x01x\x18\x01 \x01(\x03R\x01x\x12\f\n" +
 	"\x01y\x18\x02 \x01(\x03R\x01y\"E\n" +
@@ -1211,12 +1210,12 @@ const file_api_metadata_metadata_proto_rawDesc = "" +
 	"\tpositions\x18\x01 \x03(\v2\x12.metadata.PositionR\tpositions\".\n" +
 	"\rGetMapRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\"B\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\"B\n" +
 	"\x0eGetMapResponse\x120\n" +
 	"\tpositions\x18\x01 \x03(\v2\x12.metadata.PositionR\tpositions\"G\n" +
 	"\x0eGetChatRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x16\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
 	"\x06offset\x18\x02 \x01(\x03R\x06offset\"y\n" +
 	"\vChatMessage\x12\x18\n" +
 	"\acontent\x18\x01 \x01(\tR\acontent\x12\x16\n" +
@@ -1226,7 +1225,7 @@ const file_api_metadata_metadata_proto_rawDesc = "" +
 	"\bmessages\x18\x01 \x03(\tR\bmessages\"Q\n" +
 	"\x18CreateChatMessageRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x16\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
 	"\x06offset\x18\x02 \x01(\x03R\x06offset\"\x1b\n" +
 	"\x19CreateChatMessageResponse2\xb2\x06\n" +
 	"\bMetadata\x12U\n" +
