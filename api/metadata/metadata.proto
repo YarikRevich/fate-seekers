@@ -24,6 +24,9 @@ service Metadata {
     // JoinToSession performs session join request by the configured user.
     rpc JoinToSession(JoinToSessionRequest) returns (JoinToSessionResponse) {};
 
+    // GetUserMetadata performs user metadata retrieval request by the configured user.
+    rpc GetUserMetadata(GetUserMetadataRequest) returns (GetUserMetadataResponse) {};
+
     // GetChest performs chests retrieval for the selected session by the configured user.
     rpc GetChests(GetChestsRequest) returns (GetChestsResponse) {};
 
@@ -92,6 +95,23 @@ message JoinToSessionRequest {
 
 // JoinToSessionResponse represents user join to session response.
 message JoinToSessionResponse {
+};
+
+// Represents users metadata retrieval request message.
+message GetUserMetadataRequest {
+    string session_id = 1;
+    string issuer = 2;
+};
+
+// Represents common user metadata message.
+message UserMetadata {
+    string id = 1;
+    string skin = 2;
+};
+
+// Represents users metadata retrieval response message.
+message GetUserMetadataResponse {
+    repeated UserMetadata user_metadata = 1;
 };
 
 // GetChestsRequest represents chests retrieval request message.

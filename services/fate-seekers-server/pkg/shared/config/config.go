@@ -37,7 +37,9 @@ var (
 
 	settingsInitialLanguage string
 
-	debug bool
+	operationDebug bool
+
+	operationMaxSessionsAmount int
 
 	databaseName                 string
 	databaseConnectionRetryDelay time.Duration
@@ -70,6 +72,12 @@ const (
 	SETTINGS_LANGUAGE_UKRAINIAN = "uk"
 )
 
+// Represents all the available operational settings values.
+const (
+	// One session contains max 8 players.
+	maxSessionsAmount = 128
+)
+
 const (
 	// Represents home directory where all application related data is located.
 	internalGlobalDirectory = "/.fate-seekers-server"
@@ -91,6 +99,7 @@ func SetupDefaultConfig() {
 	viper.SetDefault("settings.monitoring.prometheus.name", "fate-seekers-server-prometheus")
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
 	viper.SetDefault("operation.debug", false)
+	viper.SetDefault("operation.max-sessions-amount", maxSessionsAmount)
 	viper.SetDefault("database.name", "fate_seekers.db")
 	viper.SetDefault("database.connection-retry-delay", time.Second*3)
 	viper.SetDefault("logging.level", "info")
@@ -152,7 +161,8 @@ func Init() {
 
 	settingsInitialLanguage = settingsLanguage
 
-	debug = viper.GetBool("operation.debug")
+	operationDebug = viper.GetBool("operation.debug")
+	operationMaxSessionsAmount = viper.GetInt("operation.max-sessions-amount")
 	databaseName = viper.GetString("database.name")
 	databaseConnectionRetryDelay = viper.GetDuration("database.connection-retry-delay")
 	loggingLevel = viper.GetString("logging.level")
@@ -244,8 +254,12 @@ func GetSettingsInitialLanguage() string {
 	return settingsInitialLanguage
 }
 
-func GetDebug() bool {
-	return debug
+func GetOperationDebug() bool {
+	return operationDebug
+}
+
+func GetOperationMaxSessionsAmount() int {
+	return operationMaxSessionsAmount
 }
 
 func GetDatabaseName() string {

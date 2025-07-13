@@ -172,157 +172,6 @@ func (x *GetUserPositionsResponse) GetPositions() []*Position {
 	return nil
 }
 
-// Represents users metadata retrieval request message.
-type GetUserMetadataRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issuer        string                 `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
-	Session       string                 `protobuf:"bytes,2,opt,name=session,proto3" json:"session,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetUserMetadataRequest) Reset() {
-	*x = GetUserMetadataRequest{}
-	mi := &file_api_content_content_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetUserMetadataRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserMetadataRequest) ProtoMessage() {}
-
-func (x *GetUserMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_content_content_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserMetadataRequest.ProtoReflect.Descriptor instead.
-func (*GetUserMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_api_content_content_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *GetUserMetadataRequest) GetIssuer() string {
-	if x != nil {
-		return x.Issuer
-	}
-	return ""
-}
-
-func (x *GetUserMetadataRequest) GetSession() string {
-	if x != nil {
-		return x.Session
-	}
-	return ""
-}
-
-// Represents common metadata message.
-type Metadata struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Skin          string                 `protobuf:"bytes,2,opt,name=skin,proto3" json:"skin,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Metadata) Reset() {
-	*x = Metadata{}
-	mi := &file_api_content_content_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Metadata) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Metadata) ProtoMessage() {}
-
-func (x *Metadata) ProtoReflect() protoreflect.Message {
-	mi := &file_api_content_content_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Metadata.ProtoReflect.Descriptor instead.
-func (*Metadata) Descriptor() ([]byte, []int) {
-	return file_api_content_content_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *Metadata) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *Metadata) GetSkin() string {
-	if x != nil {
-		return x.Skin
-	}
-	return ""
-}
-
-// Represents users positions retrieval response message.
-type GetUserMetadataResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Metadata      []*Metadata            `protobuf:"bytes,1,rep,name=metadata,proto3" json:"metadata,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetUserMetadataResponse) Reset() {
-	*x = GetUserMetadataResponse{}
-	mi := &file_api_content_content_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetUserMetadataResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserMetadataResponse) ProtoMessage() {}
-
-func (x *GetUserMetadataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_content_content_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserMetadataResponse.ProtoReflect.Descriptor instead.
-func (*GetUserMetadataResponse) Descriptor() ([]byte, []int) {
-	return file_api_content_content_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *GetUserMetadataResponse) GetMetadata() []*Metadata {
-	if x != nil {
-		return x.Metadata
-	}
-	return nil
-}
-
 var File_api_content_content_proto protoreflect.FileDescriptor
 
 const file_api_content_content_proto_rawDesc = "" +
@@ -335,15 +184,7 @@ const file_api_content_content_proto_rawDesc = "" +
 	"\x06issuer\x18\x01 \x01(\tR\x06issuer\x12\x18\n" +
 	"\asession\x18\x02 \x01(\tR\asession\"K\n" +
 	"\x18GetUserPositionsResponse\x12/\n" +
-	"\tpositions\x18\x01 \x03(\v2\x11.content.PositionR\tpositions\"J\n" +
-	"\x16GetUserMetadataRequest\x12\x16\n" +
-	"\x06issuer\x18\x01 \x01(\tR\x06issuer\x12\x18\n" +
-	"\asession\x18\x02 \x01(\tR\asession\".\n" +
-	"\bMetadata\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04skin\x18\x02 \x01(\tR\x04skin\"H\n" +
-	"\x17GetUserMetadataResponse\x12-\n" +
-	"\bmetadata\x18\x01 \x03(\v2\x11.content.MetadataR\bmetadataBEZCgithub.com/YarikRevich/fate-seekers/pkg/core/networking/content/apib\x06proto3"
+	"\tpositions\x18\x01 \x03(\v2\x11.content.PositionR\tpositionsBEZCgithub.com/YarikRevich/fate-seekers/pkg/core/networking/content/apib\x06proto3"
 
 var (
 	file_api_content_content_proto_rawDescOnce sync.Once
@@ -357,23 +198,19 @@ func file_api_content_content_proto_rawDescGZIP() []byte {
 	return file_api_content_content_proto_rawDescData
 }
 
-var file_api_content_content_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_api_content_content_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_api_content_content_proto_goTypes = []any{
 	(*Position)(nil),                 // 0: content.Position
 	(*GetUserPositionsRequest)(nil),  // 1: content.GetUserPositionsRequest
 	(*GetUserPositionsResponse)(nil), // 2: content.GetUserPositionsResponse
-	(*GetUserMetadataRequest)(nil),   // 3: content.GetUserMetadataRequest
-	(*Metadata)(nil),                 // 4: content.Metadata
-	(*GetUserMetadataResponse)(nil),  // 5: content.GetUserMetadataResponse
 }
 var file_api_content_content_proto_depIdxs = []int32{
 	0, // 0: content.GetUserPositionsResponse.positions:type_name -> content.Position
-	4, // 1: content.GetUserMetadataResponse.metadata:type_name -> content.Metadata
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_api_content_content_proto_init() }
@@ -387,7 +224,7 @@ func file_api_content_content_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_content_content_proto_rawDesc), len(file_api_content_content_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

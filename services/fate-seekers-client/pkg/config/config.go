@@ -38,7 +38,7 @@ var (
 
 	settingsInitialLanguage string
 
-	debug bool
+	operationDebug bool
 
 	databaseName                 string
 	databaseConnectionRetryDelay time.Duration
@@ -162,7 +162,7 @@ func Init() {
 
 	settingsInitialLanguage = settingsLanguage
 
-	debug = viper.GetBool("operation.debug")
+	operationDebug = viper.GetBool("operation.debug")
 	databaseName = viper.GetString("database.name")
 	databaseConnectionRetryDelay = viper.GetDuration("database.connection-retry-delay")
 	loggingLevel = viper.GetString("logging.level")
@@ -274,8 +274,8 @@ func GetSettingsInitialLanguage() string {
 	return settingsInitialLanguage
 }
 
-func GetDebug() bool {
-	return debug
+func GetOperationDebug() bool {
+	return operationDebug
 }
 
 func GetDatabaseName() string {

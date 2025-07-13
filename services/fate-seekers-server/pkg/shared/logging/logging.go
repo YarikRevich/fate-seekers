@@ -36,7 +36,7 @@ func configure() *zap.Logger {
 
 	var loggingConfig zap.Config
 
-	if !config.GetDebug() {
+	if !config.GetOperationDebug() {
 		loggingConfig = zap.NewProductionConfig()
 
 		loggingConfig.DisableCaller = true

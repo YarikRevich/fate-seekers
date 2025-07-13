@@ -24,6 +24,7 @@ const (
 	Metadata_CreateSession_FullMethodName     = "/metadata.Metadata/CreateSession"
 	Metadata_RemoveSession_FullMethodName     = "/metadata.Metadata/RemoveSession"
 	Metadata_JoinToSession_FullMethodName     = "/metadata.Metadata/JoinToSession"
+	Metadata_GetUserMetadata_FullMethodName   = "/metadata.Metadata/GetUserMetadata"
 	Metadata_GetChests_FullMethodName         = "/metadata.Metadata/GetChests"
 	Metadata_GetMap_FullMethodName            = "/metadata.Metadata/GetMap"
 	Metadata_GetChat_FullMethodName           = "/metadata.Metadata/GetChat"
@@ -48,6 +49,8 @@ type MetadataClient interface {
 	RemoveSession(ctx context.Context, in *RemoveSessionRequest, opts ...grpc.CallOption) (*RemoveSessionResponse, error)
 	// JoinToSession performs session join request by the configured user.
 	JoinToSession(ctx context.Context, in *JoinToSessionRequest, opts ...grpc.CallOption) (*JoinToSessionResponse, error)
+	// GetUserMetadata performs user metadata retrieval request by the configured user.
+	GetUserMetadata(ctx context.Context, in *GetUserMetadataRequest, opts ...grpc.CallOption) (*GetUserMetadataResponse, error)
 	// GetChest performs chests retrieval for the selected session by the configured user.
 	GetChests(ctx context.Context, in *GetChestsRequest, opts ...grpc.CallOption) (*GetChestsResponse, error)
 	// GetMap performs map retrieval for the selected session by the configured user.
@@ -110,6 +113,16 @@ func (c *metadataClient) JoinToSession(ctx context.Context, in *JoinToSessionReq
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(JoinToSessionResponse)
 	err := c.cc.Invoke(ctx, Metadata_JoinToSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metadataClient) GetUserMetadata(ctx context.Context, in *GetUserMetadataRequest, opts ...grpc.CallOption) (*GetUserMetadataResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserMetadataResponse)
+	err := c.cc.Invoke(ctx, Metadata_GetUserMetadata_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -192,6 +205,8 @@ type MetadataServer interface {
 	RemoveSession(context.Context, *RemoveSessionRequest) (*RemoveSessionResponse, error)
 	// JoinToSession performs session join request by the configured user.
 	JoinToSession(context.Context, *JoinToSessionRequest) (*JoinToSessionResponse, error)
+	// GetUserMetadata performs user metadata retrieval request by the configured user.
+	GetUserMetadata(context.Context, *GetUserMetadataRequest) (*GetUserMetadataResponse, error)
 	// GetChest performs chests retrieval for the selected session by the configured user.
 	GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error)
 	// GetMap performs map retrieval for the selected session by the configured user.
@@ -224,6 +239,9 @@ func (UnimplementedMetadataServer) RemoveSession(context.Context, *RemoveSession
 }
 func (UnimplementedMetadataServer) JoinToSession(context.Context, *JoinToSessionRequest) (*JoinToSessionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JoinToSession not implemented")
+}
+func (UnimplementedMetadataServer) GetUserMetadata(context.Context, *GetUserMetadataRequest) (*GetUserMetadataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserMetadata not implemented")
 }
 func (UnimplementedMetadataServer) GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetChests not implemented")
@@ -348,6 +366,24 @@ func _Metadata_JoinToSession_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Metadata_GetUserMetadata_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserMetadataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).GetUserMetadata(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_GetUserMetadata_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).GetUserMetadata(ctx, req.(*GetUserMetadataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Metadata_GetChests_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetChestsRequest)
 	if err := dec(in); err != nil {
@@ -432,6 +468,10 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "JoinToSession",
 			Handler:    _Metadata_JoinToSession_Handler,
+		},
+		{
+			MethodName: "GetUserMetadata",
+			Handler:    _Metadata_GetUserMetadata_Handler,
 		},
 		{
 			MethodName: "GetChests",

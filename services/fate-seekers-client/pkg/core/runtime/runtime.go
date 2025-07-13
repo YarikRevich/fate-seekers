@@ -241,7 +241,7 @@ func (r *Runtime) Update() error {
 		r.notificationInterface.Update()
 	}
 
-	if config.GetDebug() {
+	if config.GetOperationDebug() {
 		imgui.GetInstance().Update()
 	}
 
@@ -340,14 +340,14 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 				r.promptTransparentTransitionEffect.GetValue()).ColorM})
 	}
 
-	if config.GetDebug() {
+	if config.GetOperationDebug() {
 		imgui.GetInstance().Draw(screen)
 	}
 }
 
 // Layout manages virtual world size.
 func (r *Runtime) Layout(outsideWidth, outsideHeight int) (int, int) {
-	if config.GetDebug() {
+	if config.GetOperationDebug() {
 		imgui.GetInstance().Layout(outsideWidth, outsideHeight)
 	}
 

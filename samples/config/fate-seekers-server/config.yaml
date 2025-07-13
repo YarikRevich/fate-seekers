@@ -40,6 +40,10 @@ operation:
   # Represents debug property, which enables debug panels used for testing.
   debug: true
 
+  # Represents max sessions amount, which is used for caching configuration. Be aware
+  # that amount of sessions influences the amount of allocated memory.
+  max-sessions-amount: 128
+
   # Represents database properties description.
   database:
     # Represents name of the sqlite3 database file.

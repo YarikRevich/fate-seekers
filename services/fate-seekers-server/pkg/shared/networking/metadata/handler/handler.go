@@ -50,11 +50,11 @@ func (h *Handler) GetChests(context.Context, *api.GetChestsRequest) (*api.GetChe
 	return nil, nil
 }
 
-func (h *Handler) GetMap(*api.GetMapRequest, grpc.ServerStreamingServer[api.GetMapResponse]) error {
+func (h *Handler) GetMap(request *api.GetMapRequest, stream grpc.ServerStreamingServer[api.GetMapResponse]) error {
 	return nil
 }
 
-func (h *Handler) GetChat(*api.GetChatRequest, grpc.ServerStreamingServer[api.GetChatResponse]) error {
+func (h *Handler) GetChat(request *api.GetChatRequest, stream grpc.ServerStreamingServer[api.GetChatResponse]) error {
 	// TODO: messages would be retrieved from memory(not lru cache??????)
 
 	return nil
