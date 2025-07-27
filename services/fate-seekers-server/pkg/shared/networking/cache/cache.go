@@ -15,17 +15,29 @@ var (
 	GetInstance = sync.OnceValue[*NetworkingCache](newNetworkingCache)
 )
 
-var ErrFailedToEvictSessionCacheEntity = errors.New("err failed to evict session cache entity")
+var (
+	ErrFailedToEvictSessionCacheEntity  = errors.New("err failed to evict session cache entity")
+	ErrFailedToEvictLobbySetCacheEntity = errors.New("err failed to evict lobby set cache entity")
+	ErrFailedToEvictMetadataCacheEntity = errors.New("err failed to evict metadata cache entity")
+)
 
 const (
 	// Represents max amount of users per session.
 	maxSessionUsers = 8
 )
 
+// lobby -> lobby set -> metadata
+
 // NetworkingCache represents networking cache.
 type NetworkingCache struct {
 	// Represents sessions cache instance.
 	sessions *lru.Cache[string, []dto.CacheSessionEntity]
+
+	// Represents lobby sets cache instance. Value contains issuer names only.
+	lobbySets *lru.Cache[int64, []string]
+
+	// Represents metadata cache instance.
+	metadata *lru.Cache[string, dto.CacheMetadataEntity]
 
 	// Represents expirable messages cache, which contains offset for the message table.
 	// If user stops request messages, all the messages would be retrieved.
@@ -49,6 +61,53 @@ func (nc *NetworkingCache) GetSessions(key string) ([]dto.CacheSessionEntity, bo
 func (nc *NetworkingCache) EvictSessions(key string) {
 	if ok := nc.sessions.Remove(key); !ok {
 		logging.GetInstance().Error(ErrFailedToEvictSessionCacheEntity.Error())
+	}
+}
+
+// AddLobbySet adds lobby set cache instance with the provided key and value.
+func (nc *NetworkingCache) AddLobbySet(key int64, value []string) {
+	nc.lobbySets.Add(key, value)
+}
+
+// GetLobbies retrieves lobby cache instance by the provided key.
+func (nc *NetworkingCache) GetLobbySet(key int64) ([]string, bool) {
+	return nc.lobbySets.Get(key)
+}
+
+// EvictLobbySet evicts lobby set cache for the provided key.
+func (nc *NetworkingCache) EvictLobbySet(key int64) {
+	if ok := nc.lobbySets.Remove(key); !ok {
+		logging.GetInstance().Error(ErrFailedToEvictLobbySetCacheEntity.Error())
+	}
+}
+
+// AddMetadata adds metadata cache instance with the provided key and value.
+func (nc *NetworkingCache) AddMetadata(key string, value dto.CacheMetadataEntity) {
+	nc.metadata.Add(key, value)
+}
+
+// GetMetadata retrieves metadata cache instance by the provided key.
+func (nc *NetworkingCache) GetMetadata(key string) (dto.CacheMetadataEntity, bool) {
+	return nc.metadata.Get(key)
+}
+
+// GetMetadataMappings retrieves all metadata mapping cache instances.
+func (nc *NetworkingCache) GetMetadataMappings() map[string]dto.CacheMetadataEntity {
+	result := make(map[string]dto.CacheMetadataEntity)
+
+	for _, key := range nc.metadata.Keys() {
+		value, _ := nc.GetMetadata(key)
+
+		result[key] = value
+	}
+
+	return result
+}
+
+// EvictMetadata evicts metadata cache for the provided key.
+func (nc *NetworkingCache) EvictMetadata(key string) {
+	if ok := nc.metadata.Remove(key); !ok {
+		logging.GetInstance().Error(ErrFailedToEvictMetadataCacheEntity.Error())
 	}
 }
 
@@ -79,6 +138,17 @@ func newNetworkingCache() *NetworkingCache {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
+	lobbySets, err := lru.New[int64, []string](config.GetOperationMaxSessionsAmount())
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
+	metadata, err := lru.New[string, dto.CacheMetadataEntity](
+		config.GetOperationMaxSessionsAmount() * config.GetOperationMaxSessionsAmount())
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
 	messages, err := lru.New[string, int](config.GetOperationMaxSessionsAmount())
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
@@ -90,8 +160,10 @@ func newNetworkingCache() *NetworkingCache {
 	}
 
 	return &NetworkingCache{
-		sessions: sessions,
-		messages: messages,
-		users:    users,
+		sessions:  sessions,
+		lobbySets: lobbySets,
+		metadata:  metadata,
+		messages:  messages,
+		users:     users,
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/db"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/entity"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -11,6 +12,7 @@ import (
 
 var (
 	ErrPersistingSessions = errors.New("err happened during the process of session creation response data save.")
+	ErrPersistingLobbies  = errors.New("err happened during the process of lobby creation response data save.")
 	ErrPersistingMessages = errors.New("err happened during the process of message creation response data save.")
 	ErrPersistingUsers    = errors.New("err happened during the process of user creation response data save.")
 )
@@ -18,6 +20,9 @@ var (
 var (
 	// GetSessionsRepository retrieves instance of the sessions repository, performing initial creation if needed.
 	GetSessionsRepository = sync.OnceValue[SessionsRepository](createSessionsRepository)
+
+	// GetLobbiesRepository retrieves instance of the lobbies repository, performing initial creation if needed.
+	GetLobbiesRepository = sync.OnceValue[LobbiesRepository](createLobbiesRepository)
 
 	// GetMessagesRepository retrieves instance of the messages repository, performing initial creation if needed.
 	GetMessagesRepository = sync.OnceValue[MessagesRepository](createMessagesRepository)
@@ -29,6 +34,7 @@ var (
 // SessionsRepository represents sessions entity repository.
 type SessionsRepository interface {
 	Insert(name string, issuer int64) error
+	DeleteByID(id int64) error
 	GetByIssuer(issuer int64) ([]*entity.SessionEntity, error)
 }
 
@@ -47,6 +53,15 @@ func (w *sessionsRepositoryImpl) Insert(name string, issuer int64) error {
 	return errors.Wrap(err, ErrPersistingSessions.Error())
 }
 
+// DeleteByID deletes session by the provided id.
+func (w *sessionsRepositoryImpl) DeleteByID(id int64) error {
+	instance := db.GetInstance()
+
+	return instance.Table((&entity.SessionEntity{}).TableName()).
+		Where("id = ?", id).
+		Delete(&entity.SessionEntity{}).Error
+}
+
 // GetByIssuer retrieves all available sessions.
 func (w *sessionsRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.SessionEntity, error) {
 	instance := db.GetInstance()
@@ -63,6 +78,78 @@ func (w *sessionsRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.SessionEnt
 // createSessionsRepository initializes sessionsRepositoryImpl.
 func createSessionsRepository() SessionsRepository {
 	return new(sessionsRepositoryImpl)
+}
+
+// LobbiesRepository represents lobbies entity repository.
+type LobbiesRepository interface {
+	InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error
+	Exists(userID int64) (bool, error)
+	DeleteByUserID(userID int64) error
+	GetByUserID(userID int64) (*entity.LobbyEntity, error)
+}
+
+// lobbiesRepositoryImpl represents implementation of LobbiesRepository.
+type lobbiesRepositoryImpl struct{}
+
+// Insert inserts new lobbies entity to the storage.
+func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
+	instance := db.GetInstance()
+
+	err := instance.Save(
+		&entity.LobbyEntity{
+			UserID:     request.UserID,
+			SessionID:  request.SessionID,
+			Skin:       request.Skin,
+			Health:     request.Health,
+			Eliminated: request.Eliminated,
+			Position:   request.Position,
+		}).Error
+
+	return errors.Wrap(err, ErrPersistingLobbies.Error())
+}
+
+// Exists checks if any lobby the given name exists.
+func (w *lobbiesRepositoryImpl) Exists(userID int64) (bool, error) {
+	instance := db.GetInstance()
+
+	err := instance.Model(&entity.LobbyEntity{}).
+		Where("user_id = ?", userID).
+		First(&entity.LobbyEntity{}).Error
+
+	if err != gorm.ErrRecordNotFound {
+		return true, nil
+	} else if err == gorm.ErrRecordNotFound {
+		return false, nil
+	}
+
+	return false, err
+}
+
+// DeleteByUserID deletes lobby by the provided user id.
+func (w *lobbiesRepositoryImpl) DeleteByUserID(userID int64) error {
+	instance := db.GetInstance()
+
+	return instance.Table((&entity.LobbyEntity{}).TableName()).
+		Where("user_id = ?", userID).
+		Delete(&entity.LobbyEntity{}).Error
+}
+
+// GetByUserID retrieves lobby by the provided user id.
+func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) (*entity.LobbyEntity, error) {
+	instance := db.GetInstance()
+
+	var result *entity.LobbyEntity
+
+	err := instance.Table((&entity.LobbyEntity{}).TableName()).
+		Where("user_id = ?", userID).
+		Find(&result).Error
+
+	return result, err
+}
+
+// createLobbiesRepository initializes lobbiesRepositoryImpl.
+func createLobbiesRepository() LobbiesRepository {
+	return new(lobbiesRepositoryImpl)
 }
 
 // MessagesRepository represents messages entity repository.
@@ -124,7 +211,7 @@ func (w *usersRepositoryImpl) Insert(name string) error {
 	return errors.Wrap(err, ErrPersistingUsers.Error())
 }
 
-// GetByName checks if any user with the given name exists.
+// GetByName retrieves user with the given name.
 func (w *usersRepositoryImpl) GetByName(name string) (*entity.UserEntity, bool, error) {
 	instance := db.GetInstance()
 

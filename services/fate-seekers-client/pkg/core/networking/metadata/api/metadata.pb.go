@@ -152,8 +152,9 @@ func (x *GetSessionsRequest) GetIssuer() string {
 // Session represents common session retrieval message.
 type Session struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Seed          int64                  `protobuf:"varint,2,opt,name=seed,proto3" json:"seed,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -188,9 +189,16 @@ func (*Session) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *Session) GetId() int64 {
+func (x *Session) GetSessionId() int64 {
 	if x != nil {
-		return x.Id
+		return x.SessionId
+	}
+	return 0
+}
+
+func (x *Session) GetSeed() int64 {
+	if x != nil {
+		return x.Seed
 	}
 	return 0
 }
@@ -436,8 +444,8 @@ func (*RemoveSessionResponse) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{8}
 }
 
-// JoinToSessionRequest represents user join to session request.
-type JoinToSessionRequest struct {
+// GetLobbySetRequest represents user create lobby request.
+type GetLobbySetRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Issuer        string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
@@ -445,20 +453,20 @@ type JoinToSessionRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *JoinToSessionRequest) Reset() {
-	*x = JoinToSessionRequest{}
+func (x *GetLobbySetRequest) Reset() {
+	*x = GetLobbySetRequest{}
 	mi := &file_api_metadata_metadata_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *JoinToSessionRequest) String() string {
+func (x *GetLobbySetRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*JoinToSessionRequest) ProtoMessage() {}
+func (*GetLobbySetRequest) ProtoMessage() {}
 
-func (x *JoinToSessionRequest) ProtoReflect() protoreflect.Message {
+func (x *GetLobbySetRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_api_metadata_metadata_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -470,46 +478,47 @@ func (x *JoinToSessionRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use JoinToSessionRequest.ProtoReflect.Descriptor instead.
-func (*JoinToSessionRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetLobbySetRequest.ProtoReflect.Descriptor instead.
+func (*GetLobbySetRequest) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *JoinToSessionRequest) GetSessionId() int64 {
+func (x *GetLobbySetRequest) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
 	}
 	return 0
 }
 
-func (x *JoinToSessionRequest) GetIssuer() string {
+func (x *GetLobbySetRequest) GetIssuer() string {
 	if x != nil {
 		return x.Issuer
 	}
 	return ""
 }
 
-// JoinToSessionResponse represents user join to session response.
-type JoinToSessionResponse struct {
+// GetLobbySetResponse represents user create lobby response.
+type GetLobbySetResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	Issuers       []string               `protobuf:"bytes,1,rep,name=issuers,proto3" json:"issuers,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *JoinToSessionResponse) Reset() {
-	*x = JoinToSessionResponse{}
+func (x *GetLobbySetResponse) Reset() {
+	*x = GetLobbySetResponse{}
 	mi := &file_api_metadata_metadata_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *JoinToSessionResponse) String() string {
+func (x *GetLobbySetResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*JoinToSessionResponse) ProtoMessage() {}
+func (*GetLobbySetResponse) ProtoMessage() {}
 
-func (x *JoinToSessionResponse) ProtoReflect() protoreflect.Message {
+func (x *GetLobbySetResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_api_metadata_metadata_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -521,9 +530,196 @@ func (x *JoinToSessionResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use JoinToSessionResponse.ProtoReflect.Descriptor instead.
-func (*JoinToSessionResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetLobbySetResponse.ProtoReflect.Descriptor instead.
+func (*GetLobbySetResponse) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetLobbySetResponse) GetIssuers() []string {
+	if x != nil {
+		return x.Issuers
+	}
+	return nil
+}
+
+// CreateLobbyRequest represents user create lobby request.
+type CreateLobbyRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Issuer        string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateLobbyRequest) Reset() {
+	*x = CreateLobbyRequest{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateLobbyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateLobbyRequest) ProtoMessage() {}
+
+func (x *CreateLobbyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateLobbyRequest.ProtoReflect.Descriptor instead.
+func (*CreateLobbyRequest) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *CreateLobbyRequest) GetSessionId() int64 {
+	if x != nil {
+		return x.SessionId
+	}
+	return 0
+}
+
+func (x *CreateLobbyRequest) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+// CreateLobbyResponse represents user create lobby response.
+type CreateLobbyResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateLobbyResponse) Reset() {
+	*x = CreateLobbyResponse{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateLobbyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateLobbyResponse) ProtoMessage() {}
+
+func (x *CreateLobbyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateLobbyResponse.ProtoReflect.Descriptor instead.
+func (*CreateLobbyResponse) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{12}
+}
+
+// RemoveLobbyRequest represents user remove lobby request.
+type RemoveLobbyRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Issuer        string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveLobbyRequest) Reset() {
+	*x = RemoveLobbyRequest{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveLobbyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveLobbyRequest) ProtoMessage() {}
+
+func (x *RemoveLobbyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveLobbyRequest.ProtoReflect.Descriptor instead.
+func (*RemoveLobbyRequest) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *RemoveLobbyRequest) GetSessionId() int64 {
+	if x != nil {
+		return x.SessionId
+	}
+	return 0
+}
+
+func (x *RemoveLobbyRequest) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+// RemoveLobbyResponse represents user remove lobby response.
+type RemoveLobbyResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveLobbyResponse) Reset() {
+	*x = RemoveLobbyResponse{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveLobbyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveLobbyResponse) ProtoMessage() {}
+
+func (x *RemoveLobbyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveLobbyResponse.ProtoReflect.Descriptor instead.
+func (*RemoveLobbyResponse) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{14}
 }
 
 // Represents users metadata retrieval request message.
@@ -537,7 +733,7 @@ type GetUserMetadataRequest struct {
 
 func (x *GetUserMetadataRequest) Reset() {
 	*x = GetUserMetadataRequest{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[11]
+	mi := &file_api_metadata_metadata_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -549,7 +745,7 @@ func (x *GetUserMetadataRequest) String() string {
 func (*GetUserMetadataRequest) ProtoMessage() {}
 
 func (x *GetUserMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[11]
+	mi := &file_api_metadata_metadata_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -562,7 +758,7 @@ func (x *GetUserMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserMetadataRequest.ProtoReflect.Descriptor instead.
 func (*GetUserMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{11}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetUserMetadataRequest) GetSessionId() int64 {
@@ -582,7 +778,7 @@ func (x *GetUserMetadataRequest) GetIssuer() string {
 // Represents common user metadata message.
 type UserMetadata struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Skin          string                 `protobuf:"bytes,2,opt,name=skin,proto3" json:"skin,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -590,7 +786,7 @@ type UserMetadata struct {
 
 func (x *UserMetadata) Reset() {
 	*x = UserMetadata{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[12]
+	mi := &file_api_metadata_metadata_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -602,7 +798,7 @@ func (x *UserMetadata) String() string {
 func (*UserMetadata) ProtoMessage() {}
 
 func (x *UserMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[12]
+	mi := &file_api_metadata_metadata_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -615,12 +811,12 @@ func (x *UserMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserMetadata.ProtoReflect.Descriptor instead.
 func (*UserMetadata) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{12}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{16}
 }
 
-func (x *UserMetadata) GetId() string {
+func (x *UserMetadata) GetUserId() string {
 	if x != nil {
-		return x.Id
+		return x.UserId
 	}
 	return ""
 }
@@ -642,7 +838,7 @@ type GetUserMetadataResponse struct {
 
 func (x *GetUserMetadataResponse) Reset() {
 	*x = GetUserMetadataResponse{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[13]
+	mi := &file_api_metadata_metadata_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -654,7 +850,7 @@ func (x *GetUserMetadataResponse) String() string {
 func (*GetUserMetadataResponse) ProtoMessage() {}
 
 func (x *GetUserMetadataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[13]
+	mi := &file_api_metadata_metadata_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -667,7 +863,7 @@ func (x *GetUserMetadataResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserMetadataResponse.ProtoReflect.Descriptor instead.
 func (*GetUserMetadataResponse) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{13}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GetUserMetadataResponse) GetUserMetadata() []*UserMetadata {
@@ -687,7 +883,7 @@ type GetChestsRequest struct {
 
 func (x *GetChestsRequest) Reset() {
 	*x = GetChestsRequest{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[14]
+	mi := &file_api_metadata_metadata_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -699,7 +895,7 @@ func (x *GetChestsRequest) String() string {
 func (*GetChestsRequest) ProtoMessage() {}
 
 func (x *GetChestsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[14]
+	mi := &file_api_metadata_metadata_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -712,7 +908,7 @@ func (x *GetChestsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChestsRequest.ProtoReflect.Descriptor instead.
 func (*GetChestsRequest) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{14}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GetChestsRequest) GetSessionId() int64 {
@@ -733,7 +929,7 @@ type Position struct {
 
 func (x *Position) Reset() {
 	*x = Position{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[15]
+	mi := &file_api_metadata_metadata_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -745,7 +941,7 @@ func (x *Position) String() string {
 func (*Position) ProtoMessage() {}
 
 func (x *Position) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[15]
+	mi := &file_api_metadata_metadata_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -758,7 +954,7 @@ func (x *Position) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Position.ProtoReflect.Descriptor instead.
 func (*Position) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{15}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *Position) GetX() int64 {
@@ -785,7 +981,7 @@ type GetChestsResponse struct {
 
 func (x *GetChestsResponse) Reset() {
 	*x = GetChestsResponse{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[16]
+	mi := &file_api_metadata_metadata_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -797,7 +993,7 @@ func (x *GetChestsResponse) String() string {
 func (*GetChestsResponse) ProtoMessage() {}
 
 func (x *GetChestsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[16]
+	mi := &file_api_metadata_metadata_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -810,7 +1006,7 @@ func (x *GetChestsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChestsResponse.ProtoReflect.Descriptor instead.
 func (*GetChestsResponse) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{16}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *GetChestsResponse) GetPositions() []*Position {
@@ -830,7 +1026,7 @@ type GetMapRequest struct {
 
 func (x *GetMapRequest) Reset() {
 	*x = GetMapRequest{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[17]
+	mi := &file_api_metadata_metadata_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -842,7 +1038,7 @@ func (x *GetMapRequest) String() string {
 func (*GetMapRequest) ProtoMessage() {}
 
 func (x *GetMapRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[17]
+	mi := &file_api_metadata_metadata_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -855,7 +1051,7 @@ func (x *GetMapRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMapRequest.ProtoReflect.Descriptor instead.
 func (*GetMapRequest) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{17}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *GetMapRequest) GetSessionId() int64 {
@@ -875,7 +1071,7 @@ type GetMapResponse struct {
 
 func (x *GetMapResponse) Reset() {
 	*x = GetMapResponse{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[18]
+	mi := &file_api_metadata_metadata_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -887,7 +1083,7 @@ func (x *GetMapResponse) String() string {
 func (*GetMapResponse) ProtoMessage() {}
 
 func (x *GetMapResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[18]
+	mi := &file_api_metadata_metadata_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -900,7 +1096,7 @@ func (x *GetMapResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMapResponse.ProtoReflect.Descriptor instead.
 func (*GetMapResponse) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{18}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GetMapResponse) GetPositions() []*Position {
@@ -910,8 +1106,8 @@ func (x *GetMapResponse) GetPositions() []*Position {
 	return nil
 }
 
-// GetChatRequest represents chat retrieval request message.
-type GetChatRequest struct {
+// GetChatMessagesRequest represents chat messages retrieval request message.
+type GetChatMessagesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	Offset        int64                  `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
@@ -919,21 +1115,21 @@ type GetChatRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetChatRequest) Reset() {
-	*x = GetChatRequest{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[19]
+func (x *GetChatMessagesRequest) Reset() {
+	*x = GetChatMessagesRequest{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetChatRequest) String() string {
+func (x *GetChatMessagesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetChatRequest) ProtoMessage() {}
+func (*GetChatMessagesRequest) ProtoMessage() {}
 
-func (x *GetChatRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[19]
+func (x *GetChatMessagesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -944,19 +1140,19 @@ func (x *GetChatRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetChatRequest.ProtoReflect.Descriptor instead.
-func (*GetChatRequest) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{19}
+// Deprecated: Use GetChatMessagesRequest.ProtoReflect.Descriptor instead.
+func (*GetChatMessagesRequest) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{23}
 }
 
-func (x *GetChatRequest) GetSessionId() int64 {
+func (x *GetChatMessagesRequest) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
 	}
 	return 0
 }
 
-func (x *GetChatRequest) GetOffset() int64 {
+func (x *GetChatMessagesRequest) GetOffset() int64 {
 	if x != nil {
 		return x.Offset
 	}
@@ -975,7 +1171,7 @@ type ChatMessage struct {
 
 func (x *ChatMessage) Reset() {
 	*x = ChatMessage{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[20]
+	mi := &file_api_metadata_metadata_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -987,7 +1183,7 @@ func (x *ChatMessage) String() string {
 func (*ChatMessage) ProtoMessage() {}
 
 func (x *ChatMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[20]
+	mi := &file_api_metadata_metadata_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1000,7 +1196,7 @@ func (x *ChatMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatMessage.ProtoReflect.Descriptor instead.
 func (*ChatMessage) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{20}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ChatMessage) GetContent() string {
@@ -1024,29 +1220,29 @@ func (x *ChatMessage) GetTimestamp() *timestamppb.Timestamp {
 	return nil
 }
 
-// GetChatResponse represents chat retrieval response streaming message.
-type GetChatResponse struct {
+// GetChatMessagesResponse represents chat messages retrieval response streaming message.
+type GetChatMessagesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Messages      []string               `protobuf:"bytes,1,rep,name=messages,proto3" json:"messages,omitempty"`
+	Messages      []*ChatMessage         `protobuf:"bytes,1,rep,name=messages,proto3" json:"messages,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetChatResponse) Reset() {
-	*x = GetChatResponse{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[21]
+func (x *GetChatMessagesResponse) Reset() {
+	*x = GetChatMessagesResponse{}
+	mi := &file_api_metadata_metadata_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetChatResponse) String() string {
+func (x *GetChatMessagesResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetChatResponse) ProtoMessage() {}
+func (*GetChatMessagesResponse) ProtoMessage() {}
 
-func (x *GetChatResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[21]
+func (x *GetChatMessagesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_metadata_metadata_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1057,12 +1253,12 @@ func (x *GetChatResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetChatResponse.ProtoReflect.Descriptor instead.
-func (*GetChatResponse) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{21}
+// Deprecated: Use GetChatMessagesResponse.ProtoReflect.Descriptor instead.
+func (*GetChatMessagesResponse) Descriptor() ([]byte, []int) {
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{25}
 }
 
-func (x *GetChatResponse) GetMessages() []string {
+func (x *GetChatMessagesResponse) GetMessages() []*ChatMessage {
 	if x != nil {
 		return x.Messages
 	}
@@ -1080,7 +1276,7 @@ type CreateChatMessageRequest struct {
 
 func (x *CreateChatMessageRequest) Reset() {
 	*x = CreateChatMessageRequest{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[22]
+	mi := &file_api_metadata_metadata_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1092,7 +1288,7 @@ func (x *CreateChatMessageRequest) String() string {
 func (*CreateChatMessageRequest) ProtoMessage() {}
 
 func (x *CreateChatMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[22]
+	mi := &file_api_metadata_metadata_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1105,7 +1301,7 @@ func (x *CreateChatMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateChatMessageRequest.ProtoReflect.Descriptor instead.
 func (*CreateChatMessageRequest) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{22}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *CreateChatMessageRequest) GetSessionId() int64 {
@@ -1131,7 +1327,7 @@ type CreateChatMessageResponse struct {
 
 func (x *CreateChatMessageResponse) Reset() {
 	*x = CreateChatMessageResponse{}
-	mi := &file_api_metadata_metadata_proto_msgTypes[23]
+	mi := &file_api_metadata_metadata_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1143,7 +1339,7 @@ func (x *CreateChatMessageResponse) String() string {
 func (*CreateChatMessageResponse) ProtoMessage() {}
 
 func (x *CreateChatMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_metadata_metadata_proto_msgTypes[23]
+	mi := &file_api_metadata_metadata_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1156,7 +1352,7 @@ func (x *CreateChatMessageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateChatMessageResponse.ProtoReflect.Descriptor instead.
 func (*CreateChatMessageResponse) Descriptor() ([]byte, []int) {
-	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{23}
+	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{27}
 }
 
 var File_api_metadata_metadata_proto protoreflect.FileDescriptor
@@ -1168,10 +1364,12 @@ const file_api_metadata_metadata_proto_rawDesc = "" +
 	"\x06issuer\x18\x01 \x01(\tR\x06issuer\"\x18\n" +
 	"\x16PingConnectionResponse\",\n" +
 	"\x12GetSessionsRequest\x12\x16\n" +
-	"\x06issuer\x18\x01 \x01(\tR\x06issuer\"-\n" +
-	"\aSession\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"D\n" +
+	"\x06issuer\x18\x01 \x01(\tR\x06issuer\"P\n" +
+	"\aSession\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x12\n" +
+	"\x04seed\x18\x02 \x01(\x03R\x04seed\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\"D\n" +
 	"\x13GetSessionsResponse\x12-\n" +
 	"\bsessions\x18\x01 \x03(\v2\x11.metadata.SessionR\bsessions\"d\n" +
 	"\x14CreateSessionRequest\x12\x12\n" +
@@ -1185,18 +1383,29 @@ const file_api_metadata_metadata_proto_rawDesc = "" +
 	"\x14RemoveSessionRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\"\x17\n" +
-	"\x15RemoveSessionResponse\"M\n" +
-	"\x14JoinToSessionRequest\x12\x1d\n" +
+	"\x15RemoveSessionResponse\"K\n" +
+	"\x12GetLobbySetRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
-	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"\x17\n" +
-	"\x15JoinToSessionResponse\"O\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"/\n" +
+	"\x13GetLobbySetResponse\x12\x18\n" +
+	"\aissuers\x18\x01 \x03(\tR\aissuers\"K\n" +
+	"\x12CreateLobbyRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"\x15\n" +
+	"\x13CreateLobbyResponse\"K\n" +
+	"\x12RemoveLobbyRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"\x15\n" +
+	"\x13RemoveLobbyResponse\"O\n" +
 	"\x16GetUserMetadataRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
-	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"2\n" +
-	"\fUserMetadata\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\";\n" +
+	"\fUserMetadata\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
 	"\x04skin\x18\x02 \x01(\tR\x04skin\"V\n" +
 	"\x17GetUserMetadataResponse\x12;\n" +
 	"\ruser_metadata\x18\x01 \x03(\v2\x16.metadata.UserMetadataR\fuserMetadata\"1\n" +
@@ -1212,32 +1421,34 @@ const file_api_metadata_metadata_proto_rawDesc = "" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\"B\n" +
 	"\x0eGetMapResponse\x120\n" +
-	"\tpositions\x18\x01 \x03(\v2\x12.metadata.PositionR\tpositions\"G\n" +
-	"\x0eGetChatRequest\x12\x1d\n" +
+	"\tpositions\x18\x01 \x03(\v2\x12.metadata.PositionR\tpositions\"O\n" +
+	"\x16GetChatMessagesRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
 	"\x06offset\x18\x02 \x01(\x03R\x06offset\"y\n" +
 	"\vChatMessage\x12\x18\n" +
 	"\acontent\x18\x01 \x01(\tR\acontent\x12\x16\n" +
 	"\x06issuer\x18\x02 \x01(\tR\x06issuer\x128\n" +
-	"\ttimestamp\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"-\n" +
-	"\x0fGetChatResponse\x12\x1a\n" +
-	"\bmessages\x18\x01 \x03(\tR\bmessages\"Q\n" +
+	"\ttimestamp\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"L\n" +
+	"\x17GetChatMessagesResponse\x121\n" +
+	"\bmessages\x18\x01 \x03(\v2\x15.metadata.ChatMessageR\bmessages\"Q\n" +
 	"\x18CreateChatMessageRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
 	"\x06offset\x18\x02 \x01(\x03R\x06offset\"\x1b\n" +
-	"\x19CreateChatMessageResponse2\xb2\x06\n" +
+	"\x19CreateChatMessageResponse2\xe0\a\n" +
 	"\bMetadata\x12U\n" +
 	"\x0ePingConnection\x12\x1f.metadata.PingConnectionRequest\x1a .metadata.PingConnectionResponse\"\x00\x12L\n" +
 	"\vGetSessions\x12\x1c.metadata.GetSessionsRequest\x1a\x1d.metadata.GetSessionsResponse\"\x00\x12R\n" +
 	"\rCreateSession\x12\x1e.metadata.CreateSessionRequest\x1a\x1f.metadata.CreateSessionResponse\"\x00\x12R\n" +
-	"\rRemoveSession\x12\x1e.metadata.RemoveSessionRequest\x1a\x1f.metadata.RemoveSessionResponse\"\x00\x12R\n" +
-	"\rJoinToSession\x12\x1e.metadata.JoinToSessionRequest\x1a\x1f.metadata.JoinToSessionResponse\"\x00\x12X\n" +
+	"\rRemoveSession\x12\x1e.metadata.RemoveSessionRequest\x1a\x1f.metadata.RemoveSessionResponse\"\x00\x12L\n" +
+	"\vGetLobbySet\x12\x1c.metadata.GetLobbySetRequest\x1a\x1d.metadata.GetLobbySetResponse\"\x00\x12L\n" +
+	"\vCreateLobby\x12\x1c.metadata.CreateLobbyRequest\x1a\x1d.metadata.CreateLobbyResponse\"\x00\x12L\n" +
+	"\vRemoveLobby\x12\x1c.metadata.RemoveLobbyRequest\x1a\x1d.metadata.RemoveLobbyResponse\"\x00\x12X\n" +
 	"\x0fGetUserMetadata\x12 .metadata.GetUserMetadataRequest\x1a!.metadata.GetUserMetadataResponse\"\x00\x12F\n" +
 	"\tGetChests\x12\x1a.metadata.GetChestsRequest\x1a\x1b.metadata.GetChestsResponse\"\x00\x12?\n" +
-	"\x06GetMap\x12\x17.metadata.GetMapRequest\x1a\x18.metadata.GetMapResponse\"\x000\x01\x12B\n" +
-	"\aGetChat\x12\x18.metadata.GetChatRequest\x1a\x19.metadata.GetChatResponse\"\x000\x01\x12^\n" +
+	"\x06GetMap\x12\x17.metadata.GetMapRequest\x1a\x18.metadata.GetMapResponse\"\x000\x01\x12Z\n" +
+	"\x0fGetChatMessages\x12 .metadata.GetChatMessagesRequest\x1a!.metadata.GetChatMessagesResponse\"\x000\x01\x12^\n" +
 	"\x11CreateChatMessage\x12\".metadata.CreateChatMessageRequest\x1a#.metadata.CreateChatMessageResponse\"\x00BFZDgithub.com/YarikRevich/fate-seekers/pkg/core/networking/metadata/apib\x06proto3"
 
 var (
@@ -1252,7 +1463,7 @@ func file_api_metadata_metadata_proto_rawDescGZIP() []byte {
 	return file_api_metadata_metadata_proto_rawDescData
 }
 
-var file_api_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_api_metadata_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_api_metadata_metadata_proto_goTypes = []any{
 	(*PingConnectionRequest)(nil),     // 0: metadata.PingConnectionRequest
 	(*PingConnectionResponse)(nil),    // 1: metadata.PingConnectionResponse
@@ -1263,54 +1474,63 @@ var file_api_metadata_metadata_proto_goTypes = []any{
 	(*CreateSessionResponse)(nil),     // 6: metadata.CreateSessionResponse
 	(*RemoveSessionRequest)(nil),      // 7: metadata.RemoveSessionRequest
 	(*RemoveSessionResponse)(nil),     // 8: metadata.RemoveSessionResponse
-	(*JoinToSessionRequest)(nil),      // 9: metadata.JoinToSessionRequest
-	(*JoinToSessionResponse)(nil),     // 10: metadata.JoinToSessionResponse
-	(*GetUserMetadataRequest)(nil),    // 11: metadata.GetUserMetadataRequest
-	(*UserMetadata)(nil),              // 12: metadata.UserMetadata
-	(*GetUserMetadataResponse)(nil),   // 13: metadata.GetUserMetadataResponse
-	(*GetChestsRequest)(nil),          // 14: metadata.GetChestsRequest
-	(*Position)(nil),                  // 15: metadata.Position
-	(*GetChestsResponse)(nil),         // 16: metadata.GetChestsResponse
-	(*GetMapRequest)(nil),             // 17: metadata.GetMapRequest
-	(*GetMapResponse)(nil),            // 18: metadata.GetMapResponse
-	(*GetChatRequest)(nil),            // 19: metadata.GetChatRequest
-	(*ChatMessage)(nil),               // 20: metadata.ChatMessage
-	(*GetChatResponse)(nil),           // 21: metadata.GetChatResponse
-	(*CreateChatMessageRequest)(nil),  // 22: metadata.CreateChatMessageRequest
-	(*CreateChatMessageResponse)(nil), // 23: metadata.CreateChatMessageResponse
-	(*timestamppb.Timestamp)(nil),     // 24: google.protobuf.Timestamp
+	(*GetLobbySetRequest)(nil),        // 9: metadata.GetLobbySetRequest
+	(*GetLobbySetResponse)(nil),       // 10: metadata.GetLobbySetResponse
+	(*CreateLobbyRequest)(nil),        // 11: metadata.CreateLobbyRequest
+	(*CreateLobbyResponse)(nil),       // 12: metadata.CreateLobbyResponse
+	(*RemoveLobbyRequest)(nil),        // 13: metadata.RemoveLobbyRequest
+	(*RemoveLobbyResponse)(nil),       // 14: metadata.RemoveLobbyResponse
+	(*GetUserMetadataRequest)(nil),    // 15: metadata.GetUserMetadataRequest
+	(*UserMetadata)(nil),              // 16: metadata.UserMetadata
+	(*GetUserMetadataResponse)(nil),   // 17: metadata.GetUserMetadataResponse
+	(*GetChestsRequest)(nil),          // 18: metadata.GetChestsRequest
+	(*Position)(nil),                  // 19: metadata.Position
+	(*GetChestsResponse)(nil),         // 20: metadata.GetChestsResponse
+	(*GetMapRequest)(nil),             // 21: metadata.GetMapRequest
+	(*GetMapResponse)(nil),            // 22: metadata.GetMapResponse
+	(*GetChatMessagesRequest)(nil),    // 23: metadata.GetChatMessagesRequest
+	(*ChatMessage)(nil),               // 24: metadata.ChatMessage
+	(*GetChatMessagesResponse)(nil),   // 25: metadata.GetChatMessagesResponse
+	(*CreateChatMessageRequest)(nil),  // 26: metadata.CreateChatMessageRequest
+	(*CreateChatMessageResponse)(nil), // 27: metadata.CreateChatMessageResponse
+	(*timestamppb.Timestamp)(nil),     // 28: google.protobuf.Timestamp
 }
 var file_api_metadata_metadata_proto_depIdxs = []int32{
 	3,  // 0: metadata.GetSessionsResponse.sessions:type_name -> metadata.Session
-	12, // 1: metadata.GetUserMetadataResponse.user_metadata:type_name -> metadata.UserMetadata
-	15, // 2: metadata.GetChestsResponse.positions:type_name -> metadata.Position
-	15, // 3: metadata.GetMapResponse.positions:type_name -> metadata.Position
-	24, // 4: metadata.ChatMessage.timestamp:type_name -> google.protobuf.Timestamp
-	0,  // 5: metadata.Metadata.PingConnection:input_type -> metadata.PingConnectionRequest
-	2,  // 6: metadata.Metadata.GetSessions:input_type -> metadata.GetSessionsRequest
-	5,  // 7: metadata.Metadata.CreateSession:input_type -> metadata.CreateSessionRequest
-	7,  // 8: metadata.Metadata.RemoveSession:input_type -> metadata.RemoveSessionRequest
-	9,  // 9: metadata.Metadata.JoinToSession:input_type -> metadata.JoinToSessionRequest
-	11, // 10: metadata.Metadata.GetUserMetadata:input_type -> metadata.GetUserMetadataRequest
-	14, // 11: metadata.Metadata.GetChests:input_type -> metadata.GetChestsRequest
-	17, // 12: metadata.Metadata.GetMap:input_type -> metadata.GetMapRequest
-	19, // 13: metadata.Metadata.GetChat:input_type -> metadata.GetChatRequest
-	22, // 14: metadata.Metadata.CreateChatMessage:input_type -> metadata.CreateChatMessageRequest
-	1,  // 15: metadata.Metadata.PingConnection:output_type -> metadata.PingConnectionResponse
-	4,  // 16: metadata.Metadata.GetSessions:output_type -> metadata.GetSessionsResponse
-	6,  // 17: metadata.Metadata.CreateSession:output_type -> metadata.CreateSessionResponse
-	8,  // 18: metadata.Metadata.RemoveSession:output_type -> metadata.RemoveSessionResponse
-	10, // 19: metadata.Metadata.JoinToSession:output_type -> metadata.JoinToSessionResponse
-	13, // 20: metadata.Metadata.GetUserMetadata:output_type -> metadata.GetUserMetadataResponse
-	16, // 21: metadata.Metadata.GetChests:output_type -> metadata.GetChestsResponse
-	18, // 22: metadata.Metadata.GetMap:output_type -> metadata.GetMapResponse
-	21, // 23: metadata.Metadata.GetChat:output_type -> metadata.GetChatResponse
-	23, // 24: metadata.Metadata.CreateChatMessage:output_type -> metadata.CreateChatMessageResponse
-	15, // [15:25] is the sub-list for method output_type
-	5,  // [5:15] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	16, // 1: metadata.GetUserMetadataResponse.user_metadata:type_name -> metadata.UserMetadata
+	19, // 2: metadata.GetChestsResponse.positions:type_name -> metadata.Position
+	19, // 3: metadata.GetMapResponse.positions:type_name -> metadata.Position
+	28, // 4: metadata.ChatMessage.timestamp:type_name -> google.protobuf.Timestamp
+	24, // 5: metadata.GetChatMessagesResponse.messages:type_name -> metadata.ChatMessage
+	0,  // 6: metadata.Metadata.PingConnection:input_type -> metadata.PingConnectionRequest
+	2,  // 7: metadata.Metadata.GetSessions:input_type -> metadata.GetSessionsRequest
+	5,  // 8: metadata.Metadata.CreateSession:input_type -> metadata.CreateSessionRequest
+	7,  // 9: metadata.Metadata.RemoveSession:input_type -> metadata.RemoveSessionRequest
+	9,  // 10: metadata.Metadata.GetLobbySet:input_type -> metadata.GetLobbySetRequest
+	11, // 11: metadata.Metadata.CreateLobby:input_type -> metadata.CreateLobbyRequest
+	13, // 12: metadata.Metadata.RemoveLobby:input_type -> metadata.RemoveLobbyRequest
+	15, // 13: metadata.Metadata.GetUserMetadata:input_type -> metadata.GetUserMetadataRequest
+	18, // 14: metadata.Metadata.GetChests:input_type -> metadata.GetChestsRequest
+	21, // 15: metadata.Metadata.GetMap:input_type -> metadata.GetMapRequest
+	23, // 16: metadata.Metadata.GetChatMessages:input_type -> metadata.GetChatMessagesRequest
+	26, // 17: metadata.Metadata.CreateChatMessage:input_type -> metadata.CreateChatMessageRequest
+	1,  // 18: metadata.Metadata.PingConnection:output_type -> metadata.PingConnectionResponse
+	4,  // 19: metadata.Metadata.GetSessions:output_type -> metadata.GetSessionsResponse
+	6,  // 20: metadata.Metadata.CreateSession:output_type -> metadata.CreateSessionResponse
+	8,  // 21: metadata.Metadata.RemoveSession:output_type -> metadata.RemoveSessionResponse
+	10, // 22: metadata.Metadata.GetLobbySet:output_type -> metadata.GetLobbySetResponse
+	12, // 23: metadata.Metadata.CreateLobby:output_type -> metadata.CreateLobbyResponse
+	14, // 24: metadata.Metadata.RemoveLobby:output_type -> metadata.RemoveLobbyResponse
+	17, // 25: metadata.Metadata.GetUserMetadata:output_type -> metadata.GetUserMetadataResponse
+	20, // 26: metadata.Metadata.GetChests:output_type -> metadata.GetChestsResponse
+	22, // 27: metadata.Metadata.GetMap:output_type -> metadata.GetMapResponse
+	25, // 28: metadata.Metadata.GetChatMessages:output_type -> metadata.GetChatMessagesResponse
+	27, // 29: metadata.Metadata.CreateChatMessage:output_type -> metadata.CreateChatMessageResponse
+	18, // [18:30] is the sub-list for method output_type
+	6,  // [6:18] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_api_metadata_metadata_proto_init() }
@@ -1325,7 +1545,7 @@ func file_api_metadata_metadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_metadata_metadata_proto_rawDesc), len(file_api_metadata_metadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   24,
+			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

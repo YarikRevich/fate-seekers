@@ -8,9 +8,27 @@
 CREATE TABLE sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
+    seed INTEGER NOT NULL,
     issuer INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (issuer) REFERENCES users(id)
+);
+
+--
+-- Name: lobbies; Type: TABLE; Schema: public; 
+--
+
+CREATE TABLE lobbies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL UNIQUE,
+    session_id INTEGER NOT NULL,
+    skin INTEGER NOT NULL,
+    health INTEGER NOT NULL,
+    eliminated BOOLEAN NOT NULL,
+    position REAL NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (session_id) REFERENCES sessions(id)
 );
 
 --

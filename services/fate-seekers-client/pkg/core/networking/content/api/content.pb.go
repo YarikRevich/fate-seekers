@@ -75,7 +75,7 @@ func (x *Position) GetY() int64 {
 }
 
 // Represents users positions retrieval request message.
-type GetUserPositionsRequest struct {
+type GetUserMetadataPositionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Issuer        string                 `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
 	SessionId     int64                  `protobuf:"varint,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
@@ -83,20 +83,20 @@ type GetUserPositionsRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetUserPositionsRequest) Reset() {
-	*x = GetUserPositionsRequest{}
+func (x *GetUserMetadataPositionsRequest) Reset() {
+	*x = GetUserMetadataPositionsRequest{}
 	mi := &file_api_content_content_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetUserPositionsRequest) String() string {
+func (x *GetUserMetadataPositionsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetUserPositionsRequest) ProtoMessage() {}
+func (*GetUserMetadataPositionsRequest) ProtoMessage() {}
 
-func (x *GetUserPositionsRequest) ProtoReflect() protoreflect.Message {
+func (x *GetUserMetadataPositionsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_api_content_content_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -108,19 +108,19 @@ func (x *GetUserPositionsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetUserPositionsRequest.ProtoReflect.Descriptor instead.
-func (*GetUserPositionsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetUserMetadataPositionsRequest.ProtoReflect.Descriptor instead.
+func (*GetUserMetadataPositionsRequest) Descriptor() ([]byte, []int) {
 	return file_api_content_content_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetUserPositionsRequest) GetIssuer() string {
+func (x *GetUserMetadataPositionsRequest) GetIssuer() string {
 	if x != nil {
 		return x.Issuer
 	}
 	return ""
 }
 
-func (x *GetUserPositionsRequest) GetSessionId() int64 {
+func (x *GetUserMetadataPositionsRequest) GetSessionId() int64 {
 	if x != nil {
 		return x.SessionId
 	}
@@ -128,27 +128,27 @@ func (x *GetUserPositionsRequest) GetSessionId() int64 {
 }
 
 // Represents users positions retrieval response message.
-type GetUserPositionsResponse struct {
+type GetUserMetadataPositionsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Positions     []*Position            `protobuf:"bytes,1,rep,name=positions,proto3" json:"positions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetUserPositionsResponse) Reset() {
-	*x = GetUserPositionsResponse{}
+func (x *GetUserMetadataPositionsResponse) Reset() {
+	*x = GetUserMetadataPositionsResponse{}
 	mi := &file_api_content_content_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetUserPositionsResponse) String() string {
+func (x *GetUserMetadataPositionsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetUserPositionsResponse) ProtoMessage() {}
+func (*GetUserMetadataPositionsResponse) ProtoMessage() {}
 
-func (x *GetUserPositionsResponse) ProtoReflect() protoreflect.Message {
+func (x *GetUserMetadataPositionsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_api_content_content_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -160,12 +160,12 @@ func (x *GetUserPositionsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetUserPositionsResponse.ProtoReflect.Descriptor instead.
-func (*GetUserPositionsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetUserMetadataPositionsResponse.ProtoReflect.Descriptor instead.
+func (*GetUserMetadataPositionsResponse) Descriptor() ([]byte, []int) {
 	return file_api_content_content_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetUserPositionsResponse) GetPositions() []*Position {
+func (x *GetUserMetadataPositionsResponse) GetPositions() []*Position {
 	if x != nil {
 		return x.Positions
 	}
@@ -179,12 +179,12 @@ const file_api_content_content_proto_rawDesc = "" +
 	"\x19api/content/content.proto\x12\acontent\"&\n" +
 	"\bPosition\x12\f\n" +
 	"\x01x\x18\x01 \x01(\x03R\x01x\x12\f\n" +
-	"\x01y\x18\x02 \x01(\x03R\x01y\"P\n" +
-	"\x17GetUserPositionsRequest\x12\x16\n" +
+	"\x01y\x18\x02 \x01(\x03R\x01y\"X\n" +
+	"\x1fGetUserMetadataPositionsRequest\x12\x16\n" +
 	"\x06issuer\x18\x01 \x01(\tR\x06issuer\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x02 \x01(\x03R\tsessionId\"K\n" +
-	"\x18GetUserPositionsResponse\x12/\n" +
+	"session_id\x18\x02 \x01(\x03R\tsessionId\"S\n" +
+	" GetUserMetadataPositionsResponse\x12/\n" +
 	"\tpositions\x18\x01 \x03(\v2\x11.content.PositionR\tpositionsBEZCgithub.com/YarikRevich/fate-seekers/pkg/core/networking/content/apib\x06proto3"
 
 var (
@@ -201,12 +201,12 @@ func file_api_content_content_proto_rawDescGZIP() []byte {
 
 var file_api_content_content_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_api_content_content_proto_goTypes = []any{
-	(*Position)(nil),                 // 0: content.Position
-	(*GetUserPositionsRequest)(nil),  // 1: content.GetUserPositionsRequest
-	(*GetUserPositionsResponse)(nil), // 2: content.GetUserPositionsResponse
+	(*Position)(nil),                         // 0: content.Position
+	(*GetUserMetadataPositionsRequest)(nil),  // 1: content.GetUserMetadataPositionsRequest
+	(*GetUserMetadataPositionsResponse)(nil), // 2: content.GetUserMetadataPositionsResponse
 }
 var file_api_content_content_proto_depIdxs = []int32{
-	0, // 0: content.GetUserPositionsResponse.positions:type_name -> content.Position
+	0, // 0: content.GetUserMetadataPositionsResponse.positions:type_name -> content.Position
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

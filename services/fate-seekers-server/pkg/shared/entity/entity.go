@@ -11,6 +11,7 @@ import (
 type SessionEntity struct {
 	ID         int64      `gorm:"column:id;primaryKey;auto_increment;not null"`
 	Name       string     `gorm:"column:name;not null;unique"`
+	Seed       int64      `gorm:"column:seed;not null"`
 	Issuer     int64      `gorm:"column:issuer;not null"`
 	CreatedAt  time.Time  `gorm:"column:created_at;autoCreateTime"`
 	UserEntity UserEntity `gorm:"foreignKey:Issuer;references:UserEntityID"`
@@ -21,8 +22,8 @@ func (*SessionEntity) TableName() string {
 	return "sessions"
 }
 
-// AfterCreate performs sessions cache entity eviction after sessions entity create.
-func (s *SessionEntity) AfterCreate(tx *gorm.DB) error {
+// BeforeCreate performs sessions cache entity eviction before sessions entity create.
+func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 	cache.
 		GetInstance().
 		EvictSessions(s.UserEntity.Name)
@@ -35,6 +36,47 @@ func (s *SessionEntity) AfterDelete(tx *gorm.DB) error {
 	cache.
 		GetInstance().
 		EvictSessions(s.UserEntity.Name)
+
+	return nil
+}
+
+// LobbyEntity represents lobbies entity.
+type LobbyEntity struct {
+	ID            int64         `gorm:"column:id;primaryKey;auto_increment;not null"`
+	UserID        int64         `gorm:"column:user_id;not null;unique"`
+	SessionID     int64         `gorm:"column:session_id;not null"`
+	Skin          int64         `gorm:"column:skin;not null"`
+	Health        int64         `gorm:"column:health;not null"`
+	Eliminated    bool          `gorm:"column:eliminated;not null"`
+	Position      float64       `gorm:"column:position;not null"`
+	CreatedAt     time.Time     `gorm:"column:created_at;autoCreateTime"`
+	UserEntity    UserEntity    `gorm:"foreignKey:UserID;references:UserEntityID"`
+	SessionEntity SessionEntity `gorm:"foreignKey:SessionID;references:SessionEntityID"`
+}
+
+// TableName retrieves name of database table.
+func (*LobbyEntity) TableName() string {
+	return "lobbies"
+}
+
+// BeforeCreate performs lobbies cache entity eviction before lobbies entity create.
+func (l *LobbyEntity) BeforeCreate(tx *gorm.DB) error {
+	cache.
+		GetInstance().
+		EvictLobbySet(l.SessionID)
+
+	return nil
+}
+
+// AfterDelete performs lobbies cache entity eviction after lobbies entity removal.
+func (l *LobbyEntity) AfterDelete(tx *gorm.DB) error {
+	cache.
+		GetInstance().
+		EvictLobbySet(l.SessionID)
+
+	cache.
+		GetInstance().
+		EvictMetadata(l.UserEntity.Name)
 
 	return nil
 }
@@ -53,8 +95,8 @@ func (*MessageEntity) TableName() string {
 	return "messages"
 }
 
-// AfterCreate performs message cache entity eviction after messages entity creation.
-func (m *MessageEntity) AfterCreate(tx *gorm.DB) error {
+// BeforeCreate performs message cache entity eviction before messages entity creation.
+func (m *MessageEntity) BeforeCreate(tx *gorm.DB) error {
 	cache.
 		GetInstance().
 		EvictSessions(m.UserEntity.Name)

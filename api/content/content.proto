@@ -10,12 +10,12 @@ message Position {
 }
 
 // Represents users positions retrieval request message.
-message GetUserPositionsRequest {
+message GetUserMetadataPositionsRequest {
     string issuer = 1;
     int64 session_id = 2;
 };
 
 // Represents users positions retrieval response message.
-message GetUserPositionsResponse {
+message GetUserMetadataPositionsResponse {
     repeated Position positions = 1;
 };

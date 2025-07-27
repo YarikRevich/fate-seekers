@@ -23,11 +23,13 @@ const (
 	Metadata_GetSessions_FullMethodName       = "/metadata.Metadata/GetSessions"
 	Metadata_CreateSession_FullMethodName     = "/metadata.Metadata/CreateSession"
 	Metadata_RemoveSession_FullMethodName     = "/metadata.Metadata/RemoveSession"
-	Metadata_JoinToSession_FullMethodName     = "/metadata.Metadata/JoinToSession"
+	Metadata_GetLobbySet_FullMethodName       = "/metadata.Metadata/GetLobbySet"
+	Metadata_CreateLobby_FullMethodName       = "/metadata.Metadata/CreateLobby"
+	Metadata_RemoveLobby_FullMethodName       = "/metadata.Metadata/RemoveLobby"
 	Metadata_GetUserMetadata_FullMethodName   = "/metadata.Metadata/GetUserMetadata"
 	Metadata_GetChests_FullMethodName         = "/metadata.Metadata/GetChests"
 	Metadata_GetMap_FullMethodName            = "/metadata.Metadata/GetMap"
-	Metadata_GetChat_FullMethodName           = "/metadata.Metadata/GetChat"
+	Metadata_GetChatMessages_FullMethodName   = "/metadata.Metadata/GetChatMessages"
 	Metadata_CreateChatMessage_FullMethodName = "/metadata.Metadata/CreateChatMessage"
 )
 
@@ -45,18 +47,22 @@ type MetadataClient interface {
 	GetSessions(ctx context.Context, in *GetSessionsRequest, opts ...grpc.CallOption) (*GetSessionsResponse, error)
 	// CreateSession performs session creation operation by the configured user.
 	CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*CreateSessionResponse, error)
-	// RemoveSession performs session removal operation by the configured user. Allowed only for session owner.
+	// RemoveSession performs session removal operation by the configured user. Allowed for session owner only.
 	RemoveSession(ctx context.Context, in *RemoveSessionRequest, opts ...grpc.CallOption) (*RemoveSessionResponse, error)
-	// JoinToSession performs session join request by the configured user.
-	JoinToSession(ctx context.Context, in *JoinToSessionRequest, opts ...grpc.CallOption) (*JoinToSessionResponse, error)
+	// GetLobbySet performs existing lobbies retrieval operation by the provided session id, by the configured user.
+	GetLobbySet(ctx context.Context, in *GetLobbySetRequest, opts ...grpc.CallOption) (*GetLobbySetResponse, error)
+	// CreateLobby performs lobby creation operation by the configured user.
+	CreateLobby(ctx context.Context, in *CreateLobbyRequest, opts ...grpc.CallOption) (*CreateLobbyResponse, error)
+	// RemoveLobby performs lobby removal operation by the configured user. Allowed for lobby owner only.
+	RemoveLobby(ctx context.Context, in *RemoveLobbyRequest, opts ...grpc.CallOption) (*RemoveLobbyResponse, error)
 	// GetUserMetadata performs user metadata retrieval request by the configured user.
 	GetUserMetadata(ctx context.Context, in *GetUserMetadataRequest, opts ...grpc.CallOption) (*GetUserMetadataResponse, error)
 	// GetChest performs chests retrieval for the selected session by the configured user.
 	GetChests(ctx context.Context, in *GetChestsRequest, opts ...grpc.CallOption) (*GetChestsResponse, error)
 	// GetMap performs map retrieval for the selected session by the configured user.
 	GetMap(ctx context.Context, in *GetMapRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetMapResponse], error)
-	// GetChat performs chat retrieval for the selected session by the configured user.
-	GetChat(ctx context.Context, in *GetChatRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetChatResponse], error)
+	// GetChatMessages performs chat messages retrieval for the selected session by the configured user.
+	GetChatMessages(ctx context.Context, in *GetChatMessagesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetChatMessagesResponse], error)
 	// CreateChatMessage performs chat message creation for the selected session by the configured user.
 	CreateChatMessage(ctx context.Context, in *CreateChatMessageRequest, opts ...grpc.CallOption) (*CreateChatMessageResponse, error)
 }
@@ -109,10 +115,30 @@ func (c *metadataClient) RemoveSession(ctx context.Context, in *RemoveSessionReq
 	return out, nil
 }
 
-func (c *metadataClient) JoinToSession(ctx context.Context, in *JoinToSessionRequest, opts ...grpc.CallOption) (*JoinToSessionResponse, error) {
+func (c *metadataClient) GetLobbySet(ctx context.Context, in *GetLobbySetRequest, opts ...grpc.CallOption) (*GetLobbySetResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(JoinToSessionResponse)
-	err := c.cc.Invoke(ctx, Metadata_JoinToSession_FullMethodName, in, out, cOpts...)
+	out := new(GetLobbySetResponse)
+	err := c.cc.Invoke(ctx, Metadata_GetLobbySet_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metadataClient) CreateLobby(ctx context.Context, in *CreateLobbyRequest, opts ...grpc.CallOption) (*CreateLobbyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateLobbyResponse)
+	err := c.cc.Invoke(ctx, Metadata_CreateLobby_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metadataClient) RemoveLobby(ctx context.Context, in *RemoveLobbyRequest, opts ...grpc.CallOption) (*RemoveLobbyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveLobbyResponse)
+	err := c.cc.Invoke(ctx, Metadata_RemoveLobby_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -158,13 +184,13 @@ func (c *metadataClient) GetMap(ctx context.Context, in *GetMapRequest, opts ...
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Metadata_GetMapClient = grpc.ServerStreamingClient[GetMapResponse]
 
-func (c *metadataClient) GetChat(ctx context.Context, in *GetChatRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetChatResponse], error) {
+func (c *metadataClient) GetChatMessages(ctx context.Context, in *GetChatMessagesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetChatMessagesResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Metadata_ServiceDesc.Streams[1], Metadata_GetChat_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Metadata_ServiceDesc.Streams[1], Metadata_GetChatMessages_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[GetChatRequest, GetChatResponse]{ClientStream: stream}
+	x := &grpc.GenericClientStream[GetChatMessagesRequest, GetChatMessagesResponse]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -175,7 +201,7 @@ func (c *metadataClient) GetChat(ctx context.Context, in *GetChatRequest, opts .
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Metadata_GetChatClient = grpc.ServerStreamingClient[GetChatResponse]
+type Metadata_GetChatMessagesClient = grpc.ServerStreamingClient[GetChatMessagesResponse]
 
 func (c *metadataClient) CreateChatMessage(ctx context.Context, in *CreateChatMessageRequest, opts ...grpc.CallOption) (*CreateChatMessageResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -201,18 +227,22 @@ type MetadataServer interface {
 	GetSessions(context.Context, *GetSessionsRequest) (*GetSessionsResponse, error)
 	// CreateSession performs session creation operation by the configured user.
 	CreateSession(context.Context, *CreateSessionRequest) (*CreateSessionResponse, error)
-	// RemoveSession performs session removal operation by the configured user. Allowed only for session owner.
+	// RemoveSession performs session removal operation by the configured user. Allowed for session owner only.
 	RemoveSession(context.Context, *RemoveSessionRequest) (*RemoveSessionResponse, error)
-	// JoinToSession performs session join request by the configured user.
-	JoinToSession(context.Context, *JoinToSessionRequest) (*JoinToSessionResponse, error)
+	// GetLobbySet performs existing lobbies retrieval operation by the provided session id, by the configured user.
+	GetLobbySet(context.Context, *GetLobbySetRequest) (*GetLobbySetResponse, error)
+	// CreateLobby performs lobby creation operation by the configured user.
+	CreateLobby(context.Context, *CreateLobbyRequest) (*CreateLobbyResponse, error)
+	// RemoveLobby performs lobby removal operation by the configured user. Allowed for lobby owner only.
+	RemoveLobby(context.Context, *RemoveLobbyRequest) (*RemoveLobbyResponse, error)
 	// GetUserMetadata performs user metadata retrieval request by the configured user.
 	GetUserMetadata(context.Context, *GetUserMetadataRequest) (*GetUserMetadataResponse, error)
 	// GetChest performs chests retrieval for the selected session by the configured user.
 	GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error)
 	// GetMap performs map retrieval for the selected session by the configured user.
 	GetMap(*GetMapRequest, grpc.ServerStreamingServer[GetMapResponse]) error
-	// GetChat performs chat retrieval for the selected session by the configured user.
-	GetChat(*GetChatRequest, grpc.ServerStreamingServer[GetChatResponse]) error
+	// GetChatMessages performs chat messages retrieval for the selected session by the configured user.
+	GetChatMessages(*GetChatMessagesRequest, grpc.ServerStreamingServer[GetChatMessagesResponse]) error
 	// CreateChatMessage performs chat message creation for the selected session by the configured user.
 	CreateChatMessage(context.Context, *CreateChatMessageRequest) (*CreateChatMessageResponse, error)
 	mustEmbedUnimplementedMetadataServer()
@@ -237,8 +267,14 @@ func (UnimplementedMetadataServer) CreateSession(context.Context, *CreateSession
 func (UnimplementedMetadataServer) RemoveSession(context.Context, *RemoveSessionRequest) (*RemoveSessionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveSession not implemented")
 }
-func (UnimplementedMetadataServer) JoinToSession(context.Context, *JoinToSessionRequest) (*JoinToSessionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method JoinToSession not implemented")
+func (UnimplementedMetadataServer) GetLobbySet(context.Context, *GetLobbySetRequest) (*GetLobbySetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLobbySet not implemented")
+}
+func (UnimplementedMetadataServer) CreateLobby(context.Context, *CreateLobbyRequest) (*CreateLobbyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateLobby not implemented")
+}
+func (UnimplementedMetadataServer) RemoveLobby(context.Context, *RemoveLobbyRequest) (*RemoveLobbyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveLobby not implemented")
 }
 func (UnimplementedMetadataServer) GetUserMetadata(context.Context, *GetUserMetadataRequest) (*GetUserMetadataResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserMetadata not implemented")
@@ -249,8 +285,8 @@ func (UnimplementedMetadataServer) GetChests(context.Context, *GetChestsRequest)
 func (UnimplementedMetadataServer) GetMap(*GetMapRequest, grpc.ServerStreamingServer[GetMapResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method GetMap not implemented")
 }
-func (UnimplementedMetadataServer) GetChat(*GetChatRequest, grpc.ServerStreamingServer[GetChatResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method GetChat not implemented")
+func (UnimplementedMetadataServer) GetChatMessages(*GetChatMessagesRequest, grpc.ServerStreamingServer[GetChatMessagesResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method GetChatMessages not implemented")
 }
 func (UnimplementedMetadataServer) CreateChatMessage(context.Context, *CreateChatMessageRequest) (*CreateChatMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateChatMessage not implemented")
@@ -348,20 +384,56 @@ func _Metadata_RemoveSession_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Metadata_JoinToSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(JoinToSessionRequest)
+func _Metadata_GetLobbySet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLobbySetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MetadataServer).JoinToSession(ctx, in)
+		return srv.(MetadataServer).GetLobbySet(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Metadata_JoinToSession_FullMethodName,
+		FullMethod: Metadata_GetLobbySet_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MetadataServer).JoinToSession(ctx, req.(*JoinToSessionRequest))
+		return srv.(MetadataServer).GetLobbySet(ctx, req.(*GetLobbySetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Metadata_CreateLobby_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateLobbyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).CreateLobby(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_CreateLobby_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).CreateLobby(ctx, req.(*CreateLobbyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Metadata_RemoveLobby_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveLobbyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServer).RemoveLobby(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Metadata_RemoveLobby_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServer).RemoveLobby(ctx, req.(*RemoveLobbyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -413,16 +485,16 @@ func _Metadata_GetMap_Handler(srv interface{}, stream grpc.ServerStream) error {
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Metadata_GetMapServer = grpc.ServerStreamingServer[GetMapResponse]
 
-func _Metadata_GetChat_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetChatRequest)
+func _Metadata_GetChatMessages_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetChatMessagesRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(MetadataServer).GetChat(m, &grpc.GenericServerStream[GetChatRequest, GetChatResponse]{ServerStream: stream})
+	return srv.(MetadataServer).GetChatMessages(m, &grpc.GenericServerStream[GetChatMessagesRequest, GetChatMessagesResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Metadata_GetChatServer = grpc.ServerStreamingServer[GetChatResponse]
+type Metadata_GetChatMessagesServer = grpc.ServerStreamingServer[GetChatMessagesResponse]
 
 func _Metadata_CreateChatMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateChatMessageRequest)
@@ -466,8 +538,16 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Metadata_RemoveSession_Handler,
 		},
 		{
-			MethodName: "JoinToSession",
-			Handler:    _Metadata_JoinToSession_Handler,
+			MethodName: "GetLobbySet",
+			Handler:    _Metadata_GetLobbySet_Handler,
+		},
+		{
+			MethodName: "CreateLobby",
+			Handler:    _Metadata_CreateLobby_Handler,
+		},
+		{
+			MethodName: "RemoveLobby",
+			Handler:    _Metadata_RemoveLobby_Handler,
 		},
 		{
 			MethodName: "GetUserMetadata",
@@ -489,8 +569,8 @@ var Metadata_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "GetChat",
-			Handler:       _Metadata_GetChat_Handler,
+			StreamName:    "GetChatMessages",
+			Handler:       _Metadata_GetChatMessages_Handler,
 			ServerStreams: true,
 		},
 	},

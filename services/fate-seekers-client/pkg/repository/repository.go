@@ -105,7 +105,7 @@ type flagsRepositoryImpl struct{}
 func (w *flagsRepositoryImpl) InsertOrUpdate(name, value string) error {
 	instance := db.GetInstance()
 
-	err := instance.Create(&entity.FlagsEntity{
+	err := instance.Save(&entity.FlagsEntity{
 		Name:  name,
 		Value: value,
 	}).Error

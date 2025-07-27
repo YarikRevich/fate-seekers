@@ -134,8 +134,28 @@ func ComposeReducerResult(units ...ReducerResultUnit) ReducerResult {
 	return result
 }
 
+// LobbiesRepositoryInsertOrUpdateRequest represents
+type LobbiesRepositoryInsertOrUpdateRequest struct {
+	UserID     int64
+	SessionID  int64
+	Skin       int64
+	Health     int64
+	Eliminated bool
+	Position   float64
+}
+
 // CacheSessionEntity represent cache session entity used by global networking cache.
 type CacheSessionEntity struct {
 	ID   int64
+	Seed int64
 	Name string
+}
+
+// CacheMetadataEntity represent cache metadata entity used by global networking cache.
+type CacheMetadataEntity struct {
+	SessionID  int64
+	Position   float64
+	Skin       int64
+	Health     int64
+	Eliminated bool
 }
