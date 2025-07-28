@@ -13,10 +13,14 @@ import (
 // PerformPingConnection performs ping connection request.
 func PerformPingConnection(callback func(err error)) {
 	go func() {
-		_, err := connector.GetInstance().GetClient().PingConnection(
-			context.Background(), &api.PingConnectionRequest{
-				Issuer: store.GetRepositoryUUID(),
-			})
+		_, err := connector.
+			GetInstance().
+			GetClient().
+			PingConnection(
+				context.Background(),
+				&api.PingConnectionRequest{
+					Issuer: store.GetRepositoryUUID(),
+				})
 
 		if err != nil {
 			errRaw, ok := status.FromError(err)
@@ -38,10 +42,14 @@ func PerformPingConnection(callback func(err error)) {
 // PerformGetSessions performs sessions retrieval request.
 func PerformGetSessions(callback func(response *api.GetSessionsResponse, err error)) {
 	go func() {
-		response, err := connector.GetInstance().GetClient().GetSessions(
-			context.Background(), &api.GetSessionsRequest{
-				Issuer: store.GetRepositoryUUID(),
-			})
+		response, err := connector.
+			GetInstance().
+			GetClient().
+			GetSessions(
+				context.Background(),
+				&api.GetSessionsRequest{
+					Issuer: store.GetRepositoryUUID(),
+				})
 
 		if err != nil {
 			errRaw, ok := status.FromError(err)
@@ -63,12 +71,105 @@ func PerformGetSessions(callback func(response *api.GetSessionsResponse, err err
 // PerformCreateSession performs session creation request.
 func PerformCreateSession(name string, seed int64, callback func(err error)) {
 	go func() {
-		_, err := connector.GetInstance().GetClient().CreateSession(
-			context.Background(), &api.CreateSessionRequest{
-				Name:   name,
-				Issuer: store.GetRepositoryUUID(),
-				Seed:   &seed,
-			})
+		_, err := connector.
+			GetInstance().
+			GetClient().
+			CreateSession(
+				context.Background(),
+				&api.CreateSessionRequest{
+					Name:   name,
+					Issuer: store.GetRepositoryUUID(),
+					Seed:   &seed,
+				})
+
+		if err != nil {
+			errRaw, ok := status.FromError(err)
+			if !ok {
+				callback(err)
+
+				return
+			}
+
+			callback(errors.New(errRaw.Message()))
+
+			return
+		}
+
+		callback(nil)
+	}()
+}
+
+// PerformGetLobbySet performs lobby set retrieval request.
+func PerformGetLobbySet(sessionId int64, callback func(response *api.GetLobbySetResponse, err error)) {
+	go func() {
+		response, err := connector.
+			GetInstance().
+			GetClient().
+			GetLobbySet(
+				context.Background(),
+				&api.GetLobbySetRequest{
+					Issuer:    store.GetRepositoryUUID(),
+					SessionId: sessionId,
+				})
+
+		if err != nil {
+			errRaw, ok := status.FromError(err)
+			if !ok {
+				callback(nil, err)
+
+				return
+			}
+
+			callback(nil, errors.New(errRaw.Message()))
+
+			return
+		}
+
+		callback(response, nil)
+	}()
+}
+
+// PerformCreateLobby performs lobby creation request.
+func PerformCreateLobby(sessionId int64, callback func(err error)) {
+	go func() {
+		_, err := connector.
+			GetInstance().
+			GetClient().
+			CreateLobby(
+				context.Background(),
+				&api.CreateLobbyRequest{
+					Issuer:    store.GetRepositoryUUID(),
+					SessionId: sessionId,
+				})
+
+		if err != nil {
+			errRaw, ok := status.FromError(err)
+			if !ok {
+				callback(err)
+
+				return
+			}
+
+			callback(errors.New(errRaw.Message()))
+
+			return
+		}
+
+		callback(nil)
+	}()
+}
+
+// PerformRemoveLobby performs lobby removal request.
+func PerformRemoveLobby(callback func(err error)) {
+	go func() {
+		_, err := connector.
+			GetInstance().
+			GetClient().
+			RemoveLobby(
+				context.Background(),
+				&api.RemoveLobbyRequest{
+					Issuer: store.GetRepositoryUUID(),
+				})
 
 		if err != nil {
 			errRaw, ok := status.FromError(err)

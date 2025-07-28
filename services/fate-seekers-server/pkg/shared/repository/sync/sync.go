@@ -9,16 +9,23 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository"
 )
 
+const (
+	// Represents ticker duration used for metadata synchronization worker.
+	metadataTickerDuration = time.Second * 15
+)
+
 // Run starts the repository sync worker, which takes latest updates
 // from certain cache instances.
 func Run() {
 	go func() {
-		ticker := time.NewTicker(time.Second * 15)
+		ticker := time.NewTicker(metadataTickerDuration)
 
 		for range ticker.C {
 			ticker.Stop()
 
-			for key, value := range cache.GetInstance().GetMetadataMappings() {
+			for key, value := range cache.
+				GetInstance().
+				GetMetadataMappings() {
 				var userID int64
 
 				cachedUserID, ok := cache.
@@ -50,14 +57,15 @@ func Run() {
 							Skin:       value.Skin,
 							Health:     value.Health,
 							Eliminated: value.Eliminated,
-							Position:   value.Position,
+							PositionX:  value.PositionX,
+							PositionY:  value.PositionY,
 						})
 				if err != nil {
 					logging.GetInstance().Fatal(err.Error())
 				}
 			}
 
-			ticker.Reset(time.Second * 10)
+			ticker.Reset(metadataTickerDuration)
 		}
 	}()
 }

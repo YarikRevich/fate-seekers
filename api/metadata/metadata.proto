@@ -117,8 +117,7 @@ message CreateLobbyResponse {
 
 // RemoveLobbyRequest represents user remove lobby request.
 message RemoveLobbyRequest {
-    int64 session_id = 1;
-    string issuer = 2;
+    string issuer = 1;
 };
 
 // RemoveLobbyResponse represents user remove lobby response.
@@ -133,13 +132,15 @@ message GetUserMetadataRequest {
 
 // Represents common user metadata message.
 message UserMetadata {
-    string user_id = 1;
-    string skin = 2;
+    int64 health = 1;
+    int64 skin = 2;
+    bool eliminated = 3;
+    Position position = 4;
 };
 
 // Represents users metadata retrieval response message.
 message GetUserMetadataResponse {
-    repeated UserMetadata user_metadata = 1;
+    UserMetadata user_metadata = 1;
 };
 
 // GetChestsRequest represents chests retrieval request message.
@@ -149,8 +150,8 @@ message GetChestsRequest {
 
 // Position represents common position message.
 message Position {
-    int64 x = 1;
-    int64 y = 2;
+    double x = 1;
+    double y = 2;
 };
 
 // GetChestsResponse represents chests retrieval response streaming message.

@@ -48,7 +48,8 @@ type LobbyEntity struct {
 	Skin          int64         `gorm:"column:skin;not null"`
 	Health        int64         `gorm:"column:health;not null"`
 	Eliminated    bool          `gorm:"column:eliminated;not null"`
-	Position      float64       `gorm:"column:position;not null"`
+	PositionX     float64       `gorm:"column:position_x;not null"`
+	PositionY     float64       `gorm:"column:position_y;not null"`
 	CreatedAt     time.Time     `gorm:"column:created_at;autoCreateTime"`
 	UserEntity    UserEntity    `gorm:"foreignKey:UserID;references:UserEntityID"`
 	SessionEntity SessionEntity `gorm:"foreignKey:SessionID;references:SessionEntityID"`

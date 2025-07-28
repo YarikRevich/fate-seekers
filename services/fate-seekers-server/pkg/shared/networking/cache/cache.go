@@ -27,6 +27,7 @@ const (
 )
 
 // lobby -> lobby set -> metadata
+//
 
 // NetworkingCache represents networking cache.
 type NetworkingCache struct {

@@ -141,7 +141,8 @@ type LobbiesRepositoryInsertOrUpdateRequest struct {
 	Skin       int64
 	Health     int64
 	Eliminated bool
-	Position   float64
+	PositionX  float64
+	PositionY  float64
 }
 
 // CacheSessionEntity represent cache session entity used by global networking cache.
@@ -154,7 +155,8 @@ type CacheSessionEntity struct {
 // CacheMetadataEntity represent cache metadata entity used by global networking cache.
 type CacheMetadataEntity struct {
 	SessionID  int64
-	Position   float64
+	PositionX  float64
+	PositionY  float64
 	Skin       int64
 	Health     int64
 	Eliminated bool

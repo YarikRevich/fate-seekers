@@ -42,15 +42,15 @@ func (h *Handler) send(key string, value []byte) error {
 	return nil
 }
 
-// PerformGetUserPosition performs get user positions retrieval
-func (h *Handler) PerformGetUserPositions(callback func(err error)) {
-	proto.Marshal(&api.GetUserPositionsRequest{
-		Issuer:  store.GetRepositoryUUID(),
-		Session: "",
-	})
-
+// PerformGetUserMetadataPositions performs get user positions retrieval
+func (h *Handler) PerformGetUserMetadataPositions(callback func(err error)) {
 	go func() {
-		err := h.send(api.GET_USER_POSITIONS, []byte("gjfkgjfk"))
+		proto.Marshal(&api.GetUserMetadataPositionsRequest{
+			Issuer:    store.GetRepositoryUUID(),
+			SessionId: "",
+		})
+
+		err := h.send(api.GET_USER_METADATA_POSITIONS, []byte("gjfkgjfk"))
 		if err != nil {
 			callback(err)
 

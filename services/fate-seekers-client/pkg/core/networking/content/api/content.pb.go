@@ -24,8 +24,8 @@ const (
 // Represents common position message.
 type Position struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	X             int64                  `protobuf:"varint,1,opt,name=x,proto3" json:"x,omitempty"`
-	Y             int64                  `protobuf:"varint,2,opt,name=y,proto3" json:"y,omitempty"`
+	X             float64                `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`
+	Y             float64                `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -60,14 +60,14 @@ func (*Position) Descriptor() ([]byte, []int) {
 	return file_api_content_content_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Position) GetX() int64 {
+func (x *Position) GetX() float64 {
 	if x != nil {
 		return x.X
 	}
 	return 0
 }
 
-func (x *Position) GetY() int64 {
+func (x *Position) GetY() float64 {
 	if x != nil {
 		return x.Y
 	}
@@ -178,8 +178,8 @@ const file_api_content_content_proto_rawDesc = "" +
 	"\n" +
 	"\x19api/content/content.proto\x12\acontent\"&\n" +
 	"\bPosition\x12\f\n" +
-	"\x01x\x18\x01 \x01(\x03R\x01x\x12\f\n" +
-	"\x01y\x18\x02 \x01(\x03R\x01y\"X\n" +
+	"\x01x\x18\x01 \x01(\x01R\x01x\x12\f\n" +
+	"\x01y\x18\x02 \x01(\x01R\x01y\"X\n" +
 	"\x1fGetUserMetadataPositionsRequest\x12\x16\n" +
 	"\x06issuer\x18\x01 \x01(\tR\x06issuer\x12\x1d\n" +
 	"\n" +

@@ -635,8 +635,7 @@ func (*CreateLobbyResponse) Descriptor() ([]byte, []int) {
 // RemoveLobbyRequest represents user remove lobby request.
 type RemoveLobbyRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
-	Issuer        string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	Issuer        string                 `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -669,13 +668,6 @@ func (x *RemoveLobbyRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RemoveLobbyRequest.ProtoReflect.Descriptor instead.
 func (*RemoveLobbyRequest) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{13}
-}
-
-func (x *RemoveLobbyRequest) GetSessionId() int64 {
-	if x != nil {
-		return x.SessionId
-	}
-	return 0
 }
 
 func (x *RemoveLobbyRequest) GetIssuer() string {
@@ -778,8 +770,10 @@ func (x *GetUserMetadataRequest) GetIssuer() string {
 // Represents common user metadata message.
 type UserMetadata struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Skin          string                 `protobuf:"bytes,2,opt,name=skin,proto3" json:"skin,omitempty"`
+	Health        int64                  `protobuf:"varint,1,opt,name=health,proto3" json:"health,omitempty"`
+	Skin          int64                  `protobuf:"varint,2,opt,name=skin,proto3" json:"skin,omitempty"`
+	Eliminated    bool                   `protobuf:"varint,3,opt,name=eliminated,proto3" json:"eliminated,omitempty"`
+	Position      *Position              `protobuf:"bytes,4,opt,name=position,proto3" json:"position,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -814,24 +808,38 @@ func (*UserMetadata) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{16}
 }
 
-func (x *UserMetadata) GetUserId() string {
+func (x *UserMetadata) GetHealth() int64 {
 	if x != nil {
-		return x.UserId
+		return x.Health
 	}
-	return ""
+	return 0
 }
 
-func (x *UserMetadata) GetSkin() string {
+func (x *UserMetadata) GetSkin() int64 {
 	if x != nil {
 		return x.Skin
 	}
-	return ""
+	return 0
+}
+
+func (x *UserMetadata) GetEliminated() bool {
+	if x != nil {
+		return x.Eliminated
+	}
+	return false
+}
+
+func (x *UserMetadata) GetPosition() *Position {
+	if x != nil {
+		return x.Position
+	}
+	return nil
 }
 
 // Represents users metadata retrieval response message.
 type GetUserMetadataResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserMetadata  []*UserMetadata        `protobuf:"bytes,1,rep,name=user_metadata,json=userMetadata,proto3" json:"user_metadata,omitempty"`
+	UserMetadata  *UserMetadata          `protobuf:"bytes,1,opt,name=user_metadata,json=userMetadata,proto3" json:"user_metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -866,7 +874,7 @@ func (*GetUserMetadataResponse) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{17}
 }
 
-func (x *GetUserMetadataResponse) GetUserMetadata() []*UserMetadata {
+func (x *GetUserMetadataResponse) GetUserMetadata() *UserMetadata {
 	if x != nil {
 		return x.UserMetadata
 	}
@@ -921,8 +929,8 @@ func (x *GetChestsRequest) GetSessionId() int64 {
 // Position represents common position message.
 type Position struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	X             int64                  `protobuf:"varint,1,opt,name=x,proto3" json:"x,omitempty"`
-	Y             int64                  `protobuf:"varint,2,opt,name=y,proto3" json:"y,omitempty"`
+	X             float64                `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`
+	Y             float64                `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -957,14 +965,14 @@ func (*Position) Descriptor() ([]byte, []int) {
 	return file_api_metadata_metadata_proto_rawDescGZIP(), []int{19}
 }
 
-func (x *Position) GetX() int64 {
+func (x *Position) GetX() float64 {
 	if x != nil {
 		return x.X
 	}
 	return 0
 }
 
-func (x *Position) GetY() int64 {
+func (x *Position) GetY() float64 {
 	if x != nil {
 		return x.Y
 	}
@@ -1394,27 +1402,29 @@ const file_api_metadata_metadata_proto_rawDesc = "" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
 	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"\x15\n" +
-	"\x13CreateLobbyResponse\"K\n" +
-	"\x12RemoveLobbyRequest\x12\x1d\n" +
-	"\n" +
-	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
-	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"\x15\n" +
+	"\x13CreateLobbyResponse\",\n" +
+	"\x12RemoveLobbyRequest\x12\x16\n" +
+	"\x06issuer\x18\x01 \x01(\tR\x06issuer\"\x15\n" +
 	"\x13RemoveLobbyResponse\"O\n" +
 	"\x16GetUserMetadataRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\x12\x16\n" +
-	"\x06issuer\x18\x02 \x01(\tR\x06issuer\";\n" +
-	"\fUserMetadata\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
-	"\x04skin\x18\x02 \x01(\tR\x04skin\"V\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\"\x8a\x01\n" +
+	"\fUserMetadata\x12\x16\n" +
+	"\x06health\x18\x01 \x01(\x03R\x06health\x12\x12\n" +
+	"\x04skin\x18\x02 \x01(\x03R\x04skin\x12\x1e\n" +
+	"\n" +
+	"eliminated\x18\x03 \x01(\bR\n" +
+	"eliminated\x12.\n" +
+	"\bposition\x18\x04 \x01(\v2\x12.metadata.PositionR\bposition\"V\n" +
 	"\x17GetUserMetadataResponse\x12;\n" +
-	"\ruser_metadata\x18\x01 \x03(\v2\x16.metadata.UserMetadataR\fuserMetadata\"1\n" +
+	"\ruser_metadata\x18\x01 \x01(\v2\x16.metadata.UserMetadataR\fuserMetadata\"1\n" +
 	"\x10GetChestsRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\x03R\tsessionId\"&\n" +
 	"\bPosition\x12\f\n" +
-	"\x01x\x18\x01 \x01(\x03R\x01x\x12\f\n" +
-	"\x01y\x18\x02 \x01(\x03R\x01y\"E\n" +
+	"\x01x\x18\x01 \x01(\x01R\x01x\x12\f\n" +
+	"\x01y\x18\x02 \x01(\x01R\x01y\"E\n" +
 	"\x11GetChestsResponse\x120\n" +
 	"\tpositions\x18\x01 \x03(\v2\x12.metadata.PositionR\tpositions\".\n" +
 	"\rGetMapRequest\x12\x1d\n" +
@@ -1497,40 +1507,41 @@ var file_api_metadata_metadata_proto_goTypes = []any{
 }
 var file_api_metadata_metadata_proto_depIdxs = []int32{
 	3,  // 0: metadata.GetSessionsResponse.sessions:type_name -> metadata.Session
-	16, // 1: metadata.GetUserMetadataResponse.user_metadata:type_name -> metadata.UserMetadata
-	19, // 2: metadata.GetChestsResponse.positions:type_name -> metadata.Position
-	19, // 3: metadata.GetMapResponse.positions:type_name -> metadata.Position
-	28, // 4: metadata.ChatMessage.timestamp:type_name -> google.protobuf.Timestamp
-	24, // 5: metadata.GetChatMessagesResponse.messages:type_name -> metadata.ChatMessage
-	0,  // 6: metadata.Metadata.PingConnection:input_type -> metadata.PingConnectionRequest
-	2,  // 7: metadata.Metadata.GetSessions:input_type -> metadata.GetSessionsRequest
-	5,  // 8: metadata.Metadata.CreateSession:input_type -> metadata.CreateSessionRequest
-	7,  // 9: metadata.Metadata.RemoveSession:input_type -> metadata.RemoveSessionRequest
-	9,  // 10: metadata.Metadata.GetLobbySet:input_type -> metadata.GetLobbySetRequest
-	11, // 11: metadata.Metadata.CreateLobby:input_type -> metadata.CreateLobbyRequest
-	13, // 12: metadata.Metadata.RemoveLobby:input_type -> metadata.RemoveLobbyRequest
-	15, // 13: metadata.Metadata.GetUserMetadata:input_type -> metadata.GetUserMetadataRequest
-	18, // 14: metadata.Metadata.GetChests:input_type -> metadata.GetChestsRequest
-	21, // 15: metadata.Metadata.GetMap:input_type -> metadata.GetMapRequest
-	23, // 16: metadata.Metadata.GetChatMessages:input_type -> metadata.GetChatMessagesRequest
-	26, // 17: metadata.Metadata.CreateChatMessage:input_type -> metadata.CreateChatMessageRequest
-	1,  // 18: metadata.Metadata.PingConnection:output_type -> metadata.PingConnectionResponse
-	4,  // 19: metadata.Metadata.GetSessions:output_type -> metadata.GetSessionsResponse
-	6,  // 20: metadata.Metadata.CreateSession:output_type -> metadata.CreateSessionResponse
-	8,  // 21: metadata.Metadata.RemoveSession:output_type -> metadata.RemoveSessionResponse
-	10, // 22: metadata.Metadata.GetLobbySet:output_type -> metadata.GetLobbySetResponse
-	12, // 23: metadata.Metadata.CreateLobby:output_type -> metadata.CreateLobbyResponse
-	14, // 24: metadata.Metadata.RemoveLobby:output_type -> metadata.RemoveLobbyResponse
-	17, // 25: metadata.Metadata.GetUserMetadata:output_type -> metadata.GetUserMetadataResponse
-	20, // 26: metadata.Metadata.GetChests:output_type -> metadata.GetChestsResponse
-	22, // 27: metadata.Metadata.GetMap:output_type -> metadata.GetMapResponse
-	25, // 28: metadata.Metadata.GetChatMessages:output_type -> metadata.GetChatMessagesResponse
-	27, // 29: metadata.Metadata.CreateChatMessage:output_type -> metadata.CreateChatMessageResponse
-	18, // [18:30] is the sub-list for method output_type
-	6,  // [6:18] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	19, // 1: metadata.UserMetadata.position:type_name -> metadata.Position
+	16, // 2: metadata.GetUserMetadataResponse.user_metadata:type_name -> metadata.UserMetadata
+	19, // 3: metadata.GetChestsResponse.positions:type_name -> metadata.Position
+	19, // 4: metadata.GetMapResponse.positions:type_name -> metadata.Position
+	28, // 5: metadata.ChatMessage.timestamp:type_name -> google.protobuf.Timestamp
+	24, // 6: metadata.GetChatMessagesResponse.messages:type_name -> metadata.ChatMessage
+	0,  // 7: metadata.Metadata.PingConnection:input_type -> metadata.PingConnectionRequest
+	2,  // 8: metadata.Metadata.GetSessions:input_type -> metadata.GetSessionsRequest
+	5,  // 9: metadata.Metadata.CreateSession:input_type -> metadata.CreateSessionRequest
+	7,  // 10: metadata.Metadata.RemoveSession:input_type -> metadata.RemoveSessionRequest
+	9,  // 11: metadata.Metadata.GetLobbySet:input_type -> metadata.GetLobbySetRequest
+	11, // 12: metadata.Metadata.CreateLobby:input_type -> metadata.CreateLobbyRequest
+	13, // 13: metadata.Metadata.RemoveLobby:input_type -> metadata.RemoveLobbyRequest
+	15, // 14: metadata.Metadata.GetUserMetadata:input_type -> metadata.GetUserMetadataRequest
+	18, // 15: metadata.Metadata.GetChests:input_type -> metadata.GetChestsRequest
+	21, // 16: metadata.Metadata.GetMap:input_type -> metadata.GetMapRequest
+	23, // 17: metadata.Metadata.GetChatMessages:input_type -> metadata.GetChatMessagesRequest
+	26, // 18: metadata.Metadata.CreateChatMessage:input_type -> metadata.CreateChatMessageRequest
+	1,  // 19: metadata.Metadata.PingConnection:output_type -> metadata.PingConnectionResponse
+	4,  // 20: metadata.Metadata.GetSessions:output_type -> metadata.GetSessionsResponse
+	6,  // 21: metadata.Metadata.CreateSession:output_type -> metadata.CreateSessionResponse
+	8,  // 22: metadata.Metadata.RemoveSession:output_type -> metadata.RemoveSessionResponse
+	10, // 23: metadata.Metadata.GetLobbySet:output_type -> metadata.GetLobbySetResponse
+	12, // 24: metadata.Metadata.CreateLobby:output_type -> metadata.CreateLobbyResponse
+	14, // 25: metadata.Metadata.RemoveLobby:output_type -> metadata.RemoveLobbyResponse
+	17, // 26: metadata.Metadata.GetUserMetadata:output_type -> metadata.GetUserMetadataResponse
+	20, // 27: metadata.Metadata.GetChests:output_type -> metadata.GetChestsResponse
+	22, // 28: metadata.Metadata.GetMap:output_type -> metadata.GetMapResponse
+	25, // 29: metadata.Metadata.GetChatMessages:output_type -> metadata.GetChatMessagesResponse
+	27, // 30: metadata.Metadata.CreateChatMessage:output_type -> metadata.CreateChatMessageResponse
+	19, // [19:31] is the sub-list for method output_type
+	7,  // [7:19] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_api_metadata_metadata_proto_init() }

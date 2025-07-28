@@ -83,9 +83,8 @@ func createSessionsRepository() SessionsRepository {
 // LobbiesRepository represents lobbies entity repository.
 type LobbiesRepository interface {
 	InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error
-	Exists(userID int64) (bool, error)
 	DeleteByUserID(userID int64) error
-	GetByUserID(userID int64) (*entity.LobbyEntity, error)
+	GetByUserID(userID int64) (*entity.LobbyEntity, bool, error)
 }
 
 // lobbiesRepositoryImpl represents implementation of LobbiesRepository.
@@ -102,27 +101,11 @@ func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInse
 			Skin:       request.Skin,
 			Health:     request.Health,
 			Eliminated: request.Eliminated,
-			Position:   request.Position,
+			PositionX:  request.PositionX,
+			PositionY:  request.PositionY,
 		}).Error
 
 	return errors.Wrap(err, ErrPersistingLobbies.Error())
-}
-
-// Exists checks if any lobby the given name exists.
-func (w *lobbiesRepositoryImpl) Exists(userID int64) (bool, error) {
-	instance := db.GetInstance()
-
-	err := instance.Model(&entity.LobbyEntity{}).
-		Where("user_id = ?", userID).
-		First(&entity.LobbyEntity{}).Error
-
-	if err != gorm.ErrRecordNotFound {
-		return true, nil
-	} else if err == gorm.ErrRecordNotFound {
-		return false, nil
-	}
-
-	return false, err
 }
 
 // DeleteByUserID deletes lobby by the provided user id.
@@ -135,7 +118,7 @@ func (w *lobbiesRepositoryImpl) DeleteByUserID(userID int64) error {
 }
 
 // GetByUserID retrieves lobby by the provided user id.
-func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) (*entity.LobbyEntity, error) {
+func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) (*entity.LobbyEntity, bool, error) {
 	instance := db.GetInstance()
 
 	var result *entity.LobbyEntity
@@ -144,7 +127,13 @@ func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) (*entity.LobbyEntity, 
 		Where("user_id = ?", userID).
 		Find(&result).Error
 
-	return result, err
+	if err != gorm.ErrRecordNotFound {
+		return result, true, nil
+	} else if err == gorm.ErrRecordNotFound {
+		return nil, false, nil
+	}
+
+	return nil, false, err
 }
 
 // createLobbiesRepository initializes lobbiesRepositoryImpl.

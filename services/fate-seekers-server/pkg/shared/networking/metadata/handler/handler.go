@@ -13,6 +13,7 @@ import (
 
 var (
 	ErrLobbySetDoesNotExist = errors.New("err happened lobby set does not exist")
+	ErrLobbyDoesNotExist    = errors.New("err happened lobby does not exist")
 )
 
 // Handler represents handler implementation of api.MetadataServer.
@@ -141,7 +142,9 @@ func (h *Handler) RemoveSession(ctx context.Context, request *api.RemoveSessionR
 func (h *Handler) GetLobbySet(ctx context.Context, request *api.GetLobbySetRequest) (*api.GetLobbySetResponse, error) {
 	response := new(api.GetLobbySetResponse)
 
-	issuers, ok := cache.GetInstance().GetLobbySet(request.GetSessionId())
+	issuers, ok := cache.
+		GetInstance().
+		GetLobbySet(request.GetSessionId())
 	if !ok {
 		return nil, ErrLobbySetDoesNotExist
 	}
@@ -222,9 +225,79 @@ func (h *Handler) RemoveLobby(context context.Context, request *api.RemoveLobbyR
 }
 
 func (h *Handler) GetUserMetadata(ctx context.Context, request *api.GetUserMetadataRequest) (*api.GetUserMetadataResponse, error) {
-	metadata, ok := cache.GetInstance().GetMetadata(request.GetIssuer())
+	response := new(api.GetUserMetadataResponse)
 
-	return nil, nil
+	metadata, ok := cache.
+		GetInstance().
+		GetMetadata(request.GetIssuer())
+	if !ok {
+		var userID int64
+
+		cachedUserID, ok := cache.
+			GetInstance().
+			GetUsers(request.GetIssuer())
+		if ok {
+			userID = cachedUserID
+		} else {
+			user, _, err := repository.
+				GetUsersRepository().
+				GetByName(request.GetIssuer())
+			if err != nil {
+				return nil, err
+			}
+
+			userID = user.ID
+
+			cache.
+				GetInstance().
+				AddUser(request.GetIssuer(), userID)
+		}
+
+		lobby, exists, err := repository.
+			GetLobbiesRepository().
+			GetByUserID(userID)
+		if err != nil {
+			return nil, err
+		}
+
+		if !exists {
+			return nil, ErrLobbyDoesNotExist
+		}
+
+		cache.
+			GetInstance().
+			AddMetadata(
+				request.GetIssuer(), dto.CacheMetadataEntity{
+					SessionID:  lobby.SessionID,
+					PositionX:  lobby.PositionX,
+					PositionY:  lobby.PositionY,
+					Skin:       lobby.Skin,
+					Health:     lobby.Health,
+					Eliminated: lobby.Eliminated,
+				})
+
+		response.UserMetadata = &api.UserMetadata{
+			Health:     lobby.Health,
+			Skin:       lobby.Skin,
+			Eliminated: lobby.Eliminated,
+			Position: &api.Position{
+				X: lobby.PositionX,
+				Y: lobby.PositionY,
+			},
+		}
+	} else {
+		response.UserMetadata = &api.UserMetadata{
+			Health:     metadata.Health,
+			Skin:       metadata.Skin,
+			Eliminated: metadata.Eliminated,
+			Position: &api.Position{
+				X: metadata.PositionX,
+				Y: metadata.PositionY,
+			},
+		}
+	}
+
+	return response, nil
 }
 
 func (h *Handler) GetChests(context.Context, *api.GetChestsRequest) (*api.GetChestsResponse, error) {

@@ -25,7 +25,8 @@ CREATE TABLE lobbies (
     skin INTEGER NOT NULL,
     health INTEGER NOT NULL,
     eliminated BOOLEAN NOT NULL,
-    position REAL NOT NULL,
+    position_x REAL NOT NULL,
+    position_y REAL NOT NULL,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
     FOREIGN KEY (session_id) REFERENCES sessions(id)
