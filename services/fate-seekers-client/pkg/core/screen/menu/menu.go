@@ -133,6 +133,9 @@ func newMenuScreen() screen.Screen {
 							connector.GetInstance().Connect(
 								func(err1 error) {
 									if err1 != nil {
+										dispatcher.GetInstance().Dispatch(
+											action.NewDecrementLoadingApplicationAction())
+
 										notification.GetInstance().Push(
 											common.ComposeMessage(
 												translation.GetInstance().GetTranslation("client.networking.connection-failure"),
@@ -144,10 +147,10 @@ func newMenuScreen() screen.Screen {
 									}
 
 									handler.PerformPingConnection(func(err2 error) {
-										dispatcher.GetInstance().Dispatch(
-											action.NewDecrementLoadingApplicationAction())
-
 										if err2 != nil {
+											dispatcher.GetInstance().Dispatch(
+												action.NewDecrementLoadingApplicationAction())
+
 											notification.GetInstance().Push(
 												common.ComposeMessage(
 													translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
@@ -161,10 +164,32 @@ func newMenuScreen() screen.Screen {
 											return
 										}
 
-										transparentTransitionEffect.Reset()
+										handler.PerformCreateUserIfNotExists(func(err3 error) {
+											if err3 != nil {
+												dispatcher.GetInstance().Dispatch(
+													action.NewDecrementLoadingApplicationAction())
 
-										dispatcher.GetInstance().Dispatch(
-											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
+												notification.GetInstance().Push(
+													common.ComposeMessage(
+														translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
+														err2.Error()),
+													time.Second*2,
+													common.NotificationErrorTextColor)
+
+												dispatcher.GetInstance().Dispatch(
+													action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
+
+												return
+											}
+
+											dispatcher.GetInstance().Dispatch(
+												action.NewDecrementLoadingApplicationAction())
+
+											transparentTransitionEffect.Reset()
+
+											dispatcher.GetInstance().Dispatch(
+												action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
+										})
 									})
 								},
 								func(err error) {

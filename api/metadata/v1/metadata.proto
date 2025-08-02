@@ -2,15 +2,19 @@ syntax = "proto3";
 option go_package = "github.com/YarikRevich/fate-seekers/pkg/core/networking/metadata/api";
 
 import "google/protobuf/timestamp.proto";
+import "buf/validate/validate.proto";
 
-package metadata;
+package metadata.v1;
 
 // Represents service used to retrieve user content related data.
 // All the metadata requests require authentication header to be provided, having JWT token saved in it.
-service Metadata {
+service MetadataService {
     // PingConnection performs ping connection and creates user record on the server side at the same time, 
     // if such does not exist.
     rpc PingConnection(PingConnectionRequest) returns (PingConnectionResponse) {};
+
+    // CreateUserIfNotExists performs attempt to create a user, if it hasn't been create yet.
+    rpc CreateUserIfNotExists(CreateUserIfNotExistsRequest) returns (CreateUserIfNotExistsResponse) {};
 
     // GetSessions performs existing sessions retrieval operation by the configured user.
     rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse) {};
@@ -33,7 +37,7 @@ service Metadata {
     // GetUserMetadata performs user metadata retrieval request by the configured user.
     rpc GetUserMetadata(GetUserMetadataRequest) returns (GetUserMetadataResponse) {};
 
-    // GetChest performs chests retrieval for the selected session by the configured user.
+    // GetChests performs chests retrieval for the selected session by the configured user.
     rpc GetChests(GetChestsRequest) returns (GetChestsResponse) {};
 
     // GetMap performs map retrieval for the selected session by the configured user.
@@ -48,22 +52,32 @@ service Metadata {
 
 // PingConnectionRequest represents  ping connection request message.
 message PingConnectionRequest {
-    string issuer = 1;
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
 };
 
 // PingConnectionResponse represents ping connection response message.
 message PingConnectionResponse {
 };
 
+// CreateUserIfNotExistsRequest represents user creation attempt request message.
+message CreateUserIfNotExistsRequest {
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
+};
+
+// CreateUserIfNotExistsRequest represents user creation attempt response message.
+message CreateUserIfNotExistsResponse {
+
+};
+
 // GetSessionsRequest represents get sesssions request.
 message GetSessionsRequest {
-    string issuer = 1;
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
 };
 
 // Session represents common session retrieval message.
 message Session {
     int64 session_id = 1; 
-    int64 seed = 2;
+    uint64 seed = 2;
     string name = 3;
 }
 
@@ -75,9 +89,9 @@ message GetSessionsResponse {
 // CreateSessionRequest represents create session request.
 // User is allowed to create only 3 sessions in 10 minutes.
 message CreateSessionRequest {
-    string name = 1;
-    string issuer = 2;
-    optional int64 seed = 3;
+    string name = 1 [(buf.validate.field).string.pattern = "^[a-zA-Z0-9-]{8}\b$"];
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
+    optional uint64 seed = 3 ;
 };
 
 // CreateSessionResponse represents create session response.
@@ -97,7 +111,7 @@ message RemoveSessionResponse {
 // GetLobbySetRequest represents user create lobby request.
 message GetLobbySetRequest {
     int64 session_id = 1;
-    string issuer = 2;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
 
 // GetLobbySetResponse represents user create lobby response.
@@ -108,7 +122,7 @@ message GetLobbySetResponse {
 // CreateLobbyRequest represents user create lobby request.
 message CreateLobbyRequest {
     int64 session_id = 1;
-    string issuer = 2;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
 
 // CreateLobbyResponse represents user create lobby response.
@@ -117,7 +131,7 @@ message CreateLobbyResponse {
 
 // RemoveLobbyRequest represents user remove lobby request.
 message RemoveLobbyRequest {
-    string issuer = 1;
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
 };
 
 // RemoveLobbyResponse represents user remove lobby response.
@@ -127,13 +141,13 @@ message RemoveLobbyResponse {
 // Represents users metadata retrieval request message.
 message GetUserMetadataRequest {
     int64 session_id = 1;
-    string issuer = 2;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
 
 // Represents common user metadata message.
 message UserMetadata {
-    int64 health = 1;
-    int64 skin = 2;
+    uint64 health = 1;
+    uint64 skin = 2;
     bool eliminated = 3;
     Position position = 4;
 };
@@ -172,7 +186,7 @@ message GetMapResponse {
 // GetChatMessagesRequest represents chat messages retrieval request message.
 message GetChatMessagesRequest {
     int64 session_id = 1;
-    int64 offset = 2;
+    uint64 offset = 2;
 };
 
 // ChatMessage represents common chat retrieval message.
@@ -190,7 +204,7 @@ message GetChatMessagesResponse {
 // CreateChatMessageRequest represents chat message creation request message.
 message CreateChatMessageRequest {
     int64 session_id = 1;
-    int64 offset = 2;
+    uint64 offset = 2;
 };
 
 // CreateChatMessageResponse represents chat message creation request message.

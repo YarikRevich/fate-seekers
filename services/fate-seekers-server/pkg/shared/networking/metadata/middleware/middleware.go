@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 
+	"buf.build/go/protovalidate"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 )
 
 // Represents all the headers used for middlewares management.
@@ -17,8 +19,25 @@ const (
 )
 
 var (
+	ErrMissingMetadata            = errors.New("err happened missing metadata")
 	ErrAuthorizationHeaderInvalid = errors.New("err happened during authorization header validation")
+	ErrMessageValidationFailed    = errors.New("err happened message validation failed")
 )
+
+// CheckValidationMiddleware represents protobuf API validation middleware.
+func CheckValidationMiddleware(
+	ctx context.Context,
+	req interface{},
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+) (interface{}, error) {
+	err := protovalidate.Validate(req.(proto.Message))
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, ErrMessageValidationFailed.Error())
+	}
+
+	return handler(ctx, req)
+}
 
 // CheckAuthenticationMiddleware performs authentication middleware validation.
 func CheckAuthenticationMiddleware(
@@ -29,7 +48,7 @@ func CheckAuthenticationMiddleware(
 ) (interface{}, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return nil, status.Errorf(codes.Unauthenticated, "missing metadata")
+		return nil, status.Errorf(codes.Unauthenticated, ErrMissingMetadata.Error())
 	}
 
 	if _, ok := md[AuthenticationHeader]; !ok {

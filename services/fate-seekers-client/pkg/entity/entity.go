@@ -18,7 +18,7 @@ func (*CollectionEntity) TableName() string {
 type FlagsEntity struct {
 	ID        int64     `gorm:"column:id;primaryKey;auto_increment;not null"`
 	Name      string    `gorm:"column:name;not null;unique"`
-	Value     string    `gorm:"column:name;not null"`
+	Value     string    `gorm:"column:value;not null"`
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime:milli"`
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
 }

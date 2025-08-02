@@ -1,7 +1,9 @@
 syntax = "proto3";
 option go_package = "github.com/YarikRevich/fate-seekers/pkg/core/networking/content/api";
 
-package content;
+package content.v1;
+
+import "buf/validate/validate.proto";
 
 // Represents common position message.
 message Position {
@@ -11,7 +13,7 @@ message Position {
 
 // Represents users positions retrieval request message.
 message GetUserMetadataPositionsRequest {
-    string issuer = 1;
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
     int64 session_id = 2;
 };
 

@@ -8,7 +8,7 @@ import (
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
+	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/middleware"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/pkg/errors"
@@ -27,17 +27,18 @@ type NetworkingMetadataConnector struct {
 	conn *grpc.ClientConn
 
 	// Represents metadata connector client.
-	client api.MetadataClient
+	client metadatav1.MetadataServiceClient
 }
 
 // Connecto performs connect operation.
 func (nmc *NetworkingMetadataConnector) Connect() error {
 	var err error
 
-	nmc.conn, err = grpc.NewClient(
+	nmc.conn, err = grpc.Dial(
 		config.GetSettingsNetworkingServerHost(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithPerRPCCredentials(&middleware.AuthenticationMiddleware{}))
+		grpc.WithPerRPCCredentials(&middleware.AuthenticationMiddleware{}),
+		grpc.WithUnaryInterceptor(middleware.CheckValidationMiddleware))
 	if err != nil {
 		return errors.Wrap(err, networking.ErrConnectorHostIsInvalid.Error())
 	}
@@ -53,7 +54,7 @@ func (nmc *NetworkingMetadataConnector) Connect() error {
 		}
 	}()
 
-	nmc.client = api.NewMetadataClient(nmc.conn)
+	nmc.client = metadatav1.NewMetadataServiceClient(nmc.conn)
 
 	return nil
 }
@@ -68,7 +69,7 @@ func (nmc *NetworkingMetadataConnector) Close() error {
 }
 
 // GetConnection retrieves metadata client connection instance.
-func (ncm *NetworkingMetadataConnector) GetClient() api.MetadataClient {
+func (ncm *NetworkingMetadataConnector) GetClient() metadatav1.MetadataServiceClient {
 	return ncm.client
 }
 

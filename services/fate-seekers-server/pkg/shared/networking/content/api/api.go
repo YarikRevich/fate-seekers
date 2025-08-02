@@ -1,4 +1,4 @@
-package api
+package contentv1
 
 // Represents NOT GENERATED labels for all the requests, which are performed
 // by content connector.

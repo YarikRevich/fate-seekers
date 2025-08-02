@@ -182,7 +182,8 @@ func createMessagesRepository() MessagesRepository {
 
 // UsersRepository represents users entity repository.
 type UsersRepository interface {
-	Insert(nam string) error
+	Insert(name string) error
+	Exists(name string) (bool, error)
 	GetByName(name string) (*entity.UserEntity, bool, error)
 }
 
@@ -198,6 +199,24 @@ func (w *usersRepositoryImpl) Insert(name string) error {
 	}).Error
 
 	return errors.Wrap(err, ErrPersistingUsers.Error())
+}
+
+// Exists checks if user with the given name exists.
+func (w *usersRepositoryImpl) Exists(name string) (bool, error) {
+	instance := db.GetInstance()
+
+	var exists bool
+
+	err := instance.Model(&entity.UserEntity{}).
+		Select("count(*) > 0").
+		Where("name = ?", name).
+		Find(&exists).Error
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, err
 }
 
 // GetByName retrieves user with the given name.

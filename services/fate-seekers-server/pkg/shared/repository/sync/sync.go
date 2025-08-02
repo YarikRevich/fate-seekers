@@ -1,12 +1,17 @@
 package sync
 
 import (
+	"errors"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/cache"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository"
+)
+
+var (
+	ErrUserDoesNotExist = errors.New("err happened user does not exist")
 )
 
 const (
@@ -34,11 +39,15 @@ func Run() {
 				if ok {
 					userID = cachedUserID
 				} else {
-					user, _, err := repository.
+					user, exists, err := repository.
 						GetUsersRepository().
 						GetByName(key)
 					if err != nil {
 						logging.GetInstance().Fatal(err.Error())
+					}
+
+					if !exists {
+						logging.GetInstance().Fatal(ErrUserDoesNotExist.Error())
 					}
 
 					userID = user.ID

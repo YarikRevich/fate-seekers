@@ -14,7 +14,7 @@ type SessionEntity struct {
 	Seed       int64      `gorm:"column:seed;not null"`
 	Issuer     int64      `gorm:"column:issuer;not null"`
 	CreatedAt  time.Time  `gorm:"column:created_at;autoCreateTime"`
-	UserEntity UserEntity `gorm:"foreignKey:Issuer;references:UserEntityID"`
+	UserEntity UserEntity `gorm:"foreignKey:Issuer;references:ID"`
 }
 
 // TableName retrieves name of database table.
@@ -51,8 +51,8 @@ type LobbyEntity struct {
 	PositionX     float64       `gorm:"column:position_x;not null"`
 	PositionY     float64       `gorm:"column:position_y;not null"`
 	CreatedAt     time.Time     `gorm:"column:created_at;autoCreateTime"`
-	UserEntity    UserEntity    `gorm:"foreignKey:UserID;references:UserEntityID"`
-	SessionEntity SessionEntity `gorm:"foreignKey:SessionID;references:SessionEntityID"`
+	UserEntity    UserEntity    `gorm:"foreignKey:UserID;references:ID"`
+	SessionEntity SessionEntity `gorm:"foreignKey:SessionID;references:ID"`
 }
 
 // TableName retrieves name of database table.
@@ -88,7 +88,7 @@ type MessageEntity struct {
 	Content    string     `gorm:"column:name;not null"`
 	Issuer     int64      `gorm:"column:issuer;not null"`
 	CreatedAt  time.Time  `gorm:"column:created_at;autoCreateTime"`
-	UserEntity UserEntity `gorm:"foreignKey:Issuer;references:UserEntityID"`
+	UserEntity UserEntity `gorm:"foreignKey:Issuer;references:ID"`
 }
 
 // TableName retrieves name of database table.
