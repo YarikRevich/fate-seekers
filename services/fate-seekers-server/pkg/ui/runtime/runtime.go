@@ -101,7 +101,7 @@ func (r *Runtime) Update() error {
 		r.notificationTransparentTransitionEffect.Reset()
 	}
 
-	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
+	if store.GetPromptText() != value.TEXT_PROMPT_EMPTY_VALUE {
 		if !r.promptTransparentTransitionEffect.Done() {
 			if !r.promptTransparentTransitionEffect.OnEnd() {
 				r.promptTransparentTransitionEffect.Update()
@@ -111,7 +111,7 @@ func (r *Runtime) Update() error {
 		}
 	}
 
-	if store.GetInfoText() != value.INFO_TEXT_EMPTY_VALUE {
+	if store.GetInfoText() != value.TEXT_INFO_EMPTY_VALUE {
 		if !r.infoTransparentTransitionEffect.Done() {
 			if !r.infoTransparentTransitionEffect.OnEnd() {
 				r.infoTransparentTransitionEffect.Update()
@@ -132,23 +132,23 @@ func (r *Runtime) Update() error {
 		r.activeScreen = settings.GetInstance()
 	}
 
-	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
-		if store.GetPromptUpdated() == value.PROMPT_UPDATED_FALSE_VALUE {
+	if store.GetPromptText() != value.TEXT_PROMPT_EMPTY_VALUE {
+		if store.GetPromptUpdated() == value.UPDATED_PROMPT_FALSE_VALUE {
 			prompt.GetInstance().SetText(store.GetPromptText())
 
 			dispatcher.GetInstance().Dispatch(
-				action.NewSetPromptUpdated(value.PROMPT_UPDATED_TRUE_VALUE))
+				action.NewSetPromptUpdated(value.UPDATED_PROMPT_TRUE_VALUE))
 		}
 
 		r.promptInterface.Update()
 	}
 
-	if store.GetInfoText() != value.INFO_TEXT_EMPTY_VALUE {
-		if store.GetInfoUpdated() == value.INFO_UPDATED_FALSE_VALUE {
+	if store.GetInfoText() != value.TEXT_INFO_EMPTY_VALUE {
+		if store.GetInfoUpdated() == value.UPDATED_INFO_FALSE_VALUE {
 			info.GetInstance().SetText(store.GetInfoText())
 
 			dispatcher.GetInstance().Dispatch(
-				action.NewSetInfoUpdated(value.INFO_UPDATED_TRUE_VALUE))
+				action.NewSetInfoUpdated(value.UPDATED_INFO_TRUE_VALUE))
 		}
 
 		r.infoInterface.Update()
@@ -176,11 +176,11 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 		r.notificationInterfaceWorld.Clear()
 	}
 
-	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
+	if store.GetPromptText() != value.TEXT_PROMPT_EMPTY_VALUE {
 		r.promptInterfaceWorld.Clear()
 	}
 
-	if store.GetInfoText() != value.INFO_TEXT_EMPTY_VALUE {
+	if store.GetInfoText() != value.TEXT_INFO_EMPTY_VALUE {
 		r.infoInterfaceWorld.Clear()
 	}
 
@@ -204,7 +204,7 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 		ColorM: options.GetTransparentDrawOptions(
 			r.notificationTransparentTransitionEffect.GetValue()).ColorM})
 
-	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
+	if store.GetPromptText() != value.TEXT_PROMPT_EMPTY_VALUE {
 		screen.DrawImage(r.promptInterfaceMask, &ebiten.DrawImageOptions{
 			ColorM: mask.GetMaskEffect(80).ColorM,
 		})
@@ -216,7 +216,7 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 				r.promptTransparentTransitionEffect.GetValue()).ColorM})
 	}
 
-	if store.GetInfoText() != value.INFO_TEXT_EMPTY_VALUE {
+	if store.GetInfoText() != value.TEXT_INFO_EMPTY_VALUE {
 		screen.DrawImage(r.infoInterfaceMask, &ebiten.DrawImageOptions{
 			ColorM: mask.GetMaskEffect(80).ColorM,
 		})
@@ -255,32 +255,32 @@ func NewRuntime() *Runtime {
 		store.GetPromptSubmitCallback()()
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptSubmitCallback(value.PROMPT_SUBMIT_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptSubmitCallback(value.SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptCancelCallback(value.PROMPT_CANCEL_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptCancelCallback(value.CANCEL_PROMPT_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptText(value.PROMPT_TEXT_EMPTY_VALUE))
+			action.NewSetPromptText(value.TEXT_PROMPT_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptUpdated(value.PROMPT_UPDATED_FALSE_VALUE))
+			action.NewSetPromptUpdated(value.UPDATED_PROMPT_FALSE_VALUE))
 	})
 
 	prompt.GetInstance().SetCloseCallback(func() {
 		store.GetPromptCancelCallback()()
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptSubmitCallback(value.PROMPT_SUBMIT_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptSubmitCallback(value.SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptCancelCallback(value.PROMPT_CANCEL_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptCancelCallback(value.CANCEL_PROMPT_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptText(value.PROMPT_TEXT_EMPTY_VALUE))
+			action.NewSetPromptText(value.TEXT_PROMPT_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptUpdated(value.PROMPT_UPDATED_FALSE_VALUE))
+			action.NewSetPromptUpdated(value.UPDATED_PROMPT_FALSE_VALUE))
 
 		promptTransparentTransitionEffect.Reset()
 	})
@@ -296,13 +296,13 @@ func NewRuntime() *Runtime {
 		store.GetInfoCancelCallback()()
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetInfoCancelCallback(value.INFO_CANCEL_CALLBACK_EMPTY_VALUE))
+			action.NewSetInfoCancelCallback(value.CANCEL_INFO_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetInfoText(value.INFO_TEXT_EMPTY_VALUE))
+			action.NewSetInfoText(value.TEXT_INFO_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetInfoUpdated(value.INFO_UPDATED_FALSE_VALUE))
+			action.NewSetInfoUpdated(value.UPDATED_INFO_FALSE_VALUE))
 
 		infoTransparentTransitionEffect.Reset()
 	})

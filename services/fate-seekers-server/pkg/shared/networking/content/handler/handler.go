@@ -9,6 +9,7 @@ type Handler struct {
 func (h *Handler) Process(key string, value []byte) error {
 	switch key {
 	case contentv1.GET_USER_METADATA_POSITIONS:
+	case contentv1.UPDATE_USER_METADATA_POSITIONS:
 
 	}
 

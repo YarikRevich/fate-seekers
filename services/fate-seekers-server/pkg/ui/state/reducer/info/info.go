@@ -22,9 +22,9 @@ type InfoStateReducer struct {
 }
 
 func (isr *InfoStateReducer) Init() {
-	isr.store.SetState(UPDATED_INFO_STATE, value.INFO_UPDATED_FALSE_VALUE)
-	isr.store.SetState(TEXT_INFO_STATE, value.INFO_TEXT_EMPTY_VALUE)
-	isr.store.SetState(CANCEL_CALLBACK_INFO_STATE, value.INFO_CANCEL_CALLBACK_EMPTY_VALUE)
+	isr.store.SetState(UPDATED_INFO_STATE, value.UPDATED_INFO_FALSE_VALUE)
+	isr.store.SetState(TEXT_INFO_STATE, value.TEXT_INFO_EMPTY_VALUE)
+	isr.store.SetState(CANCEL_CALLBACK_INFO_STATE, value.CANCEL_INFO_CALLBACK_EMPTY_VALUE)
 }
 
 func (isr *InfoStateReducer) GetProcessor() func(value godux.Action) interface{} {

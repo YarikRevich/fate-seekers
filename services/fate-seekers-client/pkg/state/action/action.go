@@ -67,6 +67,12 @@ const (
 	SET_MUSIC_UPDATED_SOUND_ACTION = "SET_MUSIC_UPDATED_SOUND_ACTION"
 )
 
+// Describes all the available state actions for statistics reducer.
+const (
+	SET_CONTENT_PING_STATISTICS_ACTION  = "SET_CONTENT_PING_STATISTICS_ACTION"
+	SET_METADATA_PING_STATISTICS_ACTION = "SET_METADATA_PING_STATISTICS_ACTION"
+)
+
 // NewSetActiveScreenAction creates new set active screen action.
 func NewSetActiveScreenAction(value string) godux.Action {
 	return godux.Action{
@@ -277,6 +283,22 @@ func NewSetSoundFXUpdated(value string) godux.Action {
 func NewSetSoundMusicUpdated(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_MUSIC_UPDATED_SOUND_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetStatisticsContentPing creates new set statistics content ping action.
+func NewSetStatisticsContentPing(value int64) godux.Action {
+	return godux.Action{
+		Type:  SET_CONTENT_PING_STATISTICS_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetStatisticsMetadataPing creates new set statistics metadata ping action.
+func NewSetStatisticsMetadataPing(value int64) godux.Action {
+	return godux.Action{
+		Type:  SET_METADATA_PING_STATISTICS_ACTION,
 		Value: value,
 	}
 }

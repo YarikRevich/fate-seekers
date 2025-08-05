@@ -27,7 +27,13 @@ func (i *ImGUI) Update() {
 
 	ebimgui.BeginFrame()
 
-	imgui.Text(fmt.Sprintf("FPS: %f", ebiten.ActualFPS()))
+	if imgui.BeginMenu("Statistics") {
+		imgui.Text(fmt.Sprintf("FPS: %f", ebiten.ActualFPS()))
+		imgui.Text(fmt.Sprintf("Content ping: %d", store.GetStatisticsContentPing()))
+		imgui.Text(fmt.Sprintf("Metadata ping: %d", store.GetStatisticsMetadataPing()))
+
+		imgui.EndMenu()
+	}
 
 	if imgui.BeginMenu("States") {
 		imgui.Text(fmt.Sprintf("active_screen: %s", store.GetActiveScreen()))

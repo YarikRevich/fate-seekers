@@ -7,6 +7,7 @@ import (
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/middleware"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/balacode/udpt"
 	"google.golang.org/protobuf/proto"
@@ -29,28 +30,62 @@ type Handler struct {
 
 // send performs low level UDP send operation using udpt wrapper.
 func (h *Handler) send(key string, value []byte) error {
-	err := udpt.Send(
-		config.GetSettingsNetworkingServerHost(),
-		key,
-		value,
-		config.GetSettingsParsedNetworkingEncryptionKey(),
-		h.configuration)
-	if err != nil {
-		return ErrSendRequest
-	}
+	return middleware.
+		GetInstance().
+		Run(func() error {
+			err := udpt.Send(
+				config.GetSettingsNetworkingServerHost(),
+				key,
+				value,
+				config.GetSettingsParsedNetworkingEncryptionKey(),
+				h.configuration)
+			if err != nil {
+				return ErrSendRequest
+			}
 
-	return nil
+			return nil
+		})
 }
 
-// PerformGetUserMetadataPositions performs get user positions retrieval
+// PerformGetUserMetadataPositions performs get user positions retrieval.
 func (h *Handler) PerformGetUserMetadataPositions(callback func(err error)) {
 	go func() {
-		proto.Marshal(&api.GetUserMetadataPositionsRequest{
+		message, err := proto.Marshal(&api.GetUserMetadataPositionsRequest{
 			Issuer:    store.GetRepositoryUUID(),
 			SessionId: "",
 		})
+		if err != nil {
+			callback(err)
 
-		err := h.send(api.GET_USER_METADATA_POSITIONS, []byte("gjfkgjfk"))
+			return
+		}
+
+		err = h.send(api.GET_USER_METADATA_POSITIONS, message)
+		if err != nil {
+			callback(err)
+
+			return
+		}
+
+		callback(nil)
+	}()
+}
+
+// PerformUpdateUserMetadataPositions performs user positions update.
+func (h *Handler) PerformUpdateUserMetadataPositions(callback func(err error)) {
+	go func() {
+		message, err := proto.Marshal(&api.UpdateUserMetadataPositionsRequest{
+			Issuer:    store.GetRepositoryUUID(),
+			SessionId: "",
+			Position:  &api.Position{},
+		})
+		if err != nil {
+			callback(err)
+
+			return
+		}
+
+		err = h.send(api.UPDATE_USER_METADATA_POSITIONS, message)
 		if err != nil {
 			callback(err)
 

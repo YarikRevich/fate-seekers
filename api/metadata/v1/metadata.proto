@@ -35,7 +35,7 @@ service MetadataService {
     rpc RemoveLobby(RemoveLobbyRequest) returns (RemoveLobbyResponse) {};
 
     // GetUserMetadata performs user metadata retrieval request by the configured user.
-    rpc GetUserMetadata(GetUserMetadataRequest) returns (GetUserMetadataResponse) {};
+    rpc GetUserMetadata(GetUserMetadataRequest) returns (stream GetUserMetadataResponse) {};
 
     // GetChests performs chests retrieval for the selected session by the configured user.
     rpc GetChests(GetChestsRequest) returns (GetChestsResponse) {};

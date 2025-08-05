@@ -13,6 +13,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/sound"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/statistics"
 	"github.com/luisvinicius167/godux"
 )
 
@@ -196,6 +197,20 @@ func GetSoundMusicUpdated() string {
 	return instance.GetState(sound.MUSIC_UPDATED_SOUND_STATE).(string)
 }
 
+// GetStatisticsContentPing retrieves statistics content ping state value.
+func GetStatisticsContentPing() int64 {
+	instance := GetInstance()
+
+	return instance.GetState(statistics.CONTENT_PING_STATISTICS_STATE).(int64)
+}
+
+// GetStatisticsMetadataPing retrieves statistics metadata ping state value.
+func GetStatisticsMetadataPing() int64 {
+	instance := GetInstance()
+
+	return instance.GetState(statistics.METADATA_PING_STATISTICS_STATE).(int64)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()
@@ -229,6 +244,9 @@ func newStore() *godux.Store {
 
 	creatorReducer := creator.NewCreatorStateReducer(store)
 	creatorReducer.Init()
+
+	statisticsReducer := statistics.NewStatisticsStateReducer(store)
+	statisticsReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
@@ -277,6 +295,11 @@ func newStore() *godux.Store {
 		}
 
 		result = creatorReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = statisticsReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

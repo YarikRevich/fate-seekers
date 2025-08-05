@@ -98,8 +98,8 @@ func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInse
 		&entity.LobbyEntity{
 			UserID:     request.UserID,
 			SessionID:  request.SessionID,
-			Skin:       request.Skin,
-			Health:     request.Health,
+			Skin:       int64(request.Skin),
+			Health:     int64(request.Health),
 			Eliminated: request.Eliminated,
 			PositionX:  request.PositionX,
 			PositionY:  request.PositionY,

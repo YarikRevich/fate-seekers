@@ -5,19 +5,31 @@ package content.v1;
 
 import "buf/validate/validate.proto";
 
-// Represents common position message.
+// // Represents users positions retrieval request message.
+// message GetUserMetadataPositionsRequest {
+//     string issuer = 1 [(buf.validate.field).string.uuid = true];
+//     int64 session_id = 2;
+// };
+
+// // Represents users positions retrieval response message.
+// message GetUserMetadataPositionsResponse {
+//     repeated Position positions = 1;
+// };
+
+// Position represents common position message.
 message Position {
     double x = 1;
     double y = 2;
 }
 
-// Represents users positions retrieval request message.
-message GetUserMetadataPositionsRequest {
+// UpdateUserMetadataPositionsRequest represents users positions update request message.
+message UpdateUserMetadataPositionsRequest {
     string issuer = 1 [(buf.validate.field).string.uuid = true];
     int64 session_id = 2;
+    Position position = 3;
 };
 
-// Represents users positions retrieval response message.
-message GetUserMetadataPositionsResponse {
-    repeated Position positions = 1;
+// UpdateUserMetadataPositionsResponse represents users position update response message;
+message UpdateUserMetadataPositionsResponse {
+
 };

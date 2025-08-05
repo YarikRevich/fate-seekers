@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/connector"
@@ -14,8 +13,6 @@ import (
 // PerformPingConnection performs ping connection request.
 func PerformPingConnection(callback func(err error)) {
 	go func() {
-		fmt.Println(store.GetRepositoryUUID(), "PERFORMING PING CONNECTION")
-
 		_, err := connector.
 			GetInstance().
 			GetClient().
@@ -101,7 +98,7 @@ func PerformGetSessions(callback func(response *metadatav1.GetSessionsResponse, 
 }
 
 // PerformCreateSession performs session creation request.
-func PerformCreateSession(name string, seed int64, callback func(err error)) {
+func PerformCreateSession(name string, seed uint64, callback func(err error)) {
 	go func() {
 		_, err := connector.
 			GetInstance().

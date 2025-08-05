@@ -100,7 +100,7 @@ func newCreatorScreen() screen.Screen {
 					action.NewSetSessionCreationStartedNetworkingAction(
 						value.SESSION_CREATION_STARTED_NETWORKING_TRUE_VALUE))
 
-				seedInt, err := strconv.ParseInt(seed, 10, 64)
+				seedUint, err := strconv.ParseUint(seed, 10, 64)
 				if err != nil {
 					notification.GetInstance().Push(
 						translation.GetInstance().GetTranslation("client.creatormanager.invalid-session-seed"),
@@ -112,7 +112,7 @@ func newCreatorScreen() screen.Screen {
 						time.Second*4,
 						common.NotificationInfoTextColor)
 
-					handler.PerformCreateSession(name, seedInt, func(err error) {
+					handler.PerformCreateSession(name, seedUint, func(err error) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetSessionCreationStartedNetworkingAction(
 								value.SESSION_CREATION_STARTED_NETWORKING_TRUE_VALUE))

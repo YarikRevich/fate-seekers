@@ -59,7 +59,7 @@ type MetadataServiceClient interface {
 	// RemoveLobby performs lobby removal operation by the configured user. Allowed for lobby owner only.
 	RemoveLobby(ctx context.Context, in *RemoveLobbyRequest, opts ...grpc.CallOption) (*RemoveLobbyResponse, error)
 	// GetUserMetadata performs user metadata retrieval request by the configured user.
-	GetUserMetadata(ctx context.Context, in *GetUserMetadataRequest, opts ...grpc.CallOption) (*GetUserMetadataResponse, error)
+	GetUserMetadata(ctx context.Context, in *GetUserMetadataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetUserMetadataResponse], error)
 	// GetChests performs chests retrieval for the selected session by the configured user.
 	GetChests(ctx context.Context, in *GetChestsRequest, opts ...grpc.CallOption) (*GetChestsResponse, error)
 	// GetMap performs map retrieval for the selected session by the configured user.
@@ -158,15 +158,24 @@ func (c *metadataServiceClient) RemoveLobby(ctx context.Context, in *RemoveLobby
 	return out, nil
 }
 
-func (c *metadataServiceClient) GetUserMetadata(ctx context.Context, in *GetUserMetadataRequest, opts ...grpc.CallOption) (*GetUserMetadataResponse, error) {
+func (c *metadataServiceClient) GetUserMetadata(ctx context.Context, in *GetUserMetadataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetUserMetadataResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserMetadataResponse)
-	err := c.cc.Invoke(ctx, MetadataService_GetUserMetadata_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[0], MetadataService_GetUserMetadata_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[GetUserMetadataRequest, GetUserMetadataResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetUserMetadataClient = grpc.ServerStreamingClient[GetUserMetadataResponse]
 
 func (c *metadataServiceClient) GetChests(ctx context.Context, in *GetChestsRequest, opts ...grpc.CallOption) (*GetChestsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -180,7 +189,7 @@ func (c *metadataServiceClient) GetChests(ctx context.Context, in *GetChestsRequ
 
 func (c *metadataServiceClient) GetMap(ctx context.Context, in *GetMapRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetMapResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[0], MetadataService_GetMap_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[1], MetadataService_GetMap_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +208,7 @@ type MetadataService_GetMapClient = grpc.ServerStreamingClient[GetMapResponse]
 
 func (c *metadataServiceClient) GetChatMessages(ctx context.Context, in *GetChatMessagesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetChatMessagesResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[1], MetadataService_GetChatMessages_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[2], MetadataService_GetChatMessages_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -251,7 +260,7 @@ type MetadataServiceServer interface {
 	// RemoveLobby performs lobby removal operation by the configured user. Allowed for lobby owner only.
 	RemoveLobby(context.Context, *RemoveLobbyRequest) (*RemoveLobbyResponse, error)
 	// GetUserMetadata performs user metadata retrieval request by the configured user.
-	GetUserMetadata(context.Context, *GetUserMetadataRequest) (*GetUserMetadataResponse, error)
+	GetUserMetadata(*GetUserMetadataRequest, grpc.ServerStreamingServer[GetUserMetadataResponse]) error
 	// GetChests performs chests retrieval for the selected session by the configured user.
 	GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error)
 	// GetMap performs map retrieval for the selected session by the configured user.
@@ -294,8 +303,8 @@ func (UnimplementedMetadataServiceServer) CreateLobby(context.Context, *CreateLo
 func (UnimplementedMetadataServiceServer) RemoveLobby(context.Context, *RemoveLobbyRequest) (*RemoveLobbyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveLobby not implemented")
 }
-func (UnimplementedMetadataServiceServer) GetUserMetadata(context.Context, *GetUserMetadataRequest) (*GetUserMetadataResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserMetadata not implemented")
+func (UnimplementedMetadataServiceServer) GetUserMetadata(*GetUserMetadataRequest, grpc.ServerStreamingServer[GetUserMetadataResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method GetUserMetadata not implemented")
 }
 func (UnimplementedMetadataServiceServer) GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetChests not implemented")
@@ -474,23 +483,16 @@ func _MetadataService_RemoveLobby_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MetadataService_GetUserMetadata_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserMetadataRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _MetadataService_GetUserMetadata_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetUserMetadataRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(MetadataServiceServer).GetUserMetadata(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: MetadataService_GetUserMetadata_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MetadataServiceServer).GetUserMetadata(ctx, req.(*GetUserMetadataRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(MetadataServiceServer).GetUserMetadata(m, &grpc.GenericServerStream[GetUserMetadataRequest, GetUserMetadataResponse]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetUserMetadataServer = grpc.ServerStreamingServer[GetUserMetadataResponse]
 
 func _MetadataService_GetChests_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetChestsRequest)
@@ -590,10 +592,6 @@ var MetadataService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _MetadataService_RemoveLobby_Handler,
 		},
 		{
-			MethodName: "GetUserMetadata",
-			Handler:    _MetadataService_GetUserMetadata_Handler,
-		},
-		{
 			MethodName: "GetChests",
 			Handler:    _MetadataService_GetChests_Handler,
 		},
@@ -603,6 +601,11 @@ var MetadataService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetUserMetadata",
+			Handler:       _MetadataService_GetUserMetadata_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "GetMap",
 			Handler:       _MetadataService_GetMap_Handler,

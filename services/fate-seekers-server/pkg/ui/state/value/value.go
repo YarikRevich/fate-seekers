@@ -13,9 +13,6 @@ const (
 
 // Describes all the available application reducer store values.
 const (
-	TRANSLATION_UPDATED_TRUE_VALUE  = "true"
-	TRANSLATION_UPDATED_FALSE_VALUE = "false"
-
 	EXIT_APPLICATION_TRUE_VALUE = "true"
 
 	LOADING_APPLICATION_EMPTY_VALUE = 0
@@ -29,25 +26,25 @@ const (
 
 // Describes available prompt reducer store values.
 const (
-	PROMPT_UPDATED_TRUE_VALUE  = "true"
-	PROMPT_UPDATED_FALSE_VALUE = "false"
-	PROMPT_TEXT_EMPTY_VALUE    = ""
+	UPDATED_PROMPT_TRUE_VALUE  = "true"
+	UPDATED_PROMPT_FALSE_VALUE = "false"
+	TEXT_PROMPT_EMPTY_VALUE    = ""
 )
 
 // Describes available prompt reducer store values.
 var (
-	PROMPT_SUBMIT_CALLBACK_EMPTY_VALUE = func() {}
-	PROMPT_CANCEL_CALLBACK_EMPTY_VALUE = func() {}
+	SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE = func() {}
+	CANCEL_PROMPT_CALLBACK_EMPTY_VALUE = func() {}
 )
 
 // Describes available info reducer store values.
 const (
-	INFO_UPDATED_TRUE_VALUE  = "true"
-	INFO_UPDATED_FALSE_VALUE = "false"
-	INFO_TEXT_EMPTY_VALUE    = ""
+	UPDATED_INFO_TRUE_VALUE  = "true"
+	UPDATED_INFO_FALSE_VALUE = "false"
+	TEXT_INFO_EMPTY_VALUE    = ""
 )
 
 // Describes available info reducer store values.
 var (
-	INFO_CANCEL_CALLBACK_EMPTY_VALUE = func() {}
+	CANCEL_INFO_CALLBACK_EMPTY_VALUE = func() {}
 )

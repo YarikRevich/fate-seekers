@@ -25,9 +25,6 @@ const (
 
 // Describes all the available application reducer store values.
 const (
-	TRANSLATION_UPDATED_TRUE_VALUE  = "true"
-	TRANSLATION_UPDATED_FALSE_VALUE = "false"
-
 	EXIT_APPLICATION_TRUE_VALUE = "true"
 
 	LOADING_APPLICATION_EMPTY_VALUE = 0
@@ -78,15 +75,15 @@ const (
 
 // Describes available prompt reducer store values.
 const (
-	PROMPT_UPDATED_TRUE_VALUE  = "true"
-	PROMPT_UPDATED_FALSE_VALUE = "false"
-	PROMPT_TEXT_EMPTY_VALUE    = ""
+	UPDATED_PROMPT_TRUE_VALUE  = "true"
+	UPDATED_PROMPT_FALSE_VALUE = "false"
+	TEXT_PROMPT_EMPTY_VALUE    = ""
 )
 
 // Describes available prompt reducer store values.
 var (
-	PROMPT_SUBMIT_CALLBACK_EMPTY_VALUE = func() {}
-	PROMPT_CANCEL_CALLBACK_EMPTY_VALUE = func() {}
+	SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE = func() {}
+	CANCEL_PROMPT_CALLBACK_EMPTY_VALUE = func() {}
 )
 
 // Describes available event reducer store values.
@@ -105,4 +102,10 @@ var (
 	SOUND_FX_UPDATED_TRUE_VALUE     = "true"
 	SOUND_MUSIC_UPDATED_FALSE_VALUE = "false"
 	SOUND_MUSIC_UPDATED_TRUE_VALUE  = "true"
+)
+
+// Describes available statistics reducer store values.
+const (
+	CONTENT_PING_STATISTICS_EMPTY_VALUE  = int64(0)
+	METADATA_PING_STATISTICS_EMPTY_VALUE = int64(0)
 )

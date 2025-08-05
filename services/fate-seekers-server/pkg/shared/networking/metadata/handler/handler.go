@@ -106,13 +106,13 @@ func (h *Handler) GetSessions(ctx context.Context, request *metadatav1.GetSessio
 		for _, rawSession := range rawSessions {
 			response.Sessions = append(response.Sessions, &metadatav1.Session{
 				SessionId: rawSession.ID,
-				Seed:      rawSession.Seed,
+				Seed:      uint64(rawSession.Seed),
 				Name:      rawSession.Name,
 			})
 
 			sessions = append(sessions, dto.CacheSessionEntity{
 				ID:   rawSession.ID,
-				Seed: rawSession.Seed,
+				Seed: uint64(rawSession.Seed),
 				Name: rawSession.Name,
 			})
 		}
@@ -317,14 +317,14 @@ func (h *Handler) GetUserMetadata(ctx context.Context, request *metadatav1.GetUs
 					SessionID:  lobby.SessionID,
 					PositionX:  lobby.PositionX,
 					PositionY:  lobby.PositionY,
-					Skin:       lobby.Skin,
-					Health:     lobby.Health,
+					Skin:       uint64(lobby.Skin),
+					Health:     uint64(lobby.Health),
 					Eliminated: lobby.Eliminated,
 				})
 
 		response.UserMetadata = &metadatav1.UserMetadata{
-			Health:     lobby.Health,
-			Skin:       lobby.Skin,
+			Health:     uint64(lobby.Health),
+			Skin:       uint64(lobby.Skin),
 			Eliminated: lobby.Eliminated,
 			Position: &metadatav1.Position{
 				X: lobby.PositionX,
