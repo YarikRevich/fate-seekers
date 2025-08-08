@@ -103,7 +103,7 @@ func newSelectorScreen() screen.Screen {
 			transparentTransitionEffect.Reset()
 
 			dispatcher.GetInstance().Dispatch(
-				action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
+				action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
@@ -118,7 +118,7 @@ func newSelectorScreen() screen.Screen {
 		selector.GetInstance().CleanInputs()
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
+			action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_CREATOR_VALUE))
@@ -130,7 +130,7 @@ func newSelectorScreen() screen.Screen {
 		selector.GetInstance().CleanInputs()
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
+			action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))

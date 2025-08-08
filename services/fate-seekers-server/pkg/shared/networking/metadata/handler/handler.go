@@ -128,12 +128,18 @@ func (h *Handler) GetSessions(ctx context.Context, request *metadatav1.GetSessio
 func (h *Handler) CreateSession(ctx context.Context, request *metadatav1.CreateSessionRequest) (*metadatav1.CreateSessionResponse, error) {
 	var userID int64
 
+	fmt.Println("herer")
+
 	cachedUserID, ok := cache.
 		GetInstance().
 		GetUsers(request.GetIssuer())
 	if ok {
+		fmt.Println("user id ok")
+
 		userID = cachedUserID
 	} else {
+		fmt.Println("user id not ok")
+
 		user, exists, err := repository.
 			GetUsersRepository().
 			GetByName(request.GetIssuer())
@@ -142,15 +148,20 @@ func (h *Handler) CreateSession(ctx context.Context, request *metadatav1.CreateS
 		}
 
 		if !exists {
+			fmt.Println("user does not exist")
 			return nil, ErrUserDoesNotExist
 		}
 
 		userID = user.ID
 
+		fmt.Println("addint user to cache")
+
 		cache.
 			GetInstance().
 			AddUser(request.GetIssuer(), userID)
 	}
+
+	fmt.Println("CREATEING SESSION")
 
 	err := repository.
 		GetSessionsRepository().
@@ -266,7 +277,7 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 	return nil, nil
 }
 
-func (h *Handler) GetUserMetadata(ctx context.Context, request *metadatav1.GetUserMetadataRequest) (*metadatav1.GetUserMetadataResponse, error) {
+func (h *Handler) GetUserMetadata(request *metadatav1.GetUserMetadataRequest, stream grpc.ServerStreamingServer[metadatav1.GetUserMetadataResponse]) error {
 	response := new(metadatav1.GetUserMetadataResponse)
 
 	metadata, ok := cache.
@@ -285,11 +296,11 @@ func (h *Handler) GetUserMetadata(ctx context.Context, request *metadatav1.GetUs
 				GetUsersRepository().
 				GetByName(request.GetIssuer())
 			if err != nil {
-				return nil, err
+				return err
 			}
 
 			if !exists {
-				return nil, ErrUserDoesNotExist
+				return ErrUserDoesNotExist
 			}
 
 			userID = user.ID
@@ -303,11 +314,11 @@ func (h *Handler) GetUserMetadata(ctx context.Context, request *metadatav1.GetUs
 			GetLobbiesRepository().
 			GetByUserID(userID)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		if !exists {
-			return nil, ErrLobbyDoesNotExist
+			return ErrLobbyDoesNotExist
 		}
 
 		cache.
@@ -343,7 +354,9 @@ func (h *Handler) GetUserMetadata(ctx context.Context, request *metadatav1.GetUs
 		}
 	}
 
-	return response, nil
+	stream.Send(response)
+
+	return nil
 }
 
 func (h *Handler) GetChests(context.Context, *metadatav1.GetChestsRequest) (*metadatav1.GetChestsResponse, error) {

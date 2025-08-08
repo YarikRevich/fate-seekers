@@ -2,10 +2,10 @@ package middleware
 
 import (
 	"context"
-	"errors"
 
 	"buf.build/go/protovalidate"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -45,7 +45,9 @@ func CheckValidationMiddleware(
 ) error {
 	err := protovalidate.Validate(req.(proto.Message))
 	if err != nil {
-		return status.Errorf(codes.InvalidArgument, ErrMessageValidationFailed.Error())
+		return status.Errorf(
+			codes.InvalidArgument,
+			errors.Wrap(err, ErrMessageValidationFailed.Error()).Error())
 	}
 
 	return invoker(ctx, method, req, reply, cc, opts...)

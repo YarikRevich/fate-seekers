@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
@@ -13,12 +13,6 @@ import (
 var (
 	// GetInstance retrieves instance of the networking cache, performing initilization if needed.
 	GetInstance = sync.OnceValue[*NetworkingCache](newNetworkingCache)
-)
-
-var (
-	ErrFailedToEvictSessionCacheEntity  = errors.New("err failed to evict session cache entity")
-	ErrFailedToEvictLobbySetCacheEntity = errors.New("err failed to evict lobby set cache entity")
-	ErrFailedToEvictMetadataCacheEntity = errors.New("err failed to evict metadata cache entity")
 )
 
 const (
@@ -50,6 +44,8 @@ type NetworkingCache struct {
 
 // AddSession adds session cache instance with the provided key and value.
 func (nc *NetworkingCache) AddSessions(key string, value []dto.CacheSessionEntity) {
+	fmt.Println("KEY DURING CREATION", key)
+
 	nc.sessions.Add(key, value)
 }
 
@@ -60,9 +56,9 @@ func (nc *NetworkingCache) GetSessions(key string) ([]dto.CacheSessionEntity, bo
 
 // EvictSessions evicts sessions cache for the provided key.
 func (nc *NetworkingCache) EvictSessions(key string) {
-	if ok := nc.sessions.Remove(key); !ok {
-		logging.GetInstance().Error(ErrFailedToEvictSessionCacheEntity.Error())
-	}
+	fmt.Println("KEY DURING EVICTION", key)
+
+	nc.sessions.Remove(key)
 }
 
 // AddLobbySet adds lobby set cache instance with the provided key and value.
@@ -77,9 +73,7 @@ func (nc *NetworkingCache) GetLobbySet(key int64) ([]string, bool) {
 
 // EvictLobbySet evicts lobby set cache for the provided key.
 func (nc *NetworkingCache) EvictLobbySet(key int64) {
-	if ok := nc.lobbySets.Remove(key); !ok {
-		logging.GetInstance().Error(ErrFailedToEvictLobbySetCacheEntity.Error())
-	}
+	nc.lobbySets.Remove(key)
 }
 
 // AddMetadata adds metadata cache instance with the provided key and value.
@@ -107,9 +101,7 @@ func (nc *NetworkingCache) GetMetadataMappings() map[string]dto.CacheMetadataEnt
 
 // EvictMetadata evicts metadata cache for the provided key.
 func (nc *NetworkingCache) EvictMetadata(key string) {
-	if ok := nc.metadata.Remove(key); !ok {
-		logging.GetInstance().Error(ErrFailedToEvictMetadataCacheEntity.Error())
-	}
+	nc.metadata.Remove(key)
 }
 
 // AddMessage retrieves messages cache instance.

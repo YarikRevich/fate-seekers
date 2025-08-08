@@ -89,7 +89,7 @@ message GetSessionsResponse {
 // CreateSessionRequest represents create session request.
 // User is allowed to create only 3 sessions in 10 minutes.
 message CreateSessionRequest {
-    string name = 1 [(buf.validate.field).string.pattern = "^[a-zA-Z0-9-]{8}\b$"];
+    string name = 1 [(buf.validate.field).string.pattern = "^[a-zA-Z0-9-]{8}$"];
     string issuer = 2 [(buf.validate.field).string.uuid = true];
     optional uint64 seed = 3 ;
 };

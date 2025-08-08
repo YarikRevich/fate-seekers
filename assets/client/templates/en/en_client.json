@@ -115,6 +115,10 @@
         "one": "Session creation is in progress",
         "other": "Session creation is in progress"
     },
+    "client.creatormanager.failure": {
+        "one": "Session creation has failed",
+        "other": "Session creation has failed"
+    },
     "client.settingsmanager.invalid-networking-server-host": {
         "one": "Provided server host is invalid",
         "other": "Provided server host is invalid"

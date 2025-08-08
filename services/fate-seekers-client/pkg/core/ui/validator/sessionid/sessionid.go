@@ -4,7 +4,7 @@ import "regexp"
 
 // Describes allowed sessionid validation value.
 const (
-	allowedPattern = `^[a-zA-Z0-9-]{8}\b$`
+	allowedPattern = `^[a-zA-Z0-9-]{8}$`
 )
 
 // Validate performs provided sessionid value validation.

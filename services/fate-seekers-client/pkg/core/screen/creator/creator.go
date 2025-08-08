@@ -93,8 +93,6 @@ func newCreatorScreen() screen.Screen {
 
 	creator.GetInstance().SetSubmitCallback(func(name, seed string) {
 		if creatormanager.ProcessChanges(name, seed) {
-			transparentTransitionEffect.Reset()
-
 			if store.GetSessionCreationStartedNetworking() == value.SESSION_CREATION_STARTED_NETWORKING_FALSE_VALUE {
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetSessionCreationStartedNetworkingAction(
@@ -107,20 +105,30 @@ func newCreatorScreen() screen.Screen {
 						time.Second*3,
 						common.NotificationErrorTextColor)
 				} else {
-					notification.GetInstance().Push(
-						translation.GetInstance().GetTranslation("client.creatormanager.in-progress"),
-						time.Second*4,
-						common.NotificationInfoTextColor)
-
 					handler.PerformCreateSession(name, seedUint, func(err error) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetSessionCreationStartedNetworkingAction(
-								value.SESSION_CREATION_STARTED_NETWORKING_TRUE_VALUE))
+								value.SESSION_CREATION_STARTED_NETWORKING_FALSE_VALUE))
 
 						creator.GetInstance().CleanInputs()
 
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
+						if err != nil {
+							notification.GetInstance().Push(
+								common.ComposeMessage(
+									translation.GetInstance().GetTranslation("client.creatormanager.failure"),
+									err.Error()),
+								time.Second*3,
+								common.NotificationErrorTextColor)
+
+							return
+						}
+
+						transparentTransitionEffect.Reset()
+
+						notification.GetInstance().Push(
+							translation.GetInstance().GetTranslation("client.creatormanager.in-progress"),
+							time.Second*4,
+							common.NotificationInfoTextColor)
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))

@@ -31,7 +31,7 @@ func Run() {
 
 			handler.PerformPingConnection(func(err error) {
 				if err != nil {
-					logging.GetInstance().Fatal(err.Error())
+					logging.GetInstance().Error(err.Error())
 
 					return
 				}

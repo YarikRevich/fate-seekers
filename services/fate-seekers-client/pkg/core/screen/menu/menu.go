@@ -147,8 +147,6 @@ func newMenuScreen() screen.Screen {
 										return
 									}
 
-									ping.Run()
-
 									handler.PerformPingConnection(func(err2 error) {
 										if err2 != nil {
 											dispatcher.GetInstance().Dispatch(
@@ -166,6 +164,8 @@ func newMenuScreen() screen.Screen {
 
 											return
 										}
+
+										ping.Run()
 
 										handler.PerformCreateUserIfNotExists(func(err3 error) {
 											if err3 != nil {

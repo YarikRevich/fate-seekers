@@ -2,6 +2,7 @@ package creator
 
 import (
 	"image/color"
+	"regexp"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
@@ -10,6 +11,7 @@ import (
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -23,6 +25,12 @@ var (
 const (
 	// Describes max amount of symbols, which can be entered to input component.
 	maxInputSymbols = 30
+
+	// Describes name input format, which is allowed to be entered to name input component.
+	nameInputFormat = `^[a-zA-Z0-9-]{0,8}$`
+
+	// Describes seed input format, which is allowed to be entered to seed input component.
+	seedInputFormat = `^[0-9-]{0,8}$`
 )
 
 // Describes all the colors used for list combo definition.
@@ -200,6 +208,17 @@ func newCreatorComponent() *CreatorComponent {
 				return false, &replacement
 			}
 
+			matched, err := regexp.MatchString(nameInputFormat, newInputText)
+			if err != nil {
+				logging.GetInstance().Fatal(err.Error())
+			}
+
+			if !matched {
+				replacement := nameInput.GetText()
+
+				return false, &replacement
+			}
+
 			return false, &newInputText
 		}))
 
@@ -270,6 +289,17 @@ func newCreatorComponent() *CreatorComponent {
 			}
 
 			if len(newInputText) > maxInputSymbols {
+				replacement := seedInput.GetText()
+
+				return false, &replacement
+			}
+
+			matched, err := regexp.MatchString(seedInputFormat, newInputText)
+			if err != nil {
+				logging.GetInstance().Fatal(err.Error())
+			}
+
+			if !matched {
 				replacement := seedInput.GetText()
 
 				return false, &replacement

@@ -24,6 +24,13 @@ func (*SessionEntity) TableName() string {
 
 // BeforeCreate performs sessions cache entity eviction before sessions entity create.
 func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
+	if err := tx.
+		Model(&UserEntity{}).
+		Where("id = ?", s.Issuer).
+		First(&s.UserEntity).Error; err != nil {
+		return err
+	}
+
 	cache.
 		GetInstance().
 		EvictSessions(s.UserEntity.Name)
@@ -33,6 +40,13 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 
 // AfterDelete performs sessions cache entity eviction after sessions entity removal.
 func (s *SessionEntity) AfterDelete(tx *gorm.DB) error {
+	if err := tx.
+		Model(&UserEntity{}).
+		Where("id = ?", s.Issuer).
+		First(&s.UserEntity).Error; err != nil {
+		return err
+	}
+
 	cache.
 		GetInstance().
 		EvictSessions(s.UserEntity.Name)
@@ -71,6 +85,13 @@ func (l *LobbyEntity) BeforeCreate(tx *gorm.DB) error {
 
 // AfterDelete performs lobbies cache entity eviction after lobbies entity removal.
 func (l *LobbyEntity) AfterDelete(tx *gorm.DB) error {
+	if err := tx.
+		Model(&UserEntity{}).
+		Where("id = ?", l.UserID).
+		First(&l.UserEntity).Error; err != nil {
+		return err
+	}
+
 	cache.
 		GetInstance().
 		EvictLobbySet(l.SessionID)
@@ -98,6 +119,13 @@ func (*MessageEntity) TableName() string {
 
 // BeforeCreate performs message cache entity eviction before messages entity creation.
 func (m *MessageEntity) BeforeCreate(tx *gorm.DB) error {
+	if err := tx.
+		Model(&UserEntity{}).
+		Where("id = ?", m.Issuer).
+		First(&m.UserEntity).Error; err != nil {
+		return err
+	}
+
 	cache.
 		GetInstance().
 		EvictSessions(m.UserEntity.Name)
