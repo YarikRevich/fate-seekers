@@ -1,7 +1,6 @@
 package selector
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -9,13 +8,17 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/converter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/selector"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	selectormanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/selector"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -51,7 +54,26 @@ func (ss *SelectorScreen) HandleInput() error {
 			action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
 
 		handler.PerformGetSessions(func(response *metadatav1.GetSessionsResponse, err error) {
-			fmt.Println(response.GetSessions(), err)
+			if err != nil {
+				notification.GetInstance().Push(
+					common.ComposeMessage(
+						translation.GetInstance().GetTranslation("client.networking.get-sessions-failure"),
+						err.Error()),
+					time.Second*3,
+					common.NotificationErrorTextColor)
+
+				return
+			}
+
+			dispatcher.
+				GetInstance().
+				Dispatch(
+					action.NewSetRetrievedSessionsMetadata(
+						converter.ConvertGetSessionsResponseToRetrievedSessionsMetadata(
+							response)))
+
+			selector.GetInstance().SetListsEntries(
+				converter.ConvertGetSessionsResponseToListEntries(response))
 		})
 	}
 
@@ -100,6 +122,8 @@ func newSelectorScreen() screen.Screen {
 
 	selector.GetInstance().SetSubmitCallback(func(sessionID string) {
 		if selectormanager.ProcessChanges(sessionID) {
+			// TODO: save session ID to metadata management reducer. Clean that value in the menu.
+
 			transparentTransitionEffect.Reset()
 
 			dispatcher.GetInstance().Dispatch(

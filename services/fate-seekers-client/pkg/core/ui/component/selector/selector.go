@@ -282,7 +282,9 @@ func newSelectorComponent() *SelectorComponent {
 		),
 		widget.ListOpts.AllowReselect(),
 		widget.ListOpts.HideHorizontalSlider(),
-		widget.ListOpts.Entries([]interface{}{}),
+		widget.ListOpts.Entries([]interface{}{
+			"itworks",
+		}),
 		widget.ListOpts.EntryLabelFunc(func(e interface{}) string {
 			return e.(string)
 		}),

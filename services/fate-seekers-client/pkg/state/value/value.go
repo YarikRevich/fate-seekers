@@ -109,3 +109,8 @@ const (
 	CONTENT_PING_STATISTICS_EMPTY_VALUE  = int64(0)
 	METADATA_PING_STATISTICS_EMPTY_VALUE = int64(0)
 )
+
+// Describes available metadata reducer store values.
+var (
+	RETRIEVED_SESSIONS_METADATA_EMPTY_VALUE = []interface{}{}
+)

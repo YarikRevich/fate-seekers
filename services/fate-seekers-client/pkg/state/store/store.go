@@ -3,11 +3,13 @@ package store
 import (
 	"sync"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/creator"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/event"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/letter"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/metadata"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/networking"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/prompt"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/repository"
@@ -211,6 +213,13 @@ func GetStatisticsMetadataPing() int64 {
 	return instance.GetState(statistics.METADATA_PING_STATISTICS_STATE).(int64)
 }
 
+// GetRetrievedSessionsMetadata retrieves retrieved sessions metadata state value.
+func GetRetrievedSessionsMetadata() []dto.RetrievedSessionMetadata {
+	instance := GetInstance()
+
+	return instance.GetState(metadata.RETRIEVED_SESSIONS_METADATA_STATE).([]dto.RetrievedSessionMetadata)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()
@@ -247,6 +256,9 @@ func newStore() *godux.Store {
 
 	statisticsReducer := statistics.NewStatisticsStateReducer(store)
 	statisticsReducer.Init()
+
+	metadataReducer := metadata.NewMetadataStateReducer(store)
+	metadataReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
@@ -300,6 +312,11 @@ func newStore() *godux.Store {
 		}
 
 		result = statisticsReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = metadataReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

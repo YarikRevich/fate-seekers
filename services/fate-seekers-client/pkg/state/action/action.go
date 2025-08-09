@@ -1,6 +1,7 @@
 package action
 
 import (
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/luisvinicius167/godux"
 )
 
@@ -71,6 +72,11 @@ const (
 const (
 	SET_CONTENT_PING_STATISTICS_ACTION  = "SET_CONTENT_PING_STATISTICS_ACTION"
 	SET_METADATA_PING_STATISTICS_ACTION = "SET_METADATA_PING_STATISTICS_ACTION"
+)
+
+// Describes all the available state actions for metadata reducer.
+const (
+	SET_RETRIEVED_SESSIONS_METADATA_ACTION = "SET_RETRIEVED_SESSIONS_METADATA_ACTION"
 )
 
 // NewSetActiveScreenAction creates new set active screen action.
@@ -299,6 +305,14 @@ func NewSetStatisticsContentPing(value int64) godux.Action {
 func NewSetStatisticsMetadataPing(value int64) godux.Action {
 	return godux.Action{
 		Type:  SET_METADATA_PING_STATISTICS_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetRetrievedSessionsMetadata creates new set retrieved sessions metadata action.
+func NewSetRetrievedSessionsMetadata(value []dto.RetrievedSessionMetadata) godux.Action {
+	return godux.Action{
+		Type:  SET_RETRIEVED_SESSIONS_METADATA_ACTION,
 		Value: value,
 	}
 }

@@ -127,6 +127,10 @@
         "one": "Unable to connect to a server",
         "other": "Unable to connect to a server"
     },
+    "client.networking.get-sessions-failure": {
+        "one": "Unable to retrieve sessions from a server",
+        "other": "Unable to retrieve sessions from a server"
+    },
     "client.networking.connection-failure": {
         "one": "Connector connect operation failed",
         "other": "Connector connect operation failed"
