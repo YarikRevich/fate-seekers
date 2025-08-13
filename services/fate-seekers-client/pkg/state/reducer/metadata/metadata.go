@@ -11,6 +11,7 @@ import (
 // Describes all the available metadata reducer store states.
 const (
 	RETRIEVED_SESSIONS_METADATA_STATE = "retrieved_sessions"
+	SELECTED_SESSION_METADATA_STATE   = "selected_session"
 )
 
 // MetadataStateReducer represents reducer used for metadata state management.
@@ -22,6 +23,8 @@ type MetadataStateReducer struct {
 func (msr *MetadataStateReducer) Init() {
 	msr.store.SetState(
 		RETRIEVED_SESSIONS_METADATA_STATE, value.RETRIEVED_SESSIONS_METADATA_EMPTY_VALUE)
+	msr.store.SetState(
+		SELECTED_SESSION_METADATA_STATE, value.SELECTED_SESSION_METADATA_EMPTY_VALUE)
 }
 
 func (msr *MetadataStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -31,6 +34,11 @@ func (msr *MetadataStateReducer) GetProcessor() func(value godux.Action) interfa
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{
 					Key: RETRIEVED_SESSIONS_METADATA_STATE, Value: value.Value})
+
+		case action.SET_SELECTED_SESSION_METADATA_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: SELECTED_SESSION_METADATA_STATE, Value: value.Value})
 
 		default:
 			return nil

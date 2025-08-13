@@ -49,6 +49,11 @@ type MenuScreen struct {
 }
 
 func (ms *MenuScreen) HandleInput() error {
+	if store.GetApplicationStateReset() == value.STATE_RESET_APPLICATION_FALSE_VALUE {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetStateResetApplicationAction(value.STATE_RESET_APPLICATION_TRUE_VALUE))
+	}
+
 	if !ms.transparentTransitionEffect.Done() {
 		if !ms.transparentTransitionEffect.OnEnd() {
 			ms.transparentTransitionEffect.Update()

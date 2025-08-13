@@ -169,6 +169,44 @@ func PerformCreateSession(name string, seed uint64, callback func(err error)) {
 	}()
 }
 
+// PerformRemoveSession performs session removal request.
+func PerformRemoveSession(sessionID int64, callback func(err error)) {
+	go func() {
+		_, err := connector.
+			GetInstance().
+			GetClient().
+			RemoveSession(
+				context.Background(),
+				&metadatav1.RemoveSessionRequest{
+					SessionId: sessionID,
+				})
+
+		if err != nil {
+			if status.Code(err) == codes.Unavailable {
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+				callback(ErrConnectionLost)
+
+				return
+			}
+
+			errRaw, ok := status.FromError(err)
+			if !ok {
+				callback(err)
+
+				return
+			}
+
+			callback(errors.New(errRaw.Message()))
+
+			return
+		}
+
+		callback(nil)
+	}()
+}
+
 // PerformGetLobbySet performs lobby set retrieval request.
 func PerformGetLobbySet(sessionId int64, callback func(response *metadatav1.GetLobbySetResponse, err error)) {
 	go func() {

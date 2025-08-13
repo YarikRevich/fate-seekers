@@ -52,6 +52,13 @@ func GetApplicationLoading() int {
 	return instance.GetState(application.LOADING_APPLICATION_STATE).(int)
 }
 
+func GetApplicationStateReset() string {
+	// GetApplicationStateReset retrieves state reset application state value.
+	instance := GetInstance()
+
+	return instance.GetState(application.STATE_RESET_APPLICATION_STATE).(string)
+}
+
 // GetRepositoryUUID retrieves uuid repository state value.
 func GetRepositoryUUID() string {
 	instance := GetInstance()
@@ -94,18 +101,25 @@ func GetSessionCreationStartedNetworking() string {
 	return instance.GetState(networking.SESSION_CREATION_STARTED_NETWORKING_STATE).(string)
 }
 
-// GetSessionJoiningStartedNetworking retrieves session joining started networking state value.
-func GetSessionJoiningStartedNetworking() string {
-	instance := GetInstance()
-
-	return instance.GetState(networking.SESSION_JOINING_STARTED_NETWORKING_STATE).(string)
-}
-
 // GetSessionRemovalStartedNetworking retrieves session removal started networking state value.
 func GetSessionRemovalStartedNetworking() string {
 	instance := GetInstance()
 
 	return instance.GetState(networking.SESSION_REMOVAL_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetLobbyCreationStartedNetworking retrieves lobby creation started networking state value.
+func GetLobbyCreationStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.LOBBY_CREATION_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetLobbyRemovalStartedNetworking retrieves lobby removal started networking state value.
+func GetLobbyRemovalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.LOBBY_REMOVAL_STARTED_NETWORKING_STATE).(string)
 }
 
 // GetLetterUpdated retrieves letter updated state value.
@@ -218,6 +232,13 @@ func GetRetrievedSessionsMetadata() []dto.RetrievedSessionMetadata {
 	instance := GetInstance()
 
 	return instance.GetState(metadata.RETRIEVED_SESSIONS_METADATA_STATE).([]dto.RetrievedSessionMetadata)
+}
+
+// GetSelectedSessionMetadata retrieves selected session metadata state value.
+func GetSelectedSessionMetadata() string {
+	instance := GetInstance()
+
+	return instance.GetState(metadata.SELECTED_SESSION_METADATA_STATE).(string)
 }
 
 // newStore creates new instance of application store.

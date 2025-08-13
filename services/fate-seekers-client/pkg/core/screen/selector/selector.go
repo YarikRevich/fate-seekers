@@ -122,17 +122,30 @@ func newSelectorScreen() screen.Screen {
 
 	selector.GetInstance().SetSubmitCallback(func(sessionID string) {
 		if selectormanager.ProcessChanges(sessionID) {
-			// TODO: save session ID to metadata management reducer. Clean that value in the menu.
+			if store.GetLobbyCreationStartedNetworking() == value.LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE {
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetLobbyCreationStartedNetworkingAction(
+						value.LOBBY_CREATION_STARTED_NETWORKING_TRUE_VALUE))
 
-			transparentTransitionEffect.Reset()
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetSelectedSessionMetadata(sessionID))
 
-			dispatcher.GetInstance().Dispatch(
-				action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+				handler.PerformCreateLobby(0, func(err error) {
+					transparentTransitionEffect.Reset()
 
-			dispatcher.GetInstance().Dispatch(
-				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
-			selector.GetInstance().CleanInputs()
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetLobbyCreationStartedNetworkingAction(
+							value.LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE))
+
+					selector.GetInstance().CleanInputs()
+				})
+			}
 		}
 	})
 
