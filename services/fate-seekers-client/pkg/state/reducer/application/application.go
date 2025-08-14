@@ -10,8 +10,9 @@ import (
 
 // Describes all the available application reducer store states.
 const (
-	EXIT_APPLICATION_STATE    = "exit"
-	LOADING_APPLICATION_STATE = "loading"
+	EXIT_APPLICATION_STATE        = "exit"
+	LOADING_APPLICATION_STATE     = "loading"
+	STATE_RESET_APPLICATION_STATE = "state_reset"
 )
 
 // ApplicationStateReducer represents reducer used for application state management.
@@ -23,6 +24,7 @@ type ApplicationStateReducer struct {
 func (asr *ApplicationStateReducer) Init() {
 	asr.store.SetState(EXIT_APPLICATION_STATE, value.ACTIVE_SCREEN_MENU_VALUE)
 	asr.store.SetState(LOADING_APPLICATION_STATE, value.LOADING_APPLICATION_EMPTY_VALUE)
+	asr.store.SetState(STATE_RESET_APPLICATION_STATE, value.STATE_RESET_APPLICATION_FALSE_VALUE)
 }
 
 func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -47,6 +49,10 @@ func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) inte
 
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: LOADING_APPLICATION_STATE, Value: valueRaw})
+
+		case action.SET_STATE_RESET_APPLICATION_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: STATE_RESET_APPLICATION_STATE, Value: value.Value})
 
 		default:
 			return nil

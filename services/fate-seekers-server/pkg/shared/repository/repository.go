@@ -1,125 +1,231 @@
 package repository
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/db"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/entity"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
 var (
-	ErrPersistingCollection = errors.New("err happened during the process of collection creation response data save.")
-	ErrPersistingFlags      = errors.New("err happened during the process of flag creation response data save.")
+	ErrPersistingSessions = errors.New("err happened during the process of session creation response data save.")
+	ErrPersistingLobbies  = errors.New("err happened during the process of lobby creation response data save.")
+	ErrPersistingMessages = errors.New("err happened during the process of message creation response data save.")
+	ErrPersistingUsers    = errors.New("err happened during the process of user creation response data save.")
 )
 
 var (
-	// GetCollectionsRepository retrieves instance of the collections repository, performing initial creation if needed.
-	GetCollectionsRepository = sync.OnceValue[CollectionsRepository](createCollectionsRepository)
+	// GetSessionsRepository retrieves instance of the sessions repository, performing initial creation if needed.
+	GetSessionsRepository = sync.OnceValue[SessionsRepository](createSessionsRepository)
 
-	// GetFlagsRepository retrieves instance of the collections repository, performing initial creation if needed.
-	GetFlagsRepository = sync.OnceValue[FlagsRepository](createFlagsRepository)
+	// GetLobbiesRepository retrieves instance of the lobbies repository, performing initial creation if needed.
+	GetLobbiesRepository = sync.OnceValue[LobbiesRepository](createLobbiesRepository)
+
+	// GetMessagesRepository retrieves instance of the messages repository, performing initial creation if needed.
+	GetMessagesRepository = sync.OnceValue[MessagesRepository](createMessagesRepository)
+
+	// GetUsersRepository retrieves instance of the users repository, performing initial creation if needed.
+	GetUsersRepository = sync.OnceValue[UsersRepository](createUsersRepository)
 )
 
-// CollectionsRepository represents collections entity repository.
-type CollectionsRepository interface {
-	Insert(name string) error
-	Exists(name string) (bool, error)
-	IsEmpty() (bool, error)
-	GetAll() ([]entity.CollectionEntity, error)
+// SessionsRepository represents sessions entity repository.
+type SessionsRepository interface {
+	Insert(name string, issuer int64) error
+	DeleteByID(id int64) error
+	GetByIssuer(issuer int64) ([]*entity.SessionEntity, error)
 }
 
-// collectionsRepositoryImpl represents implementation of CollectionsRepository.
-type collectionsRepositoryImpl struct{}
+// sessionsRepositoryImpl represents implementation of SessionsRepository.
+type sessionsRepositoryImpl struct{}
 
-// Insert inserts new collection entity to the storage.
-func (w *collectionsRepositoryImpl) Insert(name string) error {
+// Insert inserts new sessions entity to the storage.
+func (w *sessionsRepositoryImpl) Insert(name string, issuer int64) error {
 	instance := db.GetInstance()
 
-	err := instance.Create(&entity.CollectionEntity{Name: name}).Error
+	err := instance.Create(
+		&entity.SessionEntity{
+			Name:   name,
+			Issuer: issuer}).Error
 
-	return errors.Wrap(err, ErrPersistingCollection.Error())
+	return errors.Wrap(err, ErrPersistingSessions.Error())
 }
 
-// Exists checks if any collection with the given name exists.
-func (w *collectionsRepositoryImpl) Exists(name string) (bool, error) {
+// DeleteByID deletes session by the provided id.
+func (w *sessionsRepositoryImpl) DeleteByID(id int64) error {
 	instance := db.GetInstance()
 
-	err := instance.Model(&entity.CollectionEntity{}).
-		Where("name = ?", name).
-		First(&entity.CollectionEntity{}).Error
-
-	if err != gorm.ErrRecordNotFound {
-		return true, nil
-	} else if err == gorm.ErrRecordNotFound {
-		return false, nil
-	}
-
-	return false, err
+	return instance.Table((&entity.SessionEntity{}).TableName()).
+		Where("id = ?", id).
+		Delete(&entity.SessionEntity{}).Error
 }
 
-// IsEmpty checks if any collection is set.
-func (w *collectionsRepositoryImpl) IsEmpty() (bool, error) {
+// GetByIssuer retrieves all available sessions.
+func (w *sessionsRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.SessionEntity, error) {
 	instance := db.GetInstance()
 
-	var result bool
+	var result []*entity.SessionEntity
 
-	err := instance.Raw(
-		fmt.Sprintf(
-			"SELECT COUNT(*) = 0 FROM %s",
-			(&entity.CollectionEntity{}).TableName()),
-	).Scan(&result).Error
-
-	return result, err
-}
-
-// GetAll retrieves all available collections.
-func (w *collectionsRepositoryImpl) GetAll() ([]entity.CollectionEntity, error) {
-	instance := db.GetInstance()
-
-	var result []entity.CollectionEntity
-
-	err := instance.Table((&entity.CollectionEntity{}).TableName()).
+	err := instance.Table((&entity.SessionEntity{}).TableName()).
+		Where("issuer = ?", issuer).
 		Find(&result).Error
 
 	return result, err
 }
 
-// createCollectionsRepository initializes collectionsRepositoryImpl.
-func createCollectionsRepository() CollectionsRepository {
-	return new(collectionsRepositoryImpl)
+// createSessionsRepository initializes sessionsRepositoryImpl.
+func createSessionsRepository() SessionsRepository {
+	return new(sessionsRepositoryImpl)
 }
 
-// FlagsRepository represents flags entity repository.
-type FlagsRepository interface {
-	InsertOrUpdate(name, value string) error
-	GetByName(name string) (*entity.FlagsEntity, bool, error)
+// LobbiesRepository represents lobbies entity repository.
+type LobbiesRepository interface {
+	InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error
+	DeleteByUserID(userID int64) error
+	GetByUserID(userID int64) (*entity.LobbyEntity, bool, error)
 }
 
-// flagsRepositoryImpl represents implementation of FlagsRepository.
-type flagsRepositoryImpl struct{}
+// lobbiesRepositoryImpl represents implementation of LobbiesRepository.
+type lobbiesRepositoryImpl struct{}
 
-// InsertOrUpdate inserts or updates flags entity to the storage.
-func (w *flagsRepositoryImpl) InsertOrUpdate(name, value string) error {
+// Insert inserts new lobbies entity to the storage.
+func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
 	instance := db.GetInstance()
 
-	err := instance.Create(&entity.FlagsEntity{
-		Name:  name,
-		Value: value,
+	err := instance.Save(
+		&entity.LobbyEntity{
+			UserID:     request.UserID,
+			SessionID:  request.SessionID,
+			Skin:       int64(request.Skin),
+			Health:     int64(request.Health),
+			Eliminated: request.Eliminated,
+			PositionX:  request.PositionX,
+			PositionY:  request.PositionY,
+		}).Error
+
+	return errors.Wrap(err, ErrPersistingLobbies.Error())
+}
+
+// DeleteByUserID deletes lobby by the provided user id.
+func (w *lobbiesRepositoryImpl) DeleteByUserID(userID int64) error {
+	instance := db.GetInstance()
+
+	return instance.Table((&entity.LobbyEntity{}).TableName()).
+		Where("user_id = ?", userID).
+		Delete(&entity.LobbyEntity{}).Error
+}
+
+// GetByUserID retrieves lobby by the provided user id.
+func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) (*entity.LobbyEntity, bool, error) {
+	instance := db.GetInstance()
+
+	var result *entity.LobbyEntity
+
+	err := instance.Table((&entity.LobbyEntity{}).TableName()).
+		Where("user_id = ?", userID).
+		Find(&result).Error
+
+	if err != gorm.ErrRecordNotFound {
+		return result, true, nil
+	} else if err == gorm.ErrRecordNotFound {
+		return nil, false, nil
+	}
+
+	return nil, false, err
+}
+
+// createLobbiesRepository initializes lobbiesRepositoryImpl.
+func createLobbiesRepository() LobbiesRepository {
+	return new(lobbiesRepositoryImpl)
+}
+
+// MessagesRepository represents messages entity repository.
+type MessagesRepository interface {
+	Insert(issuer int64, content string) error
+	GetByIssuer(issuer int64) ([]*entity.MessageEntity, error)
+}
+
+// messagesRepositoryImpl represents implementation of MessagesRepository.
+type messagesRepositoryImpl struct{}
+
+// Insert inserts new messages entity to the storage.
+func (w *messagesRepositoryImpl) Insert(issuer int64, content string) error {
+	instance := db.GetInstance()
+
+	err := instance.Create(
+		&entity.MessageEntity{
+			Issuer:  issuer,
+			Content: content}).Error
+
+	return errors.Wrap(err, ErrPersistingMessages.Error())
+}
+
+// GetAll retrieves all available sessions.
+func (w *messagesRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.MessageEntity, error) {
+	instance := db.GetInstance()
+
+	var result []*entity.MessageEntity
+
+	err := instance.Table((&entity.MessageEntity{}).TableName()).
+		Where("issuer = ?", issuer).
+		Find(&result).Error
+
+	return result, err
+}
+
+// createMessagesRepository initializes messagesRepositoryImpl.
+func createMessagesRepository() MessagesRepository {
+	return new(messagesRepositoryImpl)
+}
+
+// UsersRepository represents users entity repository.
+type UsersRepository interface {
+	Insert(name string) error
+	Exists(name string) (bool, error)
+	GetByName(name string) (*entity.UserEntity, bool, error)
+}
+
+// usersRepositoryImpl represents implementation of UsersRepository.
+type usersRepositoryImpl struct{}
+
+// Insert inserts users entity to the storage.
+func (w *usersRepositoryImpl) Insert(name string) error {
+	instance := db.GetInstance()
+
+	err := instance.Create(&entity.UserEntity{
+		Name: name,
 	}).Error
 
-	return errors.Wrap(err, ErrPersistingFlags.Error())
+	return errors.Wrap(err, ErrPersistingUsers.Error())
 }
 
-// GetByName checks if any flag with the given name exists.
-func (w *flagsRepositoryImpl) GetByName(name string) (*entity.FlagsEntity, bool, error) {
+// Exists checks if user with the given name exists.
+func (w *usersRepositoryImpl) Exists(name string) (bool, error) {
 	instance := db.GetInstance()
 
-	var result *entity.FlagsEntity
+	var exists bool
 
-	err := instance.Model(&entity.FlagsEntity{}).
+	err := instance.Model(&entity.UserEntity{}).
+		Select("count(*) > 0").
+		Where("name = ?", name).
+		Find(&exists).Error
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, err
+}
+
+// GetByName retrieves user with the given name.
+func (w *usersRepositoryImpl) GetByName(name string) (*entity.UserEntity, bool, error) {
+	instance := db.GetInstance()
+
+	var result *entity.UserEntity
+
+	err := instance.Model(&entity.UserEntity{}).
 		Where("name = ?", name).
 		First(&result).Error
 
@@ -132,7 +238,7 @@ func (w *flagsRepositoryImpl) GetByName(name string) (*entity.FlagsEntity, bool,
 	return nil, false, err
 }
 
-// createFlagsRepository initializes flagsRepositoryImpl.
-func createFlagsRepository() FlagsRepository {
-	return new(flagsRepositoryImpl)
+// createUsersRepository initializes usersRepositoryImpl.
+func createUsersRepository() UsersRepository {
+	return new(usersRepositoryImpl)
 }

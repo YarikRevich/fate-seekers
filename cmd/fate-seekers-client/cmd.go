@@ -12,9 +12,10 @@ import (
 // init performs client internal components initialization.
 func init() {
 	config.SetupDefaultConfig()
-
 	config.Init()
+
 	db.Init()
+
 	sound.GetInstance().InitSoundAmbientBatch()
 }
 

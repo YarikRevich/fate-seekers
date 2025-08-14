@@ -5,7 +5,7 @@ import (
 	"net"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/api"
+	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/middleware"
 	"google.golang.org/grpc"
@@ -29,10 +29,13 @@ func (nmc *NetworkingMetadataConnector) Connect(callback func(err error)) {
 		}
 
 		grpcServer := grpc.NewServer(
-			grpc.UnaryInterceptor(middleware.CheckAuthenticationMiddleware),
+			grpc.ChainUnaryInterceptor(
+				middleware.CheckValidationMiddleware,
+				middleware.CheckAuthenticationMiddleware,
+			),
 		)
 
-		api.RegisterMetadataServer(grpcServer, handler.NewHandler())
+		metadatav1.RegisterMetadataServiceServer(grpcServer, handler.NewHandler())
 
 		callback(nil)
 

@@ -2,3 +2,7 @@
 
 build/fate-seekers-client
 build/fate-seekers-server
+
+# Application API generated configurations.
+
+api/buf.lock

@@ -3,15 +3,19 @@ package store
 import (
 	"sync"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/creator"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/event"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/letter"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/metadata"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/networking"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/prompt"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/sound"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/statistics"
 	"github.com/luisvinicius167/godux"
 )
 
@@ -46,6 +50,13 @@ func GetApplicationLoading() int {
 	instance := GetInstance()
 
 	return instance.GetState(application.LOADING_APPLICATION_STATE).(int)
+}
+
+func GetApplicationStateReset() string {
+	// GetApplicationStateReset retrieves state reset application state value.
+	instance := GetInstance()
+
+	return instance.GetState(application.STATE_RESET_APPLICATION_STATE).(string)
 }
 
 // GetRepositoryUUID retrieves uuid repository state value.
@@ -90,18 +101,25 @@ func GetSessionCreationStartedNetworking() string {
 	return instance.GetState(networking.SESSION_CREATION_STARTED_NETWORKING_STATE).(string)
 }
 
-// GetSessionJoiningStartedNetworking retrieves session joining started networking state value.
-func GetSessionJoiningStartedNetworking() string {
-	instance := GetInstance()
-
-	return instance.GetState(networking.SESSION_JOINING_STARTED_NETWORKING_STATE).(string)
-}
-
 // GetSessionRemovalStartedNetworking retrieves session removal started networking state value.
 func GetSessionRemovalStartedNetworking() string {
 	instance := GetInstance()
 
 	return instance.GetState(networking.SESSION_REMOVAL_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetLobbyCreationStartedNetworking retrieves lobby creation started networking state value.
+func GetLobbyCreationStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.LOBBY_CREATION_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetLobbyRemovalStartedNetworking retrieves lobby removal started networking state value.
+func GetLobbyRemovalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.LOBBY_REMOVAL_STARTED_NETWORKING_STATE).(string)
 }
 
 // GetLetterUpdated retrieves letter updated state value.
@@ -195,6 +213,34 @@ func GetSoundMusicUpdated() string {
 	return instance.GetState(sound.MUSIC_UPDATED_SOUND_STATE).(string)
 }
 
+// GetStatisticsContentPing retrieves statistics content ping state value.
+func GetStatisticsContentPing() int64 {
+	instance := GetInstance()
+
+	return instance.GetState(statistics.CONTENT_PING_STATISTICS_STATE).(int64)
+}
+
+// GetStatisticsMetadataPing retrieves statistics metadata ping state value.
+func GetStatisticsMetadataPing() int64 {
+	instance := GetInstance()
+
+	return instance.GetState(statistics.METADATA_PING_STATISTICS_STATE).(int64)
+}
+
+// GetRetrievedSessionsMetadata retrieves retrieved sessions metadata state value.
+func GetRetrievedSessionsMetadata() []dto.RetrievedSessionMetadata {
+	instance := GetInstance()
+
+	return instance.GetState(metadata.RETRIEVED_SESSIONS_METADATA_STATE).([]dto.RetrievedSessionMetadata)
+}
+
+// GetSelectedSessionMetadata retrieves selected session metadata state value.
+func GetSelectedSessionMetadata() string {
+	instance := GetInstance()
+
+	return instance.GetState(metadata.SELECTED_SESSION_METADATA_STATE).(string)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()
@@ -225,6 +271,15 @@ func newStore() *godux.Store {
 
 	soundReducer := sound.NewEventStateReducer(store)
 	soundReducer.Init()
+
+	creatorReducer := creator.NewCreatorStateReducer(store)
+	creatorReducer.Init()
+
+	statisticsReducer := statistics.NewStatisticsStateReducer(store)
+	statisticsReducer.Init()
+
+	metadataReducer := metadata.NewMetadataStateReducer(store)
+	metadataReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
@@ -268,6 +323,21 @@ func newStore() *godux.Store {
 		}
 
 		result = soundReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = creatorReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = statisticsReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = metadataReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

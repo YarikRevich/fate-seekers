@@ -1,6 +1,7 @@
 package action
 
 import (
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/luisvinicius167/godux"
 )
 
@@ -15,6 +16,7 @@ const (
 	SET_EXIT_APPLICATION_ACTION          = "SET_EXIT_APPLICATION_ACTION"
 	INCREMENT_LOADING_APPLICATION_ACTION = "INCREMENT_LOADING_APPLICATION_ACTION"
 	DECREMENT_LOADING_APPLICATION_ACTION = "DECREMENT_LOADING_APPLICATION_ACTION"
+	SET_STATE_RESET_APPLICATION_ACTION   = "SET_STATE_RESET_APPLICATION_ACTION"
 )
 
 // Describes all the available state actions for repository reducer.
@@ -29,8 +31,9 @@ const (
 	SET_PING_CONNECTION_STARTED_NETWORKING_ACTION   = "SET_PING_CONNECTION_STARTED_NETWORKING_ACTION"
 	SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION = "SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION"
 	SET_SESSION_CREATION_STARTED_NETWORKING_ACTION  = "SET_SESSION_CREATION_STARTED_NETWORKING_ACTION"
-	SET_SESSION_JOINING_STARTED_NETWORKING_ACTION   = "SET_SESSION_JOINING_STARTED_NETWORKING_ACTION"
 	SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION   = "SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION"
+	SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION    = "SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION"
+	SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION     = "SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION"
 )
 
 // Describes all the available state actions for letter reducer.
@@ -65,6 +68,18 @@ const (
 const (
 	SET_FX_UPDATED_SOUND_ACTION    = "SET_FX_UPDATED_SOUND_ACTION"
 	SET_MUSIC_UPDATED_SOUND_ACTION = "SET_MUSIC_UPDATED_SOUND_ACTION"
+)
+
+// Describes all the available state actions for statistics reducer.
+const (
+	SET_CONTENT_PING_STATISTICS_ACTION  = "SET_CONTENT_PING_STATISTICS_ACTION"
+	SET_METADATA_PING_STATISTICS_ACTION = "SET_METADATA_PING_STATISTICS_ACTION"
+)
+
+// Describes all the available state actions for metadata reducer.
+const (
+	SET_RETRIEVED_SESSIONS_METADATA_ACTION = "SET_RETRIEVED_SESSIONS_METADATA_ACTION"
+	SET_SELECTED_SESSION_METADATA_ACTION   = "SET_SELECTED_SESSION_METADATA_ACTION"
 )
 
 // NewSetActiveScreenAction creates new set active screen action.
@@ -121,6 +136,14 @@ func NewDecrementLoadingApplicationAction() godux.Action {
 	}
 }
 
+// NewSetStateResetApplicationAction creates new set state reset application action.
+func NewSetStateResetApplicationAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_STATE_RESET_APPLICATION_ACTION,
+		Value: value,
+	}
+}
+
 // NewSetEntryHandshakeStartedNetworkingAction creates new set entry handshake started networking action.
 func NewSetEntryHandshakeStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
@@ -153,18 +176,26 @@ func NewSetSessionCreationStartedNetworkingAction(value string) godux.Action {
 	}
 }
 
-// NewSetSessionJoiningStartedNetworkingAction creates new set session joining started networking action.
-func NewSetSessionJoiningStartedNetworkingAction(value string) godux.Action {
-	return godux.Action{
-		Type:  SET_SESSION_JOINING_STARTED_NETWORKING_ACTION,
-		Value: value,
-	}
-}
-
 // NewSetSessionRemovalStartedNetworkingAction creates new set session removal started networking action.
 func NewSetSessionRemovalStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetLobbyCreationStartedNetworkingAction creates new set lobby creation started networking action.
+func NewSetLobbyCreationStartedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetLobbyRemovalStartedNetworkingAction creates new set lobby removal started networking action.
+func NewSetLobbyRemovalStartedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION,
 		Value: value,
 	}
 }
@@ -277,6 +308,38 @@ func NewSetSoundFXUpdated(value string) godux.Action {
 func NewSetSoundMusicUpdated(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_MUSIC_UPDATED_SOUND_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetStatisticsContentPing creates new set statistics content ping action.
+func NewSetStatisticsContentPing(value int64) godux.Action {
+	return godux.Action{
+		Type:  SET_CONTENT_PING_STATISTICS_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetStatisticsMetadataPing creates new set statistics metadata ping action.
+func NewSetStatisticsMetadataPing(value int64) godux.Action {
+	return godux.Action{
+		Type:  SET_METADATA_PING_STATISTICS_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetRetrievedSessionsMetadata creates new set retrieved sessions metadata action.
+func NewSetRetrievedSessionsMetadata(value []dto.RetrievedSessionMetadata) godux.Action {
+	return godux.Action{
+		Type:  SET_RETRIEVED_SESSIONS_METADATA_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetSelectedSessionMetadata creates new set selected session metadata action.
+func NewSetSelectedSessionMetadata(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_SELECTED_SESSION_METADATA_ACTION,
 		Value: value,
 	}
 }

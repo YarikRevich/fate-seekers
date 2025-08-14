@@ -1,29 +1,120 @@
 package entity
 
-import "time"
+import (
+	"time"
 
-// CollectionEntity represents collections entity.
-type CollectionEntity struct {
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/cache"
+	"gorm.io/gorm"
+)
+
+// SessionEntity represents sessions entity.
+type SessionEntity struct {
+	ID         int64      `gorm:"column:id;primaryKey;auto_increment;not null"`
+	Name       string     `gorm:"column:name;not null;unique"`
+	Seed       int64      `gorm:"column:seed;not null"`
+	Issuer     int64      `gorm:"column:issuer;not null"`
+	CreatedAt  time.Time  `gorm:"column:created_at;autoCreateTime"`
+	UserEntity UserEntity `gorm:"foreignKey:Issuer;references:ID"`
+}
+
+// TableName retrieves name of database table.
+func (*SessionEntity) TableName() string {
+	return "sessions"
+}
+
+// BeforeCreate performs sessions cache entity eviction before sessions entity create.
+func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
+	if err := tx.
+		Model(&UserEntity{}).
+		Where("id = ?", s.Issuer).
+		First(&s.UserEntity).Error; err != nil {
+		return err
+	}
+
+	cache.
+		GetInstance().
+		EvictSessions(s.UserEntity.Name)
+
+	return nil
+}
+
+// LobbyEntity represents lobbies entity.
+type LobbyEntity struct {
+	ID            int64         `gorm:"column:id;primaryKey;auto_increment;not null"`
+	UserID        int64         `gorm:"column:user_id;not null;unique"`
+	SessionID     int64         `gorm:"column:session_id;not null"`
+	Skin          int64         `gorm:"column:skin;not null"`
+	Health        int64         `gorm:"column:health;not null"`
+	Host          bool          `gorm:"column:host;not null"`
+	Eliminated    bool          `gorm:"column:eliminated;not null"`
+	PositionX     float64       `gorm:"column:position_x;not null"`
+	PositionY     float64       `gorm:"column:position_y;not null"`
+	CreatedAt     time.Time     `gorm:"column:created_at;autoCreateTime"`
+	UserEntity    UserEntity    `gorm:"foreignKey:UserID;references:ID"`
+	SessionEntity SessionEntity `gorm:"foreignKey:SessionID;references:ID"`
+}
+
+// TableName retrieves name of database table.
+func (*LobbyEntity) TableName() string {
+	return "lobbies"
+}
+
+// BeforeCreate performs lobbies cache entity eviction before lobbies entity create.
+func (l *LobbyEntity) BeforeCreate(tx *gorm.DB) error {
+	cache.
+		GetInstance().
+		EvictLobbySet(l.SessionID)
+
+	return nil
+}
+
+// MessageEntity represents messages entity.
+type MessageEntity struct {
+	ID         int64      `gorm:"column:id;primaryKey;auto_increment;not null"`
+	Content    string     `gorm:"column:name;not null"`
+	Issuer     int64      `gorm:"column:issuer;not null"`
+	CreatedAt  time.Time  `gorm:"column:created_at;autoCreateTime"`
+	UserEntity UserEntity `gorm:"foreignKey:Issuer;references:ID"`
+}
+
+// TableName retrieves name of database table.
+func (*MessageEntity) TableName() string {
+	return "messages"
+}
+
+// BeforeCreate performs message cache entity eviction before messages entity creation.
+func (m *MessageEntity) BeforeCreate(tx *gorm.DB) error {
+	if err := tx.
+		Model(&UserEntity{}).
+		Where("id = ?", m.Issuer).
+		First(&m.UserEntity).Error; err != nil {
+		return err
+	}
+
+	cache.
+		GetInstance().
+		EvictSessions(m.UserEntity.Name)
+
+	return nil
+}
+
+// UserEntity represents users entity.
+type UserEntity struct {
 	ID        int64     `gorm:"column:id;primaryKey;auto_increment;not null"`
 	Name      string    `gorm:"column:name;not null;unique"`
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
 }
 
 // TableName retrieves name of database table.
-func (*CollectionEntity) TableName() string {
-	return "collections"
+func (*UserEntity) TableName() string {
+	return "users"
 }
 
-// FlagsEntity represents flags entity.
-type FlagsEntity struct {
-	ID        int64     `gorm:"column:id;primaryKey;auto_increment;not null"`
-	Name      string    `gorm:"column:name;not null;unique"`
-	Value     string    `gorm:"column:name;not null"`
-	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime:milli"`
-	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
-}
+// AfterFind performs user cache entity creation after user entity creation.
+func (u *UserEntity) AfterFind(tx *gorm.DB) error {
+	cache.
+		GetInstance().
+		AddUser(u.Name, u.ID)
 
-// TableName retrieves name of database table.
-func (*FlagsEntity) TableName() string {
-	return "flags"
+	return nil
 }

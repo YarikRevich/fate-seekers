@@ -43,13 +43,33 @@
         "one": "Створити",
         "other": "Створити"
     },
+    "client.selector.delete": {
+        "one": "Видалити",
+        "other": "Видалити"
+    },
     "client.selector.close": {
         "one": "Закрити",
         "other": "Закрити"
     },
-    "client.selector.session_id": {
-        "one": "Ідентифікатор сесії",
-        "other": "Ідентифікатор сесії"
+    "client.selector.session_name": {
+        "one": "Назва сесії",
+        "other": "Назва сесії"
+    },
+    "client.selector.sessions": {
+        "one": "Сесії створені гравцем",
+        "other": "Сесії створені гравцем"
+    },
+    "client.creator.title": {
+        "one": "Створення сесії",
+        "other": "Створення сесії"
+    },
+    "client.creator.session_name": {
+        "one": "Назва",
+        "other": "Назва"
+    },
+    "client.creator.session_seed": {
+        "one": "Сід",
+        "other": "Сід"
     },
     "client.letterimage.close": {
         "one": "Закрити",
@@ -75,9 +95,29 @@
         "one": "Закрити",
         "other": "Закрити"
     },
-    "client.selectormanager.invalid-session-id": {
-        "one": "Надано некоректний ідентифікатор сесії",
-        "other": "Надано некоректний ідентифікатор сесії"
+    "client.selectormanager.invalid-session-name": {
+        "one": "Надано некоректну назву сесії",
+        "other": "Надано некоректну назву сесії"
+    },
+    "client.selectormanager.session-removal-in-progress": {
+        "one": "Відбувається видалення сесії",
+        "other": "Відбувається видалення сесії"
+    },
+    "client.creatormanager.invalid-session-name": {
+        "one": "Надано некоректну назву сесії",
+        "other": "Надано некоректну назву сесії"
+    },
+    "client.creatormanager.invalid-session-seed": {
+        "one": "Надано некоректний сід сесії",
+        "other": "Надано некоректний сід сесії"
+    },
+    "client.creatormanager.in-progress": {
+        "one": "Відбувається створення сесії",
+        "other": "Відбувається створення сесії"
+    },
+    "client.creatormanager.failure": {
+        "one": "Під час створення сесії трапилася помилка",
+        "other": "Під час створення сесії трапилася помилка"
     },
     "client.settingsmanager.invalid-networking-server-host": {
         "one": "Надано некоректний хост сервера",
@@ -86,6 +126,18 @@
     "client.networking.ping-connection-failure": {
         "one": "Неможливо підʼєднатися до сервера",
         "other": "Неможливо підʼєднатися до сервера"
+    },
+    "client.networking.get-sessions-failure": {
+        "one": "Неможливо отримати список сесій від сервера",
+        "other": "Неможливо отримати список сесій від сервера"
+    },
+    "client.networking.remove-session-failure": {
+        "one": "Неможливо видалити вибрану сесію",
+        "other": "Неможливо видалити вибрану сесію"
+    },
+    "client.networking.create-lobby-failure": {
+        "one": "Неможливо створити лобі для вибраної сесії",
+        "other": "Неможливо створити лобі для вибраної сесії"
     },
     "client.networking.connection-failure": {
         "one": "Зʼєднання конектора не вдалося встановити",

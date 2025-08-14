@@ -34,6 +34,7 @@ type LobbyScreen struct {
 }
 
 func (ls *LobbyScreen) HandleInput() error {
+
 	if !ls.transparentTransitionEffect.Done() {
 		if !ls.transparentTransitionEffect.OnEnd() {
 			ls.transparentTransitionEffect.Update()

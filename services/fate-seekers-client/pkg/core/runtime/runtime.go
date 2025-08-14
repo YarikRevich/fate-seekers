@@ -10,6 +10,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/answerinput"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/creator"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/intro"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/lobby"
@@ -128,7 +129,7 @@ func (r *Runtime) Update() error {
 		r.notificationTransparentTransitionEffect.Reset()
 	}
 
-	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
+	if store.GetPromptText() != value.TEXT_PROMPT_EMPTY_VALUE {
 		if !r.promptTransparentTransitionEffect.Done() {
 			if !r.promptTransparentTransitionEffect.OnEnd() {
 				r.promptTransparentTransitionEffect.Update()
@@ -177,6 +178,9 @@ func (r *Runtime) Update() error {
 	case value.ACTIVE_SCREEN_SELECTOR_VALUE:
 		r.activeScreen = selector.GetInstance()
 
+	case value.ACTIVE_SCREEN_CREATOR_VALUE:
+		r.activeScreen = creator.GetInstance()
+
 	case value.ACTIVE_SCREEN_LOBBY_VALUE:
 		r.activeScreen = lobby.GetInstance()
 
@@ -213,12 +217,12 @@ func (r *Runtime) Update() error {
 		r.letterInterface.Update()
 	}
 
-	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
-		if store.GetPromptUpdated() == value.PROMPT_UPDATED_FALSE_VALUE {
+	if store.GetPromptText() != value.TEXT_PROMPT_EMPTY_VALUE {
+		if store.GetPromptUpdated() == value.UPDATED_PROMPT_FALSE_VALUE {
 			prompt.GetInstance().SetText(store.GetPromptText())
 
 			dispatcher.GetInstance().Dispatch(
-				action.NewSetPromptUpdated(value.PROMPT_UPDATED_TRUE_VALUE))
+				action.NewSetPromptUpdated(value.UPDATED_PROMPT_TRUE_VALUE))
 		}
 
 		r.promptInterface.Update()
@@ -237,7 +241,7 @@ func (r *Runtime) Update() error {
 		r.notificationInterface.Update()
 	}
 
-	if config.GetDebug() {
+	if config.GetOperationDebug() {
 		imgui.GetInstance().Update()
 	}
 
@@ -250,7 +254,7 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 		r.notificationInterfaceWorld.Clear()
 	}
 
-	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
+	if store.GetPromptText() != value.TEXT_PROMPT_EMPTY_VALUE {
 		r.promptInterfaceWorld.Clear()
 	}
 
@@ -324,7 +328,7 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 				r.letterImageTransparentTransitionEffect.GetValue()).ColorM})
 	}
 
-	if store.GetPromptText() != value.PROMPT_TEXT_EMPTY_VALUE {
+	if store.GetPromptText() != value.TEXT_PROMPT_EMPTY_VALUE {
 		screen.DrawImage(r.promptInterfaceMask, &ebiten.DrawImageOptions{
 			ColorM: mask.GetMaskEffect(80).ColorM,
 		})
@@ -336,14 +340,14 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 				r.promptTransparentTransitionEffect.GetValue()).ColorM})
 	}
 
-	if config.GetDebug() {
+	if config.GetOperationDebug() {
 		imgui.GetInstance().Draw(screen)
 	}
 }
 
 // Layout manages virtual world size.
 func (r *Runtime) Layout(outsideWidth, outsideHeight int) (int, int) {
-	if config.GetDebug() {
+	if config.GetOperationDebug() {
 		imgui.GetInstance().Layout(outsideWidth, outsideHeight)
 	}
 
@@ -392,32 +396,32 @@ func NewRuntime() *Runtime {
 		store.GetPromptSubmitCallback()()
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptSubmitCallback(value.PROMPT_SUBMIT_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptSubmitCallback(value.SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptCancelCallback(value.PROMPT_CANCEL_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptCancelCallback(value.CANCEL_PROMPT_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptText(value.PROMPT_TEXT_EMPTY_VALUE))
+			action.NewSetPromptText(value.TEXT_PROMPT_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptUpdated(value.PROMPT_UPDATED_FALSE_VALUE))
+			action.NewSetPromptUpdated(value.UPDATED_PROMPT_FALSE_VALUE))
 	})
 
 	prompt.GetInstance().SetCloseCallback(func() {
 		store.GetPromptCancelCallback()()
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptSubmitCallback(value.PROMPT_SUBMIT_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptSubmitCallback(value.SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptCancelCallback(value.PROMPT_CANCEL_CALLBACK_EMPTY_VALUE))
+			action.NewSetPromptCancelCallback(value.CANCEL_PROMPT_CALLBACK_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptText(value.PROMPT_TEXT_EMPTY_VALUE))
+			action.NewSetPromptText(value.TEXT_PROMPT_EMPTY_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetPromptUpdated(value.PROMPT_UPDATED_FALSE_VALUE))
+			action.NewSetPromptUpdated(value.UPDATED_PROMPT_FALSE_VALUE))
 
 		promptTransparentTransitionEffect.Reset()
 	})

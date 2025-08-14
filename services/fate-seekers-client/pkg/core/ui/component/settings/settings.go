@@ -113,7 +113,7 @@ func NewSettingsComponent(
 				Position: widget.RowLayoutPositionStart,
 			}),
 		),
-		widget.SliderOpts.MinMax(1, 100),
+		widget.SliderOpts.MinMax(0, 100),
 		widget.SliderOpts.Images(&widget.SliderTrackImage{
 			Idle:     image.NewNineSlice(loader.GetInstance().GetStatic(loader.SliderTrackIdle), [3]int{0, 19, 0}, [3]int{6, 0, 0}),
 			Hover:    image.NewNineSlice(loader.GetInstance().GetStatic(loader.SliderTrackIdle), [3]int{0, 19, 0}, [3]int{6, 0, 0}),
@@ -169,7 +169,7 @@ func NewSettingsComponent(
 				Position: widget.RowLayoutPositionStart,
 			}),
 		),
-		widget.SliderOpts.MinMax(1, 100),
+		widget.SliderOpts.MinMax(0, 100),
 		widget.SliderOpts.Images(&widget.SliderTrackImage{
 			Idle:     image.NewNineSlice(loader.GetInstance().GetStatic(loader.SliderTrackIdle), [3]int{0, 19, 0}, [3]int{6, 0, 0}),
 			Hover:    image.NewNineSlice(loader.GetInstance().GetStatic(loader.SliderTrackIdle), [3]int{0, 19, 0}, [3]int{6, 0, 0}),

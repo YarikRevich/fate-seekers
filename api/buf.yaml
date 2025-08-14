@@ -1,0 +1,11 @@
+version: v2
+modules:
+  - path: .
+deps:
+  - buf.build/bufbuild/protovalidate:v0.14.1
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE

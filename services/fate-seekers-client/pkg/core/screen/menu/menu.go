@@ -9,6 +9,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/connector"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/handler"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/ping"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
@@ -48,6 +49,11 @@ type MenuScreen struct {
 }
 
 func (ms *MenuScreen) HandleInput() error {
+	if store.GetApplicationStateReset() == value.STATE_RESET_APPLICATION_FALSE_VALUE {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetStateResetApplicationAction(value.STATE_RESET_APPLICATION_TRUE_VALUE))
+	}
+
 	if !ms.transparentTransitionEffect.Done() {
 		if !ms.transparentTransitionEffect.OnEnd() {
 			ms.transparentTransitionEffect.Update()
@@ -133,6 +139,9 @@ func newMenuScreen() screen.Screen {
 							connector.GetInstance().Connect(
 								func(err1 error) {
 									if err1 != nil {
+										dispatcher.GetInstance().Dispatch(
+											action.NewDecrementLoadingApplicationAction())
+
 										notification.GetInstance().Push(
 											common.ComposeMessage(
 												translation.GetInstance().GetTranslation("client.networking.connection-failure"),
@@ -144,10 +153,10 @@ func newMenuScreen() screen.Screen {
 									}
 
 									handler.PerformPingConnection(func(err2 error) {
-										dispatcher.GetInstance().Dispatch(
-											action.NewDecrementLoadingApplicationAction())
-
 										if err2 != nil {
+											dispatcher.GetInstance().Dispatch(
+												action.NewDecrementLoadingApplicationAction())
+
 											notification.GetInstance().Push(
 												common.ComposeMessage(
 													translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
@@ -161,10 +170,34 @@ func newMenuScreen() screen.Screen {
 											return
 										}
 
-										transparentTransitionEffect.Reset()
+										ping.Run()
 
-										dispatcher.GetInstance().Dispatch(
-											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
+										handler.PerformCreateUserIfNotExists(func(err3 error) {
+											if err3 != nil {
+												dispatcher.GetInstance().Dispatch(
+													action.NewDecrementLoadingApplicationAction())
+
+												notification.GetInstance().Push(
+													common.ComposeMessage(
+														translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
+														err2.Error()),
+													time.Second*2,
+													common.NotificationErrorTextColor)
+
+												dispatcher.GetInstance().Dispatch(
+													action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
+
+												return
+											}
+
+											dispatcher.GetInstance().Dispatch(
+												action.NewDecrementLoadingApplicationAction())
+
+											transparentTransitionEffect.Reset()
+
+											dispatcher.GetInstance().Dispatch(
+												action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
+										})
 									})
 								},
 								func(err error) {

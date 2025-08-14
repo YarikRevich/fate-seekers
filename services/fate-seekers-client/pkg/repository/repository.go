@@ -19,7 +19,7 @@ var (
 	// GetCollectionsRepository retrieves instance of the collections repository, performing initial creation if needed.
 	GetCollectionsRepository = sync.OnceValue[CollectionsRepository](createCollectionsRepository)
 
-	// GetFlagsRepository retrieves instance of the collections repository, performing initial creation if needed.
+	// GetFlagsRepository retrieves instance of the flags repository, performing initial creation if needed.
 	GetFlagsRepository = sync.OnceValue[FlagsRepository](createFlagsRepository)
 )
 
@@ -105,7 +105,9 @@ type flagsRepositoryImpl struct{}
 func (w *flagsRepositoryImpl) InsertOrUpdate(name, value string) error {
 	instance := db.GetInstance()
 
-	err := instance.Create(&entity.FlagsEntity{
+	fmt.Println(name, value)
+
+	err := instance.Save(&entity.FlagsEntity{
 		Name:  name,
 		Value: value,
 	}).Error

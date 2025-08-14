@@ -28,6 +28,14 @@ settings:
   # Represents language selected for the interface.
   language: "en"
 
+  # Represents section used for sound settings description.
+  sound:
+    # Represents music level property.
+    music: 0
+
+    # Represents FX level property.
+    fx: 0
+
 # Represents sector used for internal operation properties. 
 operation:
   # Represents debug property, which enables debug panels used for testing.
@@ -36,7 +44,7 @@ operation:
   # Represents database properties description.
   database:
     # Represents name of the sqlite3 database file.
-    name: "fate_seekers.db"
+    name: "fate_seekers_client.db"
 
     # Represents connection retry delay used for retry operations.
     connection-retry-delay: 3s
@@ -50,7 +58,7 @@ operation:
     console: true
 
     # Represents output file name.
-    name: "fate_seekers.log"
+    name: "fate_seekers_client.log"
 
     # Represents output file directory.
     directory: "log"

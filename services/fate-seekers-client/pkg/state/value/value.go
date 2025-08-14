@@ -25,12 +25,12 @@ const (
 
 // Describes all the available application reducer store values.
 const (
-	TRANSLATION_UPDATED_TRUE_VALUE  = "true"
-	TRANSLATION_UPDATED_FALSE_VALUE = "false"
-
 	EXIT_APPLICATION_TRUE_VALUE = "true"
 
 	LOADING_APPLICATION_EMPTY_VALUE = 0
+
+	STATE_RESET_APPLICATION_TRUE_VALUE  = "true"
+	STATE_RESET_APPLICATION_FALSE_VALUE = "false"
 )
 
 // Describes all the available repository reducer store values.
@@ -55,11 +55,14 @@ const (
 	SESSION_CREATION_STARTED_NETWORKING_TRUE_VALUE  = "true"
 	SESSION_CREATION_STARTED_NETWORKING_FALSE_VALUE = "false"
 
-	SESSION_JOINING_STARTED_NETWORKING_TRUE_VALUE  = "true"
-	SESSION_JOINING_STARTED_NETWORKING_FALSE_VALUE = "false"
-
 	SESSION_REMOVAL_STARTED_NETWORKING_TRUE_VALUE  = "true"
 	SESSION_REMOVAL_STARTED_NETWORKING_FALSE_VALUE = "false"
+
+	LOBBY_CREATION_STARTED_NETWORKING_TRUE_VALUE  = "true"
+	LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE = "false"
+
+	LOBBY_REMOVAL_STARTED_NETWORKING_TRUE_VALUE  = "true"
+	LOBBY_REMOVAL_STARTED_NETWORKING_FALSE_VALUE = "false"
 )
 
 // Describes all the available letter reducer store values.
@@ -78,15 +81,15 @@ const (
 
 // Describes available prompt reducer store values.
 const (
-	PROMPT_UPDATED_TRUE_VALUE  = "true"
-	PROMPT_UPDATED_FALSE_VALUE = "false"
-	PROMPT_TEXT_EMPTY_VALUE    = ""
+	UPDATED_PROMPT_TRUE_VALUE  = "true"
+	UPDATED_PROMPT_FALSE_VALUE = "false"
+	TEXT_PROMPT_EMPTY_VALUE    = ""
 )
 
 // Describes available prompt reducer store values.
 var (
-	PROMPT_SUBMIT_CALLBACK_EMPTY_VALUE = func() {}
-	PROMPT_CANCEL_CALLBACK_EMPTY_VALUE = func() {}
+	SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE = func() {}
+	CANCEL_PROMPT_CALLBACK_EMPTY_VALUE = func() {}
 )
 
 // Describes available event reducer store values.
@@ -105,4 +108,16 @@ var (
 	SOUND_FX_UPDATED_TRUE_VALUE     = "true"
 	SOUND_MUSIC_UPDATED_FALSE_VALUE = "false"
 	SOUND_MUSIC_UPDATED_TRUE_VALUE  = "true"
+)
+
+// Describes available statistics reducer store values.
+const (
+	CONTENT_PING_STATISTICS_EMPTY_VALUE  = int64(0)
+	METADATA_PING_STATISTICS_EMPTY_VALUE = int64(0)
+)
+
+// Describes available metadata reducer store values.
+var (
+	RETRIEVED_SESSIONS_METADATA_EMPTY_VALUE = []interface{}{}
+	SELECTED_SESSION_METADATA_EMPTY_VALUE   = ""
 )

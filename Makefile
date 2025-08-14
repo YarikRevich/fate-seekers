@@ -5,15 +5,15 @@ help:
 
 .PHONY: generate-proto
 generate-proto: ## Generates ProtocolBuffers API for API Server
-	@protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative api/metadata/metadata.proto && \
-	cp api/metadata/metadata_grpc.pb.go services/fate-seekers-client/pkg/core/networking/metadata/api && \
-	cp api/metadata/metadata.pb.go services/fate-seekers-client/pkg/core/networking/metadata/api && \
-	cp api/metadata/metadata_grpc.pb.go services/fate-seekers-server/pkg/shared/networking/metadata/api && \
-	cp api/metadata/metadata.pb.go services/fate-seekers-server/pkg/shared/networking/metadata/api
+	@cd api && buf build && buf generate
 
-	@protoc --go_out=. --go_opt=paths=source_relative api/content/content.proto && \
-	cp api/content/content.pb.go services/fate-seekers-client/pkg/core/networking/content/api && \
-	cp api/content/content.pb.go services/fate-seekers-server/pkg/shared/networking/content/api
+	@cp api/gen/content/v1/content.pb.go services/fate-seekers-client/pkg/core/networking/content/api && \
+	cp api/gen/content/v1/content.pb.go services/fate-seekers-server/pkg/shared/networking/content/api
+
+	@cp api/gen/metadata/v1/metadata_grpc.pb.go services/fate-seekers-client/pkg/core/networking/metadata/api && \
+	cp api/gen/metadata/v1/metadata.pb.go services/fate-seekers-client/pkg/core/networking/metadata/api && \
+	cp api/gen/metadata/v1/metadata_grpc.pb.go services/fate-seekers-server/pkg/shared/networking/metadata/api && \
+	cp api/gen/metadata/v1/metadata.pb.go services/fate-seekers-server/pkg/shared/networking/metadata/api
 
 .PHONY: create-local-client
 create-local-client: ## Creates fate-seekers-client local directory for API Server

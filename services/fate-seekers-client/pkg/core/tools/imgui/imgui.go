@@ -27,12 +27,24 @@ func (i *ImGUI) Update() {
 
 	ebimgui.BeginFrame()
 
-	imgui.Text(fmt.Sprintf("FPS: %f", ebiten.ActualFPS()))
+	if imgui.BeginMenu("Statistics") {
+		imgui.Text(fmt.Sprintf("FPS: %f", ebiten.ActualFPS()))
+		imgui.Text(fmt.Sprintf("Content ping: %d", store.GetStatisticsContentPing()))
+		imgui.Text(fmt.Sprintf("Metadata ping: %d", store.GetStatisticsMetadataPing()))
+
+		imgui.EndMenu()
+	}
 
 	if imgui.BeginMenu("States") {
 		imgui.Text(fmt.Sprintf("active_screen: %s", store.GetActiveScreen()))
 		imgui.Text(fmt.Sprintf("answer_input_question_updated: %s", store.GetAnswerInputQuestionUpdated()))
 		imgui.Text(fmt.Sprintf("entry_handshake_started_networking: %s", store.GetEntryHandshakeStartedNetworking()))
+		imgui.Text(fmt.Sprintf("ping_connection_started_networking: %s", store.GetPingConnectionStartedNetworking()))
+		imgui.Text(fmt.Sprintf("session_creation_started_networking: %s", store.GetSessionCreationStartedNetworking()))
+		imgui.Text(fmt.Sprintf("session_removal_started_networking: %s", store.GetSessionRemovalStartedNetworking()))
+		imgui.Text(fmt.Sprintf("session_retrieval_started_networking: %s", store.GetSessionRetrievalStartedNetworking()))
+		imgui.Text(fmt.Sprintf("lobby_creation_started_networking: %s", store.GetLobbyCreationStartedNetworking()))
+		imgui.Text(fmt.Sprintf("lobby_removal_started_networking: %s", store.GetLobbyRemovalStartedNetworking()))
 		imgui.Text(fmt.Sprintf("event_name: %s", store.GetEventName()))
 		imgui.Text(fmt.Sprintf("letter_image: %s", store.GetLetterImage()))
 		imgui.Text(fmt.Sprintf("letter_name: %s", store.GetLetterName()))

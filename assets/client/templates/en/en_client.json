@@ -43,13 +43,33 @@
         "one": "Create",
         "other": "Create"
     },
+    "client.selector.delete": {
+        "one": "Delete",
+        "other": "Delete"
+    },
     "client.selector.close": {
         "one": "Close",
         "other": "Close"
     },
-    "client.selector.session_id": {
-        "one": "Session ID",
-        "other": "Session ID"
+    "client.selector.session_name": {
+        "one": "Session name",
+        "other": "Session name"
+    },
+    "client.selector.sessions": {
+        "one": "User created sessions",
+        "other": "User created sessions"
+    },
+    "client.creator.title": {
+        "one": "Session creator",
+        "other": "Session creator"
+    },
+    "client.creator.session_name": {
+        "one": "Name",
+        "other": "Name"
+    },
+    "client.creator.session_seed": {
+        "one": "Seed",
+        "other": "Seed"
     },
     "client.letterimage.close": {
         "one": "Close",
@@ -83,9 +103,29 @@
         "one": "Answer is incorrect!",
         "other": "Answer is incorrect!"
     },
-    "client.selectormanager.invalid-session-id": {
-        "one": "Provided session ID is invalid",
-        "other": "Provided session ID is invalid"
+    "client.selectormanager.invalid-session-name": {
+        "one": "Provided session name is invalid",
+        "other": "Provided session name is invalid"
+    },
+    "client.selectormanager.session-removal-in-progress": {
+        "one": "Session removal is in progress",
+        "other": "Session removal is in progress"
+    },
+    "client.creatormanager.invalid-session-name": {
+        "one": "Provided session name is invalid",
+        "other": "Provided session name is invalid"
+    },
+    "client.creatormanager.invalid-session-seed": {
+        "one": "Provided session seed is invalid",
+        "other": "Provided session seed is invalid"
+    },
+    "client.creatormanager.in-progress": {
+        "one": "Session creation is in progress",
+        "other": "Session creation is in progress"
+    },
+    "client.creatormanager.failure": {
+        "one": "Session creation has failed",
+        "other": "Session creation has failed"
     },
     "client.settingsmanager.invalid-networking-server-host": {
         "one": "Provided server host is invalid",
@@ -94,6 +134,18 @@
     "client.networking.ping-connection-failure": {
         "one": "Unable to connect to a server",
         "other": "Unable to connect to a server"
+    },
+    "client.networking.get-sessions-failure": {
+        "one": "Unable to retrieve sessions from a server",
+        "other": "Unable to retrieve sessions from a server"
+    },
+    "client.networking.remove-session-failure": {
+        "one": "Unable to remove selected session",
+        "other": "Unable to remove selected session"
+    },
+    "client.networking.create-lobby-failure": {
+        "one": "Unable to create lobby for selected session",
+        "other": "Unable to create lobby for selected session"
     },
     "client.networking.connection-failure": {
         "one": "Connector connect operation failed",

@@ -133,3 +133,10 @@ func ComposeReducerResult(units ...ReducerResultUnit) ReducerResult {
 
 	return result
 }
+
+// RetrievedSessionMetadata represents retrieved session holder for reducer components.
+type RetrievedSessionMetadata struct {
+	SessionID int64
+	Name      string
+	Seed      uint64
+}

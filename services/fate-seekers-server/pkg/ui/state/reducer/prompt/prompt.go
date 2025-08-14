@@ -23,10 +23,10 @@ type PromptStateReducer struct {
 }
 
 func (psr *PromptStateReducer) Init() {
-	psr.store.SetState(UPDATED_PROMPT_STATE, value.PROMPT_UPDATED_FALSE_VALUE)
-	psr.store.SetState(TEXT_PROMPT_STATE, value.PROMPT_TEXT_EMPTY_VALUE)
-	psr.store.SetState(SUBMIT_CALLBACK_PROMPT_STATE, value.PROMPT_SUBMIT_CALLBACK_EMPTY_VALUE)
-	psr.store.SetState(CANCEL_CALLBACK_PROMPT_STATE, value.PROMPT_CANCEL_CALLBACK_EMPTY_VALUE)
+	psr.store.SetState(UPDATED_PROMPT_STATE, value.UPDATED_PROMPT_FALSE_VALUE)
+	psr.store.SetState(TEXT_PROMPT_STATE, value.TEXT_PROMPT_EMPTY_VALUE)
+	psr.store.SetState(SUBMIT_CALLBACK_PROMPT_STATE, value.SUBMIT_PROMPT_CALLBACK_EMPTY_VALUE)
+	psr.store.SetState(CANCEL_CALLBACK_PROMPT_STATE, value.CANCEL_PROMPT_CALLBACK_EMPTY_VALUE)
 }
 
 func (psr *PromptStateReducer) GetProcessor() func(value godux.Action) interface{} {

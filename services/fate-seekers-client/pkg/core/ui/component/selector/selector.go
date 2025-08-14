@@ -2,6 +2,7 @@ package selector
 
 import (
 	"image/color"
+	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
@@ -26,12 +27,86 @@ var (
 	disabledListColor = color.NRGBA{100, 100, 100, 255}
 )
 
-// NewSelectorComponent creates new selector component.
-func NewSelectorComponent(
-	submitCallback func(sessionID string),
-	createCallback func(),
-	backCallback func()) *widget.Container {
-	result := widget.NewContainer(
+var (
+	// GetInstance retrieves instance of the selector component, performing initial creation if needed.
+	GetInstance = sync.OnceValue[*SelectorComponent](newSelectorComponent)
+)
+
+// SelectorComponent represents component, which contains selector menu.
+type SelectorComponent struct {
+	// Represents session name input widget.
+	sessionNameInput *widget.TextInput
+
+	// Represents sessions list widget.
+	list *widget.List
+
+	// Represents delete action button widget.
+	deleteActionButton *widget.Button
+
+	// Represents currently selected session name entry.
+	sessionNameEntry string
+
+	// Represents submit callback.
+	submitCallback func(sessionName string)
+
+	// Represents create callback.
+	createCallback func()
+
+	// Represents delete callback.
+	deleteCallback func(sessionName string)
+
+	// Represents back callback.
+	backCallback func()
+
+	// Represents container widget.
+	container *widget.Container
+}
+
+// CleanInputs cleans all the inputs in the container.
+func (sc *SelectorComponent) CleanInputs() {
+	sc.sessionNameInput.SetText("")
+}
+
+// SetListsEntries sets lists entries to the list widget.
+func (sc *SelectorComponent) SetListsEntries(value []interface{}) {
+	sc.list.SetEntries(value)
+}
+
+// SetSubmitCallback modifies submit callback in the container.
+func (sc *SelectorComponent) SetSubmitCallback(callback func(sessionName string)) {
+	sc.submitCallback = callback
+}
+
+// SetCreateCallback modifies create callback in the container.
+func (sc *SelectorComponent) SetCreateCallback(callback func()) {
+	sc.createCallback = callback
+}
+
+// SetDeleteCallback modifies delete callback in the container.
+func (sc *SelectorComponent) SetDeleteCallback(callback func(sessionName string)) {
+	sc.deleteCallback = callback
+}
+
+// SetBackCallback modifies back callback in the container.
+func (sc *SelectorComponent) SetBackCallback(callback func()) {
+	sc.backCallback = callback
+}
+
+// ResetDeleteButton resets delete button widget state.
+func (sc *SelectorComponent) ResetDeleteButton() {
+	sc.deleteActionButton.GetWidget().Disabled = true
+}
+
+// GetContainer retrieves container widget.
+func (sc *SelectorComponent) GetContainer() *widget.Container {
+	return sc.container
+}
+
+// newSelectorComponent creates new selector component.
+func newSelectorComponent() *SelectorComponent {
+	var result *SelectorComponent
+
+	container := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
 				scaler.GetPercentageOf(config.GetWorldWidth(), 20),
@@ -61,7 +136,7 @@ func NewSelectorComponent(
 		Size:   20,
 	}
 
-	result.AddChild(widget.NewText(
+	container.AddChild(widget.NewText(
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
@@ -88,13 +163,13 @@ func NewSelectorComponent(
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.selector.session_id"),
+			translation.GetInstance().GetTranslation("client.selector.session_name"),
 			generalFont,
 			color.White)))
 
-	var sessionIDInput *widget.TextInput
+	var sessionNameInput *widget.TextInput
 
-	sessionIDInput = widget.NewTextInput(
+	sessionNameInput = widget.NewTextInput(
 		widget.TextInputOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionCenter,
@@ -132,10 +207,10 @@ func NewSelectorComponent(
 		widget.TextInputOpts.Validation(func(newInputTextRaw string) (bool, *string) {
 			newInputText := newInputTextRaw
 
-			parsedNewInputText := newInputText[len(sessionIDInput.GetText()):]
+			parsedNewInputText := newInputText[len(sessionNameInput.GetText()):]
 
 			if len(parsedNewInputText) > 1 {
-				newInputText = sessionIDInput.GetText() + parsedNewInputText[:1]
+				newInputText = sessionNameInput.GetText() + parsedNewInputText[:1]
 			} else if len(parsedNewInputText) == 0 {
 				return false, &newInputText
 			}
@@ -143,13 +218,13 @@ func NewSelectorComponent(
 			parsedNewInputTextSymbol := rune(parsedNewInputText[0])
 
 			if parsedNewInputTextSymbol < 32 && parsedNewInputTextSymbol > 127 {
-				replacement := sessionIDInput.GetText()
+				replacement := sessionNameInput.GetText()
 
 				return false, &replacement
 			}
 
 			if len(newInputText) > maxInputSymbols {
-				replacement := sessionIDInput.GetText()
+				replacement := sessionNameInput.GetText()
 
 				return false, &replacement
 			}
@@ -157,24 +232,118 @@ func NewSelectorComponent(
 			return false, &newInputText
 		}))
 
-	components.AddChild(sessionIDInput)
+	components.AddChild(sessionNameInput)
 
-	result.AddChild(components)
+	container.AddChild(components)
 
-	// listsContainer := widget.NewContainer(
-	// 	widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-	// 		Stretch: true,
-	// 	})),
-	// 	widget.ContainerOpts.Layout(widget.NewGridLayout(
-	// 		widget.GridLayoutOpts.Columns(3),
-	// 		widget.GridLayoutOpts.Stretch([]bool{true, false, true}, []bool{true}),
-	// 		widget.GridLayoutOpts.Spacing(10, 0))))
+	listsContainer := widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Stretch:  true,
+				Position: widget.RowLayoutPositionCenter,
+			}),
+			widget.WidgetOpts.MinSize(
+				container.GetWidget().MinWidth,
+				container.GetWidget().MinHeight,
+			),
+		),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+			widget.RowLayoutOpts.Padding(widget.Insets{
+				Top: 40,
+			}),
+		)))
+
+	listsContainer.AddChild(widget.NewText(
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+			Stretch: true,
+		})),
+		widget.TextOpts.Insets(widget.Insets{
+			Bottom: 20,
+		}),
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("client.selector.sessions"),
+			generalFont,
+			color.White)))
+
+	list := widget.NewList(
+		widget.ListOpts.ContainerOpts(
+			widget.ContainerOpts.WidgetOpts(
+				widget.WidgetOpts.MinSize(
+					scaler.GetPercentageOf(config.GetWorldWidth(), 40),
+					scaler.GetPercentageOf(config.GetWorldHeight(), 30),
+				),
+				widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+					MaxWidth:  scaler.GetPercentageOf(config.GetWorldWidth(), 40),
+					MaxHeight: scaler.GetPercentageOf(config.GetWorldHeight(), 30),
+					Position:  widget.RowLayoutPositionCenter,
+				}))),
+		widget.ListOpts.ScrollContainerOpts(widget.ScrollContainerOpts.Image(&widget.ScrollContainerImage{
+			Idle:     image.NewNineSlice(loader.GetInstance().GetStatic(loader.ListIdle), [3]int{25, 12, 22}, [3]int{25, 12, 25}),
+			Disabled: image.NewNineSlice(loader.GetInstance().GetStatic(loader.ListDisabled), [3]int{25, 12, 22}, [3]int{25, 12, 25}),
+			Mask:     image.NewNineSlice(loader.GetInstance().GetStatic(loader.ListMask), [3]int{26, 10, 23}, [3]int{26, 10, 26}),
+		})),
+		widget.ListOpts.SliderOpts(
+			widget.SliderOpts.Images(
+				&widget.SliderTrackImage{
+					Idle:     image.NewNineSlice(loader.GetInstance().GetStatic(loader.ListTrackIdle), [3]int{5, 0, 0}, [3]int{25, 12, 25}),
+					Hover:    image.NewNineSlice(loader.GetInstance().GetStatic(loader.ListTrackIdle), [3]int{5, 0, 0}, [3]int{25, 12, 25}),
+					Disabled: image.NewNineSlice(loader.GetInstance().GetStatic(loader.ListTrackDisabled), [3]int{0, 5, 0}, [3]int{25, 12, 25}),
+				},
+				&widget.ButtonImage{
+					Idle:     image.NewNineSliceSimple(loader.GetInstance().GetStatic(loader.SliderHandleIdle), 0, 5),
+					Hover:    image.NewNineSliceSimple(loader.GetInstance().GetStatic(loader.SliderHandleHover), 0, 5),
+					Pressed:  image.NewNineSliceSimple(loader.GetInstance().GetStatic(loader.SliderHandleHover), 0, 5),
+					Disabled: image.NewNineSliceSimple(loader.GetInstance().GetStatic(loader.SliderHandleIdle), 0, 5),
+				}),
+			widget.SliderOpts.MinHandleSize(8),
+			widget.SliderOpts.TrackPadding(widget.Insets{Bottom: 20}),
+		),
+		widget.ListOpts.AllowReselect(),
+		widget.ListOpts.HideHorizontalSlider(),
+		widget.ListOpts.Entries([]interface{}{}),
+		widget.ListOpts.EntryLabelFunc(func(e interface{}) string {
+			return e.(string)
+		}),
+		widget.ListOpts.EntrySelectedHandler(func(args *widget.ListEntrySelectedEventArgs) {
+			if result.deleteActionButton.GetWidget().Disabled {
+				result.deleteActionButton.GetWidget().Disabled = false
+			}
+
+			sessionNameEntry := args.Entry.(string)
+
+			sessionNameInput.SetText(sessionNameEntry)
+
+			result.sessionNameEntry = sessionNameEntry
+		}),
+		widget.ListOpts.EntryFontFace(generalFont),
+		widget.ListOpts.EntryColor(&widget.ListEntryColor{
+			Selected:                   componentscommon.ButtonTextColor,
+			Unselected:                 selectedListColor,
+			SelectedBackground:         selectedListColor,
+			SelectedFocusedBackground:  selectedListColor,
+			FocusedBackground:          focusedListColor,
+			DisabledUnselected:         disabledListColor,
+			DisabledSelected:           disabledListColor,
+			DisabledSelectedBackground: disabledListColor,
+		}),
+		widget.ListOpts.EntryTextPadding(widget.Insets{
+			Top:    15,
+			Left:   40,
+			Right:  40,
+			Bottom: 15,
+		}),
+	)
+
+	listsContainer.AddChild(list)
+
+	container.AddChild(listsContainer)
 
 	buttonsContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
-				result.GetWidget().MinWidth,
-				result.GetWidget().MinHeight),
+				container.GetWidget().MinWidth,
+				0),
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionEnd,
 				HorizontalPosition: widget.AnchorLayoutPositionEnd,
@@ -184,14 +353,17 @@ func NewSelectorComponent(
 		),
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
+			widget.RowLayoutOpts.Padding(widget.Insets{
+				Top: -scaler.GetPercentageOf(config.GetWorldHeight(), 10),
+			}),
 		)),
 	)
 
 	closeButtonsContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
-				result.GetWidget().MinWidth,
-				result.GetWidget().MinHeight),
+				container.GetWidget().MinWidth,
+				container.GetWidget().MinHeight),
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionEnd,
 				HorizontalPosition: widget.AnchorLayoutPositionEnd,
@@ -230,7 +402,7 @@ func NewSelectorComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			backCallback()
+			result.backCallback()
 		}),
 	))
 
@@ -239,8 +411,8 @@ func NewSelectorComponent(
 	actionButtonContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
-				result.GetWidget().MinWidth,
-				result.GetWidget().MinHeight),
+				container.GetWidget().MinWidth,
+				container.GetWidget().MinHeight),
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionEnd,
 				HorizontalPosition: widget.AnchorLayoutPositionEnd,
@@ -252,10 +424,42 @@ func NewSelectorComponent(
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
 			widget.RowLayoutOpts.Spacing(13),
 			widget.RowLayoutOpts.Padding(widget.Insets{
-				Left: scaler.GetPercentageOf(config.GetWorldWidth(), 4),
+				Left: scaler.GetPercentageOf(config.GetWorldWidth(), 1),
 			}),
 		)),
 	)
+
+	deleteActionButton := widget.NewButton(
+		widget.ButtonOpts.Image(&widget.ButtonImage{
+			Idle:         buttonIdleIcon,
+			Hover:        buttonHoverIcon,
+			Pressed:      buttonIdleIcon,
+			PressedHover: buttonIdleIcon,
+			Disabled:     buttonIdleIcon,
+		}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("client.selector.delete"),
+			generalFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Position: widget.RowLayoutPositionEnd,
+			}),
+		),
+		widget.ButtonOpts.TextPadding(widget.Insets{
+			Left:   30,
+			Right:  30,
+			Top:    20,
+			Bottom: 20,
+		}),
+		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			result.deleteCallback(result.sessionNameEntry)
+		}),
+	)
+
+	deleteActionButton.GetWidget().Disabled = true
+
+	actionButtonContainer.AddChild(deleteActionButton)
 
 	actionButtonContainer.AddChild(widget.NewButton(
 		widget.ButtonOpts.Image(&widget.ButtonImage{
@@ -281,7 +485,7 @@ func NewSelectorComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			createCallback()
+			result.createCallback()
 		}),
 	))
 
@@ -309,74 +513,20 @@ func NewSelectorComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			submitCallback(sessionIDInput.GetText())
+			result.submitCallback(sessionNameInput.GetText())
 		}),
 	))
 
 	buttonsContainer.AddChild(actionButtonContainer)
 
-	result.AddChild(buttonsContainer)
+	container.AddChild(buttonsContainer)
 
-	// TODO: should add a list of sessions created by the user.
-
-	// 	listsContainer := widget.NewContainer(
-	// 	widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-	// 		Stretch: true,
-	// 	})),
-	// 	widget.ContainerOpts.Layout(widget.NewGridLayout(
-	// 		widget.GridLayoutOpts.Columns(3),
-	// 		widget.GridLayoutOpts.Stretch([]bool{true, false, true}, []bool{true}),
-	// 		widget.GridLayoutOpts.Spacing(10, 0))))
-	// c.AddChild(listsContainer)
-
-	// entries1 := []interface{}{"One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"}
-	// list1 := newList(entries1, res, widget.WidgetOpts.LayoutData(widget.GridLayoutData{
-	// 	MaxHeight: 220,
-	// }))
-	// listsContainer.AddChild(list1)
-
-	// buttonsContainer := widget.NewContainer(
-	// 	widget.ContainerOpts.Layout(widget.NewRowLayout(
-	// 		widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-	// 		widget.RowLayoutOpts.Spacing(10),
-	// 	)))
-	// listsContainer.AddChild(buttonsContainer)
-
-	// bs := []*widget.Button{}
-	// for i := 0; i < 3; i++ {
-	// 	b := widget.NewButton(
-	// 		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-	// 			Stretch: true,
-	// 		})),
-	// 		widget.ButtonOpts.Image(res.button.image),
-	// 		widget.ButtonOpts.TextPadding(res.button.padding),
-	// 		widget.ButtonOpts.Text(fmt.Sprintf("Action %d", i+1), res.button.face, res.button.text))
-	// 	buttonsContainer.AddChild(b)
-	// 	bs = append(bs, b)
-	// }
-
-	// entries2 := []interface{}{"Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen", "Twenty"}
-	// list2 := newList(entries2, res, widget.WidgetOpts.LayoutData(widget.GridLayoutData{
-	// 	MaxHeight: 220,
-	// }))
-	// listsContainer.AddChild(list2)
-
-	// c.AddChild(newSeparator(res, widget.RowLayoutData{
-	// 	Stretch: true,
-	// }))
-
-	// c.AddChild(newCheckbox("Disabled", func(args *widget.CheckboxChangedEventArgs) {
-	// 	list1.GetWidget().Disabled = args.State == widget.WidgetChecked
-	// 	list2.GetWidget().Disabled = args.State == widget.WidgetChecked
-	// 	for _, b := range bs {
-	// 		b.GetWidget().Disabled = args.State == widget.WidgetChecked
-	// 	}
-	// }, res))
-
-	// return &page{
-	// 	title:   "List",
-	// 	content: c,
-	// }
+	result = &SelectorComponent{
+		sessionNameInput:   sessionNameInput,
+		list:               list,
+		deleteActionButton: deleteActionButton,
+		container:          container,
+	}
 
 	return result
 }
