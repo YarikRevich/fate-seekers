@@ -179,6 +179,7 @@ func PerformRemoveSession(sessionID int64, callback func(err error)) {
 				context.Background(),
 				&metadatav1.RemoveSessionRequest{
 					SessionId: sessionID,
+					Issuer:    store.GetRepositoryUUID(),
 				})
 
 		if err != nil {
@@ -208,7 +209,7 @@ func PerformRemoveSession(sessionID int64, callback func(err error)) {
 }
 
 // PerformGetLobbySet performs lobby set retrieval request.
-func PerformGetLobbySet(sessionId int64, callback func(response *metadatav1.GetLobbySetResponse, err error)) {
+func PerformGetLobbySet(sessionID int64, callback func(response *metadatav1.GetLobbySetResponse, err error)) {
 	go func() {
 		response, err := connector.
 			GetInstance().
@@ -217,7 +218,7 @@ func PerformGetLobbySet(sessionId int64, callback func(response *metadatav1.GetL
 				context.Background(),
 				&metadatav1.GetLobbySetRequest{
 					Issuer:    store.GetRepositoryUUID(),
-					SessionId: sessionId,
+					SessionId: sessionID,
 				})
 
 		if err != nil {
@@ -247,7 +248,7 @@ func PerformGetLobbySet(sessionId int64, callback func(response *metadatav1.GetL
 }
 
 // PerformCreateLobby performs lobby creation request.
-func PerformCreateLobby(sessionId int64, callback func(err error)) {
+func PerformCreateLobby(sessionID int64, callback func(err error)) {
 	go func() {
 		_, err := connector.
 			GetInstance().
@@ -256,7 +257,7 @@ func PerformCreateLobby(sessionId int64, callback func(err error)) {
 				context.Background(),
 				&metadatav1.CreateLobbyRequest{
 					Issuer:    store.GetRepositoryUUID(),
-					SessionId: sessionId,
+					SessionId: sessionID,
 				})
 
 		if err != nil {

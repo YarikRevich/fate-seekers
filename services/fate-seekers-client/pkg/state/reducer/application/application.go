@@ -52,7 +52,7 @@ func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) inte
 
 		case action.SET_STATE_RESET_APPLICATION_ACTION:
 			return dto.ComposeReducerResult(
-				dto.ReducerResultUnit{Key: STATE_RESET_APPLICATION_STATE, Value: valueRaw})
+				dto.ReducerResultUnit{Key: STATE_RESET_APPLICATION_STATE, Value: value.Value})
 
 		default:
 			return nil

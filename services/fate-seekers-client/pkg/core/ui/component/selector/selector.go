@@ -34,17 +34,26 @@ var (
 
 // SelectorComponent represents component, which contains selector menu.
 type SelectorComponent struct {
-	// Represents name input widget.
-	sessionIDInput *widget.TextInput
+	// Represents session name input widget.
+	sessionNameInput *widget.TextInput
 
-	// Represents list widget.
+	// Represents sessions list widget.
 	list *widget.List
 
+	// Represents delete action button widget.
+	deleteActionButton *widget.Button
+
+	// Represents currently selected session name entry.
+	sessionNameEntry string
+
 	// Represents submit callback.
-	submitCallback func(sessionID string)
+	submitCallback func(sessionName string)
 
 	// Represents create callback.
 	createCallback func()
+
+	// Represents delete callback.
+	deleteCallback func(sessionName string)
 
 	// Represents back callback.
 	backCallback func()
@@ -55,7 +64,7 @@ type SelectorComponent struct {
 
 // CleanInputs cleans all the inputs in the container.
 func (sc *SelectorComponent) CleanInputs() {
-	sc.sessionIDInput.SetText("")
+	sc.sessionNameInput.SetText("")
 }
 
 // SetListsEntries sets lists entries to the list widget.
@@ -63,19 +72,29 @@ func (sc *SelectorComponent) SetListsEntries(value []interface{}) {
 	sc.list.SetEntries(value)
 }
 
-// SetSubmitCallback modified submit callback in the container.
-func (sc *SelectorComponent) SetSubmitCallback(callback func(sessionID string)) {
+// SetSubmitCallback modifies submit callback in the container.
+func (sc *SelectorComponent) SetSubmitCallback(callback func(sessionName string)) {
 	sc.submitCallback = callback
 }
 
-// SetCreateCallback modified create callback in the container.
+// SetCreateCallback modifies create callback in the container.
 func (sc *SelectorComponent) SetCreateCallback(callback func()) {
 	sc.createCallback = callback
 }
 
-// SetBackCallback modified back callback in the container.
+// SetDeleteCallback modifies delete callback in the container.
+func (sc *SelectorComponent) SetDeleteCallback(callback func(sessionName string)) {
+	sc.deleteCallback = callback
+}
+
+// SetBackCallback modifies back callback in the container.
 func (sc *SelectorComponent) SetBackCallback(callback func()) {
 	sc.backCallback = callback
+}
+
+// ResetDeleteButton resets delete button widget state.
+func (sc *SelectorComponent) ResetDeleteButton() {
+	sc.deleteActionButton.GetWidget().Disabled = true
 }
 
 // GetContainer retrieves container widget.
@@ -144,13 +163,13 @@ func newSelectorComponent() *SelectorComponent {
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.selector.session_id"),
+			translation.GetInstance().GetTranslation("client.selector.session_name"),
 			generalFont,
 			color.White)))
 
-	var sessionIDInput *widget.TextInput
+	var sessionNameInput *widget.TextInput
 
-	sessionIDInput = widget.NewTextInput(
+	sessionNameInput = widget.NewTextInput(
 		widget.TextInputOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				VerticalPosition:   widget.AnchorLayoutPositionCenter,
@@ -188,10 +207,10 @@ func newSelectorComponent() *SelectorComponent {
 		widget.TextInputOpts.Validation(func(newInputTextRaw string) (bool, *string) {
 			newInputText := newInputTextRaw
 
-			parsedNewInputText := newInputText[len(sessionIDInput.GetText()):]
+			parsedNewInputText := newInputText[len(sessionNameInput.GetText()):]
 
 			if len(parsedNewInputText) > 1 {
-				newInputText = sessionIDInput.GetText() + parsedNewInputText[:1]
+				newInputText = sessionNameInput.GetText() + parsedNewInputText[:1]
 			} else if len(parsedNewInputText) == 0 {
 				return false, &newInputText
 			}
@@ -199,13 +218,13 @@ func newSelectorComponent() *SelectorComponent {
 			parsedNewInputTextSymbol := rune(parsedNewInputText[0])
 
 			if parsedNewInputTextSymbol < 32 && parsedNewInputTextSymbol > 127 {
-				replacement := sessionIDInput.GetText()
+				replacement := sessionNameInput.GetText()
 
 				return false, &replacement
 			}
 
 			if len(newInputText) > maxInputSymbols {
-				replacement := sessionIDInput.GetText()
+				replacement := sessionNameInput.GetText()
 
 				return false, &replacement
 			}
@@ -213,7 +232,7 @@ func newSelectorComponent() *SelectorComponent {
 			return false, &newInputText
 		}))
 
-	components.AddChild(sessionIDInput)
+	components.AddChild(sessionNameInput)
 
 	container.AddChild(components)
 
@@ -282,14 +301,20 @@ func newSelectorComponent() *SelectorComponent {
 		),
 		widget.ListOpts.AllowReselect(),
 		widget.ListOpts.HideHorizontalSlider(),
-		widget.ListOpts.Entries([]interface{}{
-			"itworks",
-		}),
+		widget.ListOpts.Entries([]interface{}{}),
 		widget.ListOpts.EntryLabelFunc(func(e interface{}) string {
 			return e.(string)
 		}),
 		widget.ListOpts.EntrySelectedHandler(func(args *widget.ListEntrySelectedEventArgs) {
-			sessionIDInput.SetText(args.Entry.(string))
+			if result.deleteActionButton.GetWidget().Disabled {
+				result.deleteActionButton.GetWidget().Disabled = false
+			}
+
+			sessionNameEntry := args.Entry.(string)
+
+			sessionNameInput.SetText(sessionNameEntry)
+
+			result.sessionNameEntry = sessionNameEntry
 		}),
 		widget.ListOpts.EntryFontFace(generalFont),
 		widget.ListOpts.EntryColor(&widget.ListEntryColor{
@@ -399,10 +424,42 @@ func newSelectorComponent() *SelectorComponent {
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
 			widget.RowLayoutOpts.Spacing(13),
 			widget.RowLayoutOpts.Padding(widget.Insets{
-				Left: scaler.GetPercentageOf(config.GetWorldWidth(), 4),
+				Left: scaler.GetPercentageOf(config.GetWorldWidth(), 1),
 			}),
 		)),
 	)
+
+	deleteActionButton := widget.NewButton(
+		widget.ButtonOpts.Image(&widget.ButtonImage{
+			Idle:         buttonIdleIcon,
+			Hover:        buttonHoverIcon,
+			Pressed:      buttonIdleIcon,
+			PressedHover: buttonIdleIcon,
+			Disabled:     buttonIdleIcon,
+		}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("client.selector.delete"),
+			generalFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Position: widget.RowLayoutPositionEnd,
+			}),
+		),
+		widget.ButtonOpts.TextPadding(widget.Insets{
+			Left:   30,
+			Right:  30,
+			Top:    20,
+			Bottom: 20,
+		}),
+		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			result.deleteCallback(result.sessionNameEntry)
+		}),
+	)
+
+	deleteActionButton.GetWidget().Disabled = true
+
+	actionButtonContainer.AddChild(deleteActionButton)
 
 	actionButtonContainer.AddChild(widget.NewButton(
 		widget.ButtonOpts.Image(&widget.ButtonImage{
@@ -456,7 +513,7 @@ func newSelectorComponent() *SelectorComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			result.submitCallback(sessionIDInput.GetText())
+			result.submitCallback(sessionNameInput.GetText())
 		}),
 	))
 
@@ -465,9 +522,10 @@ func newSelectorComponent() *SelectorComponent {
 	container.AddChild(buttonsContainer)
 
 	result = &SelectorComponent{
-		sessionIDInput: sessionIDInput,
-		list:           list,
-		container:      container,
+		sessionNameInput:   sessionNameInput,
+		list:               list,
+		deleteActionButton: deleteActionButton,
+		container:          container,
 	}
 
 	return result

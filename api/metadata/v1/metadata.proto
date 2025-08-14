@@ -102,6 +102,7 @@ message CreateSessionResponse {
 // RemoveSessionRequest represents remove session request.
 message RemoveSessionRequest {
     int64 session_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
 
 // RemoveSessionResponse represents remove session response.

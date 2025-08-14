@@ -19,6 +19,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	selectormanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/selector"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -26,6 +27,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/exp/slices"
 )
 
 var (
@@ -120,31 +122,110 @@ func (ss *SelectorScreen) HandleRender(screen *ebiten.Image) {
 func newSelectorScreen() screen.Screen {
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
-	selector.GetInstance().SetSubmitCallback(func(sessionID string) {
-		if selectormanager.ProcessChanges(sessionID) {
+	selector.GetInstance().SetSubmitCallback(func(sessionName string) {
+		if selectormanager.ProcessChanges(sessionName) {
 			if store.GetLobbyCreationStartedNetworking() == value.LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE {
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetLobbyCreationStartedNetworkingAction(
 						value.LOBBY_CREATION_STARTED_NETWORKING_TRUE_VALUE))
 
 				dispatcher.GetInstance().Dispatch(
-					action.NewSetSelectedSessionMetadata(sessionID))
+					action.NewSetSelectedSessionMetadata(sessionName))
 
-				handler.PerformCreateLobby(0, func(err error) {
-					transparentTransitionEffect.Reset()
+				if slices.ContainsFunc(
+					store.GetRetrievedSessionsMetadata(),
+					func(value dto.RetrievedSessionMetadata) bool {
+						return value.Name == sessionName
+					}) {
+					var sessionID int64
 
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+					for _, session := range store.GetRetrievedSessionsMetadata() {
+						if session.Name == sessionName {
+							sessionID = session.SessionID
 
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
+							break
+						}
+					}
 
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetLobbyCreationStartedNetworkingAction(
-							value.LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE))
+					handler.PerformCreateLobby(sessionID, func(err error) {
+						if err != nil {
 
-					selector.GetInstance().CleanInputs()
-				})
+						}
+
+						transparentTransitionEffect.Reset()
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLobbyCreationStartedNetworkingAction(
+								value.LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE))
+
+						selector.GetInstance().CleanInputs()
+
+						selector.GetInstance().ResetDeleteButton()
+					})
+				} else {
+					handler.PerformGetSessions(func(response *metadatav1.GetSessionsResponse, err error) {
+						if err != nil {
+							notification.GetInstance().Push(
+								common.ComposeMessage(
+									translation.GetInstance().GetTranslation("client.networking.get-sessions-failure"),
+									err.Error()),
+								time.Second*3,
+								common.NotificationErrorTextColor)
+
+							return
+						}
+
+						convertedGetSessionsResponse :=
+							converter.ConvertGetSessionsResponseToRetrievedSessionsMetadata(response)
+
+						dispatcher.
+							GetInstance().
+							Dispatch(
+								action.NewSetRetrievedSessionsMetadata(
+									convertedGetSessionsResponse))
+
+						selector.GetInstance().SetListsEntries(
+							converter.ConvertGetSessionsResponseToListEntries(response))
+
+						var sessionID int64
+
+						for _, session := range convertedGetSessionsResponse {
+							if session.Name == sessionName {
+								sessionID = session.SessionID
+
+								break
+							}
+						}
+
+						handler.PerformCreateLobby(sessionID, func(err error) {
+							if err != nil {
+
+							}
+
+							transparentTransitionEffect.Reset()
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetLobbyCreationStartedNetworkingAction(
+									value.LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE))
+
+							selector.GetInstance().CleanInputs()
+
+							selector.GetInstance().ResetDeleteButton()
+						})
+					})
+				}
 			}
 		}
 	})
@@ -154,6 +235,8 @@ func newSelectorScreen() screen.Screen {
 
 		selector.GetInstance().CleanInputs()
 
+		selector.GetInstance().ResetDeleteButton()
+
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
@@ -161,10 +244,121 @@ func newSelectorScreen() screen.Screen {
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_CREATOR_VALUE))
 	})
 
+	selector.GetInstance().SetDeleteCallback(func(sessionName string) {
+		if store.GetSessionRemovalStartedNetworking() == value.SESSION_REMOVAL_STARTED_NETWORKING_FALSE_VALUE {
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetLobbyCreationStartedNetworkingAction(
+					value.SESSION_REMOVAL_STARTED_NETWORKING_TRUE_VALUE))
+
+			if slices.ContainsFunc(
+				store.GetRetrievedSessionsMetadata(),
+				func(value dto.RetrievedSessionMetadata) bool {
+					return value.Name == sessionName
+				}) {
+				var sessionID int64
+
+				for _, session := range store.GetRetrievedSessionsMetadata() {
+					if session.Name == sessionName {
+						sessionID = session.SessionID
+
+						break
+					}
+				}
+
+				handler.PerformRemoveSession(sessionID, func(err error) {
+					if err != nil {
+						notification.GetInstance().Push(
+							common.ComposeMessage(
+								translation.GetInstance().GetTranslation("client.networking.remove-session-failure"),
+								err.Error()),
+							time.Second*3,
+							common.NotificationErrorTextColor)
+
+						return
+					}
+
+					selector.GetInstance().CleanInputs()
+
+					selector.GetInstance().ResetDeleteButton()
+
+					notification.GetInstance().Push(
+						translation.GetInstance().GetTranslation("client.selectormanager.session-removal-in-progress"),
+						time.Second*4,
+						common.NotificationInfoTextColor)
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+				})
+			} else {
+				handler.PerformGetSessions(func(response *metadatav1.GetSessionsResponse, err1 error) {
+					if err1 != nil {
+						notification.GetInstance().Push(
+							common.ComposeMessage(
+								translation.GetInstance().GetTranslation("client.networking.get-sessions-failure"),
+								err1.Error()),
+							time.Second*3,
+							common.NotificationErrorTextColor)
+
+						return
+					}
+
+					convertedGetSessionsResponse :=
+						converter.ConvertGetSessionsResponseToRetrievedSessionsMetadata(response)
+
+					dispatcher.
+						GetInstance().
+						Dispatch(
+							action.NewSetRetrievedSessionsMetadata(
+								convertedGetSessionsResponse))
+
+					selector.GetInstance().SetListsEntries(
+						converter.ConvertGetSessionsResponseToListEntries(response))
+
+					var sessionID int64
+
+					for _, session := range convertedGetSessionsResponse {
+						if session.Name == sessionName {
+							sessionID = session.SessionID
+
+							break
+						}
+					}
+
+					handler.PerformRemoveSession(sessionID, func(err2 error) {
+						if err2 != nil {
+							notification.GetInstance().Push(
+								common.ComposeMessage(
+									translation.GetInstance().GetTranslation("client.networking.remove-session-failure"),
+									err2.Error()),
+								time.Second*3,
+								common.NotificationErrorTextColor)
+
+							return
+						}
+
+						selector.GetInstance().CleanInputs()
+
+						selector.GetInstance().ResetDeleteButton()
+
+						notification.GetInstance().Push(
+							translation.GetInstance().GetTranslation("client.selectormanager.session-removal-in-progress"),
+							time.Second*4,
+							common.NotificationInfoTextColor)
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+					})
+				})
+			}
+		}
+	})
+
 	selector.GetInstance().SetBackCallback(func() {
 		transparentTransitionEffect.Reset()
 
 		selector.GetInstance().CleanInputs()
+
+		selector.GetInstance().ResetDeleteButton()
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))

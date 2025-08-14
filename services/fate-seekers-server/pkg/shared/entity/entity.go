@@ -38,22 +38,6 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-// AfterDelete performs sessions cache entity eviction after sessions entity removal.
-func (s *SessionEntity) AfterDelete(tx *gorm.DB) error {
-	if err := tx.
-		Model(&UserEntity{}).
-		Where("id = ?", s.Issuer).
-		First(&s.UserEntity).Error; err != nil {
-		return err
-	}
-
-	cache.
-		GetInstance().
-		EvictSessions(s.UserEntity.Name)
-
-	return nil
-}
-
 // LobbyEntity represents lobbies entity.
 type LobbyEntity struct {
 	ID            int64         `gorm:"column:id;primaryKey;auto_increment;not null"`
@@ -61,6 +45,7 @@ type LobbyEntity struct {
 	SessionID     int64         `gorm:"column:session_id;not null"`
 	Skin          int64         `gorm:"column:skin;not null"`
 	Health        int64         `gorm:"column:health;not null"`
+	Host          bool          `gorm:"column:host;not null"`
 	Eliminated    bool          `gorm:"column:eliminated;not null"`
 	PositionX     float64       `gorm:"column:position_x;not null"`
 	PositionY     float64       `gorm:"column:position_y;not null"`
@@ -79,26 +64,6 @@ func (l *LobbyEntity) BeforeCreate(tx *gorm.DB) error {
 	cache.
 		GetInstance().
 		EvictLobbySet(l.SessionID)
-
-	return nil
-}
-
-// AfterDelete performs lobbies cache entity eviction after lobbies entity removal.
-func (l *LobbyEntity) AfterDelete(tx *gorm.DB) error {
-	if err := tx.
-		Model(&UserEntity{}).
-		Where("id = ?", l.UserID).
-		First(&l.UserEntity).Error; err != nil {
-		return err
-	}
-
-	cache.
-		GetInstance().
-		EvictLobbySet(l.SessionID)
-
-	cache.
-		GetInstance().
-		EvictMetadata(l.UserEntity.Name)
 
 	return nil
 }

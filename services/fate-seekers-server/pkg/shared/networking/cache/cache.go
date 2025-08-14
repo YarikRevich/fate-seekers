@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
@@ -44,8 +43,6 @@ type NetworkingCache struct {
 
 // AddSession adds session cache instance with the provided key and value.
 func (nc *NetworkingCache) AddSessions(key string, value []dto.CacheSessionEntity) {
-	fmt.Println("KEY DURING CREATION", key)
-
 	nc.sessions.Add(key, value)
 }
 
@@ -56,8 +53,6 @@ func (nc *NetworkingCache) GetSessions(key string) ([]dto.CacheSessionEntity, bo
 
 // EvictSessions evicts sessions cache for the provided key.
 func (nc *NetworkingCache) EvictSessions(key string) {
-	fmt.Println("KEY DURING EVICTION", key)
-
 	nc.sessions.Remove(key)
 }
 

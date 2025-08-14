@@ -43,13 +43,17 @@
         "one": "Create",
         "other": "Create"
     },
+    "client.selector.delete": {
+        "one": "Delete",
+        "other": "Delete"
+    },
     "client.selector.close": {
         "one": "Close",
         "other": "Close"
     },
-    "client.selector.session_id": {
-        "one": "Session ID",
-        "other": "Session ID"
+    "client.selector.session_name": {
+        "one": "Session name",
+        "other": "Session name"
     },
     "client.selector.sessions": {
         "one": "User created sessions",
@@ -99,9 +103,13 @@
         "one": "Answer is incorrect!",
         "other": "Answer is incorrect!"
     },
-    "client.selectormanager.invalid-session-id": {
-        "one": "Provided session ID is invalid",
-        "other": "Provided session ID is invalid"
+    "client.selectormanager.invalid-session-name": {
+        "one": "Provided session name is invalid",
+        "other": "Provided session name is invalid"
+    },
+    "client.selectormanager.session-removal-in-progress": {
+        "one": "Session removal is in progress",
+        "other": "Session removal is in progress"
     },
     "client.creatormanager.invalid-session-name": {
         "one": "Provided session name is invalid",
@@ -130,6 +138,10 @@
     "client.networking.get-sessions-failure": {
         "one": "Unable to retrieve sessions from a server",
         "other": "Unable to retrieve sessions from a server"
+    },
+    "client.networking.remove-session-failure": {
+        "one": "Unable to remove selected session",
+        "other": "Unable to remove selected session"
     },
     "client.networking.connection-failure": {
         "one": "Connector connect operation failed",

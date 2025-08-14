@@ -22,6 +22,7 @@ CREATE TABLE lobbies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL UNIQUE,
     session_id INTEGER NOT NULL,
+    host BOOLEAN NOT NULL,
     skin INTEGER NOT NULL,
     health INTEGER NOT NULL,
     eliminated BOOLEAN NOT NULL,

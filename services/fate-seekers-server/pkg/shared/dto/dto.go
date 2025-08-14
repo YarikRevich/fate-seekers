@@ -138,6 +138,7 @@ func ComposeReducerResult(units ...ReducerResultUnit) ReducerResult {
 type LobbiesRepositoryInsertOrUpdateRequest struct {
 	UserID     int64
 	SessionID  int64
+	Host       bool
 	Skin       uint64
 	Health     uint64
 	Eliminated bool
@@ -160,4 +161,5 @@ type CacheMetadataEntity struct {
 	Skin       uint64
 	Health     uint64
 	Eliminated bool
+	Host       bool
 }
