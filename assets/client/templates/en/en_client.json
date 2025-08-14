@@ -143,6 +143,10 @@
         "one": "Unable to remove selected session",
         "other": "Unable to remove selected session"
     },
+    "client.networking.create-lobby-failure": {
+        "one": "Unable to create lobby for selected session",
+        "other": "Unable to create lobby for selected session"
+    },
     "client.networking.connection-failure": {
         "one": "Connector connect operation failed",
         "other": "Connector connect operation failed"

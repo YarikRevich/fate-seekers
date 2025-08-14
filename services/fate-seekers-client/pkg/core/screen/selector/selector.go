@@ -149,7 +149,14 @@ func newSelectorScreen() screen.Screen {
 
 					handler.PerformCreateLobby(sessionID, func(err error) {
 						if err != nil {
+							notification.GetInstance().Push(
+								common.ComposeMessage(
+									translation.GetInstance().GetTranslation("client.networking.create-lobby-failure"),
+									err.Error()),
+								time.Second*3,
+								common.NotificationErrorTextColor)
 
+							return
 						}
 
 						transparentTransitionEffect.Reset()
@@ -205,7 +212,14 @@ func newSelectorScreen() screen.Screen {
 
 						handler.PerformCreateLobby(sessionID, func(err error) {
 							if err != nil {
+								notification.GetInstance().Push(
+									common.ComposeMessage(
+										translation.GetInstance().GetTranslation("client.networking.create-lobby-failure"),
+										err.Error()),
+									time.Second*3,
+									common.NotificationErrorTextColor)
 
+								return
 							}
 
 							transparentTransitionEffect.Reset()
