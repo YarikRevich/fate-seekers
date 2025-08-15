@@ -156,6 +156,10 @@ func newSelectorScreen() screen.Screen {
 								time.Second*3,
 								common.NotificationErrorTextColor)
 
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetLobbyCreationStartedNetworkingAction(
+									value.LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE))
+
 							return
 						}
 
@@ -184,6 +188,10 @@ func newSelectorScreen() screen.Screen {
 									err.Error()),
 								time.Second*3,
 								common.NotificationErrorTextColor)
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetLobbyCreationStartedNetworkingAction(
+									value.LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE))
 
 							return
 						}
@@ -218,6 +226,10 @@ func newSelectorScreen() screen.Screen {
 										err.Error()),
 									time.Second*3,
 									common.NotificationErrorTextColor)
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetLobbyCreationStartedNetworkingAction(
+										value.LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE))
 
 								return
 							}

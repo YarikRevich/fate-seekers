@@ -78,6 +78,12 @@ const (
 	maxSessionsAmount = 128
 )
 
+// Represents session related static values.
+const (
+	// Max amount of users per session.
+	MAX_SESSION_USERS = 8
+)
+
 const (
 	// Represents home directory where all application related data is located.
 	internalGlobalDirectory = "/.fate-seekers-server"

@@ -10,20 +10,37 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 )
 
+var (
+	// GetInstance retrieves instance of the networking metadata ping, performing initilization if needed.
+	GetInstance = sync.OnceValue[*NetworkingMetadataPing](newNetworkingMetadataPing)
+)
+
 const (
 	// Describes metadata ping worker ticker duration.
 	metadataPingTimer = time.Second
 )
 
-// Starts networking metadata ping worker.
-func Run() {
+// NetworkingMetadataPing represents networking metadata ping worker.
+type NetworkingMetadataPing struct {
+	// Represents configured ticker, which serves to stop the worker.
+	close chan bool
+}
+
+// Run starts networking metadata ping worker.
+func (nmp *NetworkingMetadataPing) Run() {
 	go func() {
 		var wg sync.WaitGroup
 
-		ticker := time.NewTicker(metadataPingTimer)
+		nmp.ticker.Reset(metadataPingTimer)
 
-		for range ticker.C {
-			ticker.Stop()
+		for {
+			select {
+				case <- 
+			}
+		}
+
+		for range nmp.ticker.C {
+			nmp.ticker.Stop()
 
 			wg.Add(1)
 
@@ -45,7 +62,20 @@ func Run() {
 
 			wg.Wait()
 
-			ticker.Reset(metadataPingTimer)
+			nmp.ticker.Reset(metadataPingTimer)
 		}
 	}()
+}
+
+// Clean performs ping stop operation.
+func (nmp *NetworkingMetadataPing) Clean() {
+	close(nmp.ticker)
+}
+
+func newNetworkingMetadataPing() *NetworkingMetadataPing {
+	ticker := time.NewTicker(metadataPingTimer)
+
+	return &NetworkingMetadataPing{
+		ticker: ticker,
+	}
 }

@@ -1,4 +1,4 @@
-package sync
+package activity
 
 import (
 	"errors"
@@ -16,7 +16,7 @@ var (
 
 const (
 	// Represents ticker duration used for metadata synchronization worker.
-	metadataTickerDuration = time.Second * 15
+	metadataTickerDuration = time.Second * 10
 )
 
 // Run starts the repository sync worker, which takes latest updates
@@ -57,24 +57,20 @@ func Run() {
 						AddUser(key, userID)
 				}
 
-				for _, metadata := range value {
-					err := repository.
-						GetLobbiesRepository().
-						InsertOrUpdate(
-							dto.LobbiesRepositoryInsertOrUpdateRequest{
-								UserID:     userID,
-								SessionID:  metadata.SessionID,
-								Skin:       metadata.Skin,
-								Health:     metadata.Health,
-								Active:     metadata.Active,
-								Eliminated: metadata.Eliminated,
-								Host:       metadata.Host,
-								PositionX:  metadata.PositionX,
-								PositionY:  metadata.PositionY,
-							})
-					if err != nil {
-						logging.GetInstance().Fatal(err.Error())
-					}
+				err := repository.
+					GetLobbiesRepository().
+					InsertOrUpdate(
+						dto.LobbiesRepositoryInsertOrUpdateRequest{
+							UserID:     userID,
+							SessionID:  value.SessionID,
+							Skin:       value.Skin,
+							Health:     value.Health,
+							Eliminated: value.Eliminated,
+							PositionX:  value.PositionX,
+							PositionY:  value.PositionY,
+						})
+				if err != nil {
+					logging.GetInstance().Fatal(err.Error())
 				}
 			}
 

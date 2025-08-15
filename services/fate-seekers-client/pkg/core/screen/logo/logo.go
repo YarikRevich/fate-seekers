@@ -1,7 +1,6 @@
 package logo
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -43,17 +42,11 @@ type LogoScreen struct {
 }
 
 func (ls *LogoScreen) HandleInput() error {
-	fmt.Println("BEFORE UUID CHECK")
-
 	if store.GetRepositoryUUIDChecked() == value.UUID_CHECKED_REPOSITORY_FALSE_VALUE {
-		fmt.Println("UUID CHECKED")
-
 		flag, ok, err := repository.GetFlagsRepository().GetByName(common.UUID_FLAG_NAME)
 		if err != nil {
 			logging.GetInstance().Fatal(err.Error())
 		}
-
-		fmt.Println("RESULT OF UUID FLAG NAME RETRIEVE: ", ok)
 
 		if ok {
 			dispatcher.GetInstance().Dispatch(

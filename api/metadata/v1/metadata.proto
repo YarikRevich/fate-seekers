@@ -13,6 +13,9 @@ service MetadataService {
     // if such does not exist.
     rpc PingConnection(PingConnectionRequest) returns (PingConnectionResponse) {};
 
+    // UpdateSessionActivity performs session activity update.
+    rpc UpdateSessionActivity(stream UpdateSessionActivityRequest) returns (UpdateSessionActivityResponse) {};
+
     // CreateUserIfNotExists performs attempt to create a user, if it hasn't been create yet.
     rpc CreateUserIfNotExists(CreateUserIfNotExistsRequest) returns (CreateUserIfNotExistsResponse) {};
 
@@ -24,6 +27,11 @@ service MetadataService {
 
     // RemoveSession performs session removal operation by the configured user. Allowed for session owner only.
     rpc RemoveSession(RemoveSessionRequest) returns (RemoveSessionResponse) {};
+
+    // TODO: we would listen to session status in the lobby creation screen and switch to session screen when status.
+
+    // GetSessionMetadata performs session metadata retrieval request by the configured user.
+    rpc GetSessionMetadata(GetSessionMetadataRequest) returns (stream GetSessionMetadataResponse) {};
 
     // GetLobbySet performs existing lobbies retrieval operation by the provided session id, by the configured user.
     rpc GetLobbySet(GetLobbySetRequest) returns (GetLobbySetResponse) {};
@@ -57,6 +65,16 @@ message PingConnectionRequest {
 
 // PingConnectionResponse represents ping connection response message.
 message PingConnectionResponse {
+};
+
+// UpdateSessionActivityRequest represents session update request message.
+message UpdateSessionActivityRequest {
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
+};
+
+// UpdateSessionActivityResponse represents session update response message.
+message UpdateSessionActivityResponse {
+    
 };
 
 // CreateUserIfNotExistsRequest represents user creation attempt request message.
@@ -109,6 +127,17 @@ message RemoveSessionRequest {
 message RemoveSessionResponse {
 };
 
+// GetSessionMetadataRequest represents session metadata request.
+message GetSessionMetadataRequest {
+    int64 session_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
+};
+
+// GetSessionMetadataResponse represents session metadata response.
+message GetSessionMetadataResponse {
+    bool started = 1;
+};
+
 // GetLobbySetRequest represents user create lobby request.
 message GetLobbySetRequest {
     int64 session_id = 1;
@@ -127,12 +156,13 @@ message CreateLobbyRequest {
 };
 
 // CreateLobbyResponse represents user create lobby response.
-message CreateLobbyResponse {
+message CreateLobbyResponse {  
 };
 
 // RemoveLobbyRequest represents user remove lobby request.
 message RemoveLobbyRequest {
-    string issuer = 1 [(buf.validate.field).string.uuid = true];
+    int64 session_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
 
 // RemoveLobbyResponse represents user remove lobby response.

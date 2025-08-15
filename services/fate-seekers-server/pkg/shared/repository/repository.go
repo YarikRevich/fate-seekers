@@ -84,7 +84,8 @@ func createSessionsRepository() SessionsRepository {
 type LobbiesRepository interface {
 	InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error
 	DeleteByUserID(userID int64) error
-	GetByUserID(userID int64) (*entity.LobbyEntity, bool, error)
+	GetByUserID(userID int64) ([]*entity.LobbyEntity, bool, error)
+	GetBySessionID(sessionID int64) ([]*entity.LobbyEntity, bool, error)
 }
 
 // lobbiesRepositoryImpl represents implementation of LobbiesRepository.
@@ -118,13 +119,32 @@ func (w *lobbiesRepositoryImpl) DeleteByUserID(userID int64) error {
 }
 
 // GetByUserID retrieves lobby by the provided user id.
-func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) (*entity.LobbyEntity, bool, error) {
+func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) ([]*entity.LobbyEntity, bool, error) {
 	instance := db.GetInstance()
 
-	var result *entity.LobbyEntity
+	var result []*entity.LobbyEntity
 
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
 		Where("user_id = ?", userID).
+		Find(&result).Error
+
+	if err != gorm.ErrRecordNotFound {
+		return result, true, nil
+	} else if err == gorm.ErrRecordNotFound {
+		return nil, false, nil
+	}
+
+	return nil, false, err
+}
+
+// GetBySessionID retrieves lobby by the provided session id.
+func (w *lobbiesRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.LobbyEntity, bool, error) {
+	instance := db.GetInstance()
+
+	var result []*entity.LobbyEntity
+
+	err := instance.Table((&entity.LobbyEntity{}).TableName()).
+		Where("session_id = ?", sessionID).
 		Find(&result).Error
 
 	if err != gorm.ErrRecordNotFound {
