@@ -8,6 +8,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/entity"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var (
@@ -95,16 +96,24 @@ type lobbiesRepositoryImpl struct{}
 func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
 	instance := db.GetInstance()
 
-	err := instance.Save(
-		&entity.LobbyEntity{
-			UserID:     request.UserID,
-			SessionID:  request.SessionID,
-			Skin:       int64(request.Skin),
-			Health:     int64(request.Health),
-			Eliminated: request.Eliminated,
-			PositionX:  request.PositionX,
-			PositionY:  request.PositionY,
-		}).Error
+	err := instance.Clauses(clause.OnConflict{
+		DoUpdates: clause.AssignmentColumns([]string{
+			"health",
+			"active",
+			"eliminated",
+			"position_x",
+			"position_y",
+		}),
+	}).Create(&entity.LobbyEntity{
+		UserID:     request.UserID,
+		SessionID:  request.SessionID,
+		Skin:       int64(request.Skin),
+		Health:     int64(request.Health),
+		Active:     request.Active,
+		Eliminated: request.Eliminated,
+		PositionX:  request.PositionX,
+		PositionY:  request.PositionY,
+	}).Error
 
 	return errors.Wrap(err, ErrPersistingLobbies.Error())
 }

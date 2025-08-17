@@ -149,9 +149,10 @@ type LobbiesRepositoryInsertOrUpdateRequest struct {
 
 // CacheSessionEntity represent cache session entity used by global networking cache.
 type CacheSessionEntity struct {
-	ID   int64
-	Seed uint64
-	Name string
+	ID      int64
+	Seed    uint64
+	Name    string
+	Started bool
 }
 
 // CacheMetadataEntity represent cache metadata entity used by global networking cache.

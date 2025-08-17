@@ -617,6 +617,96 @@ func (*RemoveSessionResponse) Descriptor() ([]byte, []int) {
 	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{12}
 }
 
+// StartSessionRequest represents start session request
+type StartSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     int64                  `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Issuer        string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StartSessionRequest) Reset() {
+	*x = StartSessionRequest{}
+	mi := &file_metadata_v1_metadata_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartSessionRequest) ProtoMessage() {}
+
+func (x *StartSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_metadata_v1_metadata_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StartSessionRequest.ProtoReflect.Descriptor instead.
+func (*StartSessionRequest) Descriptor() ([]byte, []int) {
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *StartSessionRequest) GetSessionId() int64 {
+	if x != nil {
+		return x.SessionId
+	}
+	return 0
+}
+
+func (x *StartSessionRequest) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+// StartSessionResponse represents start session response.
+type StartSessionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StartSessionResponse) Reset() {
+	*x = StartSessionResponse{}
+	mi := &file_metadata_v1_metadata_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartSessionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartSessionResponse) ProtoMessage() {}
+
+func (x *StartSessionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_metadata_v1_metadata_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StartSessionResponse.ProtoReflect.Descriptor instead.
+func (*StartSessionResponse) Descriptor() ([]byte, []int) {
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{14}
+}
+
 // GetSessionMetadataRequest represents session metadata request.
 type GetSessionMetadataRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -628,7 +718,7 @@ type GetSessionMetadataRequest struct {
 
 func (x *GetSessionMetadataRequest) Reset() {
 	*x = GetSessionMetadataRequest{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[13]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -640,7 +730,7 @@ func (x *GetSessionMetadataRequest) String() string {
 func (*GetSessionMetadataRequest) ProtoMessage() {}
 
 func (x *GetSessionMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[13]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -653,7 +743,7 @@ func (x *GetSessionMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSessionMetadataRequest.ProtoReflect.Descriptor instead.
 func (*GetSessionMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{13}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetSessionMetadataRequest) GetSessionId() int64 {
@@ -680,7 +770,7 @@ type GetSessionMetadataResponse struct {
 
 func (x *GetSessionMetadataResponse) Reset() {
 	*x = GetSessionMetadataResponse{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[14]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -692,7 +782,7 @@ func (x *GetSessionMetadataResponse) String() string {
 func (*GetSessionMetadataResponse) ProtoMessage() {}
 
 func (x *GetSessionMetadataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[14]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -705,7 +795,7 @@ func (x *GetSessionMetadataResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSessionMetadataResponse.ProtoReflect.Descriptor instead.
 func (*GetSessionMetadataResponse) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{14}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetSessionMetadataResponse) GetStarted() bool {
@@ -726,7 +816,7 @@ type GetLobbySetRequest struct {
 
 func (x *GetLobbySetRequest) Reset() {
 	*x = GetLobbySetRequest{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[15]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -738,7 +828,7 @@ func (x *GetLobbySetRequest) String() string {
 func (*GetLobbySetRequest) ProtoMessage() {}
 
 func (x *GetLobbySetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[15]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -751,7 +841,7 @@ func (x *GetLobbySetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetLobbySetRequest.ProtoReflect.Descriptor instead.
 func (*GetLobbySetRequest) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{15}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GetLobbySetRequest) GetSessionId() int64 {
@@ -778,7 +868,7 @@ type GetLobbySetResponse struct {
 
 func (x *GetLobbySetResponse) Reset() {
 	*x = GetLobbySetResponse{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[16]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -790,7 +880,7 @@ func (x *GetLobbySetResponse) String() string {
 func (*GetLobbySetResponse) ProtoMessage() {}
 
 func (x *GetLobbySetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[16]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -803,7 +893,7 @@ func (x *GetLobbySetResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetLobbySetResponse.ProtoReflect.Descriptor instead.
 func (*GetLobbySetResponse) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{16}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GetLobbySetResponse) GetIssuers() []string {
@@ -824,7 +914,7 @@ type CreateLobbyRequest struct {
 
 func (x *CreateLobbyRequest) Reset() {
 	*x = CreateLobbyRequest{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[17]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -836,7 +926,7 @@ func (x *CreateLobbyRequest) String() string {
 func (*CreateLobbyRequest) ProtoMessage() {}
 
 func (x *CreateLobbyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[17]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -849,7 +939,7 @@ func (x *CreateLobbyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateLobbyRequest.ProtoReflect.Descriptor instead.
 func (*CreateLobbyRequest) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{17}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *CreateLobbyRequest) GetSessionId() int64 {
@@ -875,7 +965,7 @@ type CreateLobbyResponse struct {
 
 func (x *CreateLobbyResponse) Reset() {
 	*x = CreateLobbyResponse{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[18]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -887,7 +977,7 @@ func (x *CreateLobbyResponse) String() string {
 func (*CreateLobbyResponse) ProtoMessage() {}
 
 func (x *CreateLobbyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[18]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -900,7 +990,7 @@ func (x *CreateLobbyResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateLobbyResponse.ProtoReflect.Descriptor instead.
 func (*CreateLobbyResponse) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{18}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{20}
 }
 
 // RemoveLobbyRequest represents user remove lobby request.
@@ -914,7 +1004,7 @@ type RemoveLobbyRequest struct {
 
 func (x *RemoveLobbyRequest) Reset() {
 	*x = RemoveLobbyRequest{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[19]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -926,7 +1016,7 @@ func (x *RemoveLobbyRequest) String() string {
 func (*RemoveLobbyRequest) ProtoMessage() {}
 
 func (x *RemoveLobbyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[19]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -939,7 +1029,7 @@ func (x *RemoveLobbyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveLobbyRequest.ProtoReflect.Descriptor instead.
 func (*RemoveLobbyRequest) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{19}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *RemoveLobbyRequest) GetSessionId() int64 {
@@ -965,7 +1055,7 @@ type RemoveLobbyResponse struct {
 
 func (x *RemoveLobbyResponse) Reset() {
 	*x = RemoveLobbyResponse{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[20]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -977,7 +1067,7 @@ func (x *RemoveLobbyResponse) String() string {
 func (*RemoveLobbyResponse) ProtoMessage() {}
 
 func (x *RemoveLobbyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[20]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -990,7 +1080,7 @@ func (x *RemoveLobbyResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveLobbyResponse.ProtoReflect.Descriptor instead.
 func (*RemoveLobbyResponse) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{20}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{22}
 }
 
 // Represents users metadata retrieval request message.
@@ -1004,7 +1094,7 @@ type GetUserMetadataRequest struct {
 
 func (x *GetUserMetadataRequest) Reset() {
 	*x = GetUserMetadataRequest{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[21]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1016,7 +1106,7 @@ func (x *GetUserMetadataRequest) String() string {
 func (*GetUserMetadataRequest) ProtoMessage() {}
 
 func (x *GetUserMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[21]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1029,7 +1119,7 @@ func (x *GetUserMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserMetadataRequest.ProtoReflect.Descriptor instead.
 func (*GetUserMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{21}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *GetUserMetadataRequest) GetSessionId() int64 {
@@ -1059,7 +1149,7 @@ type UserMetadata struct {
 
 func (x *UserMetadata) Reset() {
 	*x = UserMetadata{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[22]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1071,7 +1161,7 @@ func (x *UserMetadata) String() string {
 func (*UserMetadata) ProtoMessage() {}
 
 func (x *UserMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[22]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1084,7 +1174,7 @@ func (x *UserMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserMetadata.ProtoReflect.Descriptor instead.
 func (*UserMetadata) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{22}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *UserMetadata) GetHealth() uint64 {
@@ -1125,7 +1215,7 @@ type GetUserMetadataResponse struct {
 
 func (x *GetUserMetadataResponse) Reset() {
 	*x = GetUserMetadataResponse{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[23]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1137,7 +1227,7 @@ func (x *GetUserMetadataResponse) String() string {
 func (*GetUserMetadataResponse) ProtoMessage() {}
 
 func (x *GetUserMetadataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[23]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1150,7 +1240,7 @@ func (x *GetUserMetadataResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserMetadataResponse.ProtoReflect.Descriptor instead.
 func (*GetUserMetadataResponse) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{23}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetUserMetadataResponse) GetUserMetadata() *UserMetadata {
@@ -1170,7 +1260,7 @@ type GetChestsRequest struct {
 
 func (x *GetChestsRequest) Reset() {
 	*x = GetChestsRequest{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[24]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1182,7 +1272,7 @@ func (x *GetChestsRequest) String() string {
 func (*GetChestsRequest) ProtoMessage() {}
 
 func (x *GetChestsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[24]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1195,7 +1285,7 @@ func (x *GetChestsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChestsRequest.ProtoReflect.Descriptor instead.
 func (*GetChestsRequest) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{24}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *GetChestsRequest) GetSessionId() int64 {
@@ -1216,7 +1306,7 @@ type Position struct {
 
 func (x *Position) Reset() {
 	*x = Position{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[25]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1228,7 +1318,7 @@ func (x *Position) String() string {
 func (*Position) ProtoMessage() {}
 
 func (x *Position) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[25]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1241,7 +1331,7 @@ func (x *Position) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Position.ProtoReflect.Descriptor instead.
 func (*Position) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{25}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *Position) GetX() float64 {
@@ -1268,7 +1358,7 @@ type GetChestsResponse struct {
 
 func (x *GetChestsResponse) Reset() {
 	*x = GetChestsResponse{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[26]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1280,7 +1370,7 @@ func (x *GetChestsResponse) String() string {
 func (*GetChestsResponse) ProtoMessage() {}
 
 func (x *GetChestsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[26]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1293,7 +1383,7 @@ func (x *GetChestsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChestsResponse.ProtoReflect.Descriptor instead.
 func (*GetChestsResponse) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{26}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *GetChestsResponse) GetPositions() []*Position {
@@ -1313,7 +1403,7 @@ type GetMapRequest struct {
 
 func (x *GetMapRequest) Reset() {
 	*x = GetMapRequest{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[27]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1325,7 +1415,7 @@ func (x *GetMapRequest) String() string {
 func (*GetMapRequest) ProtoMessage() {}
 
 func (x *GetMapRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[27]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1338,7 +1428,7 @@ func (x *GetMapRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMapRequest.ProtoReflect.Descriptor instead.
 func (*GetMapRequest) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{27}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *GetMapRequest) GetSessionId() int64 {
@@ -1358,7 +1448,7 @@ type GetMapResponse struct {
 
 func (x *GetMapResponse) Reset() {
 	*x = GetMapResponse{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[28]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1370,7 +1460,7 @@ func (x *GetMapResponse) String() string {
 func (*GetMapResponse) ProtoMessage() {}
 
 func (x *GetMapResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[28]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1383,7 +1473,7 @@ func (x *GetMapResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMapResponse.ProtoReflect.Descriptor instead.
 func (*GetMapResponse) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{28}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *GetMapResponse) GetPositions() []*Position {
@@ -1404,7 +1494,7 @@ type GetChatMessagesRequest struct {
 
 func (x *GetChatMessagesRequest) Reset() {
 	*x = GetChatMessagesRequest{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[29]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1416,7 +1506,7 @@ func (x *GetChatMessagesRequest) String() string {
 func (*GetChatMessagesRequest) ProtoMessage() {}
 
 func (x *GetChatMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[29]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1429,7 +1519,7 @@ func (x *GetChatMessagesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChatMessagesRequest.ProtoReflect.Descriptor instead.
 func (*GetChatMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{29}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *GetChatMessagesRequest) GetSessionId() int64 {
@@ -1458,7 +1548,7 @@ type ChatMessage struct {
 
 func (x *ChatMessage) Reset() {
 	*x = ChatMessage{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[30]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1470,7 +1560,7 @@ func (x *ChatMessage) String() string {
 func (*ChatMessage) ProtoMessage() {}
 
 func (x *ChatMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[30]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1483,7 +1573,7 @@ func (x *ChatMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatMessage.ProtoReflect.Descriptor instead.
 func (*ChatMessage) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{30}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ChatMessage) GetContent() string {
@@ -1517,7 +1607,7 @@ type GetChatMessagesResponse struct {
 
 func (x *GetChatMessagesResponse) Reset() {
 	*x = GetChatMessagesResponse{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[31]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1529,7 +1619,7 @@ func (x *GetChatMessagesResponse) String() string {
 func (*GetChatMessagesResponse) ProtoMessage() {}
 
 func (x *GetChatMessagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[31]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1542,7 +1632,7 @@ func (x *GetChatMessagesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetChatMessagesResponse.ProtoReflect.Descriptor instead.
 func (*GetChatMessagesResponse) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{31}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *GetChatMessagesResponse) GetMessages() []*ChatMessage {
@@ -1563,7 +1653,7 @@ type CreateChatMessageRequest struct {
 
 func (x *CreateChatMessageRequest) Reset() {
 	*x = CreateChatMessageRequest{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[32]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1575,7 +1665,7 @@ func (x *CreateChatMessageRequest) String() string {
 func (*CreateChatMessageRequest) ProtoMessage() {}
 
 func (x *CreateChatMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[32]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1588,7 +1678,7 @@ func (x *CreateChatMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateChatMessageRequest.ProtoReflect.Descriptor instead.
 func (*CreateChatMessageRequest) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{32}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *CreateChatMessageRequest) GetSessionId() int64 {
@@ -1614,7 +1704,7 @@ type CreateChatMessageResponse struct {
 
 func (x *CreateChatMessageResponse) Reset() {
 	*x = CreateChatMessageResponse{}
-	mi := &file_metadata_v1_metadata_proto_msgTypes[33]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1626,7 +1716,7 @@ func (x *CreateChatMessageResponse) String() string {
 func (*CreateChatMessageResponse) ProtoMessage() {}
 
 func (x *CreateChatMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_metadata_v1_metadata_proto_msgTypes[33]
+	mi := &file_metadata_v1_metadata_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1639,7 +1729,7 @@ func (x *CreateChatMessageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateChatMessageResponse.ProtoReflect.Descriptor instead.
 func (*CreateChatMessageResponse) Descriptor() ([]byte, []int) {
-	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{33}
+	return file_metadata_v1_metadata_proto_rawDescGZIP(), []int{35}
 }
 
 var File_metadata_v1_metadata_proto protoreflect.FileDescriptor
@@ -1701,6 +1791,13 @@ var file_metadata_v1_metadata_proto_rawDesc = string([]byte{
 	0x20, 0x0a, 0x06, 0x69, 0x73, 0x73, 0x75, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42,
 	0x08, 0xba, 0x48, 0x05, 0x72, 0x03, 0xb0, 0x01, 0x01, 0x52, 0x06, 0x69, 0x73, 0x73, 0x75, 0x65,
 	0x72, 0x22, 0x17, 0x0a, 0x15, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x53, 0x65, 0x73, 0x73, 0x69,
+	0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x56, 0x0a, 0x13, 0x53, 0x74,
+	0x61, 0x72, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64,
+	0x12, 0x20, 0x0a, 0x06, 0x69, 0x73, 0x73, 0x75, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x42, 0x08, 0xba, 0x48, 0x05, 0x72, 0x03, 0xb0, 0x01, 0x01, 0x52, 0x06, 0x69, 0x73, 0x73, 0x75,
+	0x65, 0x72, 0x22, 0x16, 0x0a, 0x14, 0x53, 0x74, 0x61, 0x72, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69,
 	0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x5c, 0x0a, 0x19, 0x47, 0x65,
 	0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
 	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x65, 0x73, 0x73, 0x69,
@@ -1796,7 +1893,7 @@ var file_metadata_v1_metadata_proto_rawDesc = string([]byte{
 	0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06,
 	0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x22, 0x1b, 0x0a, 0x19, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
 	0x43, 0x68, 0x61, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x32, 0x82, 0x0b, 0x0a, 0x0f, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
+	0x6e, 0x73, 0x65, 0x32, 0xd9, 0x0b, 0x0a, 0x0f, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
 	0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x5b, 0x0a, 0x0e, 0x50, 0x69, 0x6e, 0x67, 0x43,
 	0x6f, 0x6e, 0x6e, 0x65, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x22, 0x2e, 0x6d, 0x65, 0x74, 0x61,
 	0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x69, 0x6e, 0x67, 0x43, 0x6f, 0x6e, 0x6e,
@@ -1834,70 +1931,76 @@ var file_metadata_v1_metadata_proto_rawDesc = string([]byte{
 	0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x22, 0x2e, 0x6d,
 	0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x76,
 	0x65, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x22, 0x00, 0x12, 0x69, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e,
-	0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x26, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64,
-	0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f,
-	0x6e, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x27, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47,
-	0x65, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
-	0x61, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01, 0x12, 0x52, 0x0a,
-	0x0b, 0x47, 0x65, 0x74, 0x4c, 0x6f, 0x62, 0x62, 0x79, 0x53, 0x65, 0x74, 0x12, 0x1f, 0x2e, 0x6d,
-	0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x4c, 0x6f,
-	0x62, 0x62, 0x79, 0x53, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e,
-	0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x4c,
-	0x6f, 0x62, 0x62, 0x79, 0x53, 0x65, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
-	0x00, 0x12, 0x52, 0x0a, 0x0b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4c, 0x6f, 0x62, 0x62, 0x79,
-	0x12, 0x1f, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x43,
-	0x72, 0x65, 0x61, 0x74, 0x65, 0x4c, 0x6f, 0x62, 0x62, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x20, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e,
-	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4c, 0x6f, 0x62, 0x62, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x52, 0x0a, 0x0b, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x4c,
-	0x6f, 0x62, 0x62, 0x79, 0x12, 0x1f, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e,
-	0x76, 0x31, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x4c, 0x6f, 0x62, 0x62, 0x79, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
-	0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x4c, 0x6f, 0x62, 0x62, 0x79, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x60, 0x0a, 0x0f, 0x47, 0x65, 0x74,
-	0x55, 0x73, 0x65, 0x72, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x23, 0x2e, 0x6d,
-	0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73,
-	0x65, 0x72, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x24, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e,
-	0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01, 0x12, 0x4c, 0x0a, 0x09, 0x47,
-	0x65, 0x74, 0x43, 0x68, 0x65, 0x73, 0x74, 0x73, 0x12, 0x1d, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64,
-	0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x68, 0x65, 0x73, 0x74, 0x73,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61,
-	0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x68, 0x65, 0x73, 0x74, 0x73, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x45, 0x0a, 0x06, 0x47, 0x65, 0x74,
-	0x4d, 0x61, 0x70, 0x12, 0x1a, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76,
-	0x31, 0x2e, 0x47, 0x65, 0x74, 0x4d, 0x61, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
-	0x1b, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65,
-	0x74, 0x4d, 0x61, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01,
-	0x12, 0x60, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x43, 0x68, 0x61, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61,
-	0x67, 0x65, 0x73, 0x12, 0x23, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76,
-	0x31, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x68, 0x61, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
-	0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x24, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64,
-	0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x68, 0x61, 0x74, 0x4d, 0x65,
-	0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
-	0x30, 0x01, 0x12, 0x64, 0x0a, 0x11, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x68, 0x61, 0x74,
-	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x25, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61,
-	0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x68, 0x61, 0x74,
-	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x26,
+	0x22, 0x00, 0x12, 0x55, 0x0a, 0x0c, 0x53, 0x74, 0x61, 0x72, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69,
+	0x6f, 0x6e, 0x12, 0x20, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31,
+	0x2e, 0x53, 0x74, 0x61, 0x72, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e,
+	0x76, 0x31, 0x2e, 0x53, 0x74, 0x61, 0x72, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x69, 0x0a, 0x12, 0x47, 0x65, 0x74,
+	0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12,
+	0x26, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65,
+	0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x27, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61,
+	0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e,
+	0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x22, 0x00, 0x30, 0x01, 0x12, 0x52, 0x0a, 0x0b, 0x47, 0x65, 0x74, 0x4c, 0x6f, 0x62, 0x62, 0x79,
+	0x53, 0x65, 0x74, 0x12, 0x1f, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76,
+	0x31, 0x2e, 0x47, 0x65, 0x74, 0x4c, 0x6f, 0x62, 0x62, 0x79, 0x53, 0x65, 0x74, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e,
+	0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x4c, 0x6f, 0x62, 0x62, 0x79, 0x53, 0x65, 0x74, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x52, 0x0a, 0x0b, 0x43, 0x72, 0x65, 0x61,
+	0x74, 0x65, 0x4c, 0x6f, 0x62, 0x62, 0x79, 0x12, 0x1f, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61,
+	0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4c, 0x6f, 0x62, 0x62,
+	0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64,
+	0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4c, 0x6f, 0x62,
+	0x62, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x52, 0x0a, 0x0b,
+	0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x4c, 0x6f, 0x62, 0x62, 0x79, 0x12, 0x1f, 0x2e, 0x6d, 0x65,
+	0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65,
+	0x4c, 0x6f, 0x62, 0x62, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x6d,
+	0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x76,
+	0x65, 0x4c, 0x6f, 0x62, 0x62, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
+	0x12, 0x60, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x4d, 0x65, 0x74, 0x61, 0x64,
+	0x61, 0x74, 0x61, 0x12, 0x23, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76,
+	0x31, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
+	0x61, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x24, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64,
+	0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x4d, 0x65,
+	0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
+	0x30, 0x01, 0x12, 0x4c, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x43, 0x68, 0x65, 0x73, 0x74, 0x73, 0x12,
+	0x1d, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65,
+	0x74, 0x43, 0x68, 0x65, 0x73, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e,
+	0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74,
+	0x43, 0x68, 0x65, 0x73, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
+	0x12, 0x45, 0x0a, 0x06, 0x47, 0x65, 0x74, 0x4d, 0x61, 0x70, 0x12, 0x1a, 0x2e, 0x6d, 0x65, 0x74,
+	0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x4d, 0x61, 0x70, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
+	0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x4d, 0x61, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01, 0x12, 0x60, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x43, 0x68,
+	0x61, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x12, 0x23, 0x2e, 0x6d, 0x65, 0x74,
+	0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x68, 0x61, 0x74,
+	0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x24, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65,
+	0x74, 0x43, 0x68, 0x61, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01, 0x12, 0x64, 0x0a, 0x11, 0x43, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x43, 0x68, 0x61, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x25,
 	0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65,
 	0x61, 0x74, 0x65, 0x43, 0x68, 0x61, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0xcc, 0x01, 0x0a, 0x0f, 0x63, 0x6f, 0x6d,
-	0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x42, 0x0d, 0x4d, 0x65,
-	0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x5d, 0x67,
-	0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x62, 0x75, 0x66, 0x62, 0x75, 0x69,
-	0x6c, 0x64, 0x2f, 0x62, 0x75, 0x66, 0x2d, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x73, 0x2f,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x65, 0x2f, 0x71, 0x75,
-	0x69, 0x63, 0x6b, 0x73, 0x74, 0x61, 0x72, 0x74, 0x2d, 0x67, 0x6f, 0x2f, 0x73, 0x74, 0x61, 0x72,
-	0x74, 0x2f, 0x67, 0x65, 0x6e, 0x2f, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2f, 0x76,
-	0x31, 0x3b, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x4d,
-	0x58, 0x58, 0xaa, 0x02, 0x0b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x2e, 0x56, 0x31,
-	0xca, 0x02, 0x0b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x5c, 0x56, 0x31, 0xe2, 0x02,
-	0x17, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42,
-	0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x0c, 0x4d, 0x65, 0x74, 0x61, 0x64,
-	0x61, 0x74, 0x61, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x26, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
+	0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x68, 0x61, 0x74, 0x4d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42,
+	0xcc, 0x01, 0x0a, 0x0f, 0x63, 0x6f, 0x6d, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
+	0x2e, 0x76, 0x31, 0x42, 0x0d, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x50, 0x72, 0x6f,
+	0x74, 0x6f, 0x50, 0x01, 0x5a, 0x5d, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
+	0x2f, 0x62, 0x75, 0x66, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x2f, 0x62, 0x75, 0x66, 0x2d, 0x65, 0x78,
+	0x61, 0x6d, 0x70, 0x6c, 0x65, 0x73, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x76, 0x61, 0x6c, 0x69,
+	0x64, 0x61, 0x74, 0x65, 0x2f, 0x71, 0x75, 0x69, 0x63, 0x6b, 0x73, 0x74, 0x61, 0x72, 0x74, 0x2d,
+	0x67, 0x6f, 0x2f, 0x73, 0x74, 0x61, 0x72, 0x74, 0x2f, 0x67, 0x65, 0x6e, 0x2f, 0x6d, 0x65, 0x74,
+	0x61, 0x64, 0x61, 0x74, 0x61, 0x2f, 0x76, 0x31, 0x3b, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
+	0x61, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x4d, 0x58, 0x58, 0xaa, 0x02, 0x0b, 0x4d, 0x65, 0x74, 0x61,
+	0x64, 0x61, 0x74, 0x61, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x0b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61,
+	0x74, 0x61, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x17, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
+	0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea,
+	0x02, 0x0c, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 })
 
 var (
@@ -1912,7 +2015,7 @@ func file_metadata_v1_metadata_proto_rawDescGZIP() []byte {
 	return file_metadata_v1_metadata_proto_rawDescData
 }
 
-var file_metadata_v1_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 34)
+var file_metadata_v1_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
 var file_metadata_v1_metadata_proto_goTypes = []any{
 	(*PingConnectionRequest)(nil),         // 0: metadata.v1.PingConnectionRequest
 	(*PingConnectionResponse)(nil),        // 1: metadata.v1.PingConnectionResponse
@@ -1927,69 +2030,73 @@ var file_metadata_v1_metadata_proto_goTypes = []any{
 	(*CreateSessionResponse)(nil),         // 10: metadata.v1.CreateSessionResponse
 	(*RemoveSessionRequest)(nil),          // 11: metadata.v1.RemoveSessionRequest
 	(*RemoveSessionResponse)(nil),         // 12: metadata.v1.RemoveSessionResponse
-	(*GetSessionMetadataRequest)(nil),     // 13: metadata.v1.GetSessionMetadataRequest
-	(*GetSessionMetadataResponse)(nil),    // 14: metadata.v1.GetSessionMetadataResponse
-	(*GetLobbySetRequest)(nil),            // 15: metadata.v1.GetLobbySetRequest
-	(*GetLobbySetResponse)(nil),           // 16: metadata.v1.GetLobbySetResponse
-	(*CreateLobbyRequest)(nil),            // 17: metadata.v1.CreateLobbyRequest
-	(*CreateLobbyResponse)(nil),           // 18: metadata.v1.CreateLobbyResponse
-	(*RemoveLobbyRequest)(nil),            // 19: metadata.v1.RemoveLobbyRequest
-	(*RemoveLobbyResponse)(nil),           // 20: metadata.v1.RemoveLobbyResponse
-	(*GetUserMetadataRequest)(nil),        // 21: metadata.v1.GetUserMetadataRequest
-	(*UserMetadata)(nil),                  // 22: metadata.v1.UserMetadata
-	(*GetUserMetadataResponse)(nil),       // 23: metadata.v1.GetUserMetadataResponse
-	(*GetChestsRequest)(nil),              // 24: metadata.v1.GetChestsRequest
-	(*Position)(nil),                      // 25: metadata.v1.Position
-	(*GetChestsResponse)(nil),             // 26: metadata.v1.GetChestsResponse
-	(*GetMapRequest)(nil),                 // 27: metadata.v1.GetMapRequest
-	(*GetMapResponse)(nil),                // 28: metadata.v1.GetMapResponse
-	(*GetChatMessagesRequest)(nil),        // 29: metadata.v1.GetChatMessagesRequest
-	(*ChatMessage)(nil),                   // 30: metadata.v1.ChatMessage
-	(*GetChatMessagesResponse)(nil),       // 31: metadata.v1.GetChatMessagesResponse
-	(*CreateChatMessageRequest)(nil),      // 32: metadata.v1.CreateChatMessageRequest
-	(*CreateChatMessageResponse)(nil),     // 33: metadata.v1.CreateChatMessageResponse
-	(*timestamppb.Timestamp)(nil),         // 34: google.protobuf.Timestamp
+	(*StartSessionRequest)(nil),           // 13: metadata.v1.StartSessionRequest
+	(*StartSessionResponse)(nil),          // 14: metadata.v1.StartSessionResponse
+	(*GetSessionMetadataRequest)(nil),     // 15: metadata.v1.GetSessionMetadataRequest
+	(*GetSessionMetadataResponse)(nil),    // 16: metadata.v1.GetSessionMetadataResponse
+	(*GetLobbySetRequest)(nil),            // 17: metadata.v1.GetLobbySetRequest
+	(*GetLobbySetResponse)(nil),           // 18: metadata.v1.GetLobbySetResponse
+	(*CreateLobbyRequest)(nil),            // 19: metadata.v1.CreateLobbyRequest
+	(*CreateLobbyResponse)(nil),           // 20: metadata.v1.CreateLobbyResponse
+	(*RemoveLobbyRequest)(nil),            // 21: metadata.v1.RemoveLobbyRequest
+	(*RemoveLobbyResponse)(nil),           // 22: metadata.v1.RemoveLobbyResponse
+	(*GetUserMetadataRequest)(nil),        // 23: metadata.v1.GetUserMetadataRequest
+	(*UserMetadata)(nil),                  // 24: metadata.v1.UserMetadata
+	(*GetUserMetadataResponse)(nil),       // 25: metadata.v1.GetUserMetadataResponse
+	(*GetChestsRequest)(nil),              // 26: metadata.v1.GetChestsRequest
+	(*Position)(nil),                      // 27: metadata.v1.Position
+	(*GetChestsResponse)(nil),             // 28: metadata.v1.GetChestsResponse
+	(*GetMapRequest)(nil),                 // 29: metadata.v1.GetMapRequest
+	(*GetMapResponse)(nil),                // 30: metadata.v1.GetMapResponse
+	(*GetChatMessagesRequest)(nil),        // 31: metadata.v1.GetChatMessagesRequest
+	(*ChatMessage)(nil),                   // 32: metadata.v1.ChatMessage
+	(*GetChatMessagesResponse)(nil),       // 33: metadata.v1.GetChatMessagesResponse
+	(*CreateChatMessageRequest)(nil),      // 34: metadata.v1.CreateChatMessageRequest
+	(*CreateChatMessageResponse)(nil),     // 35: metadata.v1.CreateChatMessageResponse
+	(*timestamppb.Timestamp)(nil),         // 36: google.protobuf.Timestamp
 }
 var file_metadata_v1_metadata_proto_depIdxs = []int32{
 	7,  // 0: metadata.v1.GetSessionsResponse.sessions:type_name -> metadata.v1.Session
-	25, // 1: metadata.v1.UserMetadata.position:type_name -> metadata.v1.Position
-	22, // 2: metadata.v1.GetUserMetadataResponse.user_metadata:type_name -> metadata.v1.UserMetadata
-	25, // 3: metadata.v1.GetChestsResponse.positions:type_name -> metadata.v1.Position
-	25, // 4: metadata.v1.GetMapResponse.positions:type_name -> metadata.v1.Position
-	34, // 5: metadata.v1.ChatMessage.timestamp:type_name -> google.protobuf.Timestamp
-	30, // 6: metadata.v1.GetChatMessagesResponse.messages:type_name -> metadata.v1.ChatMessage
+	27, // 1: metadata.v1.UserMetadata.position:type_name -> metadata.v1.Position
+	24, // 2: metadata.v1.GetUserMetadataResponse.user_metadata:type_name -> metadata.v1.UserMetadata
+	27, // 3: metadata.v1.GetChestsResponse.positions:type_name -> metadata.v1.Position
+	27, // 4: metadata.v1.GetMapResponse.positions:type_name -> metadata.v1.Position
+	36, // 5: metadata.v1.ChatMessage.timestamp:type_name -> google.protobuf.Timestamp
+	32, // 6: metadata.v1.GetChatMessagesResponse.messages:type_name -> metadata.v1.ChatMessage
 	0,  // 7: metadata.v1.MetadataService.PingConnection:input_type -> metadata.v1.PingConnectionRequest
 	2,  // 8: metadata.v1.MetadataService.UpdateSessionActivity:input_type -> metadata.v1.UpdateSessionActivityRequest
 	4,  // 9: metadata.v1.MetadataService.CreateUserIfNotExists:input_type -> metadata.v1.CreateUserIfNotExistsRequest
 	6,  // 10: metadata.v1.MetadataService.GetSessions:input_type -> metadata.v1.GetSessionsRequest
 	9,  // 11: metadata.v1.MetadataService.CreateSession:input_type -> metadata.v1.CreateSessionRequest
 	11, // 12: metadata.v1.MetadataService.RemoveSession:input_type -> metadata.v1.RemoveSessionRequest
-	13, // 13: metadata.v1.MetadataService.GetSessionMetadata:input_type -> metadata.v1.GetSessionMetadataRequest
-	15, // 14: metadata.v1.MetadataService.GetLobbySet:input_type -> metadata.v1.GetLobbySetRequest
-	17, // 15: metadata.v1.MetadataService.CreateLobby:input_type -> metadata.v1.CreateLobbyRequest
-	19, // 16: metadata.v1.MetadataService.RemoveLobby:input_type -> metadata.v1.RemoveLobbyRequest
-	21, // 17: metadata.v1.MetadataService.GetUserMetadata:input_type -> metadata.v1.GetUserMetadataRequest
-	24, // 18: metadata.v1.MetadataService.GetChests:input_type -> metadata.v1.GetChestsRequest
-	27, // 19: metadata.v1.MetadataService.GetMap:input_type -> metadata.v1.GetMapRequest
-	29, // 20: metadata.v1.MetadataService.GetChatMessages:input_type -> metadata.v1.GetChatMessagesRequest
-	32, // 21: metadata.v1.MetadataService.CreateChatMessage:input_type -> metadata.v1.CreateChatMessageRequest
-	1,  // 22: metadata.v1.MetadataService.PingConnection:output_type -> metadata.v1.PingConnectionResponse
-	3,  // 23: metadata.v1.MetadataService.UpdateSessionActivity:output_type -> metadata.v1.UpdateSessionActivityResponse
-	5,  // 24: metadata.v1.MetadataService.CreateUserIfNotExists:output_type -> metadata.v1.CreateUserIfNotExistsResponse
-	8,  // 25: metadata.v1.MetadataService.GetSessions:output_type -> metadata.v1.GetSessionsResponse
-	10, // 26: metadata.v1.MetadataService.CreateSession:output_type -> metadata.v1.CreateSessionResponse
-	12, // 27: metadata.v1.MetadataService.RemoveSession:output_type -> metadata.v1.RemoveSessionResponse
-	14, // 28: metadata.v1.MetadataService.GetSessionMetadata:output_type -> metadata.v1.GetSessionMetadataResponse
-	16, // 29: metadata.v1.MetadataService.GetLobbySet:output_type -> metadata.v1.GetLobbySetResponse
-	18, // 30: metadata.v1.MetadataService.CreateLobby:output_type -> metadata.v1.CreateLobbyResponse
-	20, // 31: metadata.v1.MetadataService.RemoveLobby:output_type -> metadata.v1.RemoveLobbyResponse
-	23, // 32: metadata.v1.MetadataService.GetUserMetadata:output_type -> metadata.v1.GetUserMetadataResponse
-	26, // 33: metadata.v1.MetadataService.GetChests:output_type -> metadata.v1.GetChestsResponse
-	28, // 34: metadata.v1.MetadataService.GetMap:output_type -> metadata.v1.GetMapResponse
-	31, // 35: metadata.v1.MetadataService.GetChatMessages:output_type -> metadata.v1.GetChatMessagesResponse
-	33, // 36: metadata.v1.MetadataService.CreateChatMessage:output_type -> metadata.v1.CreateChatMessageResponse
-	22, // [22:37] is the sub-list for method output_type
-	7,  // [7:22] is the sub-list for method input_type
+	13, // 13: metadata.v1.MetadataService.StartSession:input_type -> metadata.v1.StartSessionRequest
+	15, // 14: metadata.v1.MetadataService.GetSessionMetadata:input_type -> metadata.v1.GetSessionMetadataRequest
+	17, // 15: metadata.v1.MetadataService.GetLobbySet:input_type -> metadata.v1.GetLobbySetRequest
+	19, // 16: metadata.v1.MetadataService.CreateLobby:input_type -> metadata.v1.CreateLobbyRequest
+	21, // 17: metadata.v1.MetadataService.RemoveLobby:input_type -> metadata.v1.RemoveLobbyRequest
+	23, // 18: metadata.v1.MetadataService.GetUserMetadata:input_type -> metadata.v1.GetUserMetadataRequest
+	26, // 19: metadata.v1.MetadataService.GetChests:input_type -> metadata.v1.GetChestsRequest
+	29, // 20: metadata.v1.MetadataService.GetMap:input_type -> metadata.v1.GetMapRequest
+	31, // 21: metadata.v1.MetadataService.GetChatMessages:input_type -> metadata.v1.GetChatMessagesRequest
+	34, // 22: metadata.v1.MetadataService.CreateChatMessage:input_type -> metadata.v1.CreateChatMessageRequest
+	1,  // 23: metadata.v1.MetadataService.PingConnection:output_type -> metadata.v1.PingConnectionResponse
+	3,  // 24: metadata.v1.MetadataService.UpdateSessionActivity:output_type -> metadata.v1.UpdateSessionActivityResponse
+	5,  // 25: metadata.v1.MetadataService.CreateUserIfNotExists:output_type -> metadata.v1.CreateUserIfNotExistsResponse
+	8,  // 26: metadata.v1.MetadataService.GetSessions:output_type -> metadata.v1.GetSessionsResponse
+	10, // 27: metadata.v1.MetadataService.CreateSession:output_type -> metadata.v1.CreateSessionResponse
+	12, // 28: metadata.v1.MetadataService.RemoveSession:output_type -> metadata.v1.RemoveSessionResponse
+	14, // 29: metadata.v1.MetadataService.StartSession:output_type -> metadata.v1.StartSessionResponse
+	16, // 30: metadata.v1.MetadataService.GetSessionMetadata:output_type -> metadata.v1.GetSessionMetadataResponse
+	18, // 31: metadata.v1.MetadataService.GetLobbySet:output_type -> metadata.v1.GetLobbySetResponse
+	20, // 32: metadata.v1.MetadataService.CreateLobby:output_type -> metadata.v1.CreateLobbyResponse
+	22, // 33: metadata.v1.MetadataService.RemoveLobby:output_type -> metadata.v1.RemoveLobbyResponse
+	25, // 34: metadata.v1.MetadataService.GetUserMetadata:output_type -> metadata.v1.GetUserMetadataResponse
+	28, // 35: metadata.v1.MetadataService.GetChests:output_type -> metadata.v1.GetChestsResponse
+	30, // 36: metadata.v1.MetadataService.GetMap:output_type -> metadata.v1.GetMapResponse
+	33, // 37: metadata.v1.MetadataService.GetChatMessages:output_type -> metadata.v1.GetChatMessagesResponse
+	35, // 38: metadata.v1.MetadataService.CreateChatMessage:output_type -> metadata.v1.CreateChatMessageResponse
+	23, // [23:39] is the sub-list for method output_type
+	7,  // [7:23] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name
@@ -2007,7 +2114,7 @@ func file_metadata_v1_metadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_metadata_v1_metadata_proto_rawDesc), len(file_metadata_v1_metadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   34,
+			NumMessages:   36,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

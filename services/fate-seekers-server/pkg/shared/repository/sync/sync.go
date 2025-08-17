@@ -22,6 +22,9 @@ const (
 // Run starts the repository sync worker, which takes latest updates
 // from certain cache instances.
 func Run() {
+
+	// TODO: create some mapping of hashes, which would help to avoid not necessary updates.
+
 	go func() {
 		ticker := time.NewTicker(metadataTickerDuration)
 

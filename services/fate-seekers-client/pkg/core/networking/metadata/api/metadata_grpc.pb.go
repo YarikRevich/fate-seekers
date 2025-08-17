@@ -25,6 +25,7 @@ const (
 	MetadataService_GetSessions_FullMethodName           = "/metadata.v1.MetadataService/GetSessions"
 	MetadataService_CreateSession_FullMethodName         = "/metadata.v1.MetadataService/CreateSession"
 	MetadataService_RemoveSession_FullMethodName         = "/metadata.v1.MetadataService/RemoveSession"
+	MetadataService_StartSession_FullMethodName          = "/metadata.v1.MetadataService/StartSession"
 	MetadataService_GetSessionMetadata_FullMethodName    = "/metadata.v1.MetadataService/GetSessionMetadata"
 	MetadataService_GetLobbySet_FullMethodName           = "/metadata.v1.MetadataService/GetLobbySet"
 	MetadataService_CreateLobby_FullMethodName           = "/metadata.v1.MetadataService/CreateLobby"
@@ -56,6 +57,8 @@ type MetadataServiceClient interface {
 	CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*CreateSessionResponse, error)
 	// RemoveSession performs session removal operation by the configured user. Allowed for session owner only.
 	RemoveSession(ctx context.Context, in *RemoveSessionRequest, opts ...grpc.CallOption) (*RemoveSessionResponse, error)
+	// StartSession performs start session operation by the configured user. Allowed for session host only.
+	StartSession(ctx context.Context, in *StartSessionRequest, opts ...grpc.CallOption) (*StartSessionResponse, error)
 	// GetSessionMetadata performs session metadata retrieval request by the configured user.
 	GetSessionMetadata(ctx context.Context, in *GetSessionMetadataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetSessionMetadataResponse], error)
 	// GetLobbySet performs existing lobbies retrieval operation by the provided session id, by the configured user.
@@ -141,6 +144,16 @@ func (c *metadataServiceClient) RemoveSession(ctx context.Context, in *RemoveSes
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RemoveSessionResponse)
 	err := c.cc.Invoke(ctx, MetadataService_RemoveSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metadataServiceClient) StartSession(ctx context.Context, in *StartSessionRequest, opts ...grpc.CallOption) (*StartSessionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StartSessionResponse)
+	err := c.cc.Invoke(ctx, MetadataService_StartSession_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -293,6 +306,8 @@ type MetadataServiceServer interface {
 	CreateSession(context.Context, *CreateSessionRequest) (*CreateSessionResponse, error)
 	// RemoveSession performs session removal operation by the configured user. Allowed for session owner only.
 	RemoveSession(context.Context, *RemoveSessionRequest) (*RemoveSessionResponse, error)
+	// StartSession performs start session operation by the configured user. Allowed for session host only.
+	StartSession(context.Context, *StartSessionRequest) (*StartSessionResponse, error)
 	// GetSessionMetadata performs session metadata retrieval request by the configured user.
 	GetSessionMetadata(*GetSessionMetadataRequest, grpc.ServerStreamingServer[GetSessionMetadataResponse]) error
 	// GetLobbySet performs existing lobbies retrieval operation by the provided session id, by the configured user.
@@ -338,6 +353,9 @@ func (UnimplementedMetadataServiceServer) CreateSession(context.Context, *Create
 }
 func (UnimplementedMetadataServiceServer) RemoveSession(context.Context, *RemoveSessionRequest) (*RemoveSessionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveSession not implemented")
+}
+func (UnimplementedMetadataServiceServer) StartSession(context.Context, *StartSessionRequest) (*StartSessionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StartSession not implemented")
 }
 func (UnimplementedMetadataServiceServer) GetSessionMetadata(*GetSessionMetadataRequest, grpc.ServerStreamingServer[GetSessionMetadataResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method GetSessionMetadata not implemented")
@@ -480,6 +498,24 @@ func _MetadataService_RemoveSession_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MetadataServiceServer).RemoveSession(ctx, req.(*RemoveSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MetadataService_StartSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StartSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServiceServer).StartSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MetadataService_StartSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServiceServer).StartSession(ctx, req.(*StartSessionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -644,6 +680,10 @@ var MetadataService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveSession",
 			Handler:    _MetadataService_RemoveSession_Handler,
+		},
+		{
+			MethodName: "StartSession",
+			Handler:    _MetadataService_StartSession_Handler,
 		},
 		{
 			MethodName: "GetLobbySet",

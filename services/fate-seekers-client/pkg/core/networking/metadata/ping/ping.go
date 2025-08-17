@@ -23,59 +23,74 @@ const (
 // NetworkingMetadataPing represents networking metadata ping worker.
 type NetworkingMetadataPing struct {
 	// Represents configured ticker, which serves to stop the worker.
-	close chan bool
+	cancel chan bool
 }
 
 // Run starts networking metadata ping worker.
 func (nmp *NetworkingMetadataPing) Run() {
+	nmp.cancel = make(chan bool)
+
 	go func() {
 		var wg sync.WaitGroup
 
-		nmp.ticker.Reset(metadataPingTimer)
+		ticker := time.NewTicker(metadataPingTimer)
 
 		for {
 			select {
-				case <- 
+			case <-ticker.C:
+				ticker.Stop()
+
+				wg.Add(1)
+
+				start := time.Now()
+
+				handler.PerformPingConnection(func(err error) {
+					if err != nil {
+						logging.GetInstance().Error(err.Error())
+
+						wg.Done()
+
+						return
+					}
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetStatisticsMetadataPing(
+							time.Since(start).Milliseconds()))
+
+					wg.Done()
+				})
+
+				wg.Wait()
+
+				ticker.Reset(metadataPingTimer)
+			case <-nmp.cancel:
+				ticker.Stop()
+
+				close(nmp.cancel)
+
+				nmp.cancel = nil
+
+				return
 			}
-		}
-
-		for range nmp.ticker.C {
-			nmp.ticker.Stop()
-
-			wg.Add(1)
-
-			start := time.Now()
-
-			handler.PerformPingConnection(func(err error) {
-				if err != nil {
-					logging.GetInstance().Error(err.Error())
-
-					return
-				}
-
-				dispatcher.GetInstance().Dispatch(
-					action.NewSetStatisticsMetadataPing(
-						time.Since(start).Milliseconds()))
-
-				wg.Done()
-			})
-
-			wg.Wait()
-
-			nmp.ticker.Reset(metadataPingTimer)
 		}
 	}()
 }
 
 // Clean performs ping stop operation.
-func (nmp *NetworkingMetadataPing) Clean() {
-	close(nmp.ticker)
+func (nmp *NetworkingMetadataPing) Clean(callback func()) {
+	if nmp.cancel == nil {
+		callback()
+	}
+
+	go func() {
+		nmp.cancel <- true
+
+		callback()
+	}()
 }
 
 func newNetworkingMetadataPing() *NetworkingMetadataPing {
-	ticker := time.NewTicker(metadataPingTimer)
-
 	return &NetworkingMetadataPing{
-		ticker: ticker,
+		cancel: make(chan bool),
 	}
 }

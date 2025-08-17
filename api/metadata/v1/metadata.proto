@@ -28,6 +28,9 @@ service MetadataService {
     // RemoveSession performs session removal operation by the configured user. Allowed for session owner only.
     rpc RemoveSession(RemoveSessionRequest) returns (RemoveSessionResponse) {};
 
+    // StartSession performs start session operation by the configured user. Allowed for session host only.
+    rpc StartSession(StartSessionRequest) returns (StartSessionResponse) {};
+
     // TODO: we would listen to session status in the lobby creation screen and switch to session screen when status.
 
     // GetSessionMetadata performs session metadata retrieval request by the configured user.
@@ -125,6 +128,17 @@ message RemoveSessionRequest {
 
 // RemoveSessionResponse represents remove session response.
 message RemoveSessionResponse {
+};
+
+// StartSessionRequest represents start session request
+message StartSessionRequest {
+    int64 session_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
+};
+
+// StartSessionResponse represents start session response.
+message StartSessionResponse {
+
 };
 
 // GetSessionMetadataRequest represents session metadata request.

@@ -122,6 +122,13 @@ func GetLobbyRemovalStartedNetworking() string {
 	return instance.GetState(networking.LOBBY_REMOVAL_STARTED_NETWORKING_STATE).(string)
 }
 
+// GetSessionMetadataRetrievalStartedNetworking retrieves session metadata retrieval started networking state value.
+func GetSessionMetadataRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
 // GetLetterUpdated retrieves letter updated state value.
 func GetLetterUpdated() string {
 	instance := GetInstance()

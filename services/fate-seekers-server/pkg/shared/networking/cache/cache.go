@@ -2,6 +2,7 @@ package cache
 
 import (
 	"sync"
+	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
@@ -16,7 +17,13 @@ var (
 
 // NetworkingCache represents networking cache.
 type NetworkingCache struct {
-	// Represents userSessions cache instance.
+	// Represents sessions cache instance.
+	sessions *lru.Cache[int64, dto.CacheSessionEntity]
+
+	// Represents mutex sessions related transactions.
+	sessionsMutex sync.Mutex
+
+	// Represents user sessions cache instance.
 	userSessions *lru.Cache[string, []dto.CacheSessionEntity]
 
 	// Represents mutex used for user sessions related transactions.
@@ -27,6 +34,9 @@ type NetworkingCache struct {
 
 	// Represents mutex used for lobby sets related transactions.
 	lobbySetsMutex sync.Mutex
+
+	// Represents user activity cache instance.
+	userActivity *lru.Cache[string, time.Duration]
 
 	// Represents metadata cache instance.
 	metadata *lru.Cache[string, []dto.CacheMetadataEntity]
@@ -93,6 +103,16 @@ func (nc *NetworkingCache) GetLobbySet(key int64) ([]string, bool) {
 // EvictLobbySet evicts lobby set cache for the provided key.
 func (nc *NetworkingCache) EvictLobbySet(key int64) {
 	nc.lobbySets.Remove(key)
+}
+
+// AddUserActivity adds user activity cache instance with the provided key and value.
+func (nc *NetworkingCache) AddUserActivity(key string, value time.Duration) {
+	nc.userActivity.Add(key, value)
+}
+
+// GetUserActivity retrieves user activity cache instance by the provided key.
+func (nc *NetworkingCache) GetUserActivity(key string) (time.Duration, bool) {
+	return nc.userActivity.Get(key)
 }
 
 // BeginMetadataTransaction begins metadata cache instance transaction.
@@ -170,12 +190,23 @@ func (nc *NetworkingCache) GetUsers(key string) (int64, bool) {
 
 // newNetworkingCache initializes NetworkingCache.
 func newNetworkingCache() *NetworkingCache {
+	sessions, err := lru.New[int64, dto.CacheSessionEntity](config.GetOperationMaxSessionsAmount())
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
 	userSessions, err := lru.New[string, []dto.CacheSessionEntity](config.GetOperationMaxSessionsAmount())
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
 	lobbySets, err := lru.New[int64, []string](config.GetOperationMaxSessionsAmount())
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
+	userActivity, err := lru.New[string, time.Duration](
+		config.GetOperationMaxSessionsAmount() * config.MAX_SESSION_USERS)
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
 	}
@@ -197,8 +228,10 @@ func newNetworkingCache() *NetworkingCache {
 	}
 
 	return &NetworkingCache{
+		sessions:     sessions,
 		userSessions: userSessions,
 		lobbySets:    lobbySets,
+		userActivity: userActivity,
 		metadata:     metadata,
 		messages:     messages,
 		users:        users,

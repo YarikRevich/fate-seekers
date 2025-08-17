@@ -71,6 +71,18 @@
         "one": "Seed",
         "other": "Seed"
     },
+    "client.letter.title": {
+        "one": "Letter",
+        "other": "Letter"
+    },
+    "client.letter.attachment": {
+        "one": "Attachment",
+        "other": "Attachment"
+    },
+    "client.letter.close": {
+        "one": "Close",
+        "other": "Close"
+    },
     "client.letterimage.close": {
         "one": "Close",
         "other": "Close"
