@@ -1,16 +1,23 @@
 package lobby
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
+	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/stream"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -34,6 +41,30 @@ type LobbyScreen struct {
 }
 
 func (ls *LobbyScreen) HandleInput() error {
+	if store.GetSessionMetadataRetrievalStartedNetworking() == value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
+				value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
+
+		var sessionID int64
+
+		for _, session := range store.GetRetrievedSessionsMetadata() {
+			if session.Name == store.GetSelectedSessionMetadata() {
+				sessionID = session.SessionID
+
+				break
+			}
+		}
+
+		stream.GetGetSessionMetadataSubmitter().Clean(func() {
+			stream.GetGetSessionMetadataSubmitter().Submit(
+				sessionID, func(response *metadatav1.GetSessionMetadataResponse, err error) bool {
+					fmt.Println(response.GetStarted(), err)
+
+					return false
+				})
+		})
+	}
 
 	if !ls.transparentTransitionEffect.Done() {
 		if !ls.transparentTransitionEffect.OnEnd() {

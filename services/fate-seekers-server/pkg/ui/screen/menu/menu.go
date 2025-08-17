@@ -193,9 +193,6 @@ func newMenuScreen() screen.Screen {
 	menu.GetInstance().SetMonitoringCallback(func() {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MONITORING_VALUE))
-		// monitoringmanager.GetInstance().Deploy(func(err error) {
-
-		// })
 	})
 
 	menu.GetInstance().SetSettingsCallback(func() {

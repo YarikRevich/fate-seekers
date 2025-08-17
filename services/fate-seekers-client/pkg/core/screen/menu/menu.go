@@ -170,7 +170,9 @@ func newMenuScreen() screen.Screen {
 											return
 										}
 
-										ping.Run()
+										ping.GetInstance().Clean(func() {
+											ping.GetInstance().Run()
+										})
 
 										handler.PerformCreateUserIfNotExists(func(err3 error) {
 											if err3 != nil {

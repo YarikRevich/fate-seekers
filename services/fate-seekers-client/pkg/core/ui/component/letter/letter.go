@@ -8,6 +8,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui/image"
@@ -105,7 +106,10 @@ func newLetterComponent() *LetterComponent {
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
-		widget.TextOpts.Text("Letter", generalFont, color.White)))
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("client.letter.title"),
+			generalFont,
+			color.White)))
 
 	textAreaContainer := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
@@ -229,7 +233,10 @@ func newLetterComponent() *LetterComponent {
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Attachment", generalFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("client.letter.attachment"),
+			generalFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
 			result.attachmentCallback(*result.attachmentValue)
 		}),
@@ -259,7 +266,10 @@ func newLetterComponent() *LetterComponent {
 			PressedHover: buttonIdleIcon,
 			Disabled:     buttonIdleIcon,
 		}),
-		widget.ButtonOpts.Text("Close", generalFont, &widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
+		widget.ButtonOpts.Text(
+			translation.GetInstance().GetTranslation("client.letter.close"),
+			generalFont,
+			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
 			result.closeCallback()
 		}),

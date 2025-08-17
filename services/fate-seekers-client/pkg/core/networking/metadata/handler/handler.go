@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/connector"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
@@ -12,10 +13,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-)
-
-var (
-	ErrConnectionLost = errors.New("err happened connection with server lost")
 )
 
 // PerformPingConnection performs ping connection request.
@@ -32,7 +29,7 @@ func PerformPingConnection(callback func(err error)) {
 
 		if err != nil {
 			if status.Code(err) == codes.Unavailable {
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}
@@ -70,7 +67,7 @@ func PerformCreateUserIfNotExists(callback func(err error)) {
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}
@@ -108,7 +105,7 @@ func PerformGetSessions(callback func(response *metadatav1.GetSessionsResponse, 
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(nil, ErrConnectionLost)
+				callback(nil, common.ErrConnectionLost)
 
 				return
 			}
@@ -148,7 +145,7 @@ func PerformCreateSession(name string, seed uint64, callback func(err error)) {
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}
@@ -187,7 +184,7 @@ func PerformRemoveSession(sessionID int64, callback func(err error)) {
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}
@@ -226,7 +223,7 @@ func PerformGetLobbySet(sessionID int64, callback func(response *metadatav1.GetL
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(nil, ErrConnectionLost)
+				callback(nil, common.ErrConnectionLost)
 
 				return
 			}
@@ -265,7 +262,7 @@ func PerformCreateLobby(sessionID int64, callback func(err error)) {
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}
@@ -303,7 +300,7 @@ func PerformRemoveLobby(callback func(err error)) {
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}

@@ -71,6 +71,18 @@
         "one": "Сід",
         "other": "Сід"
     },
+    "client.letter.title": {
+        "one": "Лист",
+        "other": "Лист"
+    },
+    "client.letter.attachment": {
+        "one": "Додаток",
+        "other": "Додаток"
+    },
+    "client.letter.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
     "client.letterimage.close": {
         "one": "Закрити",
         "other": "Закрити"

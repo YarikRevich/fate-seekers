@@ -10,42 +10,87 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 )
 
+var (
+	// GetInstance retrieves instance of the networking metadata ping, performing initilization if needed.
+	GetInstance = sync.OnceValue[*NetworkingMetadataPing](newNetworkingMetadataPing)
+)
+
 const (
 	// Describes metadata ping worker ticker duration.
 	metadataPingTimer = time.Second
 )
 
-// Starts networking metadata ping worker.
-func Run() {
+// NetworkingMetadataPing represents networking metadata ping worker.
+type NetworkingMetadataPing struct {
+	// Represents configured ticker, which serves to stop the worker.
+	cancel chan bool
+}
+
+// Run starts networking metadata ping worker.
+func (nmp *NetworkingMetadataPing) Run() {
+	nmp.cancel = make(chan bool)
+
 	go func() {
 		var wg sync.WaitGroup
 
 		ticker := time.NewTicker(metadataPingTimer)
 
-		for range ticker.C {
-			ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				ticker.Stop()
 
-			wg.Add(1)
+				wg.Add(1)
 
-			start := time.Now()
+				start := time.Now()
 
-			handler.PerformPingConnection(func(err error) {
-				if err != nil {
-					logging.GetInstance().Error(err.Error())
+				handler.PerformPingConnection(func(err error) {
+					if err != nil {
+						logging.GetInstance().Error(err.Error())
 
-					return
-				}
+						wg.Done()
 
-				dispatcher.GetInstance().Dispatch(
-					action.NewSetStatisticsMetadataPing(
-						time.Since(start).Milliseconds()))
+						return
+					}
 
-				wg.Done()
-			})
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetStatisticsMetadataPing(
+							time.Since(start).Milliseconds()))
 
-			wg.Wait()
+					wg.Done()
+				})
 
-			ticker.Reset(metadataPingTimer)
+				wg.Wait()
+
+				ticker.Reset(metadataPingTimer)
+			case <-nmp.cancel:
+				ticker.Stop()
+
+				close(nmp.cancel)
+
+				nmp.cancel = nil
+
+				return
+			}
 		}
 	}()
+}
+
+// Clean performs ping stop operation.
+func (nmp *NetworkingMetadataPing) Clean(callback func()) {
+	if nmp.cancel == nil {
+		callback()
+	}
+
+	go func() {
+		nmp.cancel <- true
+
+		callback()
+	}()
+}
+
+func newNetworkingMetadataPing() *NetworkingMetadataPing {
+	return &NetworkingMetadataPing{
+		cancel: make(chan bool),
+	}
 }
