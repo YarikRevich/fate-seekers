@@ -34,22 +34,29 @@ var (
 
 // SessionsRepository represents sessions entity repository.
 type SessionsRepository interface {
-	Insert(name string, issuer int64) error
+	InsertOrUpdate(request dto.SessionsRepositoryInsertOrUpdateRequest) error
 	DeleteByID(id int64) error
+	GetByID(id int64) (*entity.SessionEntity, error)
 	GetByIssuer(issuer int64) ([]*entity.SessionEntity, error)
 }
 
 // sessionsRepositoryImpl represents implementation of SessionsRepository.
 type sessionsRepositoryImpl struct{}
 
-// Insert inserts new sessions entity to the storage.
-func (w *sessionsRepositoryImpl) Insert(name string, issuer int64) error {
+// Insert inserts new sessions entity to the storage or updates existing ones.
+func (w *sessionsRepositoryImpl) InsertOrUpdate(request dto.SessionsRepositoryInsertOrUpdateRequest) error {
 	instance := db.GetInstance()
 
-	err := instance.Create(
-		&entity.SessionEntity{
-			Name:   name,
-			Issuer: issuer}).Error
+	err := instance.Clauses(clause.OnConflict{
+		DoUpdates: clause.AssignmentColumns([]string{
+			"started",
+		}),
+	}).Create(&entity.SessionEntity{
+		Name:    request.Name,
+		Seed:    request.Seed,
+		Issuer:  request.Issuer,
+		Started: request.Started,
+	}).Error
 
 	return errors.Wrap(err, ErrPersistingSessions.Error())
 }
@@ -63,7 +70,20 @@ func (w *sessionsRepositoryImpl) DeleteByID(id int64) error {
 		Delete(&entity.SessionEntity{}).Error
 }
 
-// GetByIssuer retrieves all available sessions.
+// GetByID retrieves a session for the provided id.
+func (w *sessionsRepositoryImpl) GetByID(id int64) (*entity.SessionEntity, error) {
+	instance := db.GetInstance()
+
+	var result *entity.SessionEntity
+
+	err := instance.Table((&entity.SessionEntity{}).TableName()).
+		Where("id = ?", id).
+		Find(&result).Error
+
+	return result, err
+}
+
+// GetByIssuer retrieves all available sessions for the provided issuer.
 func (w *sessionsRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.SessionEntity, error) {
 	instance := db.GetInstance()
 
@@ -92,7 +112,7 @@ type LobbiesRepository interface {
 // lobbiesRepositoryImpl represents implementation of LobbiesRepository.
 type lobbiesRepositoryImpl struct{}
 
-// Insert inserts new lobbies entity to the storage.
+// Insert inserts new lobbies entity to the storage or updates existing ones.
 func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
 	instance := db.GetInstance()
 

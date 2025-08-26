@@ -19,10 +19,14 @@ import (
 )
 
 var (
-	ErrUserDoesNotExist                   = errors.New("err happened user does not exist")
-	ErrLobbySetDoesNotExist               = errors.New("err happened lobby set does not exist")
-	ErrLobbyDoesNotExist                  = errors.New("err happened lobby does not exist")
-	ErrLobbyAlreadyExists                 = errors.New("err happened lobby already exists")
+	ErrUserDoesNotExist     = errors.New("err happened user does not exist")
+	ErrLobbySetDoesNotExist = errors.New("err happened lobby set does not exist")
+	ErrLobbyDoesNotExist    = errors.New("err happened lobby does not exist")
+	ErrLobbyAlreadyExists   = errors.New("err happened lobby already exists")
+
+	ErrSessionAlreadyStarted = errors.New("err happened session already started")
+	ErrUserIsNotLobbyHost    = errors.New("err happened user is not a host of a lobby")
+
 	ErrUserDoesNotOwnSession              = errors.New("err happened user does not own session")
 	ErrSessionHasMaxAmountOfLobbies       = errors.New("err happened session has max amount of lobbies")
 	ErrSessionHasLobbies                  = errors.New("err happened session has lobbies")
@@ -80,7 +84,7 @@ func (h *Handler) CreateUserIfNotExists(ctx context.Context, request *metadatav1
 		}
 	}
 
-	return nil, nil
+	return new(metadatav1.CreateUserIfNotExistsResponse), nil
 }
 
 func (h *Handler) GetSessions(ctx context.Context, request *metadatav1.GetSessionsRequest) (*metadatav1.GetSessionsResponse, error) {
@@ -156,11 +160,9 @@ func (h *Handler) GetSessions(ctx context.Context, request *metadatav1.GetSessio
 				Name:      rawSession.Name,
 			})
 
-			sessions = append(sessions, dto.CacheSessionEntity{
-				ID:   rawSession.ID,
-				Seed: uint64(rawSession.Seed),
-				Name: rawSession.Name,
-			})
+			sessions = append(
+				sessions,
+				converter.ConvertSessionEntityToCacheSessionEntity(rawSession))
 		}
 
 		cache.
@@ -204,12 +206,16 @@ func (h *Handler) CreateSession(ctx context.Context, request *metadatav1.CreateS
 
 	err := repository.
 		GetSessionsRepository().
-		Insert(request.GetName(), userID)
+		InsertOrUpdate(dto.SessionsRepositoryInsertOrUpdateRequest{
+			Name:   request.GetName(),
+			Seed:   int64(request.GetSeed()),
+			Issuer: userID,
+		})
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return new(metadatav1.CreateSessionResponse), nil
 }
 
 func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveSessionRequest) (*metadatav1.RemoveSessionResponse, error) {
@@ -366,7 +372,188 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 		GetInstance().
 		CommitUserSessionsTransaction()
 
-	return nil, nil
+	return new(metadatav1.RemoveSessionResponse), nil
+}
+
+func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSessionRequest) (*metadatav1.StartSessionResponse, error) {
+	cache.
+		GetInstance().
+		BeginMetadataTransaction()
+
+	metadata, ok := cache.
+		GetInstance().
+		GetMetadata(request.GetIssuer())
+	if !ok {
+		var userID int64
+
+		cachedUserID, ok := cache.
+			GetInstance().
+			GetUsers(request.GetIssuer())
+		if ok {
+			userID = cachedUserID
+		} else {
+			user, exists, err := repository.
+				GetUsersRepository().
+				GetByName(request.GetIssuer())
+			if err != nil {
+				cache.
+					GetInstance().
+					CommitMetadataTransaction()
+
+				return nil, err
+			}
+
+			if !exists {
+				cache.
+					GetInstance().
+					CommitMetadataTransaction()
+
+				return nil, ErrUserDoesNotExist
+			}
+
+			userID = user.ID
+
+			cache.
+				GetInstance().
+				AddUser(request.GetIssuer(), userID)
+		}
+
+		lobbies, exists, err := repository.
+			GetLobbiesRepository().
+			GetByUserID(userID)
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, err
+		}
+
+		if !exists {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, ErrLobbyDoesNotExist
+		}
+
+		cache.
+			GetInstance().
+			AddMetadata(
+				request.GetIssuer(),
+				converter.ConvertLobbyEntityToCacheMetadataEntity(
+					lobbies))
+
+		var selectedLobby *entity.LobbyEntity
+
+		for _, lobby := range lobbies {
+			if lobby.ID == request.GetLobbyId() &&
+				selectedLobby.SessionID == request.GetSessionId() {
+				selectedLobby = lobby
+			}
+		}
+
+		if selectedLobby == nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, ErrLobbyDoesNotExist
+		}
+
+		if !selectedLobby.Host {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, ErrUserIsNotLobbyHost
+		}
+	} else {
+		var selectedLobby *dto.CacheMetadataEntity
+
+		for _, value := range metadata {
+			if value.LobbyID == request.GetLobbyId() &&
+				selectedLobby.SessionID == request.GetSessionId() {
+				selectedLobby = value
+			}
+		}
+
+		if selectedLobby == nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, ErrLobbyDoesNotExist
+		}
+
+		if !selectedLobby.Host {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, ErrUserIsNotLobbyHost
+		}
+	}
+
+	cache.
+		GetInstance().
+		CommitMetadataTransaction()
+
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
+
+	cachedSession, ok := cache.
+		GetInstance().
+		GetSessions(request.GetSessionId())
+	if !ok {
+		session, err := repository.
+			GetSessionsRepository().
+			GetByID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, err
+		}
+
+		if session.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, ErrSessionAlreadyStarted
+		}
+
+		cache.
+			GetInstance().
+			AddSessions(
+				request.GetSessionId(),
+				converter.ConvertSessionEntityToCacheSessionEntity(session))
+	} else {
+		if cachedSession.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, ErrSessionAlreadyStarted
+		}
+	}
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
+	err := repository.
+		GetSessionsRepository().
+		InsertOrUpdate(
+			dto.SessionsRepositoryInsertOrUpdateRequest{
+				ID:      request.GetSessionId(),
+				Started: true,
+			})
+
+	return new(metadatav1.StartSessionResponse), err
 }
 
 func (h *Handler) GetSessionMetadata(request *metadatav1.GetSessionMetadataRequest, stream grpc.ServerStreamingServer[metadatav1.GetSessionMetadataResponse]) error {
@@ -449,6 +636,10 @@ func (h *Handler) GetSessionMetadata(request *metadatav1.GetSessionMetadataReque
 		}
 
 		if !found {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
 			return ErrSessionMetadataRetrievalNotAllowed
 		}
 	} else {
@@ -463,6 +654,10 @@ func (h *Handler) GetSessionMetadata(request *metadatav1.GetSessionMetadataReque
 		}
 
 		if !found {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
 			return ErrSessionMetadataRetrievalNotAllowed
 		}
 	}
@@ -478,8 +673,44 @@ func (h *Handler) GetSessionMetadata(request *metadatav1.GetSessionMetadataReque
 		case <-ticker.C:
 			ticker.Stop()
 
+			var started bool
+
+			cache.
+				GetInstance().
+				BeginSessionsTransaction()
+
+			cachedSession, ok := cache.
+				GetInstance().
+				GetSessions(request.GetSessionId())
+			if !ok {
+				session, err := repository.
+					GetSessionsRepository().
+					GetByID(request.GetSessionId())
+				if err != nil {
+					cache.
+						GetInstance().
+						CommitSessionsTransaction()
+
+					return err
+				}
+
+				started = session.Started
+
+				cache.
+					GetInstance().
+					AddSessions(
+						request.GetSessionId(),
+						converter.ConvertSessionEntityToCacheSessionEntity(session))
+			} else {
+				started = cachedSession.Started
+			}
+
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
 			err := stream.Send(&metadatav1.GetSessionMetadataResponse{
-				Started: true,
+				Started: started,
 			})
 			if err != nil {
 				return err
@@ -708,7 +939,7 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 		return nil, err
 	}
 
-	return nil, nil
+	return new(metadatav1.CreateLobbyResponse), nil
 }
 
 func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.RemoveLobbyRequest) (*metadatav1.RemoveLobbyResponse, error) {
@@ -784,7 +1015,7 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 		GetInstance().
 		CommitMetadataTransaction()
 
-	return nil, nil
+	return new(metadatav1.RemoveLobbyResponse), nil
 }
 
 func (h *Handler) GetUserMetadata(request *metadatav1.GetUserMetadataRequest, stream grpc.ServerStreamingServer[metadatav1.GetUserMetadataResponse]) error {

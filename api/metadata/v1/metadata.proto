@@ -133,7 +133,8 @@ message RemoveSessionResponse {
 // StartSessionRequest represents start session request
 message StartSessionRequest {
     int64 session_id = 1;
-    string issuer = 2 [(buf.validate.field).string.uuid = true];
+    int64 lobby_id = 2;
+    string issuer = 3 [(buf.validate.field).string.uuid = true];
 };
 
 // StartSessionResponse represents start session response.

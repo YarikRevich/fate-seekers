@@ -34,6 +34,18 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 
 	cache.
 		GetInstance().
+		BeginSessionsTransaction()
+
+	cache.
+		GetInstance().
+		EvictSessions(s.ID)
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
+	cache.
+		GetInstance().
 		BeginUserSessionsTransaction()
 
 	cache.

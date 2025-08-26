@@ -39,7 +39,7 @@ type NetworkingCache struct {
 	userActivity *lru.Cache[string, time.Duration]
 
 	// Represents metadata cache instance.
-	metadata *lru.Cache[string, []dto.CacheMetadataEntity]
+	metadata *lru.Cache[string, []*dto.CacheMetadataEntity]
 
 	// Represents mutex used for metadata related transactions.
 	metadataMutex sync.Mutex
@@ -53,6 +53,31 @@ type NetworkingCache struct {
 
 	// Represents users cache instance.
 	users *lru.Cache[string, int64]
+}
+
+// BeginSessionsTransaction begins sessions cache instance transaction.
+func (nc *NetworkingCache) BeginSessionsTransaction() {
+	nc.sessionsMutex.Lock()
+}
+
+// CommitSessionsTransaction commits sessions cache instance transaction.
+func (nc *NetworkingCache) CommitSessionsTransaction() {
+	nc.sessionsMutex.Unlock()
+}
+
+// AddSessions adds session cache instance with the provided key and value.
+func (nc *NetworkingCache) AddSessions(key int64, value dto.CacheSessionEntity) {
+	nc.sessions.Add(key, value)
+}
+
+// GetSessions retrieves session cache instance by the provided key.
+func (nc *NetworkingCache) GetSessions(key int64) (dto.CacheSessionEntity, bool) {
+	return nc.sessions.Get(key)
+}
+
+// EvictSessions evicts sessions cache for the provided key.
+func (nc *NetworkingCache) EvictSessions(key int64) {
+	nc.sessions.Remove(key)
 }
 
 // BeginUserSessionsTransaction begins user sessions cache instance transaction.
@@ -126,18 +151,18 @@ func (nc *NetworkingCache) CommitMetadataTransaction() {
 }
 
 // AddMetadata adds metadata cache instance with the provided key and value.
-func (nc *NetworkingCache) AddMetadata(key string, value []dto.CacheMetadataEntity) {
+func (nc *NetworkingCache) AddMetadata(key string, value []*dto.CacheMetadataEntity) {
 	nc.metadata.Add(key, value)
 }
 
 // GetMetadata retrieves metadata cache instance by the provided key.
-func (nc *NetworkingCache) GetMetadata(key string) ([]dto.CacheMetadataEntity, bool) {
+func (nc *NetworkingCache) GetMetadata(key string) ([]*dto.CacheMetadataEntity, bool) {
 	return nc.metadata.Get(key)
 }
 
 // GetMetadataMappings retrieves all metadata mapping cache instances.
-func (nc *NetworkingCache) GetMetadataMappings() map[string][]dto.CacheMetadataEntity {
-	result := make(map[string][]dto.CacheMetadataEntity)
+func (nc *NetworkingCache) GetMetadataMappings() map[string][]*dto.CacheMetadataEntity {
+	result := make(map[string][]*dto.CacheMetadataEntity)
 
 	for _, key := range nc.metadata.Keys() {
 		value, _ := nc.GetMetadata(key)
@@ -211,7 +236,7 @@ func newNetworkingCache() *NetworkingCache {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
-	metadata, err := lru.New[string, []dto.CacheMetadataEntity](
+	metadata, err := lru.New[string, []*dto.CacheMetadataEntity](
 		config.GetOperationMaxSessionsAmount() * config.MAX_SESSION_USERS)
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
