@@ -51,7 +51,7 @@
         "one": "Закрити",
         "other": "Закрити"
     },
-    "client.selector.session_name": {
+    "client.selector.session-name": {
         "one": "Назва сесії",
         "other": "Назва сесії"
     },
@@ -63,13 +63,25 @@
         "one": "Створення сесії",
         "other": "Створення сесії"
     },
-    "client.creator.session_name": {
+    "client.creator.session-name": {
         "one": "Назва",
         "other": "Назва"
     },
-    "client.creator.session_seed": {
+    "client.creator.session-seed": {
         "one": "Сід",
         "other": "Сід"
+    },
+    "client.lobby.title": {
+        "one": "Лобі сесії",
+        "other": "Лобі сесії"
+    },
+    "client.lobby.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
+    "client.lobby.start": {
+        "one": "Почати",
+        "other": "Почати"
     },
     "client.letter.title": {
         "one": "Лист",
@@ -150,6 +162,10 @@
     "client.networking.create-lobby-failure": {
         "one": "Неможливо створити лобі для вибраної сесії",
         "other": "Неможливо створити лобі для вибраної сесії"
+    },
+    "client.networking.joining-existing-lobby": {
+        "one": "Доєднуюся до існуючого лобі для вибраної сесії",
+        "other": "Доєднуюся до існуючого лобі для вибраної сесії"
     },
     "client.networking.connection-failure": {
         "one": "Зʼєднання конектора не вдалося встановити",

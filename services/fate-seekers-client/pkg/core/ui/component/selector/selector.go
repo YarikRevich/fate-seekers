@@ -163,7 +163,7 @@ func newSelectorComponent() *SelectorComponent {
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.selector.session_name"),
+			translation.GetInstance().GetTranslation("client.selector.session-name"),
 			generalFont,
 			color.White)))
 

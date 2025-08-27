@@ -1,6 +1,7 @@
 package selector
 
 import (
+	"errors"
 	"sync"
 	"time"
 
@@ -148,7 +149,12 @@ func newSelectorScreen() screen.Screen {
 					}
 
 					handler.PerformCreateLobby(sessionID, func(err error) {
-						if err != nil {
+						if errors.Is(err, handler.ErrLobbyAlreadyExists) {
+							notification.GetInstance().Push(
+								translation.GetInstance().GetTranslation("client.networking.joining-existing-lobby"),
+								time.Second*3,
+								common.NotificationInfoTextColor)
+						} else if err != nil {
 							notification.GetInstance().Push(
 								common.ComposeMessage(
 									translation.GetInstance().GetTranslation("client.networking.create-lobby-failure"),
@@ -219,7 +225,12 @@ func newSelectorScreen() screen.Screen {
 						}
 
 						handler.PerformCreateLobby(sessionID, func(err error) {
-							if err != nil {
+							if errors.Is(err, handler.ErrLobbyAlreadyExists) {
+								notification.GetInstance().Push(
+									translation.GetInstance().GetTranslation("client.networking.joining-existing-lobby"),
+									time.Second*3,
+									common.NotificationInfoTextColor)
+							} else if err != nil {
 								notification.GetInstance().Push(
 									common.ComposeMessage(
 										translation.GetInstance().GetTranslation("client.networking.create-lobby-failure"),

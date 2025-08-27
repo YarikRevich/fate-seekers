@@ -16,6 +16,8 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository/converter"
 	"golang.org/x/exp/slices"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -870,7 +872,7 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 		func(value *entity.LobbyEntity) bool {
 			return value.SessionID == request.GetSessionId()
 		}) {
-		return nil, ErrLobbyAlreadyExists
+		return nil, status.Errorf(codes.AlreadyExists, ErrLobbyAlreadyExists.Error())
 	}
 
 	cache.

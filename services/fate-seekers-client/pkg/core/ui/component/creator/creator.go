@@ -140,7 +140,7 @@ func newCreatorComponent() *CreatorComponent {
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.creator.session_name"),
+			translation.GetInstance().GetTranslation("client.creator.session-name"),
 			generalFont,
 			color.White)))
 
@@ -226,7 +226,7 @@ func newCreatorComponent() *CreatorComponent {
 
 	components.AddChild(widget.NewText(
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.creator.session_seed"),
+			translation.GetInstance().GetTranslation("client.creator.session-seed"),
 			generalFont,
 			color.White)))
 

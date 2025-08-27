@@ -51,7 +51,7 @@
         "one": "Close",
         "other": "Close"
     },
-    "client.selector.session_name": {
+    "client.selector.session-name": {
         "one": "Session name",
         "other": "Session name"
     },
@@ -63,13 +63,25 @@
         "one": "Session creator",
         "other": "Session creator"
     },
-    "client.creator.session_name": {
+    "client.creator.session-name": {
         "one": "Name",
         "other": "Name"
     },
-    "client.creator.session_seed": {
+    "client.creator.session-seed": {
         "one": "Seed",
         "other": "Seed"
+    },
+    "client.lobby.title": {
+        "one": "Session lobby",
+        "other": "Session lobby"
+    },
+    "client.lobby.close": {
+        "one": "Close",
+        "other": "Close"
+    },
+    "client.lobby.start": {
+        "one": "Start",
+        "other": "Start"
     },
     "client.letter.title": {
         "one": "Letter",
@@ -158,6 +170,10 @@
     "client.networking.create-lobby-failure": {
         "one": "Unable to create lobby for selected session",
         "other": "Unable to create lobby for selected session"
+    },
+    "client.networking.joining-existing-lobby": {
+        "one": "Joining existing lobby for selected session",
+        "other": "Joining existing lobby for selected session"
     },
     "client.networking.connection-failure": {
         "one": "Connector connect operation failed",

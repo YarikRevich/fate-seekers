@@ -14,6 +14,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/lobby"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -103,8 +104,7 @@ func (ls *LobbyScreen) HandleRender(screen *ebiten.Image) {
 func newLobbyScreen() screen.Screen {
 	return &LobbyScreen{
 		ui: builder.Build(
-		// TODO: add lobby initialization
-		),
+			lobby.GetInstance().GetContainer()),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10),
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 	}

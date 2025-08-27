@@ -15,6 +15,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var (
+	ErrLobbyAlreadyExists = errors.New("err happened lobby already exists")
+)
+
 // PerformPingConnection performs ping connection request.
 func PerformPingConnection(callback func(err error)) {
 	go func() {
@@ -263,6 +267,12 @@ func PerformCreateLobby(sessionID int64, callback func(err error)) {
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
 				callback(common.ErrConnectionLost)
+
+				return
+			}
+
+			if status.Code(err) == codes.AlreadyExists {
+				callback(ErrLobbyAlreadyExists)
 
 				return
 			}
