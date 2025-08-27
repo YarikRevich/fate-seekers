@@ -83,6 +83,10 @@
         "one": "Почати",
         "other": "Почати"
     },
+    "client.lobby.transfering-to-session": {
+        "one": "Переносимо тебе на планету...",
+        "other": "Переносимо тебе на планету..."
+    },
     "client.letter.title": {
         "one": "Лист",
         "other": "Лист"
@@ -166,6 +170,10 @@
     "client.networking.joining-existing-lobby": {
         "one": "Доєднуюся до існуючого лобі для вибраної сесії",
         "other": "Доєднуюся до існуючого лобі для вибраної сесії"
+    },
+    "client.networking.get-lobby-set-failure": {
+        "one": "Неможливо отримати лобі сесії від сервера",
+        "other": "Неможливо отримати лобі сесії від сервера"
     },
     "client.networking.connection-failure": {
         "one": "Зʼєднання конектора не вдалося встановити",

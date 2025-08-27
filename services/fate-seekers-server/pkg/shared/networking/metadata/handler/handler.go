@@ -732,7 +732,7 @@ func (h *Handler) GetLobbySet(ctx context.Context, request *metadatav1.GetLobbyS
 		GetInstance().
 		BeginLobbySetTransaction()
 
-	issuers, ok := cache.
+	cachedIssuers, ok := cache.
 		GetInstance().
 		GetLobbySet(request.GetSessionId())
 	if !ok {
@@ -758,8 +758,12 @@ func (h *Handler) GetLobbySet(ctx context.Context, request *metadatav1.GetLobbyS
 		var issuers []string
 
 		for _, lobby := range lobbies {
+			fmt.Println(*lobby)
+
 			issuers = append(issuers, lobby.UserEntity.Name)
 		}
+
+		response.Issuers = issuers
 
 		cache.
 			GetInstance().
@@ -768,13 +772,15 @@ func (h *Handler) GetLobbySet(ctx context.Context, request *metadatav1.GetLobbyS
 		cache.
 			GetInstance().
 			AddLobbySet(request.GetSessionId(), issuers)
+	} else {
+		response.Issuers = cachedIssuers
 	}
+
+	fmt.Println(response)
 
 	cache.
 		GetInstance().
 		CommitLobbySetTransaction()
-
-	response.Issuers = issuers
 
 	return response, nil
 }

@@ -32,6 +32,7 @@ const (
 	SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION          = "SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION"
 	SET_SESSION_CREATION_STARTED_NETWORKING_ACTION           = "SET_SESSION_CREATION_STARTED_NETWORKING_ACTION"
 	SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION            = "SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION"
+	SET_LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_ACTION        = "SET_LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_ACTION"
 	SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION             = "SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION"
 	SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION              = "SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION"
 	SET_SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION = "SET_SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION"
@@ -79,8 +80,9 @@ const (
 
 // Describes all the available state actions for metadata reducer.
 const (
-	SET_RETRIEVED_SESSIONS_METADATA_ACTION = "SET_RETRIEVED_SESSIONS_METADATA_ACTION"
-	SET_SELECTED_SESSION_METADATA_ACTION   = "SET_SELECTED_SESSION_METADATA_ACTION"
+	SET_RETRIEVED_SESSIONS_METADATA_ACTION  = "SET_RETRIEVED_SESSIONS_METADATA_ACTION"
+	SET_SELECTED_SESSION_METADATA_ACTION    = "SET_SELECTED_SESSION_METADATA_ACTION"
+	SET_RETRIEVED_LOBBY_SET_METADATA_ACTION = "SET_RETRIEVED_LOBBY_SET_METADATA_ACTION"
 )
 
 // NewSetActiveScreenAction creates new set active screen action.
@@ -181,6 +183,14 @@ func NewSetSessionCreationStartedNetworkingAction(value string) godux.Action {
 func NewSetSessionRemovalStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetLobbySetRetrievalStartedNetworkingAction creates new lobby set retrieval started networking action.
+func NewSetLobbySetRetrievalStartedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_ACTION,
 		Value: value,
 	}
 }
@@ -348,6 +358,14 @@ func NewSetRetrievedSessionsMetadata(value []dto.RetrievedSessionMetadata) godux
 func NewSetSelectedSessionMetadata(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_SELECTED_SESSION_METADATA_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetRetrievedLobbySetMetadata creates new set retrieved lobby set metadata action.
+func NewSetRetrievedLobbySetMetadata(value []string) godux.Action {
+	return godux.Action{
+		Type:  SET_RETRIEVED_LOBBY_SET_METADATA_ACTION,
 		Value: value,
 	}
 }

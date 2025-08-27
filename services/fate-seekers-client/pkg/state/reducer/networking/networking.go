@@ -15,6 +15,7 @@ const (
 	SESSION_RETRIEVAL_STARTED_NETWORKING_STATE          = "session_retrieval_started"
 	SESSION_CREATION_STARTED_NETWORKING_STATE           = "session_creation_started"
 	SESSION_REMOVAL_STARTED_NETWORKING_STATE            = "session_removal_started"
+	LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_STATE        = "lobby_set_retrieval_started"
 	LOBBY_CREATION_STARTED_NETWORKING_STATE             = "lobby_creation_started"
 	LOBBY_REMOVAL_STARTED_NETWORKING_STATE              = "lobby_removal_started"
 	SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE = "session_metadata_retrieval_started"
@@ -37,6 +38,8 @@ func (nsr *NetworkingStateReducer) Init() {
 		SESSION_CREATION_STARTED_NETWORKING_STATE, value.SESSION_CREATION_STARTED_NETWORKING_FALSE_VALUE)
 	nsr.store.SetState(
 		SESSION_REMOVAL_STARTED_NETWORKING_STATE, value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE)
+	nsr.store.SetState(
+		LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_STATE, value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE)
 	nsr.store.SetState(
 		LOBBY_CREATION_STARTED_NETWORKING_STATE, value.LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE)
 	nsr.store.SetState(
@@ -73,6 +76,11 @@ func (nsr *NetworkingStateReducer) GetProcessor() func(value godux.Action) inter
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{
 					Key: SESSION_REMOVAL_STARTED_NETWORKING_STATE, Value: value.Value})
+
+		case action.SET_LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_STATE, Value: value.Value})
 
 		case action.SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION:
 			return dto.ComposeReducerResult(

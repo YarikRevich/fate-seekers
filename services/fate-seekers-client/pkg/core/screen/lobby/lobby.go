@@ -1,7 +1,6 @@
 package lobby
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -9,12 +8,17 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/converter"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/stream"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/lobby"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -42,6 +46,42 @@ type LobbyScreen struct {
 }
 
 func (ls *LobbyScreen) HandleInput() error {
+	if store.GetLobbySetRetrievalStartedNetworking() == value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
+
+		var sessionID int64
+
+		for _, session := range store.GetRetrievedSessionsMetadata() {
+			if session.Name == store.GetSelectedSessionMetadata() {
+				sessionID = session.SessionID
+
+				break
+			}
+		}
+
+		handler.PerformGetLobbySet(sessionID, func(response *metadatav1.GetLobbySetResponse, err error) {
+			if err != nil {
+				notification.GetInstance().Push(
+					common.ComposeMessage(
+						translation.GetInstance().GetTranslation("client.networking.get-lobby-set-failure"),
+						err.Error()),
+					time.Second*3,
+					common.NotificationErrorTextColor)
+
+				return
+			}
+
+			dispatcher.
+				GetInstance().
+				Dispatch(
+					action.NewSetRetrievedLobbySetMetadata(response.GetIssuers()))
+
+			lobby.GetInstance().SetListsEntries(
+				converter.ConvertGetLobbySetResponseToListEntries(response))
+		})
+	}
+
 	if store.GetSessionMetadataRetrievalStartedNetworking() == value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
@@ -60,7 +100,21 @@ func (ls *LobbyScreen) HandleInput() error {
 		stream.GetGetSessionMetadataSubmitter().Clean(func() {
 			stream.GetGetSessionMetadataSubmitter().Submit(
 				sessionID, func(response *metadatav1.GetSessionMetadataResponse, err error) bool {
-					fmt.Println(response.GetStarted(), err)
+					if response.GetStarted() &&
+						store.GetLobbySetRetrievalStartedNetworking() ==
+							value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE {
+						notification.GetInstance().Push(
+							translation.GetInstance().GetTranslation("client.lobby.transfering-to-session"),
+							time.Second*4,
+							common.NotificationInfoTextColor)
+
+						dispatcher.
+							GetInstance().
+							Dispatch(
+								action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_TRAVEL_VALUE))
+
+						return true
+					}
 
 					return false
 				})
@@ -102,6 +156,12 @@ func (ls *LobbyScreen) HandleRender(screen *ebiten.Image) {
 
 // newLobbyScreen initializes LobbyScreen.
 func newLobbyScreen() screen.Screen {
+	lobby.GetInstance().SetStartCallback(func() {})
+
+	lobby.GetInstance().SetBackCallback(func() {
+
+	})
+
 	return &LobbyScreen{
 		ui: builder.Build(
 			lobby.GetInstance().GetContainer()),

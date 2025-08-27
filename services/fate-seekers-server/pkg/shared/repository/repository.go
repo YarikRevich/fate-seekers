@@ -77,6 +77,7 @@ func (w *sessionsRepositoryImpl) GetByID(id int64) (*entity.SessionEntity, error
 	var result *entity.SessionEntity
 
 	err := instance.Table((&entity.SessionEntity{}).TableName()).
+		Preload("SessionEntity").
 		Where("id = ?", id).
 		Find(&result).Error
 
@@ -90,6 +91,7 @@ func (w *sessionsRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.SessionEnt
 	var result []*entity.SessionEntity
 
 	err := instance.Table((&entity.SessionEntity{}).TableName()).
+		Preload("UserEntity").
 		Where("issuer = ?", issuer).
 		Find(&result).Error
 
@@ -154,6 +156,8 @@ func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) ([]*entity.LobbyEntity
 	var result []*entity.LobbyEntity
 
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
+		Preload("UserEntity").
+		Preload("SessionEntity").
 		Where("user_id = ?", userID).
 		Find(&result).Error
 
@@ -173,6 +177,8 @@ func (w *lobbiesRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.Lobby
 	var result []*entity.LobbyEntity
 
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
+		Preload("UserEntity").
+		Preload("SessionEntity").
 		Where("session_id = ?", sessionID).
 		Find(&result).Error
 
@@ -218,6 +224,7 @@ func (w *messagesRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.MessageEnt
 	var result []*entity.MessageEntity
 
 	err := instance.Table((&entity.MessageEntity{}).TableName()).
+		Preload("UserEntity").
 		Where("issuer = ?", issuer).
 		Find(&result).Error
 

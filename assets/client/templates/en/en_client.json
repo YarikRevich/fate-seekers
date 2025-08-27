@@ -83,6 +83,10 @@
         "one": "Start",
         "other": "Start"
     },
+    "client.lobby.transfering-to-session": {
+        "one": "Transfering you to the planet...",
+        "other": "Transfering you to the planet..."
+    },
     "client.letter.title": {
         "one": "Letter",
         "other": "Letter"
@@ -174,6 +178,10 @@
     "client.networking.joining-existing-lobby": {
         "one": "Joining existing lobby for selected session",
         "other": "Joining existing lobby for selected session"
+    },
+    "client.networking.get-lobby-set-failure": {
+        "one": "Unable to retrieve lobby set from a server",
+        "other": "Unable to retrieve lobby set from a server"
     },
     "client.networking.connection-failure": {
         "one": "Connector connect operation failed",

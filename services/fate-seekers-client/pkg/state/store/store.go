@@ -108,6 +108,13 @@ func GetSessionRemovalStartedNetworking() string {
 	return instance.GetState(networking.SESSION_REMOVAL_STARTED_NETWORKING_STATE).(string)
 }
 
+// GetLobbySetRetrievalStartedNetworking retrieves lobby set retrieval started networking state value.
+func GetLobbySetRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
 // GetLobbyCreationStartedNetworking retrieves lobby creation started networking state value.
 func GetLobbyCreationStartedNetworking() string {
 	instance := GetInstance()
@@ -246,6 +253,13 @@ func GetSelectedSessionMetadata() string {
 	instance := GetInstance()
 
 	return instance.GetState(metadata.SELECTED_SESSION_METADATA_STATE).(string)
+}
+
+// GetRetrievedLobbySetMetadata retrieves retrieved lobby set metadata state value.
+func GetRetrievedLobbySetMetadata() string {
+	instance := GetInstance()
+
+	return instance.GetState(metadata.RETRIEVED_LOBBY_SET_METADATA_STATE).(string)
 }
 
 // newStore creates new instance of application store.
