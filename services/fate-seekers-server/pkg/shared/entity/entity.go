@@ -23,6 +23,11 @@ func (*SessionEntity) TableName() string {
 	return "sessions"
 }
 
+// TableView retrieves name of database table view.
+func (*SessionEntity) TableView() string {
+	return "SessionEntity"
+}
+
 // BeforeCreate performs sessions cache entity eviction before sessions entity create.
 func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 	if err := tx.
@@ -140,6 +145,11 @@ type UserEntity struct {
 // TableName retrieves name of database table.
 func (*UserEntity) TableName() string {
 	return "users"
+}
+
+// TableView retrieves name of database table view.
+func (*UserEntity) TableView() string {
+	return "UserEntity"
 }
 
 // AfterFind performs user cache entity creation after user entity creation.

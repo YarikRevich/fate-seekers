@@ -1,6 +1,7 @@
 package lobby
 
 import (
+	"fmt"
 	"image/color"
 	"sync"
 
@@ -137,15 +138,6 @@ func newLobbyComponent() *LobbyComponent {
 				Top: scaler.GetPercentageOf(config.GetWorldHeight(), 6),
 			}))))
 
-	components.AddChild(widget.NewText(
-		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-			Stretch: true,
-		})),
-		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.selector.session-name"),
-			generalFont,
-			color.White)))
-
 	container.AddChild(components)
 
 	listsContainer := widget.NewContainer(
@@ -174,7 +166,7 @@ func newLobbyComponent() *LobbyComponent {
 			Bottom: 20,
 		}),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.selector.sessions"),
+			translation.GetInstance().GetTranslation("client.lobby.players"),
 			generalFont,
 			color.White)))
 
@@ -215,12 +207,15 @@ func newLobbyComponent() *LobbyComponent {
 		widget.ListOpts.HideHorizontalSlider(),
 		widget.ListOpts.Entries([]interface{}{}),
 		widget.ListOpts.EntryLabelFunc(func(e interface{}) string {
-			return e.(string)
+			return translation.
+				GetInstance().
+				GetTranslation(
+					fmt.Sprintf("client.skin.%d.name", e.(uint64)))
 		}),
 		widget.ListOpts.EntrySelectedHandler(func(args *widget.ListEntrySelectedEventArgs) {
-			sessionNameEntry := args.Entry.(string)
+			// sessionNameEntry := args.Entry.(string)
 
-			result.sessionNameEntry = sessionNameEntry
+			// result.sessionNameEntry = sessionNameEntry
 		}),
 		widget.ListOpts.EntryFontFace(generalFont),
 		widget.ListOpts.EntryColor(&widget.ListEntryColor{

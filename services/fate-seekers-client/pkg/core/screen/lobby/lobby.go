@@ -1,6 +1,7 @@
 package lobby
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -72,10 +73,20 @@ func (ls *LobbyScreen) HandleInput() error {
 				return
 			}
 
+			for _, value := range response.GetLobbySet() {
+				fmt.Println(value.GetIssuer(), store.GetRepositoryUUID(), value.GetHost())
+
+				if value.GetIssuer() == store.GetRepositoryUUID() && value.GetHost() {
+					lobby.GetInstance().ShowStartButton()
+				}
+			}
+
 			dispatcher.
 				GetInstance().
 				Dispatch(
-					action.NewSetRetrievedLobbySetMetadata(response.GetIssuers()))
+					action.NewSetRetrievedLobbySetMetadata(
+						converter.ConvertGetLobbySetResponseToRetrievedLobbySetMetadata(
+							response)))
 
 			lobby.GetInstance().SetListsEntries(
 				converter.ConvertGetLobbySetResponseToListEntries(response))
@@ -100,6 +111,10 @@ func (ls *LobbyScreen) HandleInput() error {
 		stream.GetGetSessionMetadataSubmitter().Clean(func() {
 			stream.GetGetSessionMetadataSubmitter().Submit(
 				sessionID, func(response *metadatav1.GetSessionMetadataResponse, err error) bool {
+					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
+						return true
+					}
+
 					if response.GetStarted() &&
 						store.GetLobbySetRetrievalStartedNetworking() ==
 							value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE {
@@ -156,16 +171,34 @@ func (ls *LobbyScreen) HandleRender(screen *ebiten.Image) {
 
 // newLobbyScreen initializes LobbyScreen.
 func newLobbyScreen() screen.Screen {
-	lobby.GetInstance().SetStartCallback(func() {})
+	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
-	lobby.GetInstance().SetBackCallback(func() {
+	lobby.GetInstance().SetStartCallback(func() {
 
 	})
+
+	lobby.GetInstance().SetBackCallback(func() {
+		transparentTransitionEffect.Reset()
+
+		lobby.GetInstance().HideStartButton()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
+				value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
+	})
+
+	lobby.GetInstance().HideStartButton()
 
 	return &LobbyScreen{
 		ui: builder.Build(
 			lobby.GetInstance().GetContainer()),
-		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10),
+		transparentTransitionEffect: transparentTransitionEffect,
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 	}
 }

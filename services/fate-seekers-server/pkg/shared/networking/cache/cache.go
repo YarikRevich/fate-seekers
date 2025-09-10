@@ -30,7 +30,7 @@ type NetworkingCache struct {
 	userSessionsMutex sync.Mutex
 
 	// Represents lobby sets cache instance. Value contains issuer names only.
-	lobbySets *lru.Cache[int64, []string]
+	lobbySets *lru.Cache[int64, []dto.CacheLobbySetEntity]
 
 	// Represents mutex used for lobby sets related transactions.
 	lobbySetsMutex sync.Mutex
@@ -75,6 +75,19 @@ func (nc *NetworkingCache) GetSessions(key int64) (dto.CacheSessionEntity, bool)
 	return nc.sessions.Get(key)
 }
 
+// GetSessionsMappings retrieves all sessions mapping cache instances.
+func (nc *NetworkingCache) GetSessionsMappings() map[int64]dto.CacheSessionEntity {
+	result := make(map[int64]dto.CacheSessionEntity)
+
+	for _, key := range nc.sessions.Keys() {
+		value, _ := nc.GetSessions(key)
+
+		result[key] = value
+	}
+
+	return result
+}
+
 // EvictSessions evicts sessions cache for the provided key.
 func (nc *NetworkingCache) EvictSessions(key int64) {
 	nc.sessions.Remove(key)
@@ -116,12 +129,12 @@ func (nc *NetworkingCache) CommitLobbySetTransaction() {
 }
 
 // AddLobbySet adds lobby set cache instance with the provided key and value.
-func (nc *NetworkingCache) AddLobbySet(key int64, value []string) {
+func (nc *NetworkingCache) AddLobbySet(key int64, value []dto.CacheLobbySetEntity) {
 	nc.lobbySets.Add(key, value)
 }
 
 // GetLobbies retrieves lobby cache instance by the provided key.
-func (nc *NetworkingCache) GetLobbySet(key int64) ([]string, bool) {
+func (nc *NetworkingCache) GetLobbySet(key int64) ([]dto.CacheLobbySetEntity, bool) {
 	return nc.lobbySets.Get(key)
 }
 
@@ -225,7 +238,7 @@ func newNetworkingCache() *NetworkingCache {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
-	lobbySets, err := lru.New[int64, []string](config.GetOperationMaxSessionsAmount())
+	lobbySets, err := lru.New[int64, []dto.CacheLobbySetEntity](config.GetOperationMaxSessionsAmount())
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
 	}

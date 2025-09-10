@@ -23,6 +23,7 @@ var (
 	ErrReadingSettingsNetworkingReceiverPortFromConfig  = errors.New("err happened during config file networking receiver port read operation")
 	ErrReadingSettingsNetworkingServerHostFromConfig    = errors.New("err happened during config file networking server host read operation")
 	ErrReadingSettingsNetworkingEncryptionKeyFromConfig = errors.New("err happened during config file networking encryption key read operation")
+	ErrParsingRawModeValue                              = errors.New("err happened during raw mode value parsing")
 )
 
 var (
@@ -46,6 +47,18 @@ var (
 	loggingLevel                  string
 	loggingConsole                bool
 	loggingName, loggingDirectory string
+)
+
+// Represents build flags, which are passed to variables during compilation.
+var (
+	// Represents application mode. Can be equal to "operational" or "testing".
+	mode string
+)
+
+// Represents mode build flag values.
+const (
+	operationalMode = "operational"
+	testingMode     = "testing"
 )
 
 // Represents window configuration.
@@ -103,6 +116,11 @@ func SetupDefaultConfig() {
 
 // Init initializes the configuration using provided configuration files and parameters.
 func Init() {
+	if (mode != operationalMode) &&
+		(mode != testingMode) {
+		log.Fatalln(ErrParsingRawModeValue.Error(), zap.String("rawMode", mode))
+	}
+
 	flag.Parse()
 
 	viper.AddConfigPath(*configDirectory)
@@ -174,7 +192,7 @@ func Init() {
 		log.Fatalln(err)
 	}
 
-	loggingDirectory = filepath.Join(homeDirectory, internalGlobalDirectory, viper.GetString("logging.directory"))
+	loggingDirectory = filepath.Join(homeDirectory, internalGlobalDirectory, mode, viper.GetString("logging.directory"))
 
 	if err := os.MkdirAll(loggingDirectory, 0755); err != nil {
 		log.Fatalln(err)
@@ -284,7 +302,7 @@ func GetDatabaseName() string {
 		log.Fatalln(err)
 	}
 
-	return filepath.Join(homeDir, internalGlobalDirectory, internalDatabaseDirectory, databaseName)
+	return filepath.Join(homeDir, internalGlobalDirectory, mode, internalDatabaseDirectory, databaseName)
 }
 
 func GetDatabaseConnectionRetryDelay() time.Duration {
@@ -329,5 +347,5 @@ func getDefaultConfigDirectory() string {
 		log.Fatalln(err)
 	}
 
-	return filepath.Join(homeDirectory, internalGlobalDirectory, internalConfigDirectory)
+	return filepath.Join(homeDirectory, internalGlobalDirectory, mode, internalConfigDirectory)
 }

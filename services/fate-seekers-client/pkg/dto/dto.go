@@ -140,3 +140,10 @@ type RetrievedSessionMetadata struct {
 	Name      string
 	Seed      uint64
 }
+
+// RetrievedLobbySetMetadata represents retrieved lobby set holder for reducer components.
+type RetrievedLobbySetMetadata struct {
+	Issuer string
+	Skin   uint64
+	Host   bool
+}

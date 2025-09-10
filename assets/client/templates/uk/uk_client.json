@@ -75,6 +75,10 @@
         "one": "Лобі сесії",
         "other": "Лобі сесії"
     },
+    "client.lobby.players": {
+        "one": "Гравці лобі",
+        "other": "Гравці лобі"
+    },
     "client.lobby.close": {
         "one": "Закрити",
         "other": "Закрити"
@@ -182,5 +186,37 @@
     "client.networking.close-failure": {
         "one": "Зʼєднання конектора не вдалося перервати",
         "other": "Зʼєднання конектора не вдалося перервати"
+    },
+    "client.skin.0.name": {
+        "one": "Аріян",
+        "other": "Аріян"
+    },
+    "client.skin.1.name": {
+        "one": "Ліор",
+        "other": "Ліор"
+    },
+    "client.skin.2.name": {
+        "one": "Демір",
+        "other": "Демір"
+    },
+    "client.skin.3.name": {
+        "one": "Кайрос",
+        "other": "Кайрос"
+    },
+    "client.skin.4.name": {
+        "one": "Орія",
+        "other": "Орія"
+    },
+    "client.skin.5.name": {
+        "one": "Лунара",
+        "other": "Лунара"
+    },
+    "client.skin.6.name": {
+        "one": "Серена",
+        "other": "Серена"
+    },
+    "client.skin.7.name": {
+        "one": "Вела",
+        "other": "Вела"
     }
 }

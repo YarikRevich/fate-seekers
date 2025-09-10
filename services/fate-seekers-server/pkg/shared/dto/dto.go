@@ -176,3 +176,10 @@ type CacheMetadataEntity struct {
 	Eliminated bool
 	Host       bool
 }
+
+// CacheLobbySetEntity represent cache lobby set entity used by global networking cache.
+type CacheLobbySetEntity struct {
+	Issuer string
+	Skin   uint64
+	Host   bool
+}

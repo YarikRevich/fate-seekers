@@ -240,6 +240,8 @@ func newMenuScreen() screen.Screen {
 							dispatcher.GetInstance().Dispatch(
 								action.NewDecrementLoadingApplicationAction())
 
+							transparentTransitionEffect.Reset()
+
 							dispatcher.GetInstance().Dispatch(
 								action.NewSetPingConnectionStartedNetworkingAction(value.PING_CONNECTION_STARTED_NETWORKING_FALSE_VALUE))
 

@@ -19,8 +19,11 @@ service MetadataService {
     // CreateUserIfNotExists performs attempt to create a user, if it hasn't been create yet.
     rpc CreateUserIfNotExists(CreateUserIfNotExistsRequest) returns (CreateUserIfNotExistsResponse) {};
 
-    // GetSessions performs existing sessions retrieval operation by the configured user.
-    rpc GetSessions(GetSessionsRequest) returns (GetSessionsResponse) {};
+    // GetUserSessions performs existing sessions retrieval operation by the configured user.
+    rpc GetUserSessions(GetUserSessionsRequest) returns (GetUserSessionsResponse) {};
+
+    // GetFilteredSession performs existing filtered session retrieval operation by the configured user.
+    rpc GetFilteredSession(GetFilteredSessionRequest) returns (GetFilteredSessionResponse) {};
 
     // CreateSession performs session creation operation by the configured user.
     rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse) {};
@@ -37,7 +40,7 @@ service MetadataService {
     rpc GetSessionMetadata(GetSessionMetadataRequest) returns (stream GetSessionMetadataResponse) {};
 
     // GetLobbySet performs existing lobbies retrieval operation by the provided session id, by the configured user.
-    rpc GetLobbySet(GetLobbySetRequest) returns (GetLobbySetResponse) {};
+    rpc GetLobbySet(GetLobbySetRequest) returns (stream GetLobbySetResponse) {};
 
     // CreateLobby performs lobby creation operation by the configured user.
     rpc CreateLobby(CreateLobbyRequest) returns (CreateLobbyResponse) {};
@@ -45,8 +48,8 @@ service MetadataService {
     // RemoveLobby performs lobby removal operation by the configured user. Allowed for lobby owner only.
     rpc RemoveLobby(RemoveLobbyRequest) returns (RemoveLobbyResponse) {};
 
-    // GetUserMetadata performs user metadata retrieval request by the configured user.
-    rpc GetUserMetadata(GetUserMetadataRequest) returns (stream GetUserMetadataResponse) {};
+    // GetUsersMetadata performs users metadata retrieval request by the configured user.
+    rpc GetUsersMetadata(GetUsersMetadataRequest) returns (stream GetUsersMetadataResponse) {};
 
     // GetChests performs chests retrieval for the selected session by the configured user.
     rpc GetChests(GetChestsRequest) returns (GetChestsResponse) {};
@@ -90,8 +93,8 @@ message CreateUserIfNotExistsResponse {
 
 };
 
-// GetSessionsRequest represents get sesssions request.
-message GetSessionsRequest {
+// GetUserSessionsRequest represents get user sesssions request.
+message GetUserSessionsRequest {
     string issuer = 1 [(buf.validate.field).string.uuid = true];
 };
 
@@ -102,8 +105,19 @@ message Session {
     string name = 3;
 }
 
-// GetSessionsResponse represents get sesssions response.
-message GetSessionsResponse {
+// GetUserSessionsResponse represents get user sesssions response.
+message GetUserSessionsResponse {
+    repeated Session sessions = 1;
+};
+
+
+// GetFilteredSessionRequest represents get filtered user sessions request.
+message GetFilteredSessionRequest {
+    string name = 1 [(buf.validate.field).string.pattern = "^[a-zA-Z0-9-]{8}$"];
+};
+
+// GetFilteredSessionResponse represents get filtered user sessions response.
+message GetFilteredSessionResponse {
     repeated Session sessions = 1;
 };
 
@@ -159,9 +173,16 @@ message GetLobbySetRequest {
     string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
 
+// LobbySetUnit represents lobby set metadata unit.
+message LobbySetUnit {
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
+    uint64 skin = 2;
+    bool host = 3;
+};
+
 // GetLobbySetResponse represents user create lobby response.
 message GetLobbySetResponse {
-    repeated string issuers = 1;
+    repeated LobbySetUnit lobby_set = 1;
 };
 
 // CreateLobbyRequest represents user create lobby request.
@@ -185,7 +206,7 @@ message RemoveLobbyResponse {
 };
 
 // Represents users metadata retrieval request message.
-message GetUserMetadataRequest {
+message GetUsersMetadataRequest {
     int64 session_id = 1;
     string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
@@ -195,12 +216,13 @@ message UserMetadata {
     uint64 health = 1;
     uint64 skin = 2;
     bool eliminated = 3;
-    Position position = 4;
+    bool active = 4;
+    Position position = 5;
 };
 
 // Represents users metadata retrieval response message.
-message GetUserMetadataResponse {
-    UserMetadata user_metadata = 1;
+message GetUsersMetadataResponse {
+    repeated UserMetadata user_metadata = 1;
 };
 
 // GetChestsRequest represents chests retrieval request message.

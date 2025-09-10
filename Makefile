@@ -15,14 +15,23 @@ generate-proto: ## Generates ProtocolBuffers API for API Server
 	cp api/gen/metadata/v1/metadata_grpc.pb.go services/fate-seekers-server/pkg/shared/networking/metadata/api && \
 	cp api/gen/metadata/v1/metadata.pb.go services/fate-seekers-server/pkg/shared/networking/metadata/api
 
-.PHONY: create-local-client
-create-local-client: ## Creates fate-seekers-client local directory for API Server
-	@mkdir -p $(HOME)/.fate-seekers-client/config
-	@mkdir -p $(HOME)/.fate-seekers-client/internal/database
+.PHONY: create-local-client-operational
+create-local-client-operational: ## Creates fate-seekers-client operational local directory for API Server
+	@mkdir -p $(HOME)/.fate-seekers-client/operational/config
+	@mkdir -p $(HOME)/.fate-seekers-client/operational/internal/database
 
-.PHONY: clone-client-config
-clone-client-config: create-local-client ## Clones fate-seekers-client configuration files to local directory
-	@cp -r ./samples/config/fate-seekers-client/config.yaml $(HOME)/.fate-seekers-client/config
+.PHONY: create-local-client-testing
+create-local-client-testing: ## Creates fate-seekers-client testing local directory for API Server
+	@mkdir -p $(HOME)/.fate-seekers-client/testing/config
+	@mkdir -p $(HOME)/.fate-seekers-client/testing/internal/database
+
+.PHONY: clone-client-config-operational
+clone-client-config-operational: create-local-client-operational ## Clones fate-seekers-client operational configuration files to local directory
+	@cp -r ./samples/config/fate-seekers-client/operational/config.yaml $(HOME)/.fate-seekers-client/operational/config
+
+.PHONY: clone-client-config-testing
+clone-client-config-testing: create-local-client-testing ## Clones fate-seekers-client testing configuration files to local directory
+	@cp -r ./samples/config/fate-seekers-client/testing/config.yaml $(HOME)/.fate-seekers-client/testing/config
 
 .PHONY: create-local-server
 create-local-server: ## Creates fate-seekers-server local directory for API Server
@@ -49,10 +58,14 @@ build-server-cli: clone-server-config ## Builds fate-seekers-server-cli applicat
 build-server-cli-debug: clone-server-config ## Builds fate-seekers-server-cli application executable in DEBUG mode
 	@go build -v -race -tags="server shared" -o build/fate-seekers-server-cli ./cmd/fate-seekers-server-cli/...
 
-.PHONY: build-client
-build-client: clone-client-config ## Builds fate-seekers-client application executable
-	@go build -v -tags="client shared" -o build/fate-seekers-client ./cmd/fate-seekers-client/...
+.PHONY: build-client-operational
+build-client-operational: clone-client-config-operational ## Builds fate-seekers-client-operational application executable
+	@go build -v -ldflags "-X 'github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config.mode=operational'" -tags="client shared" -o build/fate-seekers-client-operational ./cmd/fate-seekers-client/...
 
 .PHONY: build-client-debug
-build-client-debug: clone-client-config ## Builds fate-seekers-client application executable in DEBUG mode
-	@go build -v -race -tags="client shared" -o build/fate-seekers-client ./cmd/fate-seekers-client/...
+build-client-operational-debug: clone-client-config ## Builds fate-seekers-client application executable in DEBUG mode
+	@go build -v -race -tags="client shared" -o build/fate-seekers-client ./cmd/fate-seekers-client-operational/...
+
+.PHONY: build-client-testing
+build-client-testing: clone-client-config-testing ## Builds fate-seekers-client-testing application executable
+	@go build -v -ldflags "-X 'github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config.mode=testing'" -tags="client shared" -o build/fate-seekers-client-testing ./cmd/fate-seekers-client/...

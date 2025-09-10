@@ -2,6 +2,7 @@ package selector
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -124,6 +125,8 @@ func newSelectorScreen() screen.Screen {
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
 	selector.GetInstance().SetSubmitCallback(func(sessionName string) {
+		fmt.Println(sessionName)
+
 		if selectormanager.ProcessChanges(sessionName) {
 			if store.GetLobbyCreationStartedNetworking() == value.LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE {
 				dispatcher.GetInstance().Dispatch(
@@ -187,6 +190,8 @@ func newSelectorScreen() screen.Screen {
 					})
 				} else {
 					handler.PerformGetSessions(func(response *metadatav1.GetSessionsResponse, err error) {
+						fmt.Println("IN PERFORM GET SESSIONS", response.GetSessions(), err)
+
 						if err != nil {
 							notification.GetInstance().Push(
 								common.ComposeMessage(

@@ -256,10 +256,10 @@ func GetSelectedSessionMetadata() string {
 }
 
 // GetRetrievedLobbySetMetadata retrieves retrieved lobby set metadata state value.
-func GetRetrievedLobbySetMetadata() string {
+func GetRetrievedLobbySetMetadata() []dto.RetrievedLobbySetMetadata {
 	instance := GetInstance()
 
-	return instance.GetState(metadata.RETRIEVED_LOBBY_SET_METADATA_STATE).(string)
+	return instance.GetState(metadata.RETRIEVED_LOBBY_SET_METADATA_STATE).([]dto.RetrievedLobbySetMetadata)
 }
 
 // newStore creates new instance of application store.

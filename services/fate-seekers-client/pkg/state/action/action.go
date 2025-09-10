@@ -363,7 +363,7 @@ func NewSetSelectedSessionMetadata(value string) godux.Action {
 }
 
 // NewSetRetrievedLobbySetMetadata creates new set retrieved lobby set metadata action.
-func NewSetRetrievedLobbySetMetadata(value []string) godux.Action {
+func NewSetRetrievedLobbySetMetadata(value []dto.RetrievedLobbySetMetadata) godux.Action {
 	return godux.Action{
 		Type:  SET_RETRIEVED_LOBBY_SET_METADATA_ACTION,
 		Value: value,

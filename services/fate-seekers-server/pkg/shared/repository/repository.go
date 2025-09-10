@@ -36,8 +36,9 @@ var (
 type SessionsRepository interface {
 	InsertOrUpdate(request dto.SessionsRepositoryInsertOrUpdateRequest) error
 	DeleteByID(id int64) error
-	GetByID(id int64) (*entity.SessionEntity, error)
+	GetByID(id int64) (*entity.SessionEntity, bool, error)
 	GetByIssuer(issuer int64) ([]*entity.SessionEntity, error)
+	ExistsByName(name string) (bool, error)
 }
 
 // sessionsRepositoryImpl represents implementation of SessionsRepository.
@@ -71,17 +72,25 @@ func (w *sessionsRepositoryImpl) DeleteByID(id int64) error {
 }
 
 // GetByID retrieves a session for the provided id.
-func (w *sessionsRepositoryImpl) GetByID(id int64) (*entity.SessionEntity, error) {
+func (w *sessionsRepositoryImpl) GetByID(id int64) (*entity.SessionEntity, bool, error) {
 	instance := db.GetInstance()
 
 	var result *entity.SessionEntity
 
 	err := instance.Table((&entity.SessionEntity{}).TableName()).
-		Preload("SessionEntity").
+		Preload((&entity.SessionEntity{}).TableView()).
 		Where("id = ?", id).
-		Find(&result).Error
+		First(&result).Error
 
-	return result, err
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return result, false, nil
+		}
+
+		return result, false, err
+	}
+
+	return result, true, nil
 }
 
 // GetByIssuer retrieves all available sessions for the provided issuer.
@@ -91,11 +100,55 @@ func (w *sessionsRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.SessionEnt
 	var result []*entity.SessionEntity
 
 	err := instance.Table((&entity.SessionEntity{}).TableName()).
-		Preload("UserEntity").
+		Preload((&entity.UserEntity{}).TableView()).
 		Where("issuer = ?", issuer).
 		Find(&result).Error
 
 	return result, err
+}
+
+// ExistsByID checks if session exists for the provided id.
+func (w *sessionsRepositoryImpl) ExistsByID(id int64) (bool, error) {
+	instance := db.GetInstance()
+
+	var result *entity.SessionEntity
+
+	err := instance.Table((&entity.SessionEntity{}).TableName()).
+		Preload((&entity.UserEntity{}).TableView()).
+		Where("id = ?", id).
+		Find(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
+}
+
+// ExistsByName checks if session exists for the provided name.
+func (w *sessionsRepositoryImpl) ExistsByName(name string) (bool, error) {
+	instance := db.GetInstance()
+
+	var result *entity.SessionEntity
+
+	err := instance.Table((&entity.SessionEntity{}).TableName()).
+		Preload((&entity.UserEntity{}).TableView()).
+		Where("name = ?", name).
+		First(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
 }
 
 // createSessionsRepository initializes sessionsRepositoryImpl.
@@ -132,6 +185,7 @@ func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInse
 		Skin:       int64(request.Skin),
 		Health:     int64(request.Health),
 		Active:     request.Active,
+		Host:       request.Host,
 		Eliminated: request.Eliminated,
 		PositionX:  request.PositionX,
 		PositionY:  request.PositionY,
@@ -156,18 +210,24 @@ func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) ([]*entity.LobbyEntity
 	var result []*entity.LobbyEntity
 
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
-		Preload("UserEntity").
-		Preload("SessionEntity").
+		Preload((&entity.UserEntity{}).TableView()).
+		Preload((&entity.SessionEntity{}).TableView()).
 		Where("user_id = ?", userID).
 		Find(&result).Error
 
-	if err != gorm.ErrRecordNotFound {
-		return result, true, nil
-	} else if err == gorm.ErrRecordNotFound {
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, false, nil
+		}
+
+		return nil, false, err
+	}
+
+	if len(result) == 0 {
 		return nil, false, nil
 	}
 
-	return nil, false, err
+	return result, true, nil
 }
 
 // GetBySessionID retrieves lobby by the provided session id.
@@ -177,18 +237,24 @@ func (w *lobbiesRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.Lobby
 	var result []*entity.LobbyEntity
 
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
-		Preload("UserEntity").
-		Preload("SessionEntity").
+		Preload((&entity.UserEntity{}).TableView()).
+		Preload((&entity.SessionEntity{}).TableView()).
 		Where("session_id = ?", sessionID).
 		Find(&result).Error
 
-	if err != gorm.ErrRecordNotFound {
-		return result, true, nil
-	} else if err == gorm.ErrRecordNotFound {
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, false, nil
+		}
+
+		return nil, false, err
+	}
+
+	if len(result) == 0 {
 		return nil, false, nil
 	}
 
-	return nil, false, err
+	return result, true, nil
 }
 
 // createLobbiesRepository initializes lobbiesRepositoryImpl.
@@ -224,7 +290,7 @@ func (w *messagesRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.MessageEnt
 	var result []*entity.MessageEntity
 
 	err := instance.Table((&entity.MessageEntity{}).TableName()).
-		Preload("UserEntity").
+		Preload((&entity.UserEntity{}).TableView()).
 		Where("issuer = ?", issuer).
 		Find(&result).Error
 
@@ -285,13 +351,15 @@ func (w *usersRepositoryImpl) GetByName(name string) (*entity.UserEntity, bool, 
 		Where("name = ?", name).
 		First(&result).Error
 
-	if err != gorm.ErrRecordNotFound {
-		return result, true, nil
-	} else if err == gorm.ErrRecordNotFound {
-		return nil, false, nil
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, false, nil
+		}
+
+		return nil, false, err
 	}
 
-	return nil, false, err
+	return result, true, nil
 }
 
 // createUsersRepository initializes usersRepositoryImpl.

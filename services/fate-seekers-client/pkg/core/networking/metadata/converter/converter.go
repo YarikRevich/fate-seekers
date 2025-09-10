@@ -35,14 +35,31 @@ func ConvertGetSessionsResponseToListEntries(
 	return output
 }
 
+// ConvertGetLobbySetResponseToRetrievedLobbySetMetadata converts provided metadatav1.GetLobbySetResponse
+// instance to an array of dto.RetrievedLobbySetMetadata instances.
+func ConvertGetLobbySetResponseToRetrievedLobbySetMetadata(
+	input *metadatav1.GetLobbySetResponse) []dto.RetrievedLobbySetMetadata {
+	var output []dto.RetrievedLobbySetMetadata
+
+	for _, lobby := range input.GetLobbySet() {
+		output = append(output, dto.RetrievedLobbySetMetadata{
+			Issuer: lobby.GetIssuer(),
+			Skin:   lobby.GetSkin(),
+			Host:   lobby.GetHost(),
+		})
+	}
+
+	return output
+}
+
 // ConvertGetLobbySetResponseToListEntries converts provided metadatav1.GetLobbySetResponse instance
 // to an array of list entries used by UI component.
 func ConvertGetLobbySetResponseToListEntries(
 	input *metadatav1.GetLobbySetResponse) []interface{} {
 	var output []interface{}
 
-	for _, lobby := range input.GetIssuers() {
-		output = append(output, lobby)
+	for _, lobby := range input.GetLobbySet() {
+		output = append(output, lobby.Skin)
 	}
 
 	return output
