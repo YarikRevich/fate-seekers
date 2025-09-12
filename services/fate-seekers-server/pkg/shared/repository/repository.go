@@ -38,6 +38,7 @@ type SessionsRepository interface {
 	DeleteByID(id int64) error
 	GetByID(id int64) (*entity.SessionEntity, bool, error)
 	GetByIssuer(issuer int64) ([]*entity.SessionEntity, error)
+	GetByName(name string) (*entity.SessionEntity, bool, error)
 	ExistsByName(name string) (bool, error)
 }
 
@@ -78,7 +79,7 @@ func (w *sessionsRepositoryImpl) GetByID(id int64) (*entity.SessionEntity, bool,
 	var result *entity.SessionEntity
 
 	err := instance.Table((&entity.SessionEntity{}).TableName()).
-		Preload((&entity.SessionEntity{}).TableView()).
+		Preload((&entity.UserEntity{}).TableView()).
 		Where("id = ?", id).
 		First(&result).Error
 
@@ -107,26 +108,26 @@ func (w *sessionsRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.SessionEnt
 	return result, err
 }
 
-// ExistsByID checks if session exists for the provided id.
-func (w *sessionsRepositoryImpl) ExistsByID(id int64) (bool, error) {
+// GetByName retrieves available session for the provided name.
+func (w *sessionsRepositoryImpl) GetByName(name string) (*entity.SessionEntity, bool, error) {
 	instance := db.GetInstance()
 
 	var result *entity.SessionEntity
 
 	err := instance.Table((&entity.SessionEntity{}).TableName()).
 		Preload((&entity.UserEntity{}).TableView()).
-		Where("id = ?", id).
-		Find(&result).Error
+		Where("name = ?", name).
+		First(&result).Error
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return false, nil
+			return result, false, nil
 		}
 
-		return false, err
+		return result, false, err
 	}
 
-	return true, nil
+	return result, true, nil
 }
 
 // ExistsByName checks if session exists for the provided name.

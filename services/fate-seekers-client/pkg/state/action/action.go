@@ -355,7 +355,7 @@ func NewSetRetrievedSessionsMetadata(value []dto.RetrievedSessionMetadata) godux
 }
 
 // NewSetSelectedSessionMetadata creates new set selected session metadata action.
-func NewSetSelectedSessionMetadata(value string) godux.Action {
+func NewSetSelectedSessionMetadata(value *dto.SelectedSessionMetadata) godux.Action {
 	return godux.Action{
 		Type:  SET_SELECTED_SESSION_METADATA_ACTION,
 		Value: value,

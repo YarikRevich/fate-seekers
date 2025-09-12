@@ -167,9 +167,17 @@
         "one": "Unable to connect to a server",
         "other": "Unable to connect to a server"
     },
-    "client.networking.get-sessions-failure": {
-        "one": "Unable to retrieve sessions from a server",
-        "other": "Unable to retrieve sessions from a server"
+    "client.networking.get-user-sessions-failure": {
+        "one": "Unable to retrieve user sessions from a server",
+        "other": "Unable to retrieve user sessions from a server"
+    },
+    "client.networking.get-filtered-sessions-failure": {
+        "one": "Unable to retrieve filtered sessions from a server",
+        "other": "Unable to retrieve filtered sessions from a server"
+    },
+    "client.networking.filtered-session-not-found": {
+        "one": "Provided session was not found",
+        "other": "Provided session was not found"
     },
     "client.networking.remove-session-failure": {
         "one": "Unable to remove selected session",
@@ -179,6 +187,10 @@
         "one": "Unable to create lobby for selected session",
         "other": "Unable to create lobby for selected session"
     },
+    "client.networking.remove-lobby-failure": {
+        "one": "Unable to remove lobby for selected session",
+        "other": "Unable to remove lobby for selected session"
+    },
     "client.networking.joining-existing-lobby": {
         "one": "Joining existing lobby for selected session",
         "other": "Joining existing lobby for selected session"
@@ -186,6 +198,10 @@
     "client.networking.get-lobby-set-failure": {
         "one": "Unable to retrieve lobby set from a server",
         "other": "Unable to retrieve lobby set from a server"
+    },
+    "client.networking.get-session-metadata-failure": {
+        "one": "Unable to retrieve session metadata from a server",
+        "other": "Unable to retrieve session metadata from a server"
     },
     "client.networking.connection-failure": {
         "one": "Connector connect operation failed",

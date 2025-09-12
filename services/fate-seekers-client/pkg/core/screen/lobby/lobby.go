@@ -1,7 +1,6 @@
 package lobby
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -51,45 +50,47 @@ func (ls *LobbyScreen) HandleInput() error {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
 
-		var sessionID int64
+		stream.GetGetLobbySetSubmitter().Clean(func() {
+			stream.GetGetLobbySetSubmitter().Submit(
+				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetLobbySetResponse, err error) bool {
+					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
+						return true
+					}
 
-		for _, session := range store.GetRetrievedSessionsMetadata() {
-			if session.Name == store.GetSelectedSessionMetadata() {
-				sessionID = session.SessionID
+					if err != nil {
+						notification.GetInstance().Push(
+							common.ComposeMessage(
+								translation.GetInstance().GetTranslation("client.networking.get-lobby-set-failure"),
+								err.Error()),
+							time.Second*3,
+							common.NotificationErrorTextColor)
 
-				break
-			}
-		}
+						dispatcher.
+							GetInstance().
+							Dispatch(
+								action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-		handler.PerformGetLobbySet(sessionID, func(response *metadatav1.GetLobbySetResponse, err error) {
-			if err != nil {
-				notification.GetInstance().Push(
-					common.ComposeMessage(
-						translation.GetInstance().GetTranslation("client.networking.get-lobby-set-failure"),
-						err.Error()),
-					time.Second*3,
-					common.NotificationErrorTextColor)
+						return true
+					}
 
-				return
-			}
+					for _, value := range response.GetLobbySet() {
+						if value.GetIssuer() == store.GetRepositoryUUID() && value.GetHost() {
+							lobby.GetInstance().ShowStartButton()
+						}
+					}
 
-			for _, value := range response.GetLobbySet() {
-				fmt.Println(value.GetIssuer(), store.GetRepositoryUUID(), value.GetHost())
+					dispatcher.
+						GetInstance().
+						Dispatch(
+							action.NewSetRetrievedLobbySetMetadata(
+								converter.ConvertGetLobbySetResponseToRetrievedLobbySetMetadata(
+									response)))
 
-				if value.GetIssuer() == store.GetRepositoryUUID() && value.GetHost() {
-					lobby.GetInstance().ShowStartButton()
-				}
-			}
+					lobby.GetInstance().SetListsEntries(
+						converter.ConvertGetLobbySetResponseToListEntries(response))
 
-			dispatcher.
-				GetInstance().
-				Dispatch(
-					action.NewSetRetrievedLobbySetMetadata(
-						converter.ConvertGetLobbySetResponseToRetrievedLobbySetMetadata(
-							response)))
-
-			lobby.GetInstance().SetListsEntries(
-				converter.ConvertGetLobbySetResponseToListEntries(response))
+					return false
+				})
 		})
 	}
 
@@ -98,20 +99,26 @@ func (ls *LobbyScreen) HandleInput() error {
 			action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
 				value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
 
-		var sessionID int64
-
-		for _, session := range store.GetRetrievedSessionsMetadata() {
-			if session.Name == store.GetSelectedSessionMetadata() {
-				sessionID = session.SessionID
-
-				break
-			}
-		}
-
 		stream.GetGetSessionMetadataSubmitter().Clean(func() {
 			stream.GetGetSessionMetadataSubmitter().Submit(
-				sessionID, func(response *metadatav1.GetSessionMetadataResponse, err error) bool {
+				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetSessionMetadataResponse, err error) bool {
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
+						return true
+					}
+
+					if err != nil {
+						notification.GetInstance().Push(
+							common.ComposeMessage(
+								translation.GetInstance().GetTranslation("client.networking.get-session-metadata-failure"),
+								err.Error()),
+							time.Second*3,
+							common.NotificationErrorTextColor)
+
+						dispatcher.
+							GetInstance().
+							Dispatch(
+								action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
 						return true
 					}
 
@@ -178,19 +185,30 @@ func newLobbyScreen() screen.Screen {
 	})
 
 	lobby.GetInstance().SetBackCallback(func() {
-		transparentTransitionEffect.Reset()
+		handler.PerformRemoveLobby(store.GetSelectedSessionMetadata().ID, func(err error) {
+			transparentTransitionEffect.Reset()
 
-		lobby.GetInstance().HideStartButton()
+			lobby.GetInstance().HideStartButton()
 
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+			if err != nil {
+				notification.GetInstance().Push(
+					common.ComposeMessage(
+						translation.GetInstance().GetTranslation("client.networking.remove-lobby-failure"),
+						err.Error()),
+					time.Second*3,
+					common.NotificationErrorTextColor)
+			}
 
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
-				value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
+					value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
+		})
 	})
 
 	lobby.GetInstance().HideStartButton()

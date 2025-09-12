@@ -118,7 +118,7 @@ message GetFilteredSessionRequest {
 
 // GetFilteredSessionResponse represents get filtered user sessions response.
 message GetFilteredSessionResponse {
-    repeated Session sessions = 1;
+    Session session = 1;
 };
 
 // CreateSessionRequest represents create session request.

@@ -249,10 +249,10 @@ func GetRetrievedSessionsMetadata() []dto.RetrievedSessionMetadata {
 }
 
 // GetSelectedSessionMetadata retrieves selected session metadata state value.
-func GetSelectedSessionMetadata() string {
+func GetSelectedSessionMetadata() *dto.SelectedSessionMetadata {
 	instance := GetInstance()
 
-	return instance.GetState(metadata.SELECTED_SESSION_METADATA_STATE).(string)
+	return instance.GetState(metadata.SELECTED_SESSION_METADATA_STATE).(*dto.SelectedSessionMetadata)
 }
 
 // GetRetrievedLobbySetMetadata retrieves retrieved lobby set metadata state value.

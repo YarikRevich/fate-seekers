@@ -147,3 +147,14 @@ type RetrievedLobbySetMetadata struct {
 	Skin   uint64
 	Host   bool
 }
+
+// GetFilteredSessionsRequest represents filtered sessions retrieval request.
+type GetFilteredSessionsRequest struct {
+	Name string
+}
+
+// SelectedSessionMetadata represents selected session metadata.
+type SelectedSessionMetadata struct {
+	ID   int64
+	Name string
+}

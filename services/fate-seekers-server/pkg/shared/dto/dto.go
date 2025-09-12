@@ -143,6 +143,11 @@ type SessionsRepositoryInsertOrUpdateRequest struct {
 	Started bool
 }
 
+// SessionsRepositoryGetByFiltersRequest represents sessions repository entity get by filters request.
+type SessionsRepositoryGetByFiltersRequest struct {
+	Name string
+}
+
 // LobbiesRepositoryInsertOrUpdateRequest represents lobbies repository entity update request.
 type LobbiesRepositoryInsertOrUpdateRequest struct {
 	UserID     int64

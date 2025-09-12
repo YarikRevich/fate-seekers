@@ -19,6 +19,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/encryptionkey"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -52,6 +53,15 @@ func (ms *MenuScreen) HandleInput() error {
 	if store.GetApplicationStateReset() == value.STATE_RESET_APPLICATION_FALSE_VALUE {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetStateResetApplicationAction(value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetRetrievedSessionsMetadata([]dto.RetrievedSessionMetadata{}))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetRetrievedLobbySetMetadata([]dto.RetrievedLobbySetMetadata{}))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSelectedSessionMetadata(nil))
 	}
 
 	if !ms.transparentTransitionEffect.Done() {

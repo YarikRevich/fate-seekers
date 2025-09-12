@@ -325,7 +325,7 @@ func newLobbyComponent() *LobbyComponent {
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
 			widget.RowLayoutOpts.Spacing(13),
 			widget.RowLayoutOpts.Padding(widget.Insets{
-				Left: scaler.GetPercentageOf(config.GetWorldWidth(), 1),
+				Left: scaler.GetPercentageOf(config.GetWorldWidth(), 11),
 			}),
 		)),
 	)
