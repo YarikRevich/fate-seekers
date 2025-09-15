@@ -2,6 +2,7 @@ package selector
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -152,6 +153,8 @@ func newSelectorScreen() screen.Screen {
 						}))
 
 					handler.PerformCreateLobby(sessionID, func(err error) {
+						fmt.Println(err)
+
 						if errors.Is(err, handler.ErrLobbyAlreadyExists) {
 							notification.GetInstance().Push(
 								translation.GetInstance().GetTranslation("client.networking.joining-existing-lobby"),
@@ -176,6 +179,8 @@ func newSelectorScreen() screen.Screen {
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+						fmt.Println("BEFORE 10")
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
@@ -264,6 +269,8 @@ func newSelectorScreen() screen.Screen {
 								dispatcher.GetInstance().Dispatch(
 									action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
+								fmt.Println("BEFORE 30")
+
 								dispatcher.GetInstance().Dispatch(
 									action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))
 
@@ -283,7 +290,7 @@ func newSelectorScreen() screen.Screen {
 									notification.GetInstance().Push(
 										translation.GetInstance().GetTranslation("client.networking.filtered-session-not-found"),
 										time.Second*3,
-										common.NotificationInfoTextColor)
+										common.NotificationErrorTextColor)
 
 									dispatcher.GetInstance().Dispatch(
 										action.NewSetLobbyCreationStartedNetworkingAction(
@@ -336,6 +343,8 @@ func newSelectorScreen() screen.Screen {
 
 									dispatcher.GetInstance().Dispatch(
 										action.NewSetSessionRetrievalStartedNetworkingAction(value.SESSION_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+									fmt.Println("BEFORE 20")
 
 									dispatcher.GetInstance().Dispatch(
 										action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_LOBBY_VALUE))

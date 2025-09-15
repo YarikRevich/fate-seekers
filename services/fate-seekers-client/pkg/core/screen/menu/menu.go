@@ -192,7 +192,7 @@ func newMenuScreen() screen.Screen {
 												notification.GetInstance().Push(
 													common.ComposeMessage(
 														translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
-														err2.Error()),
+														err3.Error()),
 													time.Second*2,
 													common.NotificationErrorTextColor)
 
@@ -221,8 +221,8 @@ func newMenuScreen() screen.Screen {
 									dispatcher.GetInstance().Dispatch(
 										action.NewIncrementLoadingApplicationAction())
 
-									connector.GetInstance().Close(func(err error) {
-										if err != nil {
+									connector.GetInstance().Close(func(err1 error) {
+										if err1 != nil {
 											notification.GetInstance().Push(
 												translation.GetInstance().GetTranslation("client.networking.close-failure"),
 												time.Second*2,

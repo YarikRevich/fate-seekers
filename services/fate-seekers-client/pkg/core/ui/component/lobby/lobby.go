@@ -54,6 +54,8 @@ type LobbyComponent struct {
 
 // SetListsEntries sets lists entries to the list widget.
 func (lc *LobbyComponent) SetListsEntries(value []interface{}) {
+	fmt.Println(value)
+
 	lc.list.SetEntries(value)
 }
 

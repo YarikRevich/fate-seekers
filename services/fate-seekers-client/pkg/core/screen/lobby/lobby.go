@@ -1,6 +1,7 @@
 package lobby
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -57,6 +58,8 @@ func (ls *LobbyScreen) HandleInput() error {
 						return true
 					}
 
+					fmt.Println(response.GetLobbySet(), "received lobby set")
+
 					if err != nil {
 						notification.GetInstance().Push(
 							common.ComposeMessage(
@@ -64,6 +67,12 @@ func (ls *LobbyScreen) HandleInput() error {
 								err.Error()),
 							time.Second*3,
 							common.NotificationErrorTextColor)
+
+						dispatcher.
+							GetInstance().
+							Dispatch(
+								action.NewSetStateResetApplicationAction(
+									value.STATE_RESET_APPLICATION_TRUE_VALUE))
 
 						dispatcher.
 							GetInstance().
@@ -79,15 +88,33 @@ func (ls *LobbyScreen) HandleInput() error {
 						}
 					}
 
-					dispatcher.
-						GetInstance().
-						Dispatch(
-							action.NewSetRetrievedLobbySetMetadata(
-								converter.ConvertGetLobbySetResponseToRetrievedLobbySetMetadata(
-									response)))
+					fmt.Println(response.GetLobbySet())
 
-					lobby.GetInstance().SetListsEntries(
-						converter.ConvertGetLobbySetResponseToListEntries(response))
+					fmt.Println(len(store.GetRetrievedLobbySetMetadata()), len(response.GetLobbySet()))
+
+					var isLobbySetUpdated bool = true
+
+					// if len(store.GetRetrievedLobbySetMetadata()) != len(response.GetLobbySet()) {
+					// 	isLobbySetUpdated = true
+					// } else {
+					// 	for index, value := range store.GetRetrievedLobbySetMetadata() {
+					// 		if value.Issuer != response.GetLobbySet()[index].GetIssuer() {
+					// 			isLobbySetUpdated = true
+					// 		}
+					// 	}
+					// }
+
+					if isLobbySetUpdated {
+						dispatcher.
+							GetInstance().
+							Dispatch(
+								action.NewSetRetrievedLobbySetMetadata(
+									converter.ConvertGetLobbySetResponseToRetrievedLobbySetMetadata(
+										response)))
+
+						lobby.GetInstance().SetListsEntries(
+							converter.ConvertGetLobbySetResponseToListEntries(response))
+					}
 
 					return false
 				})
@@ -113,6 +140,12 @@ func (ls *LobbyScreen) HandleInput() error {
 								err.Error()),
 							time.Second*3,
 							common.NotificationErrorTextColor)
+
+						dispatcher.
+							GetInstance().
+							Dispatch(
+								action.NewSetStateResetApplicationAction(
+									value.STATE_RESET_APPLICATION_TRUE_VALUE))
 
 						dispatcher.
 							GetInstance().

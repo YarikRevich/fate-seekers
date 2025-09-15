@@ -140,16 +140,18 @@ func newMenuScreen() screen.Screen {
 
 					dispatcher.GetInstance().Dispatch(
 						action.NewSetListenerStartedNetworkingAction(value.LISTENER_STARTED_NETWORKING_STATE_FALSE_VALUE))
-				} else {
-					menu.GetInstance().DisableStartButton()
 
-					menu.GetInstance().EnableStopButton()
-
-					notification.GetInstance().Push(
-						translation.GetInstance().GetTranslation("server.networking.start-success"),
-						time.Second*3,
-						common.NotificationInfoTextColor)
+					return
 				}
+
+				notification.GetInstance().Push(
+					translation.GetInstance().GetTranslation("server.networking.start-success"),
+					time.Second*3,
+					common.NotificationInfoTextColor)
+
+				menu.GetInstance().DisableStartButton()
+
+				menu.GetInstance().EnableStopButton()
 			})
 		}
 	})

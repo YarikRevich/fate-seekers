@@ -31,10 +31,23 @@ CREATE TABLE lobbies (
     position_x REAL NOT NULL,
     position_y REAL NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    UNIQUE (session_id, skin)
     FOREIGN KEY (user_id) REFERENCES users(id)
     FOREIGN KEY (session_id) REFERENCES sessions(id)
 );
+
+-- --
+-- -- Name: idx_lobbies_user_id_session_id; Type: INDEX; Schema: public; 
+-- --
+
+-- CREATE UNIQUE INDEX idx_lobbies_user_id_session_id
+-- ON lobbies (user_id, session_id);
+
+--
+-- Name: idx_lobbies_user_id_session_id; Type: INDEX; Schema: public; 
+--
+
+CREATE UNIQUE INDEX idx_lobbies_user_id_session_id_skin
+ON lobbies (user_id, session_id, skin);
 
 --
 -- Name: messages; Type: TABLE; Schema: public; 

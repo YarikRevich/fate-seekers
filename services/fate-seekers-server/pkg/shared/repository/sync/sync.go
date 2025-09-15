@@ -16,7 +16,7 @@ var (
 
 const (
 	// Represents ticker duration used for metadata synchronization worker.
-	metadataTickerDuration = time.Second * 15
+	metadataTickerDuration = time.Minute
 )
 
 // Run starts the repository sync worker, which takes latest updates
@@ -30,6 +30,14 @@ func Run() {
 
 		for range ticker.C {
 			ticker.Stop()
+
+			// cache.
+			// 	GetInstance().
+			// 	BeginMetadataTransaction()
+
+			// cache.
+			// 	GetInstance().
+			// 	BeginLobbySetTransaction()
 
 			for key, value := range cache.
 				GetInstance().
@@ -46,10 +54,26 @@ func Run() {
 						GetUsersRepository().
 						GetByName(key)
 					if err != nil {
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
 						logging.GetInstance().Fatal(err.Error())
 					}
 
 					if !exists {
+						// cache.
+						// 	GetInstance().
+						// 	CommitLobbySetTransaction()
+
+						// cache.
+						// 	GetInstance().
+						// 	CommitMetadataTransaction()
+
 						logging.GetInstance().Fatal(ErrUserDoesNotExist.Error())
 					}
 
@@ -76,10 +100,26 @@ func Run() {
 								PositionY:  metadata.PositionY,
 							})
 					if err != nil {
+						// cache.
+						// 	GetInstance().
+						// 	CommitLobbySetTransaction()
+
+						// cache.
+						// 	GetInstance().
+						// 	CommitMetadataTransaction()
+
 						logging.GetInstance().Fatal(err.Error())
 					}
 				}
 			}
+
+			// cache.
+			// 	GetInstance().
+			// 	CommitLobbySetTransaction()
+
+			// cache.
+			// 	GetInstance().
+			// 	CommitMetadataTransaction()
 
 			ticker.Reset(metadataTickerDuration)
 		}

@@ -57,20 +57,22 @@ func Run() {
 						AddUser(key, userID)
 				}
 
-				err := repository.
-					GetLobbiesRepository().
-					InsertOrUpdate(
-						dto.LobbiesRepositoryInsertOrUpdateRequest{
-							UserID:     userID,
-							SessionID:  value.SessionID,
-							Skin:       value.Skin,
-							Health:     value.Health,
-							Eliminated: value.Eliminated,
-							PositionX:  value.PositionX,
-							PositionY:  value.PositionY,
-						})
-				if err != nil {
-					logging.GetInstance().Fatal(err.Error())
+				for _, lobby := range value {
+					err := repository.
+						GetLobbiesRepository().
+						InsertOrUpdateBySessionSkin(
+							dto.LobbiesRepositoryInsertOrUpdateRequest{
+								UserID:     userID,
+								SessionID:  lobby.SessionID,
+								Skin:       lobby.Skin,
+								Health:     lobby.Health,
+								Eliminated: lobby.Eliminated,
+								PositionX:  lobby.PositionX,
+								PositionY:  lobby.PositionY,
+							})
+					if err != nil {
+						logging.GetInstance().Fatal(err.Error())
+					}
 				}
 			}
 

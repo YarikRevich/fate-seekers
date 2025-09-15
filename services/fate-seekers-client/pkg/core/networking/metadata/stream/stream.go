@@ -3,7 +3,6 @@ package stream
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
@@ -128,6 +127,12 @@ func (gsms *getSessionMetadataSubmitter) Submit(sessionID int64, callback func(r
 			response, err := stream.Recv()
 			if err != nil {
 				if status.Code(err) == codes.Unavailable {
+					dispatcher.
+						GetInstance().
+						Dispatch(
+							action.NewSetStateResetApplicationAction(
+								value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
 					dispatcher.GetInstance().Dispatch(
 						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
@@ -223,10 +228,14 @@ func (glsms *getLobbySetMetadataSubmitter) Submit(sessionID int64, callback func
 		for {
 			response, err := stream.Recv()
 
-			fmt.Println(response, err, "RECEIVED FROM SUBMITTER")
-
 			if err != nil {
 				if status.Code(err) == codes.Unavailable {
+					dispatcher.
+						GetInstance().
+						Dispatch(
+							action.NewSetStateResetApplicationAction(
+								value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
 					dispatcher.GetInstance().Dispatch(
 						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
