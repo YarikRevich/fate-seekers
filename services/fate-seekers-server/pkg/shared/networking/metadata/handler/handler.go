@@ -1037,78 +1037,68 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 		skin uint64
 	)
 
-	cachedLobbySet, ok := cache.
+	cachedLobbySet, _ := cache.
 		GetInstance().
 		GetLobbySet(request.GetSessionId())
-	if ok && len(cachedLobbySet) >= config.MAX_SESSION_USERS {
+	if len(cachedLobbySet) >= config.MAX_SESSION_USERS {
 		cache.
 			GetInstance().
 			CommitLobbySetTransaction()
 
 		return nil, ErrSessionHasMaxAmountOfLobbies
-	} else if !ok {
-		fmt.Println("BEFORE 3")
+	}
+	fmt.Println("BEFORE 3")
 
-		lobbies, exists, err := repository.
-			GetLobbiesRepository().
-			GetBySessionID(request.GetSessionId())
-		if err != nil {
-			cache.
-				GetInstance().
-				CommitLobbySetTransaction()
+	lobbies, exists, err := repository.
+		GetLobbiesRepository().
+		GetBySessionID(request.GetSessionId())
+	if err != nil {
+		cache.
+			GetInstance().
+			CommitLobbySetTransaction()
 
-			return nil, err
+		return nil, err
+	}
+
+	if !exists {
+		host = true
+
+		skin = uint64(rand.Intn(config.MAX_SESSION_USERS))
+	} else {
+		fmt.Println("creating new skin")
+
+		var (
+			lobbySet      []dto.CacheLobbySetEntity
+			reservedSkins = make(map[int64]bool)
+		)
+
+		for _, lobby := range lobbies {
+			lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
+				Issuer: lobby.UserEntity.Name,
+				Skin:   uint64(lobby.Skin),
+				Host:   lobby.Host,
+			})
+
+			reservedSkins[lobby.Skin] = true
 		}
 
-		if !exists {
-			host = true
+		var availableSkins []int64
 
-			skin = uint64(rand.Intn(config.MAX_SESSION_USERS))
-		} else {
-			fmt.Println("creating new skin")
-
-			var (
-				lobbySet      []dto.CacheLobbySetEntity
-				reservedSkins = make(map[int64]bool)
-				hostIsPresent bool
-			)
-
-			for _, lobby := range lobbies {
-				lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
-					Issuer: lobby.UserEntity.Name,
-					Skin:   uint64(lobby.Skin),
-					Host:   lobby.Host,
-				})
-
-				if lobby.Host {
-					hostIsPresent = true
-				}
-
-				reservedSkins[lobby.Skin] = true
+		for i := int64(0); i < config.MAX_SESSION_USERS; i++ {
+			if _, ok := reservedSkins[i]; !ok {
+				availableSkins = append(availableSkins, i)
 			}
-
-			if !hostIsPresent {
-				host = true
-			}
-
-			var availableSkins []int64
-
-			for i := int64(0); i < config.MAX_SESSION_USERS; i++ {
-				if _, ok := reservedSkins[i]; !ok {
-					availableSkins = append(availableSkins, i)
-				}
-			}
-
-			skin = uint64(availableSkins[uint64(rand.Intn(len(availableSkins)))])
-
-			cache.
-				GetInstance().
-				EvictLobbySet(request.GetSessionId())
-
-			cache.
-				GetInstance().
-				AddLobbySet(request.GetSessionId(), lobbySet)
 		}
+
+		skin = uint64(availableSkins[uint64(rand.Intn(len(availableSkins)))])
+
+		cache.
+			GetInstance().
+			EvictLobbySet(request.GetSessionId())
+
+		cache.
+			GetInstance().
+			AddLobbySet(request.GetSessionId(), lobbySet)
 	}
 
 	fmt.Println("BEFORE 4")
@@ -1127,12 +1117,8 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 				Skin:      uint64(skin),
 			})
 	if err != nil {
-		fmt.Println(err, "ERROR")
-
 		return nil, err
 	}
-
-	fmt.Println("BEFORE 5")
 
 	return new(metadatav1.CreateLobbyResponse), nil
 }
@@ -1191,18 +1177,66 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 			CommitLobbySetTransaction()
 	}
 
-	fmt.Println("BEFORE DELETING LOBBY")
-
-	// TODO: move host right to a different user in the lobby set.
-
-	err = repository.
+	repository.
 		GetLobbiesRepository().
-		DeleteByUserID(userID)
+		Lock()
+
+	lobbies, _, err = repository.
+		GetLobbiesRepository().
+		GetBySessionID(request.GetSessionId())
 	if err != nil {
+		repository.
+			GetLobbiesRepository().
+			Unlock()
+
 		return nil, err
 	}
 
-	fmt.Println("AFTER DELETING LOBBY")
+	if !slices.ContainsFunc(lobbies, func(value *entity.LobbyEntity) bool {
+		return value.Host && value.UserID != userID
+	}) {
+		var availableLobbies []*entity.LobbyEntity
+
+		for _, lobby := range lobbies {
+			if lobby.UserID != userID {
+				availableLobbies = append(availableLobbies, lobby)
+			}
+		}
+
+		selectedLobby := availableLobbies[rand.Intn(len(availableLobbies))]
+
+		err = repository.
+			GetLobbiesRepository().
+			InsertOrUpdate(
+				dto.LobbiesRepositoryInsertOrUpdateRequest{
+					UserID:    selectedLobby.UserID,
+					SessionID: request.GetSessionId(),
+					Host:      true,
+					Skin:      uint64(selectedLobby.Skin),
+				})
+		if err != nil {
+			repository.
+				GetLobbiesRepository().
+				Unlock()
+
+			return nil, err
+		}
+	}
+
+	err = repository.
+		GetLobbiesRepository().
+		DeleteByUserIDAndSessionID(userID, request.GetSessionId())
+	if err != nil {
+		repository.
+			GetLobbiesRepository().
+			Unlock()
+
+		return nil, err
+	}
+
+	repository.
+		GetLobbiesRepository().
+		Unlock()
 
 	cache.
 		GetInstance().

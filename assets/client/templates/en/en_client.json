@@ -75,9 +75,9 @@
         "one": "Session lobby",
         "other": "Session lobby"
     },
-    "client.lobby.players": {
-        "one": "Lobby players",
-        "other": "Lobby players"
+    "client.lobby.other-players": {
+        "one": "Other lobby players",
+        "other": "Other Lobby players"
     },
     "client.lobby.close": {
         "one": "Close",

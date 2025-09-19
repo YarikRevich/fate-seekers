@@ -210,15 +210,20 @@ func createSessionsRepository() SessionsRepository {
 // LobbiesRepository represents lobbies entity repository.
 type LobbiesRepository interface {
 	InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error
-	DeleteByUserID(userID int64) error
+	DeleteByUserIDAndSessionID(userID, sessionID int64) error
 	GetByUserID(userID int64) ([]*entity.LobbyEntity, bool, error)
 	GetBySessionID(sessionID int64) ([]*entity.LobbyEntity, bool, error)
+	Lock()
+	Unlock()
 }
 
 // lobbiesRepositoryImpl represents implementation of LobbiesRepository.
 type lobbiesRepositoryImpl struct {
-	// Represents mutex used for database lobbies repository related operations.
+	// Represents internal mutex used for database lobbies repository related operations.
 	mu sync.RWMutex
+
+	// Represents exposed mutex to be used for database lobbies repository access restriction.
+	lock sync.Mutex
 }
 
 // InsertOrUpdate inserts new lobbies entity to the storage or updates existing ones.
@@ -239,6 +244,7 @@ func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInse
 			"eliminated",
 			"position_x",
 			"position_y",
+			"host",
 		}),
 	}).Create(&entity.LobbyEntity{
 		UserID:     request.UserID,
@@ -264,13 +270,13 @@ func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInse
 }
 
 // DeleteByUserID deletes lobby by the provided user id.
-func (w *lobbiesRepositoryImpl) DeleteByUserID(userID int64) error {
+func (w *lobbiesRepositoryImpl) DeleteByUserIDAndSessionID(userID, sessionID int64) error {
 	w.mu.Lock()
 
 	instance := db.GetInstance()
 
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
-		Where("user_id = ?", userID).
+		Where("user_id = ? AND session_id = ?", userID, sessionID).
 		Delete(&entity.LobbyEntity{}).Error
 
 	w.mu.Unlock()
@@ -350,6 +356,16 @@ func (w *lobbiesRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.Lobby
 	w.mu.RUnlock()
 
 	return result, true, nil
+}
+
+// Lock locks access to lobbies repository.
+func (w *lobbiesRepositoryImpl) Lock() {
+	w.lock.Lock()
+}
+
+// Unlock unlocks access to lobbies repository.
+func (w *lobbiesRepositoryImpl) Unlock() {
+	w.lock.Unlock()
 }
 
 // createLobbiesRepository initializes lobbiesRepositoryImpl.

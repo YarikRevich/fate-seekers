@@ -30,14 +30,8 @@ var (
 
 // LobbyComponent represents component, which contains lobby menu.
 type LobbyComponent struct {
-	// Represents session name input widget.
-	sessionNameInput *widget.TextInput
-
 	// Represents sessions list widget.
 	list *widget.List
-
-	// Represents currently selected session name entry.
-	sessionNameEntry string
 
 	// Represents start action button widget.
 	startActionButton *widget.Button
@@ -53,9 +47,12 @@ type LobbyComponent struct {
 }
 
 // SetListsEntries sets lists entries to the list widget.
-func (lc *LobbyComponent) SetListsEntries(value []interface{}) {
-	fmt.Println(value)
+func (lc *LobbyComponent) SetSelectedPlayer(value interface{}) {
+	lc.list.SetEntries(value)
+}
 
+// SetListsEntries sets lists entries to the list widget.
+func (lc *LobbyComponent) SetListsEntries(value []interface{}) {
 	lc.list.SetEntries(value)
 }
 
@@ -168,7 +165,7 @@ func newLobbyComponent() *LobbyComponent {
 			Bottom: 20,
 		}),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.lobby.players"),
+			translation.GetInstance().GetTranslation("client.lobby.other-players"),
 			generalFont,
 			color.White)))
 
@@ -213,11 +210,6 @@ func newLobbyComponent() *LobbyComponent {
 				GetInstance().
 				GetTranslation(
 					fmt.Sprintf("client.skin.%d.name", e.(uint64)))
-		}),
-		widget.ListOpts.EntrySelectedHandler(func(args *widget.ListEntrySelectedEventArgs) {
-			// sessionNameEntry := args.Entry.(string)
-
-			// result.sessionNameEntry = sessionNameEntry
 		}),
 		widget.ListOpts.EntryFontFace(generalFont),
 		widget.ListOpts.EntryColor(&widget.ListEntryColor{

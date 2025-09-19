@@ -75,9 +75,9 @@
         "one": "Лобі сесії",
         "other": "Лобі сесії"
     },
-    "client.lobby.players": {
-        "one": "Гравці лобі",
-        "other": "Гравці лобі"
+    "client.lobby.other-players": {
+        "one": "Інші гравці у лобі",
+        "other": "Інші гравці у лобі"
     },
     "client.lobby.close": {
         "one": "Закрити",
