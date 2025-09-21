@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/common"
@@ -346,8 +345,6 @@ func PerformCreateLobby(sessionID int64, callback func(err error)) {
 				})
 
 		if err != nil {
-			fmt.Println("EXTERNAL ERROR", err)
-
 			if status.Code(err) == codes.Unavailable {
 				dispatcher.
 					GetInstance().

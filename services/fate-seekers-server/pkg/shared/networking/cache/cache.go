@@ -93,6 +93,17 @@ func (nc *NetworkingCache) EvictSessions(key int64) {
 	nc.sessions.Remove(key)
 }
 
+// EvictSessionsByName evicts sessions cache for the provided name value.
+func (nc *NetworkingCache) EvictSessionsByName(name string) {
+	for _, key := range nc.sessions.Keys() {
+		value, _ := nc.GetSessions(key)
+
+		if value.Name == name {
+			nc.sessions.Remove(key)
+		}
+	}
+}
+
 // BeginUserSessionsTransaction begins user sessions cache instance transaction.
 func (nc *NetworkingCache) BeginUserSessionsTransaction() {
 	nc.userSessionsMutex.Lock()

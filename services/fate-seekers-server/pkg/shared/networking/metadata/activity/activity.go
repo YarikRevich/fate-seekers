@@ -51,16 +51,12 @@ func Run() {
 					}
 
 					userID = user.ID
-
-					cache.
-						GetInstance().
-						AddUser(key, userID)
 				}
 
 				for _, lobby := range value {
 					err := repository.
 						GetLobbiesRepository().
-						InsertOrUpdateBySessionSkin(
+						InsertOrUpdate(
 							dto.LobbiesRepositoryInsertOrUpdateRequest{
 								UserID:     userID,
 								SessionID:  lobby.SessionID,

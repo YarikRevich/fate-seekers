@@ -43,11 +43,7 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 
 	cache.
 		GetInstance().
-		EvictSessions(s.ID)
-
-	cache.
-		GetInstance().
-		CommitSessionsTransaction()
+		EvictSessionsByName(s.Name)
 
 	cache.
 		GetInstance().
@@ -59,43 +55,28 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 
 	cache.
 		GetInstance().
-		CommitUserSessionsTransaction()
+		BeginLobbySetTransaction()
+
+	cache.
+		GetInstance().
+		EvictLobbySet(s.ID)
 
 	return nil
 }
 
-// BeforeUpdate performs sessions cache entity eviction before sessions entity update.
-func (s *SessionEntity) BeforeUpdate(tx *gorm.DB) error {
-	if err := tx.
-		Model(&UserEntity{}).
-		Where("id = ?", s.Issuer).
-		First(&s.UserEntity).Error; err != nil {
-		return err
-	}
-
-	cache.
-		GetInstance().
-		BeginSessionsTransaction()
-
-	cache.
-		GetInstance().
-		EvictSessions(s.ID)
-
+// AfterCreate performs sessions cache entity transaction commit after sessions entity create.
+func (s *SessionEntity) AfterCreate(tx *gorm.DB) error {
 	cache.
 		GetInstance().
 		CommitSessionsTransaction()
 
 	cache.
 		GetInstance().
-		BeginUserSessionsTransaction()
-
-	cache.
-		GetInstance().
-		EvictUserSessions(s.UserEntity.Name)
-
-	cache.
-		GetInstance().
 		CommitUserSessionsTransaction()
+
+	cache.
+		GetInstance().
+		CommitLobbySetTransaction()
 
 	return nil
 }
@@ -132,23 +113,11 @@ func (l *LobbyEntity) BeforeCreate(tx *gorm.DB) error {
 		GetInstance().
 		EvictLobbySet(l.SessionID)
 
-	cache.
-		GetInstance().
-		CommitLobbySetTransaction()
-
 	return nil
 }
 
-// BeforeUpdate performs lobbies cache entity eviction before lobbies entity update.
-func (l *LobbyEntity) BeforeUpdate(tx *gorm.DB) error {
-	cache.
-		GetInstance().
-		BeginLobbySetTransaction()
-
-	cache.
-		GetInstance().
-		EvictLobbySet(l.SessionID)
-
+// AfterCreate performs lobbies cache entity transaction commit after lobbies entity create.
+func (l *LobbyEntity) AfterCreate(tx *gorm.DB) error {
 	cache.
 		GetInstance().
 		CommitLobbySetTransaction()

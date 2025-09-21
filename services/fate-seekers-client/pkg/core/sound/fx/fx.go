@@ -20,13 +20,13 @@ import (
 
 const (
 	// Represents processing ticker duration.
-	processingTickerPeriod = time.Millisecond * 400
+	processingTickerPeriod = time.Millisecond * 10
 
 	// Represents start temp ticker period.
 	startTempTickerPeriod = time.Millisecond * 10
 
 	// Represents end temp ticker period.
-	endTempTickerPeriod = time.Millisecond * 120
+	endTempTickerPeriod = time.Millisecond * 10
 
 	// Represents volume ticker period.
 	volumeTickerPeriod = time.Second
@@ -54,6 +54,12 @@ type SoundFXManager struct {
 
 	// Represents state if volume is configured.
 	volumeConfigured atomic.Bool
+
+	// Represents state if handbrake has been initiated.
+	handbrakeInitiated atomic.Bool
+
+	// Represents state if handbrake has been finished.
+	handbrakeFinished atomic.Bool
 }
 
 // Init starts sound FX manager processing worker. Additionally starts volume update worker.
@@ -114,7 +120,22 @@ func (svm *SoundFXManager) Init() {
 							case <-tempTicker.C:
 								tempTicker.Stop()
 
-								if svm.currentPlayer.Load().Duration-svm.currentPlayer.Load().Player.Position() <= fadeoutDuration {
+								if svm.handbrakeInitiated.Load() {
+									if svm.volumeConfigured.Load() {
+										svm.volumeConfigured.Store(false)
+									}
+
+									select {
+									case interruptionChan <- 1:
+									default:
+									}
+
+									if svm.currentPlayer.Load().Player.Volume() != 0 {
+										svm.currentPlayer.Load().Player.SetVolume(0)
+									} else {
+										svm.handbrakeFinished.Store(true)
+									}
+								} else if svm.currentPlayer.Load().Duration-svm.currentPlayer.Load().Player.Position() <= fadeoutDuration {
 									if svm.volumeConfigured.Load() {
 										svm.volumeConfigured.Store(false)
 									}
@@ -137,7 +158,7 @@ func (svm *SoundFXManager) Init() {
 									}
 								}
 
-								if !svm.currentPlayer.Load().Player.IsPlaying() {
+								if !svm.currentPlayer.Load().Player.IsPlaying() || svm.handbrakeFinished.Load() {
 									svm.volumeConfigured.Store(true)
 
 									if err := svm.currentPlayer.Load().Player.Close(); err != nil {
@@ -147,6 +168,10 @@ func (svm *SoundFXManager) Init() {
 									tempTicker.Stop()
 
 									svm.currentPlayer.Store(nil)
+
+									svm.handbrakeFinished.Store(false)
+
+									svm.handbrakeInitiated.Store(false)
 
 									return
 								}
@@ -179,6 +204,24 @@ func (svm *SoundFXManager) Init() {
 			}
 		}
 	}()
+}
+
+// PushWithHandbrake pushes a new track immediately to the queue at the highest priority
+// stopping previously playing track.
+func (svm *SoundFXManager) PushWithHandbrake(name string) {
+	sound := loader.GetInstance().GetSoundFX(name)
+
+	player, err := svm.audioContext.NewPlayerF32(sound)
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, common.ErrSoundPlayerAccess.Error()).Error())
+	}
+
+	svm.processingBatch = append([]*dto.FXSoundUnit{{
+		Duration: time.Second * time.Duration(sound.Length()) / common.BytesPerSample / common.SampleRate,
+		Player:   player,
+	}}, svm.processingBatch...)
+
+	svm.handbrakeInitiated.Store(true)
 }
 
 // PushImmediately pushes a new track immediately to the queue at the highest priority.

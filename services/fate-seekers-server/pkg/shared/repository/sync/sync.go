@@ -54,13 +54,13 @@ func Run() {
 						GetUsersRepository().
 						GetByName(key)
 					if err != nil {
-						cache.
-							GetInstance().
-							CommitLobbySetTransaction()
+						// cache.
+						// 	GetInstance().
+						// 	CommitLobbySetTransaction()
 
-						cache.
-							GetInstance().
-							CommitMetadataTransaction()
+						// cache.
+						// 	GetInstance().
+						// 	CommitMetadataTransaction()
 
 						logging.GetInstance().Fatal(err.Error())
 					}
@@ -78,10 +78,6 @@ func Run() {
 					}
 
 					userID = user.ID
-
-					cache.
-						GetInstance().
-						AddUser(key, userID)
 				}
 
 				for _, metadata := range value {

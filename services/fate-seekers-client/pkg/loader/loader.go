@@ -111,7 +111,8 @@ const (
 	AmbientMusicSound   = "music/ambient/ambient.mp3"
 	EnergetykMusicSound = "music/energetyk/energetyk.mp3"
 
-	TestFXSound = "fx/test/test.ogg"
+	TestFXSound   = "fx/test/test.ogg"
+	ButtonFXSound = "fx/button/button.ogg"
 )
 
 // Decsribes all the embedded files specific paths.

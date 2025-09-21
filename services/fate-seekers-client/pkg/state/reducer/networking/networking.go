@@ -19,6 +19,7 @@ const (
 	LOBBY_CREATION_STARTED_NETWORKING_STATE             = "lobby_creation_started"
 	LOBBY_REMOVAL_STARTED_NETWORKING_STATE              = "lobby_removal_started"
 	SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE = "session_metadata_retrieval_started"
+	// SESSION_START_STARTED_NETWORKING_STATE              = "session"
 )
 
 // NetworkingStateReducer represents reducer used for networking state management.

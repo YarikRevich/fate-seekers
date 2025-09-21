@@ -1,7 +1,6 @@
 package lobby
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -55,6 +54,8 @@ func (ls *LobbyScreen) HandleInput() error {
 		stream.GetGetLobbySetSubmitter().Clean(func() {
 			stream.GetGetLobbySetSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetLobbySetResponse, err error) bool {
+					// TODO: add state management.
+
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
 						return true
 					}
@@ -135,8 +136,6 @@ func (ls *LobbyScreen) HandleInput() error {
 						lobby.GetInstance().SetListsEntries(
 							converter.ConvertGetLobbySetResponseToListEntries(otherPlayers))
 
-						fmt.Println(response.GetLobbySet())
-
 						for _, value := range response.GetLobbySet() {
 							if value.GetIssuer() == store.GetRepositoryUUID() && value.GetHost() {
 								lobby.GetInstance().ShowStartButton()
@@ -157,8 +156,6 @@ func (ls *LobbyScreen) HandleInput() error {
 		stream.GetGetSessionMetadataSubmitter().Clean(func() {
 			stream.GetGetSessionMetadataSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetSessionMetadataResponse, err error) bool {
-					fmt.Println(response.GetStarted())
-
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
 						return true
 					}
@@ -267,6 +264,11 @@ func newLobbyScreen() screen.Screen {
 
 					return
 				}
+
+				notification.GetInstance().Push(
+					translation.GetInstance().GetTranslation("client.lobby.transfering-to-session"),
+					time.Second*4,
+					common.NotificationInfoTextColor)
 
 				dispatcher.
 					GetInstance().

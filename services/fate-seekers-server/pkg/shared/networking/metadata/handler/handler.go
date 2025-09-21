@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"math/rand"
 	"time"
@@ -139,10 +138,6 @@ func (h *Handler) GetUserSessions(ctx context.Context, request *metadatav1.GetUs
 			}
 
 			userID = user.ID
-
-			cache.
-				GetInstance().
-				AddUser(request.GetIssuer(), userID)
 		}
 
 		rawSessions, err := repository.
@@ -271,10 +266,6 @@ func (h *Handler) CreateSession(ctx context.Context, request *metadatav1.CreateS
 		}
 
 		userID = user.ID
-
-		cache.
-			GetInstance().
-			AddUser(request.GetIssuer(), userID)
 	}
 
 	exists, err := repository.
@@ -339,10 +330,6 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 			}
 
 			userID = user.ID
-
-			cache.
-				GetInstance().
-				AddUser(request.GetIssuer(), userID)
 		}
 
 		sessions, err := repository.
@@ -379,10 +366,6 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 		}
 
 		userID = user.ID
-
-		cache.
-			GetInstance().
-			AddUser(request.GetIssuer(), userID)
 	}
 
 	cache.
@@ -496,10 +479,6 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		}
 
 		userID = user.ID
-
-		cache.
-			GetInstance().
-			AddUser(request.GetIssuer(), userID)
 	}
 
 	metadata, ok := cache.
@@ -689,10 +668,6 @@ func (h *Handler) GetSessionMetadata(request *metadatav1.GetSessionMetadataReque
 			}
 
 			userID = user.ID
-
-			cache.
-				GetInstance().
-				AddUser(request.GetIssuer(), userID)
 		}
 
 		lobbies, exists, err := repository.
@@ -778,6 +753,7 @@ func (h *Handler) GetSessionMetadata(request *metadatav1.GetSessionMetadataReque
 			cachedSession, ok := cache.
 				GetInstance().
 				GetSessions(request.GetSessionId())
+
 			if !ok {
 				session, _, err := repository.
 					GetSessionsRepository().
@@ -932,10 +908,6 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 		}
 
 		userID = user.ID
-
-		cache.
-			GetInstance().
-			AddUser(request.GetIssuer(), userID)
 	}
 
 	cache.
@@ -972,8 +944,6 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 		GetInstance().
 		CommitSessionsTransaction()
 
-	fmt.Println("BEFORE 1")
-
 	userLobbies, exists, err := repository.
 		GetLobbiesRepository().
 		GetByUserID(userID)
@@ -992,8 +962,6 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 	cache.
 		GetInstance().
 		BeginLobbySetTransaction()
-
-	fmt.Println("BEFORE 2")
 
 	sessionLobbies, exists, err := repository.
 		GetLobbiesRepository().
@@ -1049,7 +1017,6 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 
 		return nil, ErrSessionHasMaxAmountOfLobbies
 	}
-	fmt.Println("BEFORE 3")
 
 	lobbies, exists, err := repository.
 		GetLobbiesRepository().
@@ -1067,8 +1034,6 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 
 		skin = uint64(rand.Intn(config.MAX_SESSION_USERS))
 	} else {
-		fmt.Println("creating new skin")
-
 		var (
 			lobbySet      []dto.CacheLobbySetEntity
 			reservedSkins = make(map[int64]bool)
@@ -1102,8 +1067,6 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 			GetInstance().
 			AddLobbySet(request.GetSessionId(), lobbySet)
 	}
-
-	fmt.Println("BEFORE 4")
 
 	cache.
 		GetInstance().
@@ -1146,10 +1109,6 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 		}
 
 		userID = user.ID
-
-		cache.
-			GetInstance().
-			AddUser(request.GetIssuer(), userID)
 	}
 
 	lobbies, exists, err := repository.
@@ -1303,10 +1262,6 @@ func (h *Handler) GetUserMetadata(request *metadatav1.GetUsersMetadataRequest, s
 					}
 
 					userID = user.ID
-
-					cache.
-						GetInstance().
-						AddUser(request.GetIssuer(), userID)
 				}
 
 				lobbies, exists, err := repository.
