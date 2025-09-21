@@ -64,6 +64,42 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+// BeforeUpdate performs sessions cache entity eviction before sessions entity update.
+func (s *SessionEntity) BeforeUpdate(tx *gorm.DB) error {
+	if err := tx.
+		Model(&UserEntity{}).
+		Where("id = ?", s.Issuer).
+		First(&s.UserEntity).Error; err != nil {
+		return err
+	}
+
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
+
+	cache.
+		GetInstance().
+		EvictSessions(s.ID)
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
+	cache.
+		GetInstance().
+		BeginUserSessionsTransaction()
+
+	cache.
+		GetInstance().
+		EvictUserSessions(s.UserEntity.Name)
+
+	cache.
+		GetInstance().
+		CommitUserSessionsTransaction()
+
+	return nil
+}
+
 // LobbyEntity represents lobbies entity.
 type LobbyEntity struct {
 	ID            int64         `gorm:"column:id;primaryKey;auto_increment;not null"`
@@ -88,6 +124,23 @@ func (*LobbyEntity) TableName() string {
 
 // BeforeCreate performs lobbies cache entity eviction before lobbies entity create.
 func (l *LobbyEntity) BeforeCreate(tx *gorm.DB) error {
+	cache.
+		GetInstance().
+		BeginLobbySetTransaction()
+
+	cache.
+		GetInstance().
+		EvictLobbySet(l.SessionID)
+
+	cache.
+		GetInstance().
+		CommitLobbySetTransaction()
+
+	return nil
+}
+
+// BeforeUpdate performs lobbies cache entity eviction before lobbies entity update.
+func (l *LobbyEntity) BeforeUpdate(tx *gorm.DB) error {
 	cache.
 		GetInstance().
 		BeginLobbySetTransaction()

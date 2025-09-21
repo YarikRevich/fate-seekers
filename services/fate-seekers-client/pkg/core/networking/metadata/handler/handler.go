@@ -286,6 +286,52 @@ func PerformRemoveSession(sessionID int64, callback func(err error)) {
 	}()
 }
 
+// PerformStartSession performs session start request.
+func PerformStartSession(sessionID, lobbyID int64, callback func(err error)) {
+	go func() {
+		_, err := connector.
+			GetInstance().
+			GetClient().
+			StartSession(
+				context.Background(),
+				&metadatav1.StartSessionRequest{
+					SessionId: sessionID,
+					LobbyId:   lobbyID,
+					Issuer:    store.GetRepositoryUUID(),
+				})
+
+		if err != nil {
+			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+				callback(common.ErrConnectionLost)
+
+				return
+			}
+
+			errRaw, ok := status.FromError(err)
+			if !ok {
+				callback(err)
+
+				return
+			}
+
+			callback(errors.New(errRaw.Message()))
+
+			return
+		}
+
+		callback(nil)
+	}()
+}
+
 // PerformCreateLobby performs lobby creation request.
 func PerformCreateLobby(sessionID int64, callback func(err error)) {
 	go func() {

@@ -55,10 +55,10 @@ func ConvertGetLobbySetResponseToRetrievedLobbySetMetadata(
 // ConvertGetLobbySetResponseToListEntries converts provided metadatav1.GetLobbySetResponse instance
 // to an array of list entries used by UI component.
 func ConvertGetLobbySetResponseToListEntries(
-	input *metadatav1.GetLobbySetResponse) []interface{} {
+	input []*metadatav1.LobbySetUnit) []interface{} {
 	var output []interface{}
 
-	for _, lobby := range input.GetLobbySet() {
+	for _, lobby := range input {
 		output = append(output, lobby.Skin)
 	}
 

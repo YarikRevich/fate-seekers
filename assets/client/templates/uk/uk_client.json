@@ -75,6 +75,10 @@
         "one": "Лобі сесії",
         "other": "Лобі сесії"
     },
+    "client.lobby.selected-player": {
+        "one": "Вибраний гравець",
+        "other": "Вибраний гравець"
+    },
     "client.lobby.other-players": {
         "one": "Інші гравці у лобі",
         "other": "Інші гравці у лобі"
@@ -194,6 +198,10 @@
     "client.networking.get-session-metadata-failure": {
         "one": "Неможливо отримати метадані сесії від сервера",
         "other": "Неможливо отримати метадані сесії від сервера"
+    },
+    "client.networking.start-session-failure": {
+        "one": "Неможливо розпочати старт сесії",
+        "other": "Неможливо розпочати старт сесії"
     },
     "client.networking.connection-failure": {
         "one": "Зʼєднання конектора не вдалося встановити",

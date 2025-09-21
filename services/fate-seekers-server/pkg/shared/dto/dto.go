@@ -184,6 +184,7 @@ type CacheMetadataEntity struct {
 
 // CacheLobbySetEntity represent cache lobby set entity used by global networking cache.
 type CacheLobbySetEntity struct {
+	ID     int64
 	Issuer string
 	Skin   uint64
 	Host   bool

@@ -80,9 +80,10 @@ const (
 
 // Describes all the available state actions for metadata reducer.
 const (
-	SET_RETRIEVED_SESSIONS_METADATA_ACTION  = "SET_RETRIEVED_SESSIONS_METADATA_ACTION"
-	SET_SELECTED_SESSION_METADATA_ACTION    = "SET_SELECTED_SESSION_METADATA_ACTION"
-	SET_RETRIEVED_LOBBY_SET_METADATA_ACTION = "SET_RETRIEVED_LOBBY_SET_METADATA_ACTION"
+	SET_RETRIEVED_SESSIONS_METADATA_ACTION      = "SET_RETRIEVED_SESSIONS_METADATA_ACTION"
+	SET_SELECTED_SESSION_METADATA_ACTION        = "SET_SELECTED_SESSION_METADATA_ACTION"
+	SET_RETRIEVED_LOBBY_SET_METADATA_ACTION     = "SET_RETRIEVED_LOBBY_SET_METADATA_ACTION"
+	SET_SELECTED_LOBBY_SET_UNIT_METADATA_ACTION = "SET_SELECTED_LOBBY_SET_UNIT_METADATA_ACTION"
 )
 
 // NewSetActiveScreenAction creates new set active screen action.
@@ -366,6 +367,14 @@ func NewSetSelectedSessionMetadata(value *dto.SelectedSessionMetadata) godux.Act
 func NewSetRetrievedLobbySetMetadata(value []dto.RetrievedLobbySetMetadata) godux.Action {
 	return godux.Action{
 		Type:  SET_RETRIEVED_LOBBY_SET_METADATA_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetSelectedLobbySetUnitMetadata creates new set selected lobby set unit metadata action.
+func NewSetSelectedLobbySetUnitMetadata(value *dto.SelectedLobbySetUnitMetadata) godux.Action {
+	return godux.Action{
+		Type:  SET_SELECTED_LOBBY_SET_UNIT_METADATA_ACTION,
 		Value: value,
 	}
 }

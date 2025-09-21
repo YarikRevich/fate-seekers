@@ -262,6 +262,13 @@ func GetRetrievedLobbySetMetadata() []dto.RetrievedLobbySetMetadata {
 	return instance.GetState(metadata.RETRIEVED_LOBBY_SET_METADATA_STATE).([]dto.RetrievedLobbySetMetadata)
 }
 
+// GetSelectedLobbySetUnitMetadata retrieves selected lobby set unit metadata state value.
+func GetSelectedLobbySetUnitMetadata() *dto.SelectedLobbySetUnitMetadata {
+	instance := GetInstance()
+
+	return instance.GetState(metadata.SELECTED_LOBBY_SET_UNIT_METADATA_STATE).(*dto.SelectedLobbySetUnitMetadata)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()

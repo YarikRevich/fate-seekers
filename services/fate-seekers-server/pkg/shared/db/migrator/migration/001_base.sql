@@ -35,15 +35,8 @@ CREATE TABLE lobbies (
     FOREIGN KEY (session_id) REFERENCES sessions(id)
 );
 
--- --
--- -- Name: idx_lobbies_user_id_session_id; Type: INDEX; Schema: public; 
--- --
-
--- CREATE UNIQUE INDEX idx_lobbies_user_id_session_id
--- ON lobbies (user_id, session_id);
-
 --
--- Name: idx_lobbies_user_id_session_id; Type: INDEX; Schema: public; 
+-- Name: idx_lobbies_user_id_session_id_skin; Type: INDEX; Schema: public; 
 --
 
 CREATE UNIQUE INDEX idx_lobbies_user_id_session_id_skin

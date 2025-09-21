@@ -30,6 +30,8 @@ var (
 
 // LobbyComponent represents component, which contains lobby menu.
 type LobbyComponent struct {
+	selection *widget.Text
+
 	// Represents sessions list widget.
 	list *widget.List
 
@@ -46,9 +48,12 @@ type LobbyComponent struct {
 	container *widget.Container
 }
 
-// SetListsEntries sets lists entries to the list widget.
-func (lc *LobbyComponent) SetSelectedPlayer(value interface{}) {
-	lc.list.SetEntries(value)
+// SetSelectionBySkin sets label by the provided skin for selection text widget.
+func (lc *LobbyComponent) SetSelectionBySkin(value uint64) {
+	lc.selection.Label = translation.
+		GetInstance().
+		GetTranslation(
+			fmt.Sprintf("client.skin.%d.name", value))
 }
 
 // SetListsEntries sets lists entries to the list widget.
@@ -123,6 +128,40 @@ func newLobbyComponent() *LobbyComponent {
 			translation.GetInstance().GetTranslation("client.lobby.title"),
 			generalFont,
 			color.White)))
+
+	selectedContainer := widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+			Stretch: true,
+		})),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
+			widget.RowLayoutOpts.Padding(widget.Insets{
+				Top: scaler.GetPercentageOf(config.GetWorldHeight(), 6),
+			}),
+			widget.RowLayoutOpts.Spacing(
+				scaler.GetPercentageOf(config.GetWorldWidth(), 23)))))
+
+	container.AddChild(selectedContainer)
+
+	selectedContainer.AddChild(widget.NewText(
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+			Stretch: true,
+		})),
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("client.lobby.selected-player"),
+			generalFont,
+			color.White)))
+
+	selection := widget.NewText(
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+			Stretch: true,
+		})),
+		widget.TextOpts.Text(
+			"",
+			generalFont,
+			color.White))
+
+	selectedContainer.AddChild(selection)
 
 	components := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
@@ -359,6 +398,7 @@ func newLobbyComponent() *LobbyComponent {
 	container.AddChild(buttonsContainer)
 
 	result = &LobbyComponent{
+		selection:         selection,
 		list:              list,
 		startActionButton: startActionButton,
 		container:         container,

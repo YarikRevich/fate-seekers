@@ -75,6 +75,10 @@
         "one": "Session lobby",
         "other": "Session lobby"
     },
+    "client.lobby.selected-player": {
+        "one": "Selected player",
+        "other": "Selected player"
+    },
     "client.lobby.other-players": {
         "one": "Other lobby players",
         "other": "Other Lobby players"
@@ -202,6 +206,10 @@
     "client.networking.get-session-metadata-failure": {
         "one": "Unable to retrieve session metadata from a server",
         "other": "Unable to retrieve session metadata from a server"
+    },
+    "client.networking.start-session-failure": {
+        "one": "Unable to perform session start",
+        "other": "Unable to perform session start"
     },
     "client.networking.connection-failure": {
         "one": "Connector connect operation failed",

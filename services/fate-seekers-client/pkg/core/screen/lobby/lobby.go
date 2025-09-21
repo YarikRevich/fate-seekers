@@ -20,6 +20,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/lobby"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -58,8 +59,6 @@ func (ls *LobbyScreen) HandleInput() error {
 						return true
 					}
 
-					fmt.Println(response.GetLobbySet(), "received lobby set")
-
 					if err != nil {
 						notification.GetInstance().Push(
 							common.ComposeMessage(
@@ -82,29 +81,34 @@ func (ls *LobbyScreen) HandleInput() error {
 						return true
 					}
 
-					for _, value := range response.GetLobbySet() {
-						if value.GetIssuer() == store.GetRepositoryUUID() && value.GetHost() {
-							lobby.GetInstance().ShowStartButton()
+					var isLobbySetUpdated bool
+
+					if len(store.GetRetrievedLobbySetMetadata()) != len(response.GetLobbySet()) {
+						isLobbySetUpdated = true
+					} else {
+						for index, value := range store.GetRetrievedLobbySetMetadata() {
+							if value.Issuer != response.GetLobbySet()[index].GetIssuer() {
+								isLobbySetUpdated = true
+							}
 						}
 					}
 
-					fmt.Println(response.GetLobbySet())
-
-					fmt.Println(len(store.GetRetrievedLobbySetMetadata()), len(response.GetLobbySet()))
-
-					var isLobbySetUpdated bool = true
-
-					// if len(store.GetRetrievedLobbySetMetadata()) != len(response.GetLobbySet()) {
-					// 	isLobbySetUpdated = true
-					// } else {
-					// 	for index, value := range store.GetRetrievedLobbySetMetadata() {
-					// 		if value.Issuer != response.GetLobbySet()[index].GetIssuer() {
-					// 			isLobbySetUpdated = true
-					// 		}
-					// 	}
-					// }
-
 					if isLobbySetUpdated {
+						for _, value := range response.GetLobbySet() {
+							if value.GetIssuer() == store.GetRepositoryUUID() {
+								dispatcher.
+									GetInstance().
+									Dispatch(
+										action.NewSetSelectedLobbySetUnitMetadata(
+											&dto.SelectedLobbySetUnitMetadata{
+												ID:     value.GetLobbyId(),
+												Issuer: value.GetIssuer(),
+												Skin:   value.GetSkin(),
+												Host:   value.GetHost(),
+											}))
+							}
+						}
+
 						dispatcher.
 							GetInstance().
 							Dispatch(
@@ -112,8 +116,32 @@ func (ls *LobbyScreen) HandleInput() error {
 									converter.ConvertGetLobbySetResponseToRetrievedLobbySetMetadata(
 										response)))
 
+						var (
+							selectedPlayer *metadatav1.LobbySetUnit
+							otherPlayers   []*metadatav1.LobbySetUnit
+						)
+
+						for _, lobbySetUnit := range response.GetLobbySet() {
+							if lobbySetUnit.Issuer == store.GetRepositoryUUID() {
+								selectedPlayer = lobbySetUnit
+							} else {
+								otherPlayers = append(otherPlayers, lobbySetUnit)
+							}
+						}
+
+						lobby.GetInstance().SetSelectionBySkin(
+							selectedPlayer.GetSkin())
+
 						lobby.GetInstance().SetListsEntries(
-							converter.ConvertGetLobbySetResponseToListEntries(response))
+							converter.ConvertGetLobbySetResponseToListEntries(otherPlayers))
+
+						fmt.Println(response.GetLobbySet())
+
+						for _, value := range response.GetLobbySet() {
+							if value.GetIssuer() == store.GetRepositoryUUID() && value.GetHost() {
+								lobby.GetInstance().ShowStartButton()
+							}
+						}
 					}
 
 					return false
@@ -129,6 +157,8 @@ func (ls *LobbyScreen) HandleInput() error {
 		stream.GetGetSessionMetadataSubmitter().Clean(func() {
 			stream.GetGetSessionMetadataSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetSessionMetadataResponse, err error) bool {
+					fmt.Println(response.GetStarted())
+
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
 						return true
 					}
@@ -155,9 +185,7 @@ func (ls *LobbyScreen) HandleInput() error {
 						return true
 					}
 
-					if response.GetStarted() &&
-						store.GetLobbySetRetrievalStartedNetworking() ==
-							value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE {
+					if response.GetStarted() {
 						notification.GetInstance().Push(
 							translation.GetInstance().GetTranslation("client.lobby.transfering-to-session"),
 							time.Second*4,
@@ -214,7 +242,37 @@ func newLobbyScreen() screen.Screen {
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
 	lobby.GetInstance().SetStartCallback(func() {
+		handler.PerformStartSession(
+			store.GetSelectedSessionMetadata().ID,
+			store.GetSelectedLobbySetUnitMetadata().ID,
+			func(err error) {
+				if err != nil {
+					notification.GetInstance().Push(
+						common.ComposeMessage(
+							translation.GetInstance().GetTranslation("client.networking.start-session-failure"),
+							err.Error()),
+						time.Second*3,
+						common.NotificationErrorTextColor)
 
+					dispatcher.
+						GetInstance().
+						Dispatch(
+							action.NewSetStateResetApplicationAction(
+								value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
+					dispatcher.
+						GetInstance().
+						Dispatch(
+							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+					return
+				}
+
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_TRAVEL_VALUE))
+			})
 	})
 
 	lobby.GetInstance().SetBackCallback(func() {

@@ -158,3 +158,11 @@ type SelectedSessionMetadata struct {
 	ID   int64
 	Name string
 }
+
+// SelectedLobbySetUnitMetadata represents selected lobby set unit metadata.
+type SelectedLobbySetUnitMetadata struct {
+	ID     int64
+	Issuer string
+	Skin   uint64
+	Host   bool
+}

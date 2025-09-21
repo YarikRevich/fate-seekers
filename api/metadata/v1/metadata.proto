@@ -34,8 +34,6 @@ service MetadataService {
     // StartSession performs start session operation by the configured user. Allowed for session host only.
     rpc StartSession(StartSessionRequest) returns (StartSessionResponse) {};
 
-    // TODO: we would listen to session status in the lobby creation screen and switch to session screen when status.
-
     // GetSessionMetadata performs session metadata retrieval request by the configured user.
     rpc GetSessionMetadata(GetSessionMetadataRequest) returns (stream GetSessionMetadataResponse) {};
 
@@ -153,7 +151,6 @@ message StartSessionRequest {
 
 // StartSessionResponse represents start session response.
 message StartSessionResponse {
-
 };
 
 // GetSessionMetadataRequest represents session metadata request.
@@ -175,9 +172,10 @@ message GetLobbySetRequest {
 
 // LobbySetUnit represents lobby set metadata unit.
 message LobbySetUnit {
-    string issuer = 1 [(buf.validate.field).string.uuid = true];
-    uint64 skin = 2;
-    bool host = 3;
+    int64 lobby_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
+    uint64 skin = 3;
+    bool host = 4;
 };
 
 // GetLobbySetResponse represents user create lobby response.
