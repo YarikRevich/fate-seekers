@@ -13,6 +13,7 @@ type SessionEntity struct {
 	Name       string     `gorm:"column:name;not null;unique"`
 	Seed       int64      `gorm:"column:seed;not null"`
 	Issuer     int64      `gorm:"column:issuer;not null"`
+	Started    bool       `gorm:"column:started;not null"`
 	CreatedAt  time.Time  `gorm:"column:created_at;autoCreateTime"`
 	UserEntity UserEntity `gorm:"foreignKey:Issuer;references:ID"`
 }
@@ -20,6 +21,11 @@ type SessionEntity struct {
 // TableName retrieves name of database table.
 func (*SessionEntity) TableName() string {
 	return "sessions"
+}
+
+// TableView retrieves name of database table view.
+func (*SessionEntity) TableView() string {
+	return "SessionEntity"
 }
 
 // BeforeCreate performs sessions cache entity eviction before sessions entity create.
@@ -33,7 +39,44 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 
 	cache.
 		GetInstance().
-		EvictSessions(s.UserEntity.Name)
+		BeginSessionsTransaction()
+
+	cache.
+		GetInstance().
+		EvictSessionsByName(s.Name)
+
+	cache.
+		GetInstance().
+		BeginUserSessionsTransaction()
+
+	cache.
+		GetInstance().
+		EvictUserSessions(s.UserEntity.Name)
+
+	cache.
+		GetInstance().
+		BeginLobbySetTransaction()
+
+	cache.
+		GetInstance().
+		EvictLobbySet(s.ID)
+
+	return nil
+}
+
+// AfterCreate performs sessions cache entity transaction commit after sessions entity create.
+func (s *SessionEntity) AfterCreate(tx *gorm.DB) error {
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
+	cache.
+		GetInstance().
+		CommitUserSessionsTransaction()
+
+	cache.
+		GetInstance().
+		CommitLobbySetTransaction()
 
 	return nil
 }
@@ -41,10 +84,11 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 // LobbyEntity represents lobbies entity.
 type LobbyEntity struct {
 	ID            int64         `gorm:"column:id;primaryKey;auto_increment;not null"`
-	UserID        int64         `gorm:"column:user_id;not null;unique"`
+	UserID        int64         `gorm:"column:user_id;not null"`
 	SessionID     int64         `gorm:"column:session_id;not null"`
 	Skin          int64         `gorm:"column:skin;not null"`
 	Health        int64         `gorm:"column:health;not null"`
+	Active        bool          `gorm:"column:active;not null"`
 	Host          bool          `gorm:"column:host;not null"`
 	Eliminated    bool          `gorm:"column:eliminated;not null"`
 	PositionX     float64       `gorm:"column:position_x;not null"`
@@ -63,7 +107,20 @@ func (*LobbyEntity) TableName() string {
 func (l *LobbyEntity) BeforeCreate(tx *gorm.DB) error {
 	cache.
 		GetInstance().
+		BeginLobbySetTransaction()
+
+	cache.
+		GetInstance().
 		EvictLobbySet(l.SessionID)
+
+	return nil
+}
+
+// AfterCreate performs lobbies cache entity transaction commit after lobbies entity create.
+func (l *LobbyEntity) AfterCreate(tx *gorm.DB) error {
+	cache.
+		GetInstance().
+		CommitLobbySetTransaction()
 
 	return nil
 }
@@ -91,9 +148,11 @@ func (m *MessageEntity) BeforeCreate(tx *gorm.DB) error {
 		return err
 	}
 
-	cache.
-		GetInstance().
-		EvictSessions(m.UserEntity.Name)
+	// cache.GetInstance().EvictUserSessions()
+
+	// cache.
+	// 	GetInstance().
+	// 	Evict(m.UserEntity.Name)
 
 	return nil
 }
@@ -108,6 +167,11 @@ type UserEntity struct {
 // TableName retrieves name of database table.
 func (*UserEntity) TableName() string {
 	return "users"
+}
+
+// TableView retrieves name of database table view.
+func (*UserEntity) TableView() string {
+	return "UserEntity"
 }
 
 // AfterFind performs user cache entity creation after user entity creation.

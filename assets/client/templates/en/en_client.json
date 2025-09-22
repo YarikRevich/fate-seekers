@@ -19,10 +19,6 @@
         "one": "Exit",
         "other": "Exit"
     },
-    "client.settings.sound.fx": {
-        "one": "Sound FX",
-        "other": "Sound FX"
-    },
     "client.settings.sound.music": {
         "one": "Music",
         "other": "Music"
@@ -51,7 +47,7 @@
         "one": "Close",
         "other": "Close"
     },
-    "client.selector.session_name": {
+    "client.selector.session-name": {
         "one": "Session name",
         "other": "Session name"
     },
@@ -63,13 +59,49 @@
         "one": "Session creator",
         "other": "Session creator"
     },
-    "client.creator.session_name": {
+    "client.creator.session-name": {
         "one": "Name",
         "other": "Name"
     },
-    "client.creator.session_seed": {
+    "client.creator.session-seed": {
         "one": "Seed",
         "other": "Seed"
+    },
+    "client.lobby.title": {
+        "one": "Session lobby",
+        "other": "Session lobby"
+    },
+    "client.lobby.selected-player": {
+        "one": "Selected player",
+        "other": "Selected player"
+    },
+    "client.lobby.other-players": {
+        "one": "Other lobby players",
+        "other": "Other Lobby players"
+    },
+    "client.lobby.close": {
+        "one": "Close",
+        "other": "Close"
+    },
+    "client.lobby.start": {
+        "one": "Start",
+        "other": "Start"
+    },
+    "client.lobby.transfering-to-session": {
+        "one": "Transfering you to the planet...",
+        "other": "Transfering you to the planet..."
+    },
+    "client.letter.title": {
+        "one": "Letter",
+        "other": "Letter"
+    },
+    "client.letter.attachment": {
+        "one": "Attachment",
+        "other": "Attachment"
+    },
+    "client.letter.close": {
+        "one": "Close",
+        "other": "Close"
     },
     "client.letterimage.close": {
         "one": "Close",
@@ -135,9 +167,17 @@
         "one": "Unable to connect to a server",
         "other": "Unable to connect to a server"
     },
-    "client.networking.get-sessions-failure": {
-        "one": "Unable to retrieve sessions from a server",
-        "other": "Unable to retrieve sessions from a server"
+    "client.networking.get-user-sessions-failure": {
+        "one": "Unable to retrieve user sessions from a server",
+        "other": "Unable to retrieve user sessions from a server"
+    },
+    "client.networking.get-filtered-sessions-failure": {
+        "one": "Unable to retrieve filtered sessions from a server",
+        "other": "Unable to retrieve filtered sessions from a server"
+    },
+    "client.networking.filtered-session-not-found": {
+        "one": "Provided session was not found",
+        "other": "Provided session was not found"
     },
     "client.networking.remove-session-failure": {
         "one": "Unable to remove selected session",
@@ -147,6 +187,26 @@
         "one": "Unable to create lobby for selected session",
         "other": "Unable to create lobby for selected session"
     },
+    "client.networking.remove-lobby-failure": {
+        "one": "Unable to remove lobby for selected session",
+        "other": "Unable to remove lobby for selected session"
+    },
+    "client.networking.joining-existing-lobby": {
+        "one": "Joining existing lobby for selected session",
+        "other": "Joining existing lobby for selected session"
+    },
+    "client.networking.get-lobby-set-failure": {
+        "one": "Unable to retrieve lobby set from a server",
+        "other": "Unable to retrieve lobby set from a server"
+    },
+    "client.networking.get-session-metadata-failure": {
+        "one": "Unable to retrieve session metadata from a server",
+        "other": "Unable to retrieve session metadata from a server"
+    },
+    "client.networking.start-session-failure": {
+        "one": "Unable to perform session start",
+        "other": "Unable to perform session start"
+    },
     "client.networking.connection-failure": {
         "one": "Connector connect operation failed",
         "other": "Connector connect operation failed"
@@ -154,5 +214,37 @@
     "client.networking.close-failure": {
         "one": "Connector close operation failed",
         "other": "Connector close operation failed"
+    },
+    "client.skin.0.name": {
+        "one": "Ariyan",
+        "other": "Ariyan"
+    },
+    "client.skin.1.name": {
+        "one": "Lior",
+        "other": "Lior"
+    },
+    "client.skin.2.name": {
+        "one": "Demir",
+        "other": "Demir"
+    },
+    "client.skin.3.name": {
+        "one": "Kairos",
+        "other": "Kairos"
+    },
+    "client.skin.4.name": {
+        "one": "Oria",
+        "other": "Oria"
+    },
+    "client.skin.5.name": {
+        "one": "Lunara",
+        "other": "Lunara"
+    },
+    "client.skin.6.name": {
+        "one": "Serena",
+        "other": "Serena"
+    },
+    "client.skin.7.name": {
+        "one": "Vela",
+        "other": "Vela"
     }
 }

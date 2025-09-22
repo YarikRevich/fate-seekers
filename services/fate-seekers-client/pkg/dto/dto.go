@@ -109,6 +109,9 @@ type FXSoundUnit struct {
 
 	// Represents fx sound player.
 	Player *audio.Player
+
+	// Rperensets fx sound interruptable mode.
+	Interruptable bool
 }
 
 // ReducerResult represents result of reducer execution operation.
@@ -139,4 +142,30 @@ type RetrievedSessionMetadata struct {
 	SessionID int64
 	Name      string
 	Seed      uint64
+}
+
+// RetrievedLobbySetMetadata represents retrieved lobby set holder for reducer components.
+type RetrievedLobbySetMetadata struct {
+	Issuer string
+	Skin   uint64
+	Host   bool
+}
+
+// GetFilteredSessionsRequest represents filtered sessions retrieval request.
+type GetFilteredSessionsRequest struct {
+	Name string
+}
+
+// SelectedSessionMetadata represents selected session metadata.
+type SelectedSessionMetadata struct {
+	ID   int64
+	Name string
+}
+
+// SelectedLobbySetUnitMetadata represents selected lobby set unit metadata.
+type SelectedLobbySetUnitMetadata struct {
+	ID     int64
+	Issuer string
+	Skin   uint64
+	Host   bool
 }

@@ -2,6 +2,7 @@ package cache
 
 import (
 	"sync"
+	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
@@ -14,55 +15,137 @@ var (
 	GetInstance = sync.OnceValue[*NetworkingCache](newNetworkingCache)
 )
 
-const (
-	// Represents max amount of users per session.
-	maxSessionUsers = 8
-)
-
-// lobby -> lobby set -> metadata
-//
-
 // NetworkingCache represents networking cache.
 type NetworkingCache struct {
 	// Represents sessions cache instance.
-	sessions *lru.Cache[string, []dto.CacheSessionEntity]
+	sessions *lru.Cache[int64, dto.CacheSessionEntity]
+
+	// Represents mutex sessions related transactions.
+	sessionsMutex sync.Mutex
+
+	// Represents user sessions cache instance.
+	userSessions *lru.Cache[string, []dto.CacheSessionEntity]
+
+	// Represents mutex used for user sessions related transactions.
+	userSessionsMutex sync.Mutex
 
 	// Represents lobby sets cache instance. Value contains issuer names only.
-	lobbySets *lru.Cache[int64, []string]
+	lobbySets *lru.Cache[int64, []dto.CacheLobbySetEntity]
+
+	// Represents mutex used for lobby sets related transactions.
+	lobbySetsMutex sync.Mutex
+
+	// Represents user activity cache instance.
+	userActivity *lru.Cache[string, time.Duration]
 
 	// Represents metadata cache instance.
-	metadata *lru.Cache[string, dto.CacheMetadataEntity]
+	metadata *lru.Cache[string, []*dto.CacheMetadataEntity]
+
+	// Represents mutex used for metadata related transactions.
+	metadataMutex sync.Mutex
 
 	// Represents expirable messages cache, which contains offset for the message table.
 	// If user stops request messages, all the messages would be retrieved.
 	messages *lru.Cache[string, int]
 
+	// Represents mutex used for messages related transactions.
+	messagesMutex sync.Mutex
+
 	// Represents users cache instance.
 	users *lru.Cache[string, int64]
 }
 
-// AddSession adds session cache instance with the provided key and value.
-func (nc *NetworkingCache) AddSessions(key string, value []dto.CacheSessionEntity) {
+// BeginSessionsTransaction begins sessions cache instance transaction.
+func (nc *NetworkingCache) BeginSessionsTransaction() {
+	nc.sessionsMutex.Lock()
+}
+
+// CommitSessionsTransaction commits sessions cache instance transaction.
+func (nc *NetworkingCache) CommitSessionsTransaction() {
+	nc.sessionsMutex.Unlock()
+}
+
+// AddSessions adds session cache instance with the provided key and value.
+func (nc *NetworkingCache) AddSessions(key int64, value dto.CacheSessionEntity) {
 	nc.sessions.Add(key, value)
 }
 
-// GetSession retrieves session cache instance by the provided key.
-func (nc *NetworkingCache) GetSessions(key string) ([]dto.CacheSessionEntity, bool) {
+// GetSessions retrieves session cache instance by the provided key.
+func (nc *NetworkingCache) GetSessions(key int64) (dto.CacheSessionEntity, bool) {
 	return nc.sessions.Get(key)
 }
 
+// GetSessionsMappings retrieves all sessions mapping cache instances.
+func (nc *NetworkingCache) GetSessionsMappings() map[int64]dto.CacheSessionEntity {
+	result := make(map[int64]dto.CacheSessionEntity)
+
+	for _, key := range nc.sessions.Keys() {
+		value, _ := nc.GetSessions(key)
+
+		result[key] = value
+	}
+
+	return result
+}
+
 // EvictSessions evicts sessions cache for the provided key.
-func (nc *NetworkingCache) EvictSessions(key string) {
+func (nc *NetworkingCache) EvictSessions(key int64) {
 	nc.sessions.Remove(key)
 }
 
+// EvictSessionsByName evicts sessions cache for the provided name value.
+func (nc *NetworkingCache) EvictSessionsByName(name string) {
+	for _, key := range nc.sessions.Keys() {
+		value, _ := nc.GetSessions(key)
+
+		if value.Name == name {
+			nc.sessions.Remove(key)
+		}
+	}
+}
+
+// BeginUserSessionsTransaction begins user sessions cache instance transaction.
+func (nc *NetworkingCache) BeginUserSessionsTransaction() {
+	nc.userSessionsMutex.Lock()
+}
+
+// CommitUserSessionsTransaction commits user sessions cache instance transaction.
+func (nc *NetworkingCache) CommitUserSessionsTransaction() {
+	nc.userSessionsMutex.Unlock()
+}
+
+// AddUserSessions adds user session cache instance with the provided key and value.
+func (nc *NetworkingCache) AddUserSessions(key string, value []dto.CacheSessionEntity) {
+	nc.userSessions.Add(key, value)
+}
+
+// GetUserSessions retrieves user session cache instance by the provided key.
+func (nc *NetworkingCache) GetUserSessions(key string) ([]dto.CacheSessionEntity, bool) {
+	return nc.userSessions.Get(key)
+}
+
+// EvictUserSessions evicts user sessions cache for the provided key.
+func (nc *NetworkingCache) EvictUserSessions(key string) {
+	nc.userSessions.Remove(key)
+}
+
+// BeginLobbySetTransaction begins lobby set cache instance transaction.
+func (nc *NetworkingCache) BeginLobbySetTransaction() {
+	nc.lobbySetsMutex.Lock()
+}
+
+// CommitLobbySetTransaction commits lobby set cache instance transaction.
+func (nc *NetworkingCache) CommitLobbySetTransaction() {
+	nc.lobbySetsMutex.Unlock()
+}
+
 // AddLobbySet adds lobby set cache instance with the provided key and value.
-func (nc *NetworkingCache) AddLobbySet(key int64, value []string) {
+func (nc *NetworkingCache) AddLobbySet(key int64, value []dto.CacheLobbySetEntity) {
 	nc.lobbySets.Add(key, value)
 }
 
 // GetLobbies retrieves lobby cache instance by the provided key.
-func (nc *NetworkingCache) GetLobbySet(key int64) ([]string, bool) {
+func (nc *NetworkingCache) GetLobbySet(key int64) ([]dto.CacheLobbySetEntity, bool) {
 	return nc.lobbySets.Get(key)
 }
 
@@ -71,19 +154,39 @@ func (nc *NetworkingCache) EvictLobbySet(key int64) {
 	nc.lobbySets.Remove(key)
 }
 
+// AddUserActivity adds user activity cache instance with the provided key and value.
+func (nc *NetworkingCache) AddUserActivity(key string, value time.Duration) {
+	nc.userActivity.Add(key, value)
+}
+
+// GetUserActivity retrieves user activity cache instance by the provided key.
+func (nc *NetworkingCache) GetUserActivity(key string) (time.Duration, bool) {
+	return nc.userActivity.Get(key)
+}
+
+// BeginMetadataTransaction begins metadata cache instance transaction.
+func (nc *NetworkingCache) BeginMetadataTransaction() {
+	nc.metadataMutex.Lock()
+}
+
+// CommitMetadataTransaction commits metadata cache instance transaction.
+func (nc *NetworkingCache) CommitMetadataTransaction() {
+	nc.metadataMutex.Unlock()
+}
+
 // AddMetadata adds metadata cache instance with the provided key and value.
-func (nc *NetworkingCache) AddMetadata(key string, value dto.CacheMetadataEntity) {
+func (nc *NetworkingCache) AddMetadata(key string, value []*dto.CacheMetadataEntity) {
 	nc.metadata.Add(key, value)
 }
 
 // GetMetadata retrieves metadata cache instance by the provided key.
-func (nc *NetworkingCache) GetMetadata(key string) (dto.CacheMetadataEntity, bool) {
+func (nc *NetworkingCache) GetMetadata(key string) ([]*dto.CacheMetadataEntity, bool) {
 	return nc.metadata.Get(key)
 }
 
 // GetMetadataMappings retrieves all metadata mapping cache instances.
-func (nc *NetworkingCache) GetMetadataMappings() map[string]dto.CacheMetadataEntity {
-	result := make(map[string]dto.CacheMetadataEntity)
+func (nc *NetworkingCache) GetMetadataMappings() map[string][]*dto.CacheMetadataEntity {
+	result := make(map[string][]*dto.CacheMetadataEntity)
 
 	for _, key := range nc.metadata.Keys() {
 		value, _ := nc.GetMetadata(key)
@@ -99,6 +202,16 @@ func (nc *NetworkingCache) EvictMetadata(key string) {
 	nc.metadata.Remove(key)
 }
 
+// BeginMessagesTransaction begins messages cache instance transaction.
+func (nc *NetworkingCache) BeginMessagesTransaction() {
+	nc.messagesMutex.Lock()
+}
+
+// CommitMessagesTransaction commits messages cache instance transaction.
+func (nc *NetworkingCache) CommitMessagesTransaction() {
+	nc.messagesMutex.Unlock()
+}
+
 // AddMessage retrieves messages cache instance.
 func (nc *NetworkingCache) AddMessages(key string, value int) {
 	nc.messages.Add(key, value)
@@ -107,6 +220,11 @@ func (nc *NetworkingCache) AddMessages(key string, value int) {
 // GetMessage retrieves messages cache instance by the provided key.
 func (nc *NetworkingCache) GetMessage(key string) (int, bool) {
 	return nc.messages.Get(key)
+}
+
+// EvictMessages evicts messages cache for the provided key.
+func (nc *NetworkingCache) EvictMessages(key string) {
+	nc.messages.Remove(key)
 }
 
 // AddUser adds users cache instance with the provided key and value.
@@ -121,18 +239,29 @@ func (nc *NetworkingCache) GetUsers(key string) (int64, bool) {
 
 // newNetworkingCache initializes NetworkingCache.
 func newNetworkingCache() *NetworkingCache {
-	sessions, err := lru.New[string, []dto.CacheSessionEntity](config.GetOperationMaxSessionsAmount())
+	sessions, err := lru.New[int64, dto.CacheSessionEntity](config.GetOperationMaxSessionsAmount())
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
-	lobbySets, err := lru.New[int64, []string](config.GetOperationMaxSessionsAmount())
+	userSessions, err := lru.New[string, []dto.CacheSessionEntity](config.GetOperationMaxSessionsAmount())
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
-	metadata, err := lru.New[string, dto.CacheMetadataEntity](
-		config.GetOperationMaxSessionsAmount() * config.GetOperationMaxSessionsAmount())
+	lobbySets, err := lru.New[int64, []dto.CacheLobbySetEntity](config.GetOperationMaxSessionsAmount())
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
+	userActivity, err := lru.New[string, time.Duration](
+		config.GetOperationMaxSessionsAmount() * config.MAX_SESSION_USERS)
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
+	metadata, err := lru.New[string, []*dto.CacheMetadataEntity](
+		config.GetOperationMaxSessionsAmount() * config.MAX_SESSION_USERS)
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
 	}
@@ -142,16 +271,18 @@ func newNetworkingCache() *NetworkingCache {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
-	users, err := lru.New[string, int64](config.GetOperationMaxSessionsAmount() * maxSessionUsers)
+	users, err := lru.New[string, int64](config.GetOperationMaxSessionsAmount() * config.MAX_SESSION_USERS)
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
 	return &NetworkingCache{
-		sessions:  sessions,
-		lobbySets: lobbySets,
-		metadata:  metadata,
-		messages:  messages,
-		users:     users,
+		sessions:     sessions,
+		userSessions: userSessions,
+		lobbySets:    lobbySets,
+		userActivity: userActivity,
+		metadata:     metadata,
+		messages:     messages,
+		users:        users,
 	}
 }

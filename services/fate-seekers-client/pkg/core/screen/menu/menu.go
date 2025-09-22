@@ -19,6 +19,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/encryptionkey"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -52,6 +53,15 @@ func (ms *MenuScreen) HandleInput() error {
 	if store.GetApplicationStateReset() == value.STATE_RESET_APPLICATION_FALSE_VALUE {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetStateResetApplicationAction(value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetRetrievedSessionsMetadata([]dto.RetrievedSessionMetadata{}))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetRetrievedLobbySetMetadata([]dto.RetrievedLobbySetMetadata{}))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSelectedSessionMetadata(nil))
 	}
 
 	if !ms.transparentTransitionEffect.Done() {
@@ -170,7 +180,9 @@ func newMenuScreen() screen.Screen {
 											return
 										}
 
-										ping.Run()
+										ping.GetInstance().Clean(func() {
+											ping.GetInstance().Run()
+										})
 
 										handler.PerformCreateUserIfNotExists(func(err3 error) {
 											if err3 != nil {
@@ -180,7 +192,7 @@ func newMenuScreen() screen.Screen {
 												notification.GetInstance().Push(
 													common.ComposeMessage(
 														translation.GetInstance().GetTranslation("client.networking.ping-connection-failure"),
-														err2.Error()),
+														err3.Error()),
 													time.Second*2,
 													common.NotificationErrorTextColor)
 
@@ -209,8 +221,8 @@ func newMenuScreen() screen.Screen {
 									dispatcher.GetInstance().Dispatch(
 										action.NewIncrementLoadingApplicationAction())
 
-									connector.GetInstance().Close(func(err error) {
-										if err != nil {
+									connector.GetInstance().Close(func(err1 error) {
+										if err1 != nil {
 											notification.GetInstance().Push(
 												translation.GetInstance().GetTranslation("client.networking.close-failure"),
 												time.Second*2,
@@ -237,6 +249,8 @@ func newMenuScreen() screen.Screen {
 						handler.PerformPingConnection(func(err error) {
 							dispatcher.GetInstance().Dispatch(
 								action.NewDecrementLoadingApplicationAction())
+
+							transparentTransitionEffect.Reset()
 
 							dispatcher.GetInstance().Dispatch(
 								action.NewSetPingConnectionStartedNetworkingAction(value.PING_CONNECTION_STARTED_NETWORKING_FALSE_VALUE))

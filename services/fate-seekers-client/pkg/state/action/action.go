@@ -27,13 +27,15 @@ const (
 
 // Describes all the available state actions for networking reducer.
 const (
-	SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION   = "SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION"
-	SET_PING_CONNECTION_STARTED_NETWORKING_ACTION   = "SET_PING_CONNECTION_STARTED_NETWORKING_ACTION"
-	SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION = "SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION"
-	SET_SESSION_CREATION_STARTED_NETWORKING_ACTION  = "SET_SESSION_CREATION_STARTED_NETWORKING_ACTION"
-	SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION   = "SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION"
-	SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION    = "SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION"
-	SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION     = "SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION"
+	SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION            = "SET_ENTRY_HANDSHAKE_STARTED_NETWORKING_ACTION"
+	SET_PING_CONNECTION_STARTED_NETWORKING_ACTION            = "SET_PING_CONNECTION_STARTED_NETWORKING_ACTION"
+	SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION          = "SET_SESSION_RETRIEVAL_STARTED_NETWORKING_ACTION"
+	SET_SESSION_CREATION_STARTED_NETWORKING_ACTION           = "SET_SESSION_CREATION_STARTED_NETWORKING_ACTION"
+	SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION            = "SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION"
+	SET_LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_ACTION        = "SET_LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_ACTION"
+	SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION             = "SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION"
+	SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION              = "SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION"
+	SET_SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION = "SET_SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION"
 )
 
 // Describes all the available state actions for letter reducer.
@@ -66,7 +68,6 @@ const (
 
 // Describes all the available state actions for sound reducer.
 const (
-	SET_FX_UPDATED_SOUND_ACTION    = "SET_FX_UPDATED_SOUND_ACTION"
 	SET_MUSIC_UPDATED_SOUND_ACTION = "SET_MUSIC_UPDATED_SOUND_ACTION"
 )
 
@@ -78,8 +79,10 @@ const (
 
 // Describes all the available state actions for metadata reducer.
 const (
-	SET_RETRIEVED_SESSIONS_METADATA_ACTION = "SET_RETRIEVED_SESSIONS_METADATA_ACTION"
-	SET_SELECTED_SESSION_METADATA_ACTION   = "SET_SELECTED_SESSION_METADATA_ACTION"
+	SET_RETRIEVED_SESSIONS_METADATA_ACTION      = "SET_RETRIEVED_SESSIONS_METADATA_ACTION"
+	SET_SELECTED_SESSION_METADATA_ACTION        = "SET_SELECTED_SESSION_METADATA_ACTION"
+	SET_RETRIEVED_LOBBY_SET_METADATA_ACTION     = "SET_RETRIEVED_LOBBY_SET_METADATA_ACTION"
+	SET_SELECTED_LOBBY_SET_UNIT_METADATA_ACTION = "SET_SELECTED_LOBBY_SET_UNIT_METADATA_ACTION"
 )
 
 // NewSetActiveScreenAction creates new set active screen action.
@@ -184,6 +187,14 @@ func NewSetSessionRemovalStartedNetworkingAction(value string) godux.Action {
 	}
 }
 
+// NewSetLobbySetRetrievalStartedNetworkingAction creates new lobby set retrieval started networking action.
+func NewSetLobbySetRetrievalStartedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
 // NewSetLobbyCreationStartedNetworkingAction creates new set lobby creation started networking action.
 func NewSetLobbyCreationStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
@@ -196,6 +207,13 @@ func NewSetLobbyCreationStartedNetworkingAction(value string) godux.Action {
 func NewSetLobbyRemovalStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+func NewSetSessionMetadataRetrievalStartedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION,
 		Value: value,
 	}
 }
@@ -296,14 +314,6 @@ func NewSetEventEnding(value string) godux.Action {
 	}
 }
 
-// NewSetSoundFXUpdated creates new set sound fx updated action.
-func NewSetSoundFXUpdated(value string) godux.Action {
-	return godux.Action{
-		Type:  SET_FX_UPDATED_SOUND_ACTION,
-		Value: value,
-	}
-}
-
 // NewSetSoundMusicUpdated creates new set sound music updated action.
 func NewSetSoundMusicUpdated(value string) godux.Action {
 	return godux.Action{
@@ -337,9 +347,25 @@ func NewSetRetrievedSessionsMetadata(value []dto.RetrievedSessionMetadata) godux
 }
 
 // NewSetSelectedSessionMetadata creates new set selected session metadata action.
-func NewSetSelectedSessionMetadata(value string) godux.Action {
+func NewSetSelectedSessionMetadata(value *dto.SelectedSessionMetadata) godux.Action {
 	return godux.Action{
 		Type:  SET_SELECTED_SESSION_METADATA_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetRetrievedLobbySetMetadata creates new set retrieved lobby set metadata action.
+func NewSetRetrievedLobbySetMetadata(value []dto.RetrievedLobbySetMetadata) godux.Action {
+	return godux.Action{
+		Type:  SET_RETRIEVED_LOBBY_SET_METADATA_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetSelectedLobbySetUnitMetadata creates new set selected lobby set unit metadata action.
+func NewSetSelectedLobbySetUnitMetadata(value *dto.SelectedLobbySetUnitMetadata) godux.Action {
+	return godux.Action{
+		Type:  SET_SELECTED_LOBBY_SET_UNIT_METADATA_ACTION,
 		Value: value,
 	}
 }

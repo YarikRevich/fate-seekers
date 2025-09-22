@@ -5,7 +5,9 @@ import (
 	"errors"
 
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/connector"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -15,7 +17,8 @@ import (
 )
 
 var (
-	ErrConnectionLost = errors.New("err happened connection with server lost")
+	ErrLobbyAlreadyExists          = errors.New("err happened lobby already exists")
+	ErrFilteredSessionDoesNotExist = errors.New("err happened filtered session does not exist")
 )
 
 // PerformPingConnection performs ping connection request.
@@ -32,7 +35,7 @@ func PerformPingConnection(callback func(err error)) {
 
 		if err != nil {
 			if status.Code(err) == codes.Unavailable {
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}
@@ -67,10 +70,16 @@ func PerformCreateUserIfNotExists(callback func(err error)) {
 
 		if err != nil {
 			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}
@@ -91,24 +100,80 @@ func PerformCreateUserIfNotExists(callback func(err error)) {
 	}()
 }
 
-// PerformGetSessions performs sessions retrieval request.
-func PerformGetSessions(callback func(response *metadatav1.GetSessionsResponse, err error)) {
+// PerformGetUserSessions performs user sessions retrieval request.
+func PerformGetUserSessions(callback func(response *metadatav1.GetUserSessionsResponse, err error)) {
 	go func() {
 		response, err := connector.
 			GetInstance().
 			GetClient().
-			GetSessions(
+			GetUserSessions(
 				context.Background(),
-				&metadatav1.GetSessionsRequest{
+				&metadatav1.GetUserSessionsRequest{
 					Issuer: store.GetRepositoryUUID(),
 				})
 
 		if err != nil {
 			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(nil, ErrConnectionLost)
+				callback(nil, common.ErrConnectionLost)
+
+				return
+			}
+
+			errRaw, ok := status.FromError(err)
+			if !ok {
+				callback(nil, err)
+
+				return
+			}
+
+			callback(nil, errors.New(errRaw.Message()))
+
+			return
+		}
+
+		callback(response, nil)
+	}()
+}
+
+// PerformGetFilteredSessions performs filtered sessions retrieval request.
+func PerformGetFilteredSessions(request dto.GetFilteredSessionsRequest, callback func(response *metadatav1.GetFilteredSessionResponse, err error)) {
+	go func() {
+		response, err := connector.
+			GetInstance().
+			GetClient().
+			GetFilteredSession(
+				context.Background(),
+				&metadatav1.GetFilteredSessionRequest{
+					Name: request.Name,
+				})
+
+		if err != nil {
+			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+				callback(nil, common.ErrConnectionLost)
+
+				return
+			}
+
+			if status.Code(err) == codes.NotFound {
+				callback(nil, ErrFilteredSessionDoesNotExist)
 
 				return
 			}
@@ -145,10 +210,16 @@ func PerformCreateSession(name string, seed uint64, callback func(err error)) {
 
 		if err != nil {
 			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}
@@ -184,10 +255,16 @@ func PerformRemoveSession(sessionID int64, callback func(err error)) {
 
 		if err != nil {
 			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}
@@ -208,42 +285,49 @@ func PerformRemoveSession(sessionID int64, callback func(err error)) {
 	}()
 }
 
-// PerformGetLobbySet performs lobby set retrieval request.
-func PerformGetLobbySet(sessionID int64, callback func(response *metadatav1.GetLobbySetResponse, err error)) {
+// PerformStartSession performs session start request.
+func PerformStartSession(sessionID, lobbyID int64, callback func(err error)) {
 	go func() {
-		response, err := connector.
+		_, err := connector.
 			GetInstance().
 			GetClient().
-			GetLobbySet(
+			StartSession(
 				context.Background(),
-				&metadatav1.GetLobbySetRequest{
-					Issuer:    store.GetRepositoryUUID(),
+				&metadatav1.StartSessionRequest{
 					SessionId: sessionID,
+					LobbyId:   lobbyID,
+					Issuer:    store.GetRepositoryUUID(),
 				})
 
 		if err != nil {
 			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(nil, ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}
 
 			errRaw, ok := status.FromError(err)
 			if !ok {
-				callback(nil, err)
+				callback(err)
 
 				return
 			}
 
-			callback(nil, errors.New(errRaw.Message()))
+			callback(errors.New(errRaw.Message()))
 
 			return
 		}
 
-		callback(response, nil)
+		callback(nil)
 	}()
 }
 
@@ -262,10 +346,22 @@ func PerformCreateLobby(sessionID int64, callback func(err error)) {
 
 		if err != nil {
 			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
+
+				return
+			}
+
+			if status.Code(err) == codes.AlreadyExists {
+				callback(ErrLobbyAlreadyExists)
 
 				return
 			}
@@ -287,7 +383,7 @@ func PerformCreateLobby(sessionID int64, callback func(err error)) {
 }
 
 // PerformRemoveLobby performs lobby removal request.
-func PerformRemoveLobby(callback func(err error)) {
+func PerformRemoveLobby(sessionID int64, callback func(err error)) {
 	go func() {
 		_, err := connector.
 			GetInstance().
@@ -295,15 +391,22 @@ func PerformRemoveLobby(callback func(err error)) {
 			RemoveLobby(
 				context.Background(),
 				&metadatav1.RemoveLobbyRequest{
-					Issuer: store.GetRepositoryUUID(),
+					SessionId: sessionID,
+					Issuer:    store.GetRepositoryUUID(),
 				})
 
 		if err != nil {
 			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
-				callback(ErrConnectionLost)
+				callback(common.ErrConnectionLost)
 
 				return
 			}

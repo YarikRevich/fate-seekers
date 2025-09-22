@@ -10,8 +10,10 @@ import (
 
 // Describes all the available metadata reducer store states.
 const (
-	RETRIEVED_SESSIONS_METADATA_STATE = "retrieved_sessions"
-	SELECTED_SESSION_METADATA_STATE   = "selected_session"
+	RETRIEVED_SESSIONS_METADATA_STATE      = "retrieved_sessions"
+	SELECTED_SESSION_METADATA_STATE        = "selected_session"
+	RETRIEVED_LOBBY_SET_METADATA_STATE     = "retrieved_lobby_set"
+	SELECTED_LOBBY_SET_UNIT_METADATA_STATE = "selected_lobby_set_unit"
 )
 
 // MetadataStateReducer represents reducer used for metadata state management.
@@ -25,6 +27,10 @@ func (msr *MetadataStateReducer) Init() {
 		RETRIEVED_SESSIONS_METADATA_STATE, value.RETRIEVED_SESSIONS_METADATA_EMPTY_VALUE)
 	msr.store.SetState(
 		SELECTED_SESSION_METADATA_STATE, value.SELECTED_SESSION_METADATA_EMPTY_VALUE)
+	msr.store.SetState(
+		RETRIEVED_LOBBY_SET_METADATA_STATE, value.RETRIEVED_LOBBY_SET_METADATA_EMPTY_VALUE)
+	msr.store.SetState(
+		SELECTED_LOBBY_SET_UNIT_METADATA_STATE, value.SELECTED_LOBBY_SET_UNIT_METADATA_EMPTY_VALUE)
 }
 
 func (msr *MetadataStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -39,6 +45,16 @@ func (msr *MetadataStateReducer) GetProcessor() func(value godux.Action) interfa
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{
 					Key: SELECTED_SESSION_METADATA_STATE, Value: value.Value})
+
+		case action.SET_RETRIEVED_LOBBY_SET_METADATA_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: RETRIEVED_LOBBY_SET_METADATA_STATE, Value: value.Value})
+
+		case action.SET_SELECTED_LOBBY_SET_UNIT_METADATA_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: SELECTED_LOBBY_SET_UNIT_METADATA_STATE, Value: value.Value})
 
 		default:
 			return nil

@@ -19,10 +19,6 @@
         "one": "Вийти",
         "other": "Вийти"
     },
-    "client.settings.sound.fx": {
-        "one": "Гучність ефектів",
-        "other": "Гучність ефектів"
-    },
     "client.settings.sound.music": {
         "one": "Гучність музики",
         "other": "Гучність музики"
@@ -51,7 +47,7 @@
         "one": "Закрити",
         "other": "Закрити"
     },
-    "client.selector.session_name": {
+    "client.selector.session-name": {
         "one": "Назва сесії",
         "other": "Назва сесії"
     },
@@ -63,13 +59,49 @@
         "one": "Створення сесії",
         "other": "Створення сесії"
     },
-    "client.creator.session_name": {
+    "client.creator.session-name": {
         "one": "Назва",
         "other": "Назва"
     },
-    "client.creator.session_seed": {
+    "client.creator.session-seed": {
         "one": "Сід",
         "other": "Сід"
+    },
+    "client.lobby.title": {
+        "one": "Лобі сесії",
+        "other": "Лобі сесії"
+    },
+    "client.lobby.selected-player": {
+        "one": "Вибраний гравець",
+        "other": "Вибраний гравець"
+    },
+    "client.lobby.other-players": {
+        "one": "Інші гравці у лобі",
+        "other": "Інші гравці у лобі"
+    },
+    "client.lobby.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
+    "client.lobby.start": {
+        "one": "Почати",
+        "other": "Почати"
+    },
+    "client.lobby.transfering-to-session": {
+        "one": "Переносимо тебе на планету...",
+        "other": "Переносимо тебе на планету..."
+    },
+    "client.letter.title": {
+        "one": "Лист",
+        "other": "Лист"
+    },
+    "client.letter.attachment": {
+        "one": "Додаток",
+        "other": "Додаток"
+    },
+    "client.letter.close": {
+        "one": "Закрити",
+        "other": "Закрити"
     },
     "client.letterimage.close": {
         "one": "Закрити",
@@ -127,9 +159,17 @@
         "one": "Неможливо підʼєднатися до сервера",
         "other": "Неможливо підʼєднатися до сервера"
     },
-    "client.networking.get-sessions-failure": {
-        "one": "Неможливо отримати список сесій від сервера",
-        "other": "Неможливо отримати список сесій від сервера"
+    "client.networking.get-user-sessions-failure": {
+        "one": "Неможливо отримати список сесій користувача від сервера",
+        "other": "Неможливо отримати список сесій користувача від сервера"
+    },
+    "client.networking.get-filtered-sessions-failure": {
+        "one": "Неможливо отримати список фільтрованих сесій від сервера",
+        "other": "Неможливо отримати список фільтрованих сесій від сервера"
+    },
+    "client.networking.filtered-session-not-found": {
+        "one": "Надана сесія не була знайдена",
+        "other": "Надана сесія не була знайдена"
     },
     "client.networking.remove-session-failure": {
         "one": "Неможливо видалити вибрану сесію",
@@ -139,6 +179,26 @@
         "one": "Неможливо створити лобі для вибраної сесії",
         "other": "Неможливо створити лобі для вибраної сесії"
     },
+    "client.networking.remove-lobby-failure": {
+        "one": "Неможливо видалити лобі для вибраної сесії",
+        "other": "Неможливо видалити лобі для вибраної сесії"
+    },
+    "client.networking.joining-existing-lobby": {
+        "one": "Доєднуюся до існуючого лобі для вибраної сесії",
+        "other": "Доєднуюся до існуючого лобі для вибраної сесії"
+    },
+    "client.networking.get-lobby-set-failure": {
+        "one": "Неможливо отримати лобі сесії від сервера",
+        "other": "Неможливо отримати лобі сесії від сервера"
+    },
+    "client.networking.get-session-metadata-failure": {
+        "one": "Неможливо отримати метадані сесії від сервера",
+        "other": "Неможливо отримати метадані сесії від сервера"
+    },
+    "client.networking.start-session-failure": {
+        "one": "Неможливо розпочати старт сесії",
+        "other": "Неможливо розпочати старт сесії"
+    },
     "client.networking.connection-failure": {
         "one": "Зʼєднання конектора не вдалося встановити",
         "other": "Зʼєднання конектора не вдалося встановити"
@@ -146,5 +206,37 @@
     "client.networking.close-failure": {
         "one": "Зʼєднання конектора не вдалося перервати",
         "other": "Зʼєднання конектора не вдалося перервати"
+    },
+    "client.skin.0.name": {
+        "one": "Аріян",
+        "other": "Аріян"
+    },
+    "client.skin.1.name": {
+        "one": "Ліор",
+        "other": "Ліор"
+    },
+    "client.skin.2.name": {
+        "one": "Демір",
+        "other": "Демір"
+    },
+    "client.skin.3.name": {
+        "one": "Кайрос",
+        "other": "Кайрос"
+    },
+    "client.skin.4.name": {
+        "one": "Орія",
+        "other": "Орія"
+    },
+    "client.skin.5.name": {
+        "one": "Лунара",
+        "other": "Лунара"
+    },
+    "client.skin.6.name": {
+        "one": "Серена",
+        "other": "Серена"
+    },
+    "client.skin.7.name": {
+        "one": "Вела",
+        "other": "Вела"
     }
 }

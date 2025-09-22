@@ -19,6 +19,10 @@
         "one": "Language",
         "other": "Language"
     },
+    "shared.settings.sound.fx": {
+        "one": "Sound FX",
+        "other": "Sound FX"
+    },
     "shared.settings.language.english": {
         "one": "English",
         "other": "English"

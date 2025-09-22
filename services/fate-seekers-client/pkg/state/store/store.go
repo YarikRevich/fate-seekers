@@ -108,6 +108,13 @@ func GetSessionRemovalStartedNetworking() string {
 	return instance.GetState(networking.SESSION_REMOVAL_STARTED_NETWORKING_STATE).(string)
 }
 
+// GetLobbySetRetrievalStartedNetworking retrieves lobby set retrieval started networking state value.
+func GetLobbySetRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
 // GetLobbyCreationStartedNetworking retrieves lobby creation started networking state value.
 func GetLobbyCreationStartedNetworking() string {
 	instance := GetInstance()
@@ -120,6 +127,13 @@ func GetLobbyRemovalStartedNetworking() string {
 	instance := GetInstance()
 
 	return instance.GetState(networking.LOBBY_REMOVAL_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetSessionMetadataRetrievalStartedNetworking retrieves session metadata retrieval started networking state value.
+func GetSessionMetadataRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
 }
 
 // GetLetterUpdated retrieves letter updated state value.
@@ -235,10 +249,24 @@ func GetRetrievedSessionsMetadata() []dto.RetrievedSessionMetadata {
 }
 
 // GetSelectedSessionMetadata retrieves selected session metadata state value.
-func GetSelectedSessionMetadata() string {
+func GetSelectedSessionMetadata() *dto.SelectedSessionMetadata {
 	instance := GetInstance()
 
-	return instance.GetState(metadata.SELECTED_SESSION_METADATA_STATE).(string)
+	return instance.GetState(metadata.SELECTED_SESSION_METADATA_STATE).(*dto.SelectedSessionMetadata)
+}
+
+// GetRetrievedLobbySetMetadata retrieves retrieved lobby set metadata state value.
+func GetRetrievedLobbySetMetadata() []dto.RetrievedLobbySetMetadata {
+	instance := GetInstance()
+
+	return instance.GetState(metadata.RETRIEVED_LOBBY_SET_METADATA_STATE).([]dto.RetrievedLobbySetMetadata)
+}
+
+// GetSelectedLobbySetUnitMetadata retrieves selected lobby set unit metadata state value.
+func GetSelectedLobbySetUnitMetadata() *dto.SelectedLobbySetUnitMetadata {
+	instance := GetInstance()
+
+	return instance.GetState(metadata.SELECTED_LOBBY_SET_UNIT_METADATA_STATE).(*dto.SelectedLobbySetUnitMetadata)
 }
 
 // newStore creates new instance of application store.

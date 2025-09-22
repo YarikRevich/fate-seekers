@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/particle"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/particle/loadingstars"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/shader/event/toxicrain"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
@@ -121,9 +119,6 @@ type SessionScreen struct {
 	// Represents event world view.
 	eventWorld *ebiten.Image
 
-	// Represents session loading stars particle effect.
-	loadingStarsParticleEffect particle.ParticleEffect
-
 	// Represents session toxic rain event shader effect.
 	toxicRainEventShaderEffect *toxicrain.ToxicRainEventEffect
 }
@@ -165,14 +160,6 @@ func (ss *SessionScreen) HandleInput() error {
 	}
 
 	ss.ui.Update()
-
-	if !ss.loadingStarsParticleEffect.Done() {
-		if !ss.loadingStarsParticleEffect.OnEnd() {
-			ss.loadingStarsParticleEffect.Update()
-		} else {
-			ss.loadingStarsParticleEffect.Clean()
-		}
-	}
 
 	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
 		if store.GetEventStarted() == value.EVENT_STARTED_FALSE_VALUE {
@@ -235,10 +222,6 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 		ss.eventWorld.Clear()
 	}
 
-	if !ss.loadingStarsParticleEffect.Done() {
-		ss.loadingStarsParticleEffect.Draw(screen)
-	}
-
 	ss.ui.Draw(ss.world)
 
 	screen.DrawImage(ss.world, &ebiten.DrawImageOptions{
@@ -273,7 +256,6 @@ func newSessionScreen() screen.Screen {
 			false, 0, 10, 0.5, time.Millisecond*200),
 		world:                      ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		eventWorld:                 ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
-		loadingStarsParticleEffect: loadingstars.NewStarsParticleEffect(),
 		toxicRainEventShaderEffect: toxicrain.NewToxicRainEventEffect(),
 	}
 }

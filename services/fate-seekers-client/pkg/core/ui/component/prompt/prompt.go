@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
@@ -160,6 +161,8 @@ func newPromptComponent() *PromptComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.submitCallback()
 		}),
 	))
@@ -187,6 +190,8 @@ func newPromptComponent() *PromptComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.closeCallback()
 		}),
 	))

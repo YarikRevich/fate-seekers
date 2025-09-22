@@ -140,16 +140,18 @@ func newMenuScreen() screen.Screen {
 
 					dispatcher.GetInstance().Dispatch(
 						action.NewSetListenerStartedNetworkingAction(value.LISTENER_STARTED_NETWORKING_STATE_FALSE_VALUE))
-				} else {
-					menu.GetInstance().DisableStartButton()
 
-					menu.GetInstance().EnableStopButton()
-
-					notification.GetInstance().Push(
-						translation.GetInstance().GetTranslation("server.networking.start-success"),
-						time.Second*3,
-						common.NotificationInfoTextColor)
+					return
 				}
+
+				notification.GetInstance().Push(
+					translation.GetInstance().GetTranslation("server.networking.start-success"),
+					time.Second*3,
+					common.NotificationInfoTextColor)
+
+				menu.GetInstance().DisableStartButton()
+
+				menu.GetInstance().EnableStopButton()
 			})
 		}
 	})
@@ -191,11 +193,10 @@ func newMenuScreen() screen.Screen {
 	})
 
 	menu.GetInstance().SetMonitoringCallback(func() {
+		transparentTransitionEffect.Reset()
+
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MONITORING_VALUE))
-		// monitoringmanager.GetInstance().Deploy(func(err error) {
-
-		// })
 	})
 
 	menu.GetInstance().SetSettingsCallback(func() {

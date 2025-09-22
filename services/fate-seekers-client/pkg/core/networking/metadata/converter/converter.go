@@ -5,10 +5,10 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 )
 
-// ConvertGetSessionsResponseToRetrievedSessionsMetadata converts provided metadatav1.GetSessionsResponse
+// ConvertGetUserSessionsResponseToRetrievedSessionsMetadata converts provided metadatav1.GetSessionsResponse
 // instance to an array of dto.RetrievedSessionMetadata instances.
-func ConvertGetSessionsResponseToRetrievedSessionsMetadata(
-	input *metadatav1.GetSessionsResponse) []dto.RetrievedSessionMetadata {
+func ConvertGetUserSessionsResponseToRetrievedSessionsMetadata(
+	input *metadatav1.GetUserSessionsResponse) []dto.RetrievedSessionMetadata {
 	var output []dto.RetrievedSessionMetadata
 
 	for _, session := range input.GetSessions() {
@@ -22,14 +22,44 @@ func ConvertGetSessionsResponseToRetrievedSessionsMetadata(
 	return output
 }
 
-// ConvertGetSessionsResponseToListEntries converts provided metadatav1.GetSessionsResponse instance
+// ConvertGetUserSessionsResponseToListEntries converts provided metadatav1.GetSessionsResponse instance
 // to an array of list entries used by UI component.
-func ConvertGetSessionsResponseToListEntries(
-	input *metadatav1.GetSessionsResponse) []interface{} {
+func ConvertGetUserSessionsResponseToListEntries(
+	input *metadatav1.GetUserSessionsResponse) []interface{} {
 	var output []interface{}
 
 	for _, session := range input.GetSessions() {
 		output = append(output, session.Name)
+	}
+
+	return output
+}
+
+// ConvertGetLobbySetResponseToRetrievedLobbySetMetadata converts provided metadatav1.GetLobbySetResponse
+// instance to an array of dto.RetrievedLobbySetMetadata instances.
+func ConvertGetLobbySetResponseToRetrievedLobbySetMetadata(
+	input *metadatav1.GetLobbySetResponse) []dto.RetrievedLobbySetMetadata {
+	var output []dto.RetrievedLobbySetMetadata
+
+	for _, lobby := range input.GetLobbySet() {
+		output = append(output, dto.RetrievedLobbySetMetadata{
+			Issuer: lobby.GetIssuer(),
+			Skin:   lobby.GetSkin(),
+			Host:   lobby.GetHost(),
+		})
+	}
+
+	return output
+}
+
+// ConvertGetLobbySetResponseToListEntries converts provided metadatav1.GetLobbySetResponse instance
+// to an array of list entries used by UI component.
+func ConvertGetLobbySetResponseToListEntries(
+	input []*metadatav1.LobbySetUnit) []interface{} {
+	var output []interface{}
+
+	for _, lobby := range input {
+		output = append(output, lobby.Skin)
 	}
 
 	return output

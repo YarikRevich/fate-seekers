@@ -33,6 +33,7 @@ var (
 
 	settingsMonitoringGrafanaName, settingsMonitoringPrometheusName string
 
+	settingsSoundFX  int
 	settingsLanguage string
 
 	settingsInitialLanguage string
@@ -76,6 +77,12 @@ const (
 const (
 	// One session contains max 8 players.
 	maxSessionsAmount = 128
+)
+
+// Represents session related static values.
+const (
+	// Max amount of users per session.
+	MAX_SESSION_USERS = 8
 )
 
 const (
@@ -149,6 +156,7 @@ func Init() {
 
 	settingsMonitoringGrafanaName = viper.GetString("settings.monitoring.grafana.name")
 	settingsMonitoringPrometheusName = viper.GetString("settings.monitoring.prometheus.name")
+	settingsSoundFX = viper.GetInt("settings.sound.fx")
 	settingsLanguage = viper.GetString("settings.language")
 
 	if settingsLanguage != SETTINGS_LANGUAGE_ENGLISH &&
@@ -252,6 +260,18 @@ func GetSettingsLanguage() string {
 
 func GetSettingsInitialLanguage() string {
 	return settingsInitialLanguage
+}
+
+func SetSettingsSoundFX(value int) {
+	viper.Set("settings.sound.fx", value)
+
+	viper.WriteConfigAs(viper.ConfigFileUsed())
+
+	settingsSoundFX = value
+}
+
+func GetSettingsSoundFX() int {
+	return settingsSoundFX
 }
 
 func GetOperationDebug() bool {

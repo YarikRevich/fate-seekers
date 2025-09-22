@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
@@ -141,7 +142,7 @@ func NewSettingsComponent(
 
 	components.AddChild(widget.NewText(
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.settings.sound.fx"),
+			translation.GetInstance().GetTranslation("shared.settings.sound.fx"),
 			generalFont,
 			color.White)))
 
@@ -506,6 +507,8 @@ func NewSettingsComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			closeCallback(
 				soundMusicSlider.Current,
 				soundFXSlider.Current,
@@ -539,6 +542,8 @@ func NewSettingsComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			submitCallback(
 				soundMusicSlider.Current,
 				soundFXSlider.Current,

@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
@@ -140,7 +141,7 @@ func newCreatorComponent() *CreatorComponent {
 			Stretch: true,
 		})),
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.creator.session_name"),
+			translation.GetInstance().GetTranslation("client.creator.session-name"),
 			generalFont,
 			color.White)))
 
@@ -226,7 +227,7 @@ func newCreatorComponent() *CreatorComponent {
 
 	components.AddChild(widget.NewText(
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.creator.session_seed"),
+			translation.GetInstance().GetTranslation("client.creator.session-seed"),
 			generalFont,
 			color.White)))
 
@@ -359,6 +360,8 @@ func newCreatorComponent() *CreatorComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.backCallback()
 		}),
 	))
@@ -387,6 +390,8 @@ func newCreatorComponent() *CreatorComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.submitCallback(nameInput.GetText(), seedInput.GetText())
 		}),
 	))

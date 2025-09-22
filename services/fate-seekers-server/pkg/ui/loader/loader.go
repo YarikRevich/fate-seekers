@@ -9,6 +9,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/loader/common"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -88,12 +89,22 @@ const (
 	Background6Animation = "background/6/background-6.json"
 )
 
+// Describes all the available sounds to be loaded.
+const (
+	AmbientMusicSound   = "music/ambient/ambient.mp3"
+	EnergetykMusicSound = "music/energetyk/energetyk.mp3"
+
+	TestFXSound   = "fx/test/test.ogg"
+	ButtonFXSound = "fx/button/button.ogg"
+)
+
 // Decsribes all the embedded files base paths.
 const (
 	FontsPath      = "fonts"
 	StaticsPath    = "statics"
 	TemplatesPath  = "templates"
 	AnimationsPath = "animations"
+	SoundsPath     = "sounds"
 )
 
 // Loader represents low level asset loading manager, which operates in a lazy mode manner.
@@ -109,6 +120,9 @@ type Loader struct {
 
 	// Represents cache map of embedded animations.
 	animations sync.Map
+
+	// Represents cache map of embedded sounds.
+	sounds sync.Map
 }
 
 // GetStatic retrieves static content with the given name.
@@ -202,6 +216,35 @@ func (l *Loader) GetAnimation(name string, shared bool) *asebiten.Animation {
 	}
 
 	return animation
+}
+
+// GetSoundFX retrieves FX sound content with the given name.
+func (l *Loader) GetSoundFX(name string) *vorbis.Stream {
+	result, ok := l.sounds.Load(name)
+	if ok {
+		stream, err := vorbis.DecodeF32(bytes.NewReader(result.([]byte)))
+		if err != nil {
+			logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+		}
+
+		return stream
+	}
+
+	file, err := common.ReadFile(filepath.Join(SoundsPath, name))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	l.sounds.Store(name, file)
+
+	stream, err := vorbis.DecodeF32(bytes.NewReader(file))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	logging.GetInstance().Debug("FX sound has been loaded", zap.String("name", name))
+
+	return stream
 }
 
 // newLoader initializes Loader.

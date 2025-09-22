@@ -1,0 +1,64 @@
+# Represents sector used for game settings description.
+settings:
+  # Represents sector used for window settings description.
+  window:
+    # Represents window height property.
+    height: 1080
+
+    # Represents window width property.
+    width: 1920
+
+  # Represents sector used for networking settings description.
+  networking:
+    # Represents sector used for networking receiver properties.
+    receiver:
+      # Represents a local port used for receive operations.
+      port: 8091
+
+    # Represents sector used for external server properties.
+    server:
+      # Represents server host value used for networking.
+      host: "localhost:8090"
+
+    # Represents sector used for networking encryption properties.
+    encryption:
+      # Represents encryption key used for all the networking communication.
+      key: "hello"
+
+  # Represents language selected for the interface.
+  language: "en"
+
+  # Represents section used for sound settings description.
+  sound:
+    # Represents music level property.
+    music: 0
+
+    # Represents FX level property.
+    fx: 50
+
+# Represents sector used for internal operation properties. 
+operation:
+  # Represents debug property, which enables debug panels used for testing.
+  debug: true
+
+  # Represents database properties description.
+  database:
+    # Represents name of the sqlite3 database file.
+    name: "fate_seekers_client.db"
+
+    # Represents connection retry delay used for retry operations.
+    connection-retry-delay: 3s
+
+  # Represents logging properties description.
+  logging:
+    # Represents logging level.
+    level: "debug"
+
+    # Enables console output.
+    console: true
+
+    # Represents output file name.
+    name: "fate_seekers_client.log"
+
+    # Represents output file directory.
+    directory: "log"

@@ -19,6 +19,10 @@
         "one": "Мова",
         "other": "Мова"
     },
+    "shared.settings.sound.fx": {
+        "one": "Гучність ефектів",
+        "other": "Гучність ефектів"
+    },
     "shared.settings.language.english": {
         "one": "Англійська",
         "other": "Англійська"
