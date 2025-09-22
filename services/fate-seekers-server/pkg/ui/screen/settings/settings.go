@@ -89,8 +89,8 @@ func newSettingsScreen() screen.Screen {
 	return &SettingsScreen{
 		ui: builder.Build(
 			settings.NewSettingsComponent(
-				func(networkingServerPort, networkingEncryptionKey, language string) {
-					if settingsmanager.ProcessChanges(networkingServerPort, networkingEncryptionKey, language) {
+				func(soundFX int, networkingServerPort, networkingEncryptionKey, language string) {
+					if settingsmanager.ProcessChanges(soundFX, networkingServerPort, networkingEncryptionKey, language) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetActiveScreenAction(store.GetPreviousScreen()))
 
@@ -98,15 +98,15 @@ func newSettingsScreen() screen.Screen {
 							action.NewSetPreviousScreenAction(value.PREVIOUS_SCREEN_EMPTY_VALUE))
 					}
 				},
-				func(networkingServerPort, networkingEncryptionKey, language string) {
-					if settingsmanager.AnyProvidedChanges(networkingServerPort, networkingEncryptionKey, language) {
+				func(soundFX int, networkingServerPort, networkingEncryptionKey, language string) {
+					if settingsmanager.AnyProvidedChanges(soundFX, networkingServerPort, networkingEncryptionKey, language) {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptText(
 								translation.GetInstance().GetTranslation("shared.prompt.settings")))
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetPromptSubmitCallback(func() {
-								settingsmanager.ProcessChanges(networkingServerPort, networkingEncryptionKey, language)
+								settingsmanager.ProcessChanges(soundFX, networkingServerPort, networkingEncryptionKey, language)
 
 								transparentTransitionEffect.Reset()
 

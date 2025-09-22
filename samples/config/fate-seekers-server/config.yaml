@@ -35,6 +35,11 @@ settings:
   # Represents language selected for the interface.
   language: "en"
 
+  # Represents section used for sound settings description.
+  sound:
+    # Represents FX level property.
+    fx: 50
+
 # Represents sector used for internal operation properties. 
 operation:
   # Represents debug property, which enables debug panels used for testing.

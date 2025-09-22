@@ -12,7 +12,7 @@ import (
 )
 
 // ProcessChanges performs provided changes application.
-func ProcessChanges(networkingServerPort string, networkingEncryptionKey, language string) bool {
+func ProcessChanges(soundFX int, networkingServerPort string, networkingEncryptionKey, language string) bool {
 	var applied, demandRestart bool
 
 	if config.GetSettingsNetworkingServerPort() != networkingServerPort {
@@ -35,6 +35,12 @@ func ProcessChanges(networkingServerPort string, networkingEncryptionKey, langua
 
 			return false
 		}
+	}
+
+	if config.GetSettingsSoundFX() != soundFX {
+		config.SetSettingsSoundFX(soundFX)
+
+		applied = true
 	}
 
 	if config.GetSettingsNetworkingServerPort() != networkingServerPort {
@@ -74,8 +80,9 @@ func ProcessChanges(networkingServerPort string, networkingEncryptionKey, langua
 }
 
 // AnyProvidedChanges checks if there are any new provided changes.
-func AnyProvidedChanges(networkingServerPort, networkingEncryptionKey, language string) bool {
-	return config.GetSettingsNetworkingServerPort() != networkingServerPort ||
+func AnyProvidedChanges(soundFX int, networkingServerPort, networkingEncryptionKey, language string) bool {
+	return config.GetSettingsSoundFX() != soundFX ||
+		config.GetSettingsNetworkingServerPort() != networkingServerPort ||
 		config.GetSettingsNetworkingEncryptionKey() != networkingEncryptionKey ||
 		config.GetSettingsLanguage() != language
 }

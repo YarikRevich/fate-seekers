@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
@@ -402,6 +403,8 @@ func newSelectorComponent() *SelectorComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.backCallback()
 		}),
 	))
@@ -453,6 +456,8 @@ func newSelectorComponent() *SelectorComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.deleteCallback(result.sessionNameEntry)
 		}),
 	)
@@ -485,6 +490,8 @@ func newSelectorComponent() *SelectorComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.createCallback()
 		}),
 	))
@@ -513,6 +520,8 @@ func newSelectorComponent() *SelectorComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.submitCallback(sessionNameInput.GetText())
 		}),
 	))

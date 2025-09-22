@@ -19,10 +19,6 @@
         "one": "Exit",
         "other": "Exit"
     },
-    "client.settings.sound.fx": {
-        "one": "Sound FX",
-        "other": "Sound FX"
-    },
     "client.settings.sound.music": {
         "one": "Music",
         "other": "Music"

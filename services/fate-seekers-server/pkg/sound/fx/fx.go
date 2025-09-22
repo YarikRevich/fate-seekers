@@ -6,11 +6,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound/common"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/sound/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/loader"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/pkg/errors"
 )

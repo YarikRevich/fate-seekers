@@ -109,6 +109,9 @@ type FXSoundUnit struct {
 
 	// Represents fx sound player.
 	Player *audio.Player
+
+	// Rperensets fx sound interruptable mode.
+	Interruptable bool
 }
 
 // ReducerResult represents result of reducer execution operation.

@@ -142,7 +142,7 @@ func NewSettingsComponent(
 
 	components.AddChild(widget.NewText(
 		widget.TextOpts.Text(
-			translation.GetInstance().GetTranslation("client.settings.sound.fx"),
+			translation.GetInstance().GetTranslation("shared.settings.sound.fx"),
 			generalFont,
 			color.White)))
 

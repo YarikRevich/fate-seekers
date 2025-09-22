@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/common"
@@ -209,6 +210,8 @@ func newMenuComponent() *MenuComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.startCallback()
 		}),
 	)
@@ -275,6 +278,8 @@ func newMenuComponent() *MenuComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.stopCallback()
 		}),
 	)
@@ -303,6 +308,8 @@ func newMenuComponent() *MenuComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.monitoringCallback()
 		}),
 	))
@@ -329,6 +336,8 @@ func newMenuComponent() *MenuComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.settingsCallback()
 		}),
 	))
@@ -355,6 +364,8 @@ func newMenuComponent() *MenuComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.exitCallback()
 		}),
 	))

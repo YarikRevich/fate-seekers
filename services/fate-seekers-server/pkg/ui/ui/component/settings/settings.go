@@ -1,9 +1,11 @@
 package settings
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/common"
@@ -28,8 +30,8 @@ var (
 
 // NewSettingsComponent creates new main settings component.
 func NewSettingsComponent(
-	submitCallback func(networkingPort, networkingEncryptionKey, language string),
-	closeCallback func(networkingPort, networkingEncryptionKey, language string)) *widget.Container {
+	submitCallback func(soundFX int, networkingPort, networkingEncryptionKey, language string),
+	closeCallback func(soundFX int, networkingPort, networkingEncryptionKey, language string)) *widget.Container {
 	result := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(
@@ -81,6 +83,62 @@ func NewSettingsComponent(
 			widget.GridLayoutOpts.Padding(widget.Insets{
 				Top: scaler.GetPercentageOf(config.GetWorldHeight(), 6),
 			}))))
+
+	components.AddChild(widget.NewText(
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("shared.settings.sound.fx"),
+			generalFont,
+			color.White)))
+
+	soundFXComponent := widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(100, 10)),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
+			widget.RowLayoutOpts.Spacing(30),
+		)),
+	)
+
+	soundFXLabel := widget.NewText(
+		widget.TextOpts.Text(
+			fmt.Sprintf("%d", config.GetSettingsSoundFX()),
+			generalFont,
+			color.White))
+
+	soundFXSlider := widget.NewSlider(
+		widget.SliderOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(
+				scaler.GetPercentageOf(config.GetWorldWidth(), 15),
+				10),
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Stretch:  true,
+				Position: widget.RowLayoutPositionStart,
+			}),
+		),
+		widget.SliderOpts.MinMax(0, 100),
+		widget.SliderOpts.Images(&widget.SliderTrackImage{
+			Idle:     image.NewNineSlice(loader.GetInstance().GetStatic(loader.SliderTrackIdle), [3]int{0, 19, 0}, [3]int{6, 0, 0}),
+			Hover:    image.NewNineSlice(loader.GetInstance().GetStatic(loader.SliderTrackIdle), [3]int{0, 19, 0}, [3]int{6, 0, 0}),
+			Disabled: image.NewNineSlice(loader.GetInstance().GetStatic(loader.SliderTrackIdle), [3]int{0, 19, 0}, [3]int{6, 0, 0}),
+		}, &widget.ButtonImage{
+			Idle:     image.NewNineSliceSimple(loader.GetInstance().GetStatic(loader.SliderHandleIdle), 0, 5),
+			Hover:    image.NewNineSliceSimple(loader.GetInstance().GetStatic(loader.SliderHandleHover), 0, 5),
+			Pressed:  image.NewNineSliceSimple(loader.GetInstance().GetStatic(loader.SliderHandleHover), 0, 5),
+			Disabled: image.NewNineSliceSimple(loader.GetInstance().GetStatic(loader.SliderHandleIdle), 0, 5),
+		}),
+		widget.SliderOpts.FixedHandleSize(4),
+		widget.SliderOpts.TrackOffset(5),
+		widget.SliderOpts.ChangedHandler(func(args *widget.SliderChangedEventArgs) {
+			soundFXLabel.Label = fmt.Sprintf("%d", args.Current)
+		}),
+	)
+
+	soundFXSlider.Current = config.GetSettingsSoundFX()
+
+	soundFXComponent.AddChild(soundFXSlider)
+
+	soundFXComponent.AddChild(soundFXLabel)
+
+	components.AddChild(soundFXComponent)
 
 	components.AddChild(widget.NewText(
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
@@ -405,7 +463,10 @@ func NewSettingsComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			closeCallback(
+				soundFXSlider.Current,
 				networkingPortInput.GetText(),
 				networkingEncryptionKeyInput.GetText(),
 				languageComboButton.SelectedEntry().(string))
@@ -436,7 +497,10 @@ func NewSettingsComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			submitCallback(
+				soundFXSlider.Current,
 				networkingPortInput.GetText(),
 				networkingEncryptionKeyInput.GetText(),
 				languageComboButton.SelectedEntry().(string))

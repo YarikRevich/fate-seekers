@@ -33,6 +33,7 @@ var (
 
 	settingsMonitoringGrafanaName, settingsMonitoringPrometheusName string
 
+	settingsSoundFX  int
 	settingsLanguage string
 
 	settingsInitialLanguage string
@@ -155,6 +156,7 @@ func Init() {
 
 	settingsMonitoringGrafanaName = viper.GetString("settings.monitoring.grafana.name")
 	settingsMonitoringPrometheusName = viper.GetString("settings.monitoring.prometheus.name")
+	settingsSoundFX = viper.GetInt("settings.sound.fx")
 	settingsLanguage = viper.GetString("settings.language")
 
 	if settingsLanguage != SETTINGS_LANGUAGE_ENGLISH &&
@@ -258,6 +260,18 @@ func GetSettingsLanguage() string {
 
 func GetSettingsInitialLanguage() string {
 	return settingsInitialLanguage
+}
+
+func SetSettingsSoundFX(value int) {
+	viper.Set("settings.sound.fx", value)
+
+	viper.WriteConfigAs(viper.ConfigFileUsed())
+
+	settingsSoundFX = value
+}
+
+func GetSettingsSoundFX() int {
+	return settingsSoundFX
 }
 
 func GetOperationDebug() bool {

@@ -28,10 +28,6 @@ func (esr *EventStateReducer) Init() {
 func (esr *EventStateReducer) GetProcessor() func(value godux.Action) interface{} {
 	return func(value godux.Action) interface{} {
 		switch value.Type {
-		case action.SET_FX_UPDATED_SOUND_ACTION:
-			return dto.ComposeReducerResult(
-				dto.ReducerResultUnit{Key: FX_UPDATED_SOUND_STATE, Value: value.Value})
-
 		case action.SET_MUSIC_UPDATED_SOUND_ACTION:
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: MUSIC_UPDATED_SOUND_STATE, Value: value.Value})

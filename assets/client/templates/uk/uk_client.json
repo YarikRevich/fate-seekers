@@ -19,10 +19,6 @@
         "one": "Вийти",
         "other": "Вийти"
     },
-    "client.settings.sound.fx": {
-        "one": "Гучність ефектів",
-        "other": "Гучність ефектів"
-    },
     "client.settings.sound.music": {
         "one": "Гучність музики",
         "other": "Гучність музики"
