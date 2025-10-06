@@ -33,6 +33,7 @@ const (
 	SET_SESSION_CREATION_STARTED_NETWORKING_ACTION           = "SET_SESSION_CREATION_STARTED_NETWORKING_ACTION"
 	SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION            = "SET_SESSION_REMOVAL_STARTED_NETWORKING_ACTION"
 	SET_LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_ACTION        = "SET_LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_ACTION"
+	SET_LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_ACTION = "SET_LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_ACTION"
 	SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION             = "SET_LOBBY_CREATION_STARTED_NETWORKING_ACTION"
 	SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION              = "SET_LOBBY_REMOVAL_STARTED_NETWORKING_ACTION"
 	SET_SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION = "SET_SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION"
@@ -83,6 +84,15 @@ const (
 	SET_SELECTED_SESSION_METADATA_ACTION        = "SET_SELECTED_SESSION_METADATA_ACTION"
 	SET_RETRIEVED_LOBBY_SET_METADATA_ACTION     = "SET_RETRIEVED_LOBBY_SET_METADATA_ACTION"
 	SET_SELECTED_LOBBY_SET_UNIT_METADATA_ACTION = "SET_SELECTED_LOBBY_SET_UNIT_METADATA_ACTION"
+	SET_SESSION_ALREADY_STARTED_METADATA_ACTION = "SET_SESSION_ALREADY_STARTED_METADATA_ACTION"
+)
+
+// Describes all the available state actions for session reducer.
+const (
+	INCREMENT_X_POSITION_SESSION_ACTION = "INCREMENT_X_POSITION_SESSION_ACTION"
+	INCREMENT_Y_POSITION_SESSION_ACTION = "INCREMENT_Y_POSITION_SESSION_ACTION"
+	DECREMENT_X_POSITION_SESSION_ACTION = "DECREMENT_X_POSITION_SESSION_ACTION"
+	DECREMENT_Y_POSITION_SESSION_ACTION = "DECREMENT_Y_POSITION_SESSION_ACTION"
 )
 
 // NewSetActiveScreenAction creates new set active screen action.
@@ -191,6 +201,14 @@ func NewSetSessionRemovalStartedNetworkingAction(value string) godux.Action {
 func NewSetLobbySetRetrievalStartedNetworkingAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetLobbySetRetrievalCycleFinishedNetworkingAction creates new lobby set retrieval cycle finished networking action.
+func NewSetLobbySetRetrievalCycleFinishedNetworkingAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_ACTION,
 		Value: value,
 	}
 }
@@ -367,5 +385,41 @@ func NewSetSelectedLobbySetUnitMetadata(value *dto.SelectedLobbySetUnitMetadata)
 	return godux.Action{
 		Type:  SET_SELECTED_LOBBY_SET_UNIT_METADATA_ACTION,
 		Value: value,
+	}
+}
+
+// NewSetSessionAlreadyStartedMetadata creates new set session already started metadata action.
+func NewSetSessionAlreadyStartedMetadata(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_SESSION_ALREADY_STARTED_METADATA_ACTION,
+		Value: value,
+	}
+}
+
+// NewIncrementXPositionSession creates new increment x position session action.
+func NewIncrementXPositionSession() godux.Action {
+	return godux.Action{
+		Type: INCREMENT_X_POSITION_SESSION_ACTION,
+	}
+}
+
+// NewIncrementYPositionSession creates new increment y position session action.
+func NewIncrementYPositionSession() godux.Action {
+	return godux.Action{
+		Type: INCREMENT_Y_POSITION_SESSION_ACTION,
+	}
+}
+
+// NewDecrementXPositionSession creates new decrement x position session action.
+func NewDecrementXPositionSession() godux.Action {
+	return godux.Action{
+		Type: DECREMENT_X_POSITION_SESSION_ACTION,
+	}
+}
+
+// NewDecrementYPositionSession creates new decrement y position session action.
+func NewDecrementYPositionSession() godux.Action {
+	return godux.Action{
+		Type: DECREMENT_Y_POSITION_SESSION_ACTION,
 	}
 }

@@ -11,9 +11,10 @@ func ConvertSessionEntityToCacheSessionEntity(
 	input *entity.SessionEntity) dto.CacheSessionEntity {
 
 	return dto.CacheSessionEntity{
-		ID:   input.ID,
-		Seed: uint64(input.Seed),
-		Name: input.Name,
+		ID:      input.ID,
+		Seed:    uint64(input.Seed),
+		Name:    input.Name,
+		Started: input.Started,
 	}
 }
 

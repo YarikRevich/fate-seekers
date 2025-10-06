@@ -25,7 +25,7 @@ message Position {
 // UpdateUserMetadataPositionsRequest represents users positions update request message.
 message UpdateUserMetadataPositionsRequest {
     string issuer = 1 [(buf.validate.field).string.uuid = true];
-    int64 session_id = 2;
+    int64 lobby_id = 2;
     Position position = 3;
 };
 

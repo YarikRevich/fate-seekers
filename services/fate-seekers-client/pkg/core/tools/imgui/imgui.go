@@ -56,7 +56,6 @@ func (i *ImGUI) Update() {
 		imgui.Text(fmt.Sprintf("event_name: %s", store.GetEventName()))
 		imgui.Text(fmt.Sprintf("event_started: %s", store.GetEventStarted()))
 		imgui.Text(fmt.Sprintf("event_ending: %s", store.GetEventEnding()))
-		imgui.Text(fmt.Sprintf("sound_fx_updated: %s", store.GetSoundFXUpdated()))
 		imgui.Text(fmt.Sprintf("sound_music_updated: %s", store.GetSoundMusicUpdated()))
 		imgui.Text(fmt.Sprintf("prompt_submit_callback: %v", store.GetPromptSubmitCallback()))
 		imgui.Text(fmt.Sprintf("prompt_cancel_callback: %v", store.GetPromptCancelCallback()))

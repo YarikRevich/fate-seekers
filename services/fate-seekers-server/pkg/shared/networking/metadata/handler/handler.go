@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"math/rand"
 	"time"
@@ -278,6 +279,8 @@ func (h *Handler) CreateSession(ctx context.Context, request *metadatav1.CreateS
 	if exists {
 		return nil, ErrSessionAlreadyExists
 	}
+
+	fmt.Println(request.GetName())
 
 	err = repository.
 		GetSessionsRepository().
@@ -575,6 +578,8 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 	cachedSession, ok := cache.
 		GetInstance().
 		GetSessions(request.GetSessionId())
+
+	fmt.Println(cachedSession.Started, "CACHED SESSION")
 	if !ok {
 		session, _, err := repository.
 			GetSessionsRepository().
@@ -910,11 +915,80 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 		userID = user.ID
 	}
 
+	userLobbies, exists, err := repository.
+		GetLobbiesRepository().
+		GetByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if slices.ContainsFunc(
+		userLobbies,
+		func(value *entity.LobbyEntity) bool {
+			return value.SessionID == request.GetSessionId()
+		}) {
+		cache.
+			GetInstance().
+			BeginSessionsTransaction()
+
+		var cachedSession dto.CacheSessionEntity
+
+		cachedSession, ok = cache.
+			GetInstance().
+			GetSessions(request.GetSessionId())
+		if !ok {
+			session, exists, err := repository.
+				GetSessionsRepository().
+				GetByID(request.GetSessionId())
+			if err != nil {
+				cache.
+					GetInstance().
+					CommitSessionsTransaction()
+
+				return nil, err
+			}
+
+			if !exists {
+				return nil, ErrSessionDoesNotExists
+			}
+
+			cache.
+				GetInstance().
+				AddSessions(
+					request.GetSessionId(),
+					converter.ConvertSessionEntityToCacheSessionEntity(session))
+
+			if session.Started {
+				cache.
+					GetInstance().
+					CommitSessionsTransaction()
+
+				return nil, status.Errorf(codes.InvalidArgument, ErrSessionAlreadyStarted.Error())
+			}
+		} else {
+			if cachedSession.Started {
+				cache.
+					GetInstance().
+					CommitSessionsTransaction()
+
+				return nil, status.Errorf(codes.InvalidArgument, ErrSessionAlreadyStarted.Error())
+			}
+		}
+
+		cache.
+			GetInstance().
+			CommitSessionsTransaction()
+
+		return nil, status.Errorf(codes.AlreadyExists, ErrLobbyAlreadyExists.Error())
+	}
+
 	cache.
 		GetInstance().
 		BeginSessionsTransaction()
 
-	_, ok = cache.
+	var cachedSession dto.CacheSessionEntity
+
+	cachedSession, ok = cache.
 		GetInstance().
 		GetSessions(request.GetSessionId())
 	if !ok {
@@ -938,26 +1012,27 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 			AddSessions(
 				request.GetSessionId(),
 				converter.ConvertSessionEntityToCacheSessionEntity(session))
+
+		if session.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, status.Errorf(codes.InvalidArgument, ErrSessionAlreadyStarted.Error())
+		}
+	} else {
+		if cachedSession.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, status.Errorf(codes.InvalidArgument, ErrSessionAlreadyStarted.Error())
+		}
 	}
 
 	cache.
 		GetInstance().
 		CommitSessionsTransaction()
-
-	userLobbies, exists, err := repository.
-		GetLobbiesRepository().
-		GetByUserID(userID)
-	if err != nil {
-		return nil, err
-	}
-
-	if slices.ContainsFunc(
-		userLobbies,
-		func(value *entity.LobbyEntity) bool {
-			return value.SessionID == request.GetSessionId()
-		}) {
-		return nil, status.Errorf(codes.AlreadyExists, ErrLobbyAlreadyExists.Error())
-	}
 
 	cache.
 		GetInstance().
@@ -1111,6 +1186,52 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 		userID = user.ID
 	}
 
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
+
+	cachedSession, ok := cache.
+		GetInstance().
+		GetSessions(request.GetSessionId())
+	if !ok {
+		session, _, err := repository.
+			GetSessionsRepository().
+			GetByID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, err
+		}
+
+		if session.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, ErrSessionAlreadyStarted
+		}
+
+		cache.
+			GetInstance().
+			AddSessions(
+				request.GetSessionId(),
+				converter.ConvertSessionEntityToCacheSessionEntity(session))
+	} else {
+		if cachedSession.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, ErrSessionAlreadyStarted
+		}
+	}
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
 	lobbies, exists, err := repository.
 		GetLobbiesRepository().
 		GetByUserID(userID)
@@ -1164,23 +1285,25 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 			}
 		}
 
-		selectedLobby := availableLobbies[rand.Intn(len(availableLobbies))]
+		if len(availableLobbies) > 0 {
+			selectedLobby := availableLobbies[rand.Intn(len(availableLobbies))]
 
-		err = repository.
-			GetLobbiesRepository().
-			InsertOrUpdate(
-				dto.LobbiesRepositoryInsertOrUpdateRequest{
-					UserID:    selectedLobby.UserID,
-					SessionID: request.GetSessionId(),
-					Host:      true,
-					Skin:      uint64(selectedLobby.Skin),
-				})
-		if err != nil {
-			repository.
+			err = repository.
 				GetLobbiesRepository().
-				Unlock()
+				InsertOrUpdate(
+					dto.LobbiesRepositoryInsertOrUpdateRequest{
+						UserID:    selectedLobby.UserID,
+						SessionID: request.GetSessionId(),
+						Host:      true,
+						Skin:      uint64(selectedLobby.Skin),
+					})
+			if err != nil {
+				repository.
+					GetLobbiesRepository().
+					Unlock()
 
-			return nil, err
+				return nil, err
+			}
 		}
 	}
 

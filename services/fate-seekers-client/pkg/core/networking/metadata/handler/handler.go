@@ -17,6 +17,7 @@ import (
 )
 
 var (
+	ErrLobbyAlreadyStarted         = errors.New("err happened lobby already started")
 	ErrLobbyAlreadyExists          = errors.New("err happened lobby already exists")
 	ErrFilteredSessionDoesNotExist = errors.New("err happened filtered session does not exist")
 )
@@ -356,6 +357,12 @@ func PerformCreateLobby(sessionID int64, callback func(err error)) {
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
 				callback(common.ErrConnectionLost)
+
+				return
+			}
+
+			if status.Code(err) == codes.InvalidArgument {
+				callback(ErrLobbyAlreadyStarted)
 
 				return
 			}

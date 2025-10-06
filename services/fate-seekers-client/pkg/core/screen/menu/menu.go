@@ -62,6 +62,14 @@ func (ms *MenuScreen) HandleInput() error {
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetSelectedSessionMetadata(nil))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSessionAlreadyStartedMetadata(
+				value.SESSION_ALREADY_STARTED_METADATA_STATE_FALSE_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetLobbySetRetrievalCycleFinishedNetworkingAction(
+				value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_FALSE_VALUE))
 	}
 
 	if !ms.transparentTransitionEffect.Done() {

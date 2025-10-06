@@ -1,6 +1,7 @@
 package lobby
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -54,8 +55,6 @@ func (ls *LobbyScreen) HandleInput() error {
 		stream.GetGetLobbySetSubmitter().Clean(func() {
 			stream.GetGetLobbySetSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetLobbySetResponse, err error) bool {
-					// TODO: add state management.
-
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
 						return true
 					}
@@ -136,10 +135,18 @@ func (ls *LobbyScreen) HandleInput() error {
 						lobby.GetInstance().SetListsEntries(
 							converter.ConvertGetLobbySetResponseToListEntries(otherPlayers))
 
-						for _, value := range response.GetLobbySet() {
-							if value.GetIssuer() == store.GetRepositoryUUID() && value.GetHost() {
-								lobby.GetInstance().ShowStartButton()
+						if store.GetSessionAlreadyStartedMetadata() == value.SESSION_ALREADY_STARTED_METADATA_STATE_FALSE_VALUE {
+							for _, value := range response.GetLobbySet() {
+								if value.GetIssuer() == store.GetRepositoryUUID() && value.GetHost() {
+									lobby.GetInstance().ShowStartButton()
+								}
 							}
+						}
+
+						if store.GetLobbySetRetrievalCycleFinishedNetworking() == value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_FALSE_VALUE {
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetLobbySetRetrievalCycleFinishedNetworkingAction(
+									value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_TRUE_VALUE))
 						}
 					}
 
@@ -148,7 +155,8 @@ func (ls *LobbyScreen) HandleInput() error {
 		})
 	}
 
-	if store.GetSessionMetadataRetrievalStartedNetworking() == value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE {
+	if (store.GetSessionMetadataRetrievalStartedNetworking() == value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE) &&
+		(store.GetLobbySetRetrievalCycleFinishedNetworking() == value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_TRUE_VALUE) {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
 				value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
@@ -156,6 +164,8 @@ func (ls *LobbyScreen) HandleInput() error {
 		stream.GetGetSessionMetadataSubmitter().Clean(func() {
 			stream.GetGetSessionMetadataSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetSessionMetadataResponse, err error) bool {
+					fmt.Println(response.GetStarted(), "IS STARTED")
+
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
 						return true
 					}
@@ -187,6 +197,18 @@ func (ls *LobbyScreen) HandleInput() error {
 							translation.GetInstance().GetTranslation("client.lobby.transfering-to-session"),
 							time.Second*4,
 							common.NotificationInfoTextColor)
+
+						if store.GetSessionAlreadyStartedMetadata() == value.SESSION_ALREADY_STARTED_METADATA_STATE_TRUE_VALUE {
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetSessionAlreadyStartedMetadata(
+									value.SESSION_ALREADY_STARTED_METADATA_STATE_FALSE_VALUE))
+						}
+
+						if store.GetLobbySetRetrievalCycleFinishedNetworking() == value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_TRUE_VALUE {
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetLobbySetRetrievalCycleFinishedNetworkingAction(
+									value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_FALSE_VALUE))
+						}
 
 						dispatcher.
 							GetInstance().

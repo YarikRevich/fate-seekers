@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -99,6 +100,8 @@ func (nc *NetworkingCache) EvictSessionsByName(name string) {
 		value, _ := nc.GetSessions(key)
 
 		if value.Name == name {
+			fmt.Println("REMOVING SESSION", name)
+
 			nc.sessions.Remove(key)
 		}
 	}

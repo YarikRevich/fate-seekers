@@ -52,9 +52,6 @@ func ProcessChanges(soundMusic, soundFX int, networkingServerHost, networkingEnc
 	if config.GetSettingsSoundFX() != soundFX {
 		config.SetSettingsSoundFX(soundFX)
 
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetSoundFXUpdated(value.SOUND_FX_UPDATED_FALSE_VALUE))
-
 		applied = true
 	}
 

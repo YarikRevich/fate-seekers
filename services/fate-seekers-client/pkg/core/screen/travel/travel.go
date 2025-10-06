@@ -8,6 +8,9 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/particle/loadingstars"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -37,6 +40,9 @@ func (ts *TravelScreen) HandleInput() error {
 			ts.loadingStarsParticleEffect.Update()
 		} else {
 			ts.loadingStarsParticleEffect.Clean()
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))
 		}
 	}
 

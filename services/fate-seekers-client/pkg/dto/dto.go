@@ -169,3 +169,9 @@ type SelectedLobbySetUnitMetadata struct {
 	Skin   uint64
 	Host   bool
 }
+
+// Position represents lobby user position.
+type Position struct {
+	X float64
+	Y float64
+}

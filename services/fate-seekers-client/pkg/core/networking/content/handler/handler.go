@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/api"
+	contentv1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/middleware"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/balacode/udpt"
 	"google.golang.org/protobuf/proto"
@@ -47,37 +48,40 @@ func (h *Handler) send(key string, value []byte) error {
 		})
 }
 
-// PerformGetUserMetadataPositions performs get user positions retrieval.
-func (h *Handler) PerformGetUserMetadataPositions(callback func(err error)) {
-	go func() {
-		message, err := proto.Marshal(&api.GetUserMetadataPositionsRequest{
-			Issuer:    store.GetRepositoryUUID(),
-			SessionId: "",
-		})
-		if err != nil {
-			callback(err)
+// // PerformGetUserMetadataPositions performs get user positions retrieval.
+// func (h *Handler) PerformGetUserMetadataPositions(callback func(err error)) {
+// 	go func() {
+// 		message, err := proto.Marshal(&contentv1.GetUserMetadataPositionsRequest{
+// 			Issuer:    store.GetRepositoryUUID(),
+// 			SessionId: "",
+// 		})
+// 		if err != nil {
+// 			callback(err)
 
-			return
-		}
+// 			return
+// 		}
 
-		err = h.send(api.GET_USER_METADATA_POSITIONS, message)
-		if err != nil {
-			callback(err)
+// 		err = h.send(api.GET_USER_METADATA_POSITIONS, message)
+// 		if err != nil {
+// 			callback(err)
 
-			return
-		}
+// 			return
+// 		}
 
-		callback(nil)
-	}()
-}
+// 		callback(nil)
+// 	}()
+// }
 
 // PerformUpdateUserMetadataPositions performs user positions update.
-func (h *Handler) PerformUpdateUserMetadataPositions(callback func(err error)) {
+func (h *Handler) PerformUpdateUserMetadataPositions(lobbyID int64, position dto.Position, callback func(err error)) {
 	go func() {
-		message, err := proto.Marshal(&api.UpdateUserMetadataPositionsRequest{
-			Issuer:    store.GetRepositoryUUID(),
-			SessionId: "",
-			Position:  &api.Position{},
+		message, err := proto.Marshal(&contentv1.UpdateUserMetadataPositionsRequest{
+			Issuer:  store.GetRepositoryUUID(),
+			LobbyId: lobbyID,
+			Position: &contentv1.Position{
+				X: position.X,
+				Y: position.Y,
+			},
 		})
 		if err != nil {
 			callback(err)
@@ -85,7 +89,7 @@ func (h *Handler) PerformUpdateUserMetadataPositions(callback func(err error)) {
 			return
 		}
 
-		err = h.send(api.UPDATE_USER_METADATA_POSITIONS, message)
+		err = h.send(contentv1.UPDATE_USER_METADATA_POSITIONS, message)
 		if err != nil {
 			callback(err)
 

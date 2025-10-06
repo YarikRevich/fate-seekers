@@ -1,5 +1,7 @@
 package value
 
+import "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
+
 // Describes all the available screen reducer store values.
 const (
 	ACTIVE_SCREEN_LOGO_VALUE  = "logo"
@@ -61,6 +63,9 @@ const (
 	LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE  = "true"
 	LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE = "false"
 
+	LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_TRUE_VALUE  = "true"
+	LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_FALSE_VALUE = "false"
+
 	LOBBY_CREATION_STARTED_NETWORKING_TRUE_VALUE  = "true"
 	LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE = "false"
 
@@ -110,8 +115,6 @@ var (
 
 // Describes available sound reducer store values.
 var (
-	SOUND_FX_UPDATED_FALSE_VALUE    = "false"
-	SOUND_FX_UPDATED_TRUE_VALUE     = "true"
 	SOUND_MUSIC_UPDATED_FALSE_VALUE = "false"
 	SOUND_MUSIC_UPDATED_TRUE_VALUE  = "true"
 )
@@ -124,8 +127,15 @@ const (
 
 // Describes available metadata reducer store values.
 var (
-	RETRIEVED_SESSIONS_METADATA_EMPTY_VALUE      = []interface{}{}
-	SELECTED_SESSION_METADATA_EMPTY_VALUE        = ""
-	RETRIEVED_LOBBY_SET_METADATA_EMPTY_VALUE     = []interface{}{}
-	SELECTED_LOBBY_SET_UNIT_METADATA_EMPTY_VALUE = ""
+	RETRIEVED_SESSIONS_METADATA_EMPTY_VALUE            = []interface{}{}
+	SELECTED_SESSION_METADATA_EMPTY_VALUE              = ""
+	RETRIEVED_LOBBY_SET_METADATA_EMPTY_VALUE           = []interface{}{}
+	SELECTED_LOBBY_SET_UNIT_METADATA_EMPTY_VALUE       = ""
+	SESSION_ALREADY_STARTED_METADATA_STATE_TRUE_VALUE  = "true"
+	SESSION_ALREADY_STARTED_METADATA_STATE_FALSE_VALUE = "false"
+)
+
+// Describes available session reducer store values.
+var (
+	POSITION_SESSION_EMPTY_VALUE dto.Position
 )

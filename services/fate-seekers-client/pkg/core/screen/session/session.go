@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -8,17 +9,17 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/shader/event/toxicrain"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 // const (
@@ -124,32 +125,65 @@ type SessionScreen struct {
 }
 
 func (ss *SessionScreen) HandleInput() error {
-	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
 	}
 
+	// TODO: do key listening with some predefined interruption to avoid udp send buffer bloat
+
 	// Debug statements
-	{
-		if ebiten.IsKeyPressed(ebiten.KeyA) {
-			if !sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
-				sound.GetInstance().GetSoundMusicManager().StartMusic(loader.EnergetykMusicSound)
-			}
-		}
+	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
 
-		if ebiten.IsKeyPressed(ebiten.KeyY) {
-			if sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() &&
-				!sound.GetInstance().GetSoundMusicManager().IsMusicStopping() {
-				sound.GetInstance().GetSoundMusicManager().StopMusic()
-			}
-		}
+		handler.GetInstance().PerformUpdateUserMetadataPositions(
+			store.GetSelectedLobbySetUnitMetadata().ID,
+			store.GetPositionSession(),
+			func(err error) {
+				fmt.Println(err)
+			})
 
-		if ebiten.IsKeyPressed(ebiten.KeyD) {
-			dispatcher.GetInstance().Dispatch(action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
-		} else {
-			dispatcher.GetInstance().Dispatch(action.NewSetEventEnding(value.EVENT_ENDING_TRUE_VALUE))
-		}
+		// if !sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
+		// 	sound.GetInstance().GetSoundMusicManager().StartMusic(loader.EnergetykMusicSound)
+		// }
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyW) {
+		dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
+
+		handler.GetInstance().PerformUpdateUserMetadataPositions(
+			store.GetSelectedLobbySetUnitMetadata().ID,
+			store.GetPositionSession(),
+			func(err error) {
+				fmt.Println(err)
+			})
+		// if sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() &&
+		// 	!sound.GetInstance().GetSoundMusicManager().IsMusicStopping() {
+		// 	sound.GetInstance().GetSoundMusicManager().StopMusic()
+		// }
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
+
+		handler.GetInstance().PerformUpdateUserMetadataPositions(
+			store.GetSelectedLobbySetUnitMetadata().ID,
+			store.GetPositionSession(),
+			func(err error) {
+				fmt.Println(err)
+			})
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyD) {
+		dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+
+		handler.GetInstance().PerformUpdateUserMetadataPositions(
+			store.GetSelectedLobbySetUnitMetadata().ID,
+			store.GetPositionSession(),
+			func(err error) {
+				fmt.Println(err)
+			})
 	}
+
+	// if ebiten.IsKeyPressed(ebiten.KeyD) {
+	// dispatcher.GetInstance().Dispatch(action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
+	// } else {
+	// dispatcher.GetInstance().Dispatch(action.NewSetEventEnding(value.EVENT_ENDING_TRUE_VALUE))
+	// }
 
 	if !ss.transparentTransitionEffect.Done() {
 		if !ss.transparentTransitionEffect.OnEnd() {
