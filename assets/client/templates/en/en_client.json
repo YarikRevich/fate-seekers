@@ -215,6 +215,10 @@
         "one": "Connector close operation failed",
         "other": "Connector close operation failed"
     },
+    "client.networking.update-user-metadata-positions-failure": {
+        "one": "Unable to perform user metadata positions update",
+        "other": "Unable to perform user metadata positions update"
+    },
     "client.skin.0.name": {
         "one": "Ariyan",
         "other": "Ariyan"

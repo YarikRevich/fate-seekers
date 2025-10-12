@@ -4,6 +4,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/db"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/events"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository/sync"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/runtime"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -17,6 +18,8 @@ func init() {
 	db.Init()
 
 	sync.Run()
+
+	events.Run()
 }
 
 func main() {

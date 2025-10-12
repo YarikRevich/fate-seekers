@@ -6,12 +6,8 @@ import (
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
-	contentv1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/middleware"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/balacode/udpt"
-	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -30,7 +26,7 @@ type Handler struct {
 }
 
 // send performs low level UDP send operation using udpt wrapper.
-func (h *Handler) send(key string, value []byte) error {
+func (h *Handler) Send(key string, value []byte) error {
 	return middleware.
 		GetInstance().
 		Run(func() error {
@@ -71,34 +67,6 @@ func (h *Handler) send(key string, value []byte) error {
 // 		callback(nil)
 // 	}()
 // }
-
-// PerformUpdateUserMetadataPositions performs user positions update.
-func (h *Handler) PerformUpdateUserMetadataPositions(lobbyID int64, position dto.Position, callback func(err error)) {
-	go func() {
-		message, err := proto.Marshal(&contentv1.UpdateUserMetadataPositionsRequest{
-			Issuer:  store.GetRepositoryUUID(),
-			LobbyId: lobbyID,
-			Position: &contentv1.Position{
-				X: position.X,
-				Y: position.Y,
-			},
-		})
-		if err != nil {
-			callback(err)
-
-			return
-		}
-
-		err = h.send(contentv1.UPDATE_USER_METADATA_POSITIONS, message)
-		if err != nil {
-			callback(err)
-
-			return
-		}
-
-		callback(nil)
-	}()
-}
 
 // newHandler initializes Handler.
 func newHandler() *Handler {

@@ -56,10 +56,14 @@ func (ls *LobbyScreen) HandleInput() error {
 			stream.GetGetLobbySetSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetLobbySetResponse, err error) bool {
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLobbySetRetrievalStartedNetworkingAction(
+								value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
 						return true
 					}
 
-					if err != nil {
+					if response == nil || err != nil {
 						notification.GetInstance().Push(
 							common.ComposeMessage(
 								translation.GetInstance().GetTranslation("client.networking.get-lobby-set-failure"),
@@ -77,6 +81,10 @@ func (ls *LobbyScreen) HandleInput() error {
 							GetInstance().
 							Dispatch(
 								action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLobbySetRetrievalStartedNetworkingAction(
+								value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
 						return true
 					}
@@ -162,15 +170,15 @@ func (ls *LobbyScreen) HandleInput() error {
 				value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
 
 		stream.GetGetSessionMetadataSubmitter().Clean(func() {
+			fmt.Println("STARTING SESSION METADATA")
+
 			stream.GetGetSessionMetadataSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetSessionMetadataResponse, err error) bool {
-					fmt.Println(response.GetStarted(), "IS STARTED")
-
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
 						return true
 					}
 
-					if err != nil {
+					if response == nil || err != nil {
 						notification.GetInstance().Push(
 							common.ComposeMessage(
 								translation.GetInstance().GetTranslation("client.networking.get-session-metadata-failure"),

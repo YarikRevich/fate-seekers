@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -100,8 +99,6 @@ func (nc *NetworkingCache) EvictSessionsByName(name string) {
 		value, _ := nc.GetSessions(key)
 
 		if value.Name == name {
-			fmt.Println("REMOVING SESSION", name)
-
 			nc.sessions.Remove(key)
 		}
 	}
@@ -150,6 +147,19 @@ func (nc *NetworkingCache) AddLobbySet(key int64, value []dto.CacheLobbySetEntit
 // GetLobbies retrieves lobby cache instance by the provided key.
 func (nc *NetworkingCache) GetLobbySet(key int64) ([]dto.CacheLobbySetEntity, bool) {
 	return nc.lobbySets.Get(key)
+}
+
+// GetLobbySetMappings retrieves all lobby set mapping cache instances.
+func (nc *NetworkingCache) GetLobbySetMappings() map[int64][]dto.CacheLobbySetEntity {
+	result := make(map[int64][]dto.CacheLobbySetEntity)
+
+	for _, key := range nc.lobbySets.Keys() {
+		value, _ := nc.GetLobbySet(key)
+
+		result[key] = value
+	}
+
+	return result
 }
 
 // EvictLobbySet evicts lobby set cache for the provided key.

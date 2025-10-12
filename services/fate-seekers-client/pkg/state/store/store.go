@@ -1,6 +1,7 @@
 package store
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
@@ -142,6 +143,20 @@ func GetSessionMetadataRetrievalStartedNetworking() string {
 	instance := GetInstance()
 
 	return instance.GetState(networking.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetUpdateUserMetadataPositionsStartedNetworking retrieves session metadata retrieval started networking state value.
+func GetUpdateUserMetadataPositionsStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetEventRetrievalStartedNetworking retrieves event retrieval started networking state value.
+func GetEventRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.EVENT_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
 }
 
 // GetLetterUpdated retrieves letter updated state value.
@@ -392,6 +407,8 @@ func newStore() *godux.Store {
 		if result != nil {
 			return result
 		}
+
+		fmt.Println(action.Type)
 
 		return nil
 	})

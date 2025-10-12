@@ -70,5 +70,9 @@
     "shared.settingsmanager.invalid-networking-encryption-key": {
         "one": "Надано некоректний ключ для сервера",
         "other": "Надано некоректний ключ для сервера"
+    },
+    "shared.networking.close-failure": {
+        "one": "Зʼєднання конектора не вдалося перервати",
+        "other": "Зʼєднання конектора не вдалося перервати"
     }
 }

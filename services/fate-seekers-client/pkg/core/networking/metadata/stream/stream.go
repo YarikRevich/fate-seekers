@@ -25,6 +25,9 @@ var (
 
 	// GetGetLobbySetSubmitter retrieves instance of the lobby set retrieval submitter, performing initial creation if needed.
 	GetGetLobbySetSubmitter = sync.OnceValue[*getLobbySetMetadataSubmitter](newGetLobbySetSubmitter)
+
+	// GetGetEventsSubmitter retrieves instance of the events retrieval submitter, performing initial creation if needed.
+	GetGetEventsSubmitter = sync.OnceValue[*getEventsSubmitter](newGetEventsSubmitter)
 )
 
 // updateSessionsActivitySubmitter represents update sessions activity submitter.
@@ -282,4 +285,106 @@ func (glsms *getLobbySetMetadataSubmitter) Clean(callback func()) {
 // newGetLobbySetSubmitter initializes getLobbySetMetadataSubmitter.
 func newGetLobbySetSubmitter() *getLobbySetMetadataSubmitter {
 	return new(getLobbySetMetadataSubmitter)
+}
+
+// getEventsSubmitter represents events retrieval submitter.
+type getEventsSubmitter struct {
+	// Represents general context used to manage submitted context.
+	ctx context.Context
+
+	// Represents channel, which is used to close the submitted action.
+	cancel context.CancelFunc
+}
+
+// close performs stream submitter close operation.
+func (ges *getEventsSubmitter) close() {
+	if ges.ctx != nil {
+		select {
+		case <-ges.ctx.Done():
+		default:
+			ges.cancel()
+		}
+	}
+}
+
+// Submit performs a submittion of events retrieval action. Callback is required
+// to return boolean value, which defines whether submitter should be closed or not.
+func (ges *getEventsSubmitter) Submit(sessionID int64, callback func(response *metadatav1.GetEventsResponse, err error) bool) {
+	ges.ctx, ges.cancel = context.WithCancel(context.Background())
+
+	go func() {
+		stream, err := connector.
+			GetInstance().
+			GetClient().
+			GetEvents(
+				ges.ctx,
+				&metadatav1.GetEventsRequest{
+					SessionId: sessionID,
+					Issuer:    store.GetRepositoryUUID(),
+				})
+		if err != nil {
+			if callback(nil, err) {
+				ges.close()
+			}
+
+			return
+		}
+
+		for {
+			response, err := stream.Recv()
+
+			if err != nil {
+				if status.Code(err) == codes.Unavailable {
+					dispatcher.
+						GetInstance().
+						Dispatch(
+							action.NewSetStateResetApplicationAction(
+								value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+					if callback(nil, common.ErrConnectionLost) {
+						ges.close()
+					}
+
+					return
+				}
+
+				errRaw, ok := status.FromError(err)
+				if !ok {
+					if callback(nil, err) {
+						ges.close()
+					}
+
+					return
+				}
+
+				if callback(nil, errors.New(errRaw.Message())) {
+					ges.close()
+				}
+
+				break
+			}
+
+			if callback(response, nil) {
+				ges.close()
+			}
+		}
+	}()
+}
+
+// Clean perform delayed submitter close operation, which results in a called
+// provided callback when operation is finished.
+func (ges *getEventsSubmitter) Clean(callback func()) {
+	go func() {
+		ges.close()
+
+		callback()
+	}()
+}
+
+// newGetEventsSubmitter initializes getEventsSubmitter.
+func newGetEventsSubmitter() *getEventsSubmitter {
+	return new(getEventsSubmitter)
 }

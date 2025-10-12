@@ -42,6 +42,7 @@ const (
 	getSessionMetadataFrequency = time.Second * 2
 	getLobbySetFrequency        = time.Second * 1
 	getUserMetadataFrequency    = time.Second * 2
+	getEventsFrequency          = time.Second
 )
 
 // Handler represents handler implementation of metadatav1.MetadataServer.
@@ -402,6 +403,7 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 
 		for _, lobby := range lobbies {
 			lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
+				ID:     lobby.ID,
 				Issuer: lobby.UserEntity.Name,
 				Skin:   uint64(lobby.Skin),
 				Host:   lobby.Host,
@@ -782,6 +784,8 @@ func (h *Handler) GetSessionMetadata(request *metadatav1.GetSessionMetadataReque
 				started = cachedSession.Started
 			}
 
+			fmt.Println(started, "STARTED")
+
 			cache.
 				GetInstance().
 				CommitSessionsTransaction()
@@ -1054,6 +1058,7 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 
 		for _, lobby := range sessionLobbies {
 			lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
+				ID:     lobby.ID,
 				Issuer: lobby.UserEntity.Name,
 				Skin:   uint64(lobby.Skin),
 				Host:   lobby.Host,
@@ -1116,6 +1121,7 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 
 		for _, lobby := range lobbies {
 			lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
+				ID:     lobby.ID,
 				Issuer: lobby.UserEntity.Name,
 				Skin:   uint64(lobby.Skin),
 				Host:   lobby.Host,
@@ -1460,6 +1466,34 @@ func (h *Handler) GetUserMetadata(request *metadatav1.GetUsersMetadataRequest, s
 
 func (h *Handler) GetChests(context.Context, *metadatav1.GetChestsRequest) (*metadatav1.GetChestsResponse, error) {
 	return nil, nil
+}
+
+func (h *Handler) GetEvents(request *metadatav1.GetEventsRequest, stream grpc.ServerStreamingServer[metadatav1.GetEventsResponse]) error {
+	// request.GetSessionId()
+
+	// TODO: hit players in the stream and send weather event.
+
+	response := new(metadatav1.GetEventsResponse)
+
+	ticker := time.NewTicker(getEventsFrequency)
+
+	for {
+		select {
+		case <-ticker.C:
+			ticker.Stop()
+
+			response.Name = ""
+
+			err := stream.Send(response)
+			if err != nil {
+				return err
+			}
+
+			ticker.Reset(getEventsFrequency)
+		case <-stream.Context().Done():
+			return nil
+		}
+	}
 }
 
 func (h *Handler) GetMap(request *metadatav1.GetMapRequest, stream grpc.ServerStreamingServer[metadatav1.GetMapResponse]) error {

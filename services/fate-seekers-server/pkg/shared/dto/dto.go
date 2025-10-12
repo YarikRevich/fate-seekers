@@ -14,6 +14,11 @@ const (
 	ATTACHMENT_AUDIO_TYPE     = "audio"
 )
 
+// Describes all the available event names.
+const (
+	EVENT_NAME_TOXIC_RAIN = "toxic_rain"
+)
+
 // GeneratedQuestionUnit represents a generated question unit.
 type GeneratedQuestionUnit struct {
 	// Represents generated question body.
@@ -188,4 +193,11 @@ type CacheLobbySetEntity struct {
 	Issuer string
 	Skin   uint64
 	Host   bool
+}
+
+// SessionEvent represents session event description.
+type SessionEvent struct {
+	Latest time.Time
+	Active bool
+	Name   string
 }

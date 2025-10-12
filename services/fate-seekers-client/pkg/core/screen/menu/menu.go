@@ -232,7 +232,7 @@ func newMenuScreen() screen.Screen {
 									connector.GetInstance().Close(func(err1 error) {
 										if err1 != nil {
 											notification.GetInstance().Push(
-												translation.GetInstance().GetTranslation("client.networking.close-failure"),
+												translation.GetInstance().GetTranslation("shared.networking.close-failure"),
 												time.Second*2,
 												common.NotificationErrorTextColor)
 										}

@@ -1,7 +1,6 @@
 package session
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -9,17 +8,21 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/shader/event/toxicrain"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/handler"
+	contentstream "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/stream"
+	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
+	metadatastream "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/stream"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 // const (
@@ -125,65 +128,88 @@ type SessionScreen struct {
 }
 
 func (ss *SessionScreen) HandleInput() error {
-	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+	if store.GetUpdateUserMetadataPositionsStartedNetworking() == value.UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_FALSE_VALUE {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetUpdateUserMetadataPositionsStartedNetworking(
+				value.UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_TRUE_VALUE))
+
+		contentstream.GetUpdateUserMetadataPositionsSubmitter().Clean(func() {
+			contentstream.GetUpdateUserMetadataPositionsSubmitter().Submit(
+				store.GetSelectedLobbySetUnitMetadata().ID, func(err error) bool {
+					if store.GetActiveScreen() != value.ACTIVE_SCREEN_SESSION_VALUE {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetUpdateUserMetadataPositionsStartedNetworking(
+								value.UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_FALSE_VALUE))
+
+						return true
+					}
+
+					if err != nil {
+						notification.GetInstance().Push(
+							common.ComposeMessage(
+								translation.GetInstance().GetTranslation("client.update-user-metadata-positions-failure"),
+								err.Error()),
+							time.Second*3,
+							common.NotificationErrorTextColor)
+
+						return true
+					}
+
+					return false
+				})
+		})
+	}
+
+	if store.GetEventRetrievalStartedNetworking() == value.EVENT_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetEventRetrievalStartedNetworking(
+				value.EVENT_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE))
+
+		metadatastream.GetGetEventsSubmitter().Clean(func() {
+			metadatastream.GetGetEventsSubmitter().Submit(
+				store.GetSelectedLobbySetUnitMetadata().ID, func(response *metadatav1.GetEventsResponse, err error) bool {
+					if len(response.GetName()) != 0 {
+						switch response.GetName() {
+						case value.EVENT_NAME_TOXIC_RAIN_VALUE:
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
+						}
+					} else if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetEventEnding(value.EVENT_ENDING_TRUE_VALUE))
+					}
+
+					return false
+				})
+		})
+	}
+
+	// TODO: start an event stream
+
+	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
 	}
 
-	// TODO: do key listening with some predefined interruption to avoid udp send buffer bloat
-
-	// Debug statements
-	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+	if ebiten.IsKeyPressed(ebiten.KeyA) {
 		dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
-
-		handler.GetInstance().PerformUpdateUserMetadataPositions(
-			store.GetSelectedLobbySetUnitMetadata().ID,
-			store.GetPositionSession(),
-			func(err error) {
-				fmt.Println(err)
-			})
 
 		// if !sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
 		// 	sound.GetInstance().GetSoundMusicManager().StartMusic(loader.EnergetykMusicSound)
 		// }
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyW) {
+	} else if ebiten.IsKeyPressed(ebiten.KeyW) {
 		dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
 
-		handler.GetInstance().PerformUpdateUserMetadataPositions(
-			store.GetSelectedLobbySetUnitMetadata().ID,
-			store.GetPositionSession(),
-			func(err error) {
-				fmt.Println(err)
-			})
 		// if sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() &&
 		// 	!sound.GetInstance().GetSoundMusicManager().IsMusicStopping() {
 		// 	sound.GetInstance().GetSoundMusicManager().StopMusic()
 		// }
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+	} else if ebiten.IsKeyPressed(ebiten.KeyS) {
 		dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
 
-		handler.GetInstance().PerformUpdateUserMetadataPositions(
-			store.GetSelectedLobbySetUnitMetadata().ID,
-			store.GetPositionSession(),
-			func(err error) {
-				fmt.Println(err)
-			})
-	} else if inpututil.IsKeyJustPressed(ebiten.KeyD) {
+	} else if ebiten.IsKeyPressed(ebiten.KeyD) {
 		dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
-
-		handler.GetInstance().PerformUpdateUserMetadataPositions(
-			store.GetSelectedLobbySetUnitMetadata().ID,
-			store.GetPositionSession(),
-			func(err error) {
-				fmt.Println(err)
-			})
 	}
-
-	// if ebiten.IsKeyPressed(ebiten.KeyD) {
-	// dispatcher.GetInstance().Dispatch(action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
-	// } else {
-	// dispatcher.GetInstance().Dispatch(action.NewSetEventEnding(value.EVENT_ENDING_TRUE_VALUE))
-	// }
 
 	if !ss.transparentTransitionEffect.Done() {
 		if !ss.transparentTransitionEffect.OnEnd() {
@@ -210,31 +236,28 @@ func (ss *SessionScreen) HandleInput() error {
 					}
 				}
 			}
-		} else {
-			if store.GetEventEnding() == value.EVENT_ENDING_TRUE_VALUE {
-				switch store.GetEventName() {
-				case value.EVENT_NAME_TOXIC_RAIN_VALUE:
-					if !ss.toxicRainEventEndTransparentTransitionEffect.Done() {
-						if !ss.toxicRainEventEndTransparentTransitionEffect.OnEnd() {
-							ss.toxicRainEventEndTransparentTransitionEffect.Update()
-						} else {
-							dispatcher.GetInstance().Dispatch(
-								action.NewSetEventName(value.EVENT_NAME_EMPTY_VALUE))
+		} else if store.GetEventEnding() == value.EVENT_ENDING_TRUE_VALUE {
+			switch store.GetEventName() {
+			case value.EVENT_NAME_TOXIC_RAIN_VALUE:
+				if !ss.toxicRainEventEndTransparentTransitionEffect.Done() {
+					if !ss.toxicRainEventEndTransparentTransitionEffect.OnEnd() {
+						ss.toxicRainEventEndTransparentTransitionEffect.Update()
+					} else {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetEventName(value.EVENT_NAME_EMPTY_VALUE))
 
-							dispatcher.GetInstance().Dispatch(
-								action.NewSetEventStarted(value.EVENT_STARTED_FALSE_VALUE))
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetEventStarted(value.EVENT_STARTED_FALSE_VALUE))
 
-							dispatcher.GetInstance().Dispatch(
-								action.NewSetEventEnding(value.EVENT_ENDING_FALSE_VALUE))
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetEventEnding(value.EVENT_ENDING_FALSE_VALUE))
 
-							ss.toxicRainEventStartTransparentTransitionEffect.Reset()
+						ss.toxicRainEventStartTransparentTransitionEffect.Reset()
 
-							ss.toxicRainEventEndTransparentTransitionEffect.Reset()
-						}
+						ss.toxicRainEventEndTransparentTransitionEffect.Reset()
 					}
 				}
 			}
-
 		}
 	}
 

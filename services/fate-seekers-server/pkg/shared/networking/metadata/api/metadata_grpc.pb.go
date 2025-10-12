@@ -33,6 +33,7 @@ const (
 	MetadataService_RemoveLobby_FullMethodName           = "/metadata.v1.MetadataService/RemoveLobby"
 	MetadataService_GetUsersMetadata_FullMethodName      = "/metadata.v1.MetadataService/GetUsersMetadata"
 	MetadataService_GetChests_FullMethodName             = "/metadata.v1.MetadataService/GetChests"
+	MetadataService_GetEvents_FullMethodName             = "/metadata.v1.MetadataService/GetEvents"
 	MetadataService_GetMap_FullMethodName                = "/metadata.v1.MetadataService/GetMap"
 	MetadataService_GetChatMessages_FullMethodName       = "/metadata.v1.MetadataService/GetChatMessages"
 	MetadataService_CreateChatMessage_FullMethodName     = "/metadata.v1.MetadataService/CreateChatMessage"
@@ -74,6 +75,8 @@ type MetadataServiceClient interface {
 	GetUsersMetadata(ctx context.Context, in *GetUsersMetadataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetUsersMetadataResponse], error)
 	// GetChests performs chests retrieval for the selected session by the configured user.
 	GetChests(ctx context.Context, in *GetChestsRequest, opts ...grpc.CallOption) (*GetChestsResponse, error)
+	// GetEvents performs weather events retrieval for the selected session by the configured user.
+	GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetEventsResponse], error)
 	// GetMap performs map retrieval for the selected session by the configured user.
 	GetMap(ctx context.Context, in *GetMapRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetMapResponse], error)
 	// GetChatMessages performs chat messages retrieval for the selected session by the configured user.
@@ -260,9 +263,28 @@ func (c *metadataServiceClient) GetChests(ctx context.Context, in *GetChestsRequ
 	return out, nil
 }
 
+func (c *metadataServiceClient) GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetEventsResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[4], MetadataService_GetEvents_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[GetEventsRequest, GetEventsResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetEventsClient = grpc.ServerStreamingClient[GetEventsResponse]
+
 func (c *metadataServiceClient) GetMap(ctx context.Context, in *GetMapRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetMapResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[4], MetadataService_GetMap_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[5], MetadataService_GetMap_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +303,7 @@ type MetadataService_GetMapClient = grpc.ServerStreamingClient[GetMapResponse]
 
 func (c *metadataServiceClient) GetChatMessages(ctx context.Context, in *GetChatMessagesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetChatMessagesResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[5], MetadataService_GetChatMessages_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[6], MetadataService_GetChatMessages_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -344,6 +366,8 @@ type MetadataServiceServer interface {
 	GetUsersMetadata(*GetUsersMetadataRequest, grpc.ServerStreamingServer[GetUsersMetadataResponse]) error
 	// GetChests performs chests retrieval for the selected session by the configured user.
 	GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error)
+	// GetEvents performs weather events retrieval for the selected session by the configured user.
+	GetEvents(*GetEventsRequest, grpc.ServerStreamingServer[GetEventsResponse]) error
 	// GetMap performs map retrieval for the selected session by the configured user.
 	GetMap(*GetMapRequest, grpc.ServerStreamingServer[GetMapResponse]) error
 	// GetChatMessages performs chat messages retrieval for the selected session by the configured user.
@@ -401,6 +425,9 @@ func (UnimplementedMetadataServiceServer) GetUsersMetadata(*GetUsersMetadataRequ
 }
 func (UnimplementedMetadataServiceServer) GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetChests not implemented")
+}
+func (UnimplementedMetadataServiceServer) GetEvents(*GetEventsRequest, grpc.ServerStreamingServer[GetEventsResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method GetEvents not implemented")
 }
 func (UnimplementedMetadataServiceServer) GetMap(*GetMapRequest, grpc.ServerStreamingServer[GetMapResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method GetMap not implemented")
@@ -652,6 +679,17 @@ func _MetadataService_GetChests_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MetadataService_GetEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetEventsRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MetadataServiceServer).GetEvents(m, &grpc.GenericServerStream[GetEventsRequest, GetEventsResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetEventsServer = grpc.ServerStreamingServer[GetEventsResponse]
+
 func _MetadataService_GetMap_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(GetMapRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -763,6 +801,11 @@ var MetadataService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "GetUsersMetadata",
 			Handler:       _MetadataService_GetUsersMetadata_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetEvents",
+			Handler:       _MetadataService_GetEvents_Handler,
 			ServerStreams: true,
 		},
 		{
