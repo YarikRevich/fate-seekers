@@ -14,10 +14,32 @@ const (
 	ATTACHMENT_AUDIO_TYPE     = "audio"
 )
 
+// Describes all the available event duration time.
+const (
+	EVENT_DURATION_TIME_TOXIC_RAIN = time.Minute * 5
+)
+
+// Describes all the available event hit rates.
+const (
+	EVENT_HIT_RATE_TOXIC_RAIN = 5
+)
+
+// Describes all the available event frequency rates.
+const (
+	EVENT_FREQUENCY_RATE_TOXIC_RAIN = time.Second * 2
+)
+
 // Describes all the available event names.
 const (
 	EVENT_NAME_TOXIC_RAIN = "toxic_rain"
+	EVENT_NAME_EMPTY      = ""
 )
+
+// Describes map, which contains all the available event names.
+var EVENTS_NAME_MAP = []string{
+	EVENT_NAME_TOXIC_RAIN,
+	EVENT_NAME_EMPTY,
+}
 
 // GeneratedQuestionUnit represents a generated question unit.
 type GeneratedQuestionUnit struct {
@@ -197,7 +219,10 @@ type CacheLobbySetEntity struct {
 
 // SessionEvent represents session event description.
 type SessionEvent struct {
-	Latest time.Time
-	Active bool
-	Name   string
+	EndRate       time.Time
+	FrequencyRate time.Time
+	PauseRate     time.Time
+	// If name is empty, but other fields are not, it means that event
+	// has ended and awaits for the pause to end to start another event shuffle.
+	Name string
 }

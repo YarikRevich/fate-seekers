@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -167,7 +168,28 @@ func (ss *SessionScreen) HandleInput() error {
 
 		metadatastream.GetGetEventsSubmitter().Clean(func() {
 			metadatastream.GetGetEventsSubmitter().Submit(
-				store.GetSelectedLobbySetUnitMetadata().ID, func(response *metadatav1.GetEventsResponse, err error) bool {
+				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetEventsResponse, err error) bool {
+					if store.GetActiveScreen() != value.ACTIVE_SCREEN_SESSION_VALUE {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetEventRetrievalStartedNetworking(
+								value.EVENT_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
+
+						return true
+					}
+
+					if err != nil {
+						notification.GetInstance().Push(
+							common.ComposeMessage(
+								translation.GetInstance().GetTranslation("client.networking.event-retrieval-failure"),
+								err.Error()),
+							time.Second*3,
+							common.NotificationErrorTextColor)
+
+						return true
+					}
+
+					fmt.Println(response.GetName(), "EVENT NAME")
+
 					if len(response.GetName()) != 0 {
 						switch response.GetName() {
 						case value.EVENT_NAME_TOXIC_RAIN_VALUE:
@@ -184,7 +206,16 @@ func (ss *SessionScreen) HandleInput() error {
 		})
 	}
 
-	// TODO: start an event stream
+	{
+		// if !sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
+		// 	sound.GetInstance().GetSoundMusicManager().StartMusic(loader.EnergetykMusicSound)
+		// }
+
+		// if sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() &&
+		// 	!sound.GetInstance().GetSoundMusicManager().IsMusicStopping() {
+		// 	sound.GetInstance().GetSoundMusicManager().StopMusic()
+		// }
+	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
 		dispatcher.GetInstance().Dispatch(
@@ -194,16 +225,9 @@ func (ss *SessionScreen) HandleInput() error {
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
 		dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
 
-		// if !sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
-		// 	sound.GetInstance().GetSoundMusicManager().StartMusic(loader.EnergetykMusicSound)
-		// }
 	} else if ebiten.IsKeyPressed(ebiten.KeyW) {
 		dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
 
-		// if sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() &&
-		// 	!sound.GetInstance().GetSoundMusicManager().IsMusicStopping() {
-		// 	sound.GetInstance().GetSoundMusicManager().StopMusic()
-		// }
 	} else if ebiten.IsKeyPressed(ebiten.KeyS) {
 		dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
 

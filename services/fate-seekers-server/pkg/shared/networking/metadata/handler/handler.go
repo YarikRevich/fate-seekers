@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"math/rand"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/entity"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/cache"
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/events"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository/converter"
 	"golang.org/x/exp/slices"
@@ -29,6 +29,7 @@ var (
 	ErrSessionDoesNotExists               = errors.New("err happened session does not exist")
 	ErrSessionAlreadyExists               = errors.New("err happened session already exists")
 	ErrSessionAlreadyStarted              = errors.New("err happened session already started")
+	ErrSessionNotStarted                  = errors.New("err happened session has not been started yet")
 	ErrFilteredSessionDoesNotExists       = errors.New("err happened filtered session does not exist")
 	ErrUserIsNotLobbyHost                 = errors.New("err happened user is not a host of a lobby")
 	ErrUserDoesNotOwnSession              = errors.New("err happened user does not own session")
@@ -280,8 +281,6 @@ func (h *Handler) CreateSession(ctx context.Context, request *metadatav1.CreateS
 	if exists {
 		return nil, ErrSessionAlreadyExists
 	}
-
-	fmt.Println(request.GetName())
 
 	err = repository.
 		GetSessionsRepository().
@@ -580,8 +579,6 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 	cachedSession, ok := cache.
 		GetInstance().
 		GetSessions(request.GetSessionId())
-
-	fmt.Println(cachedSession.Started, "CACHED SESSION")
 	if !ok {
 		session, _, err := repository.
 			GetSessionsRepository().
@@ -634,6 +631,31 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 				Issuer:  userID,
 				Started: true,
 			})
+
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
+
+	session, _, err := repository.
+		GetSessionsRepository().
+		GetByID(request.GetSessionId())
+	if err != nil {
+		cache.
+			GetInstance().
+			CommitSessionsTransaction()
+
+		return nil, err
+	}
+
+	cache.
+		GetInstance().
+		AddSessions(
+			request.GetSessionId(),
+			converter.ConvertSessionEntityToCacheSessionEntity(session))
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
 
 	return new(metadatav1.StartSessionResponse), err
 }
@@ -783,8 +805,6 @@ func (h *Handler) GetSessionMetadata(request *metadatav1.GetSessionMetadataReque
 			} else {
 				started = cachedSession.Started
 			}
-
-			fmt.Println(started, "STARTED")
 
 			cache.
 				GetInstance().
@@ -1469,13 +1489,62 @@ func (h *Handler) GetChests(context.Context, *metadatav1.GetChestsRequest) (*met
 }
 
 func (h *Handler) GetEvents(request *metadatav1.GetEventsRequest, stream grpc.ServerStreamingServer[metadatav1.GetEventsResponse]) error {
-	// request.GetSessionId()
-
-	// TODO: hit players in the stream and send weather event.
-
 	response := new(metadatav1.GetEventsResponse)
 
 	ticker := time.NewTicker(getEventsFrequency)
+
+	var sessionName string
+
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
+
+	cachedSession, ok := cache.
+		GetInstance().
+		GetSessions(request.GetSessionId())
+
+	if !ok {
+		session, exists, err := repository.
+			GetSessionsRepository().
+			GetByID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return err
+		}
+
+		if !exists {
+			return ErrSessionDoesNotExists
+		}
+
+		if !session.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return ErrSessionNotStarted
+		}
+
+		sessionName = session.Name
+
+		cache.
+			GetInstance().
+			AddSessions(
+				request.GetSessionId(),
+				converter.ConvertSessionEntityToCacheSessionEntity(session))
+	} else {
+		if !cachedSession.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return ErrSessionNotStarted
+		}
+
+		sessionName = cachedSession.Name
+	}
 
 	for {
 		select {
@@ -1483,6 +1552,11 @@ func (h *Handler) GetEvents(request *metadatav1.GetEventsRequest, stream grpc.Se
 			ticker.Stop()
 
 			response.Name = ""
+
+			sessionEvent, ok := events.GetSessionEvents()[sessionName]
+			if ok {
+				response.Name = sessionEvent.Name
+			}
 
 			err := stream.Send(response)
 			if err != nil {

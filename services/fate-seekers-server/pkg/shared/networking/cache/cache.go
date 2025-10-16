@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -164,6 +165,8 @@ func (nc *NetworkingCache) GetLobbySetMappings() map[int64][]dto.CacheLobbySetEn
 
 // EvictLobbySet evicts lobby set cache for the provided key.
 func (nc *NetworkingCache) EvictLobbySet(key int64) {
+	fmt.Println("REMOVING LOBBY SET")
+
 	nc.lobbySets.Remove(key)
 }
 

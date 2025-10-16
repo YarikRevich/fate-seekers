@@ -19,6 +19,11 @@ const (
 	metadataTickerDuration = time.Minute
 )
 
+var (
+	// Represents a map of affected sessions, which should be returned to cache.
+	affectedSessions map[int64]bool = make(map[int64]bool)
+)
+
 // Run starts the repository sync worker, which takes latest updates
 // from certain cache instances.
 func Run() {
@@ -30,6 +35,8 @@ func Run() {
 
 		for range ticker.C {
 			ticker.Stop()
+
+			clear(affectedSessions)
 
 			for key, value := range cache.
 				GetInstance().
@@ -74,6 +81,38 @@ func Run() {
 					if err != nil {
 						logging.GetInstance().Fatal(err.Error())
 					}
+
+					affectedSessions[metadata.SessionID] = true
+				}
+			}
+
+			for sessionID := range affectedSessions {
+				lobbies, exists, err := repository.
+					GetLobbiesRepository().
+					GetBySessionID(sessionID)
+				if err != nil {
+					logging.GetInstance().Fatal(err.Error())
+				}
+
+				if exists {
+					var lobbySet []dto.CacheLobbySetEntity
+
+					for _, lobby := range lobbies {
+						lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
+							ID:     lobby.ID,
+							Issuer: lobby.UserEntity.Name,
+							Skin:   uint64(lobby.Skin),
+							Host:   lobby.Host,
+						})
+					}
+
+					cache.
+						GetInstance().
+						EvictLobbySet(sessionID)
+
+					cache.
+						GetInstance().
+						AddLobbySet(sessionID, lobbySet)
 				}
 			}
 

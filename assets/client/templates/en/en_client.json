@@ -211,13 +211,13 @@
         "one": "Connector connect operation failed",
         "other": "Connector connect operation failed"
     },
-    "client.networking.close-failure": {
-        "one": "Connector close operation failed",
-        "other": "Connector close operation failed"
-    },
     "client.networking.update-user-metadata-positions-failure": {
         "one": "Unable to perform user metadata positions update",
         "other": "Unable to perform user metadata positions update"
+    },
+    "client.networking.event-retrieval-failure": {
+        "one": "Unable to perform events retrieval",
+        "other": "Unable to perform events retrieval"
     },
     "client.skin.0.name": {
         "one": "Ariyan",
