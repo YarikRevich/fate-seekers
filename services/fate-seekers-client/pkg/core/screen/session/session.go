@@ -1,7 +1,6 @@
 package session
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -188,15 +187,25 @@ func (ss *SessionScreen) HandleInput() error {
 						return true
 					}
 
-					fmt.Println(response.GetName(), "EVENT NAME")
-
 					if len(response.GetName()) != 0 {
 						switch response.GetName() {
 						case value.EVENT_NAME_TOXIC_RAIN_VALUE:
-							dispatcher.GetInstance().Dispatch(
-								action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
+							if store.GetEventName() != value.EVENT_NAME_TOXIC_RAIN_VALUE {
+								notification.GetInstance().Push(
+									translation.GetInstance().GetTranslation("client.networking.event-toxic-rain-starated"),
+									time.Second*3,
+									common.NotificationInfoTextColor)
+
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
+							}
 						}
 					} else if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
+						notification.GetInstance().Push(
+							translation.GetInstance().GetTranslation("client.networking.event-finished"),
+							time.Second*3,
+							common.NotificationInfoTextColor)
+
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetEventEnding(value.EVENT_ENDING_TRUE_VALUE))
 					}
@@ -235,6 +244,8 @@ func (ss *SessionScreen) HandleInput() error {
 		dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
 	}
 
+	// TODO: update animator.
+
 	if !ss.transparentTransitionEffect.Done() {
 		if !ss.transparentTransitionEffect.OnEnd() {
 			ss.transparentTransitionEffect.Update()
@@ -246,21 +257,7 @@ func (ss *SessionScreen) HandleInput() error {
 	ss.ui.Update()
 
 	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
-		if store.GetEventStarted() == value.EVENT_STARTED_FALSE_VALUE {
-			switch store.GetEventName() {
-			case value.EVENT_NAME_TOXIC_RAIN_VALUE:
-				if !ss.toxicRainEventStartTransparentTransitionEffect.Done() {
-					if !ss.toxicRainEventStartTransparentTransitionEffect.OnEnd() {
-						ss.toxicRainEventStartTransparentTransitionEffect.Update()
-					} else {
-						ss.toxicRainEventStartTransparentTransitionEffect.Clean()
-
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetEventStarted(value.EVENT_STARTED_TRUE_VALUE))
-					}
-				}
-			}
-		} else if store.GetEventEnding() == value.EVENT_ENDING_TRUE_VALUE {
+		if store.GetEventEnding() == value.EVENT_ENDING_TRUE_VALUE {
 			switch store.GetEventName() {
 			case value.EVENT_NAME_TOXIC_RAIN_VALUE:
 				if !ss.toxicRainEventEndTransparentTransitionEffect.Done() {
@@ -279,6 +276,20 @@ func (ss *SessionScreen) HandleInput() error {
 						ss.toxicRainEventStartTransparentTransitionEffect.Reset()
 
 						ss.toxicRainEventEndTransparentTransitionEffect.Reset()
+					}
+				}
+			}
+		} else if store.GetEventStarted() == value.EVENT_STARTED_FALSE_VALUE {
+			switch store.GetEventName() {
+			case value.EVENT_NAME_TOXIC_RAIN_VALUE:
+				if !ss.toxicRainEventStartTransparentTransitionEffect.Done() {
+					if !ss.toxicRainEventStartTransparentTransitionEffect.OnEnd() {
+						ss.toxicRainEventStartTransparentTransitionEffect.Update()
+					} else {
+						ss.toxicRainEventStartTransparentTransitionEffect.Clean()
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetEventStarted(value.EVENT_STARTED_TRUE_VALUE))
 					}
 				}
 			}

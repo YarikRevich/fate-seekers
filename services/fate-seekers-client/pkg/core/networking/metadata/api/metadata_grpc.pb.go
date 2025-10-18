@@ -33,6 +33,7 @@ const (
 	MetadataService_RemoveLobby_FullMethodName           = "/metadata.v1.MetadataService/RemoveLobby"
 	MetadataService_GetUsersMetadata_FullMethodName      = "/metadata.v1.MetadataService/GetUsersMetadata"
 	MetadataService_GetChests_FullMethodName             = "/metadata.v1.MetadataService/GetChests"
+	MetadataService_GetHealthPacks_FullMethodName        = "/metadata.v1.MetadataService/GetHealthPacks"
 	MetadataService_GetEvents_FullMethodName             = "/metadata.v1.MetadataService/GetEvents"
 	MetadataService_GetMap_FullMethodName                = "/metadata.v1.MetadataService/GetMap"
 	MetadataService_GetChatMessages_FullMethodName       = "/metadata.v1.MetadataService/GetChatMessages"
@@ -75,6 +76,8 @@ type MetadataServiceClient interface {
 	GetUsersMetadata(ctx context.Context, in *GetUsersMetadataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetUsersMetadataResponse], error)
 	// GetChests performs chests retrieval for the selected session by the configured user.
 	GetChests(ctx context.Context, in *GetChestsRequest, opts ...grpc.CallOption) (*GetChestsResponse, error)
+	// GetHealthPacks performs health packs retrieval for the selected session by the configured user.
+	GetHealthPacks(ctx context.Context, in *GetHealthPacksRequest, opts ...grpc.CallOption) (*GetHealthPacksResponse, error)
 	// GetEvents performs weather events retrieval for the selected session by the configured user.
 	GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetEventsResponse], error)
 	// GetMap performs map retrieval for the selected session by the configured user.
@@ -263,6 +266,16 @@ func (c *metadataServiceClient) GetChests(ctx context.Context, in *GetChestsRequ
 	return out, nil
 }
 
+func (c *metadataServiceClient) GetHealthPacks(ctx context.Context, in *GetHealthPacksRequest, opts ...grpc.CallOption) (*GetHealthPacksResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetHealthPacksResponse)
+	err := c.cc.Invoke(ctx, MetadataService_GetHealthPacks_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *metadataServiceClient) GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetEventsResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[4], MetadataService_GetEvents_FullMethodName, cOpts...)
@@ -366,6 +379,8 @@ type MetadataServiceServer interface {
 	GetUsersMetadata(*GetUsersMetadataRequest, grpc.ServerStreamingServer[GetUsersMetadataResponse]) error
 	// GetChests performs chests retrieval for the selected session by the configured user.
 	GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error)
+	// GetHealthPacks performs health packs retrieval for the selected session by the configured user.
+	GetHealthPacks(context.Context, *GetHealthPacksRequest) (*GetHealthPacksResponse, error)
 	// GetEvents performs weather events retrieval for the selected session by the configured user.
 	GetEvents(*GetEventsRequest, grpc.ServerStreamingServer[GetEventsResponse]) error
 	// GetMap performs map retrieval for the selected session by the configured user.
@@ -425,6 +440,9 @@ func (UnimplementedMetadataServiceServer) GetUsersMetadata(*GetUsersMetadataRequ
 }
 func (UnimplementedMetadataServiceServer) GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetChests not implemented")
+}
+func (UnimplementedMetadataServiceServer) GetHealthPacks(context.Context, *GetHealthPacksRequest) (*GetHealthPacksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHealthPacks not implemented")
 }
 func (UnimplementedMetadataServiceServer) GetEvents(*GetEventsRequest, grpc.ServerStreamingServer[GetEventsResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method GetEvents not implemented")
@@ -679,6 +697,24 @@ func _MetadataService_GetChests_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MetadataService_GetHealthPacks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetHealthPacksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServiceServer).GetHealthPacks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MetadataService_GetHealthPacks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServiceServer).GetHealthPacks(ctx, req.(*GetHealthPacksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MetadataService_GetEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(GetEventsRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -776,6 +812,10 @@ var MetadataService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetChests",
 			Handler:    _MetadataService_GetChests_Handler,
+		},
+		{
+			MethodName: "GetHealthPacks",
+			Handler:    _MetadataService_GetHealthPacks_Handler,
 		},
 		{
 			MethodName: "CreateChatMessage",

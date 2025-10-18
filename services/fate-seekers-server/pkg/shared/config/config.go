@@ -83,6 +83,9 @@ const (
 const (
 	// Max amount of users per session.
 	MAX_SESSION_USERS = 8
+
+	// Max types of session health packs.
+	MAX_SESSION_HEALTH_PACK_TYPES = 3
 )
 
 const (

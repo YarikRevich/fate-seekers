@@ -16,17 +16,17 @@ const (
 
 // Describes all the available event duration time.
 const (
-	EVENT_DURATION_TIME_TOXIC_RAIN = time.Minute * 5
+	EVENT_DURATION_TIME_TOXIC_RAIN = time.Minute * 3
 )
 
 // Describes all the available event hit rates.
 const (
-	EVENT_HIT_RATE_TOXIC_RAIN = 5
+	EVENT_HIT_RATE_TOXIC_RAIN = 2
 )
 
 // Describes all the available event frequency rates.
 const (
-	EVENT_FREQUENCY_RATE_TOXIC_RAIN = time.Second * 2
+	EVENT_FREQUENCY_RATE_TOXIC_RAIN = time.Second * 5
 )
 
 // Describes all the available event names.

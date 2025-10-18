@@ -52,6 +52,9 @@ service MetadataService {
     // GetChests performs chests retrieval for the selected session by the configured user.
     rpc GetChests(GetChestsRequest) returns (GetChestsResponse) {};
 
+    // GetHealthPacks performs health packs retrieval for the selected session by the configured user.
+    rpc GetHealthPacks(GetHealthPacksRequest) returns (GetHealthPacksResponse) {};
+
     // GetEvents performs weather events retrieval for the selected session by the configured user.
     rpc GetEvents(GetEventsRequest) returns (stream GetEventsResponse) {};
 
@@ -228,7 +231,14 @@ message GetUsersMetadataResponse {
 
 // GetChestsRequest represents chests retrieval request message.
 message GetChestsRequest {
-        string issuer = 2 [(buf.validate.field).string.uuid = true];
+    int64 session_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
+};
+
+// GetHealthPacksRequest represents health packs retrieval request message.
+message GetHealthPacksRequest {
+    int64 session_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
 
 // Position represents common position message.
@@ -240,6 +250,17 @@ message Position {
 // GetChestsResponse represents chests retrieval response streaming message.
 message GetChestsResponse {
     repeated Position positions = 1;
+};
+
+// HealthPack represents health pack message.
+message HealthPack {
+    Position position = 1;
+    int64 type = 2;
+};
+
+// GetHealthPacksResponse represents health packs retrieval response streaming message.
+message GetHealthPacksResponse {
+    repeated HealthPack packs = 1;
 };
 
 // GetEventsRequest represents event retrieval request message.

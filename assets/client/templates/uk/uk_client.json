@@ -211,6 +211,14 @@
         "one": "Неможливо отримати події сесії",
         "other": "Неможливо отримати події сесії"
     },
+    "client.networking.event-toxic-rain-starated": {
+        "one": "Почався токсичний дощ",
+        "other": "Почався токсичний дощ"
+    },
+    "client.networking.event-finished": {
+        "one": "Погодна подія закінчилася",
+        "other": "Погодна подія закінчилася"
+    },
     "client.skin.0.name": {
         "one": "Аріян",
         "other": "Аріян"

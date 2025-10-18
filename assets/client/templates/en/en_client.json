@@ -219,6 +219,14 @@
         "one": "Unable to perform events retrieval",
         "other": "Unable to perform events retrieval"
     },
+    "client.networking.event-toxic-rain-starated": {
+        "one": "Toxic rain event has started",
+        "other": "Toxic rain event has started"
+    },
+    "client.networking.event-finished": {
+        "one": "Event has finished",
+        "other": "Event has finished"
+    },
     "client.skin.0.name": {
         "one": "Ariyan",
         "other": "Ariyan"

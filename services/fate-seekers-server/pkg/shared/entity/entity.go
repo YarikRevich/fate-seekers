@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/cache"
@@ -49,8 +48,6 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 	cache.
 		GetInstance().
 		BeginUserSessionsTransaction()
-
-	fmt.Println("BEFORE SESSION REMOVAL", s.ID)
 
 	cache.
 		GetInstance().

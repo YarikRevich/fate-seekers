@@ -2,7 +2,6 @@ package events
 
 import (
 	"errors"
-	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -20,7 +19,7 @@ const (
 	eventsTickerDuration = time.Second * 1
 
 	// Represents events processing time, which is used as a pause between events.
-	eventsProcessingDuration = time.Second * 90
+	eventsProcessingDuration = time.Minute * 1
 )
 
 // GetSessionEvents retrieves instance of the session events map, performing initilization if needed.
@@ -37,17 +36,9 @@ func Run() {
 		for range ticker.C {
 			ticker.Stop()
 
-			fmt.Println("BEFORE ITERATION BLOCK")
-
-			fmt.Println("BEFORE ITERATION", cache.
-				GetInstance().
-				GetLobbySetMappings())
-
 			for key, value := range cache.
 				GetInstance().
 				GetLobbySetMappings() {
-
-				fmt.Println("ITERATION BEGINNING")
 
 				cachedSession, ok := cache.GetInstance().GetSessions(key)
 				if !ok {
@@ -55,8 +46,6 @@ func Run() {
 
 					continue
 				}
-
-				fmt.Println("ITERATION START CHECK")
 
 				if !cachedSession.Started {
 					ticker.Reset(eventsTickerDuration)
@@ -73,36 +62,32 @@ func Run() {
 					GetSessionEvents()[cachedSession.Name] = sessionEvent
 				}
 
-				fmt.Println(sessionEvent, "SESSION EVENT")
-
 				if sessionEvent.EndRate.Before(time.Now()) {
-					fmt.Println(sessionEvent.Name, "SESSION EVENT HAS ENDED")
-
-					if !sessionEvent.PauseRate.Before(time.Now()) {
+					if sessionEvent.Name != dto.EVENT_NAME_EMPTY {
 						sessionEvent.Name = dto.EVENT_NAME_EMPTY
+					}
 
+					if sessionEvent.PauseRate.IsZero() {
+						sessionEvent.PauseRate = time.Now().Add(eventsProcessingDuration)
+					}
+
+					if sessionEvent.PauseRate.After(time.Now()) {
 						ticker.Reset(eventsTickerDuration)
 
 						continue
 					}
 
 					if rand.Intn(2) == 0 {
-						fmt.Println("SESSION EVENT HAS BEEN MISSED")
-
-						sessionEvent.PauseRate.Add(eventsProcessingDuration)
+						sessionEvent.PauseRate = time.Now().Add(eventsProcessingDuration)
 
 						ticker.Reset(eventsTickerDuration)
 
 						continue
 					}
 
-					fmt.Println("SESSION EVENT HAS BEEN SELECTED")
-
 					selectedEvent := dto.EVENTS_NAME_MAP[rand.Intn(len(dto.EVENTS_NAME_MAP))]
 
 					sessionEvent.Name = selectedEvent
-
-					fmt.Println(selectedEvent, "SESSION EVENT HAS BEEN CHOSEN")
 
 					switch selectedEvent {
 					case dto.EVENT_NAME_TOXIC_RAIN:
@@ -111,8 +96,6 @@ func Run() {
 						sessionEvent.PauseRate = sessionEvent.EndRate.Add(eventsProcessingDuration)
 					}
 				} else if sessionEvent.FrequencyRate.Before(time.Now()) {
-					fmt.Println(sessionEvent.Name, "SESSION EVENT FREQ RATE")
-
 					for _, lobby := range value {
 						metadataSet, ok := cache.GetInstance().GetMetadata(lobby.Issuer)
 						if ok {
