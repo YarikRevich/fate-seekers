@@ -50,10 +50,10 @@ service MetadataService {
     rpc GetUsersMetadata(GetUsersMetadataRequest) returns (stream GetUsersMetadataResponse) {};
 
     // GetChests performs chests retrieval for the selected session by the configured user.
-    rpc GetChests(GetChestsRequest) returns (GetChestsResponse) {};
+    rpc GetChests(GetChestsRequest) returns (stream GetChestsResponse) {};
 
     // GetHealthPacks performs health packs retrieval for the selected session by the configured user.
-    rpc GetHealthPacks(GetHealthPacksRequest) returns (GetHealthPacksResponse) {};
+    rpc GetHealthPacks(GetHealthPacksRequest) returns (stream GetHealthPacksResponse) {};
 
     // GetEvents performs weather events retrieval for the selected session by the configured user.
     rpc GetEvents(GetEventsRequest) returns (stream GetEventsResponse) {};

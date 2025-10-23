@@ -29,6 +29,8 @@ var (
 	ErrLoadingFont      = errors.New("err happened during font loading operation")
 	ErrLoadingStatic    = errors.New("err happened during image loading operation")
 	ErrLoadingAnimation = errors.New("err happened during animation loading operation")
+	ErrLoadingMovable   = errors.New("err happened during movable loading operation")
+	ErrParsingMovable   = errors.New("err happened during movable parsing operation")
 )
 
 var (
@@ -87,6 +89,23 @@ const (
 	UkrainianSharedTemplate = "uk/uk_shared.json"
 )
 
+// Describes all the available movables to be loaded
+const (
+	Skin1Movable = "skin/1"
+)
+
+// Describes all the available moveable rotation directions
+const (
+	LeftMovableRotation      = "left"
+	RightMovableRotation     = "right"
+	UpMovableRotation        = "up"
+	UpLeftMovableRotation    = "up-left"
+	UpRightMovableRotation   = "up-right"
+	DownMovableRotation      = "down"
+	DownLeftMovableRotation  = "down-left"
+	DownRightMovableRotation = "down-right"
+)
+
 // Describes all the available animations to be loaded.
 const (
 	SkullAnimation  = "skull/skull.json"
@@ -111,7 +130,6 @@ const (
 	AmbientMusicSound   = "music/ambient/ambient.mp3"
 	EnergetykMusicSound = "music/energetyk/energetyk.mp3"
 
-	TestFXSound   = "fx/test/test.ogg"
 	ButtonFXSound = "fx/button/button.ogg"
 )
 
@@ -123,6 +141,7 @@ const (
 	LettersPath    = "letters"
 	TemplatesPath  = "templates"
 	AnimationsPath = "animations"
+	MovablePath    = "movable"
 	SoundsPath     = "sounds"
 )
 
@@ -142,6 +161,9 @@ type Loader struct {
 
 	// Represents cache map of embedded templates.
 	templates sync.Map
+
+	// Represents cache map of embedded movables.
+	movable sync.Map
 
 	// Represents cache map of embedded animations.
 	animations sync.Map
@@ -325,6 +347,79 @@ func (l *Loader) GetSoundFX(name string) *vorbis.Stream {
 	logging.GetInstance().Debug("FX sound has been loaded", zap.String("name", name))
 
 	return stream
+}
+
+// GetMovable retrieves movable content with the given name.
+func (l *Loader) GetMovable(name string) dto.ProcessedMovableMetadataSet {
+	result, ok := l.movable.Load(name)
+	if ok {
+		return result.(dto.ProcessedMovableMetadataSet)
+	}
+
+	file, err := common.ReadFile(filepath.Join(MovablePath, name))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	var raw dto.RawMovableMetadata
+	if err := json.Unmarshal(file, &raw); err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrParsingMovable.Error()).Error())
+	}
+
+	set := make(dto.ProcessedMovableMetadataSet)
+
+	var (
+		rotationFile   []byte
+		rotationSource image.Image
+		rotationImage  *ebiten.Image
+
+		frameFile   []byte
+		frameSource image.Image
+		frameImage  *ebiten.Image
+	)
+
+	for direction, frames := range raw.Animations {
+		rotationFile, err = common.ReadFile(filepath.Join(MovablePath, name, raw.Rotations[direction]))
+		if err != nil {
+			logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+		}
+
+		rotationSource, _, err = image.Decode(bytes.NewReader(rotationFile))
+		if err != nil {
+			logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingMovable.Error()).Error())
+		}
+
+		rotationImage = ebiten.NewImageFromImage(rotationSource)
+
+		var frameImages []*ebiten.Image
+
+		for _, frame := range frames {
+			frameFile, err = common.ReadFile(filepath.Join(MovablePath, name, frame))
+			if err != nil {
+				logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+			}
+
+			frameSource, _, err = image.Decode(bytes.NewReader(frameFile))
+			if err != nil {
+				logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingMovable.Error()).Error())
+			}
+
+			frameImage = ebiten.NewImageFromImage(frameSource)
+
+			frameImages = append(frameImages, frameImage)
+		}
+
+		set[direction] = dto.ProcessedMovableMetadataUnit{
+			Rotation: rotationImage,
+			Frames:   frameImages,
+		}
+	}
+
+	l.movable.Store(name, set)
+
+	logging.GetInstance().Debug("Movable has been loaded", zap.String("name", name))
+
+	return set
 }
 
 // GetAnimation retrieves animation content with the given name. Allows to load new instance everytime.

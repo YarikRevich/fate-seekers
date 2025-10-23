@@ -7,6 +7,9 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
+
+	// LRU is utilized as a map with a limited size solution in this case.
+	// Should be replaced with a native solution without external library usage.
 	lru "github.com/hashicorp/golang-lru/v2"
 )
 
@@ -53,6 +56,12 @@ type NetworkingCache struct {
 
 	// Represents users cache instance.
 	users *lru.Cache[string, int64]
+
+	// Represents generations cache instance.
+	generations *lru.Cache[string, []*dto.CacheGenerationsEntity]
+
+	// Represents mutex used for generations related transactions.
+	generationsMutex sync.Mutex
 }
 
 // BeginSessionsTransaction begins sessions cache instance transaction.
@@ -289,6 +298,11 @@ func newNetworkingCache() *NetworkingCache {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
+	generations, err := lru.New[string, []*dto.CacheGenerationsEntity](config.GetOperationMaxSessionsAmount())
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
 	return &NetworkingCache{
 		sessions:     sessions,
 		userSessions: userSessions,
@@ -297,5 +311,6 @@ func newNetworkingCache() *NetworkingCache {
 		metadata:     metadata,
 		messages:     messages,
 		users:        users,
+		generations:  generations,
 	}
 }

@@ -207,6 +207,10 @@
         "one": "Unable to perform session start",
         "other": "Unable to perform session start"
     },
+    "client.networking.start-session-processing": {
+        "one": "Session is starting...",
+        "other": "Session is starting..."
+    },
     "client.networking.connection-failure": {
         "one": "Connector connect operation failed",
         "other": "Connector connect operation failed"

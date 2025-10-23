@@ -16,6 +16,22 @@ CREATE TABLE sessions (
 );
 
 --
+-- Name: generations; Type: TABLE; Schema: public;
+--
+
+CREATE TABLE generations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER NOT NULL,
+    name TEXT NOT NULL UNIQUE,
+    type TEXT NOT NULL,
+    active BOOLEAN NOT NULL,
+    position_x REAL NOT NULL,
+    position_y REAL NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+);
+
+--
 -- Name: lobbies; Type: TABLE; Schema: public; 
 --
 
@@ -32,7 +48,7 @@ CREATE TABLE lobbies (
     position_y REAL NOT NULL,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
-    FOREIGN KEY (session_id) REFERENCES sessions(id)
+    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
 );
 
 --

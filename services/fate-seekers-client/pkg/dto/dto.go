@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"time"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
@@ -175,3 +176,18 @@ type Position struct {
 	X float64
 	Y float64
 }
+
+// RawMovableMetadata represents provided raw movable metadata
+type RawMovableMetadata struct {
+	Rotations  map[string]string   `json:"rotations"`
+	Animations map[string][]string `json:"animations"`
+}
+
+// ProcessedMovableMetadata represents processed movable metadata unit.
+type ProcessedMovableMetadataUnit struct {
+	Rotation *ebiten.Image
+	Frames   []*ebiten.Image
+}
+
+// ProcessedMovableMetadataSet reprsents movable metadata set.
+type ProcessedMovableMetadataSet map[string]ProcessedMovableMetadataUnit

@@ -12,7 +12,7 @@ func ConvertSessionEntityToCacheSessionEntity(
 
 	return dto.CacheSessionEntity{
 		ID:      input.ID,
-		Seed:    uint64(input.Seed),
+		Seed:    input.Seed,
 		Name:    input.Name,
 		Started: input.Started,
 	}

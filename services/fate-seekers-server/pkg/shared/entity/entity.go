@@ -81,6 +81,27 @@ func (s *SessionEntity) AfterCreate(tx *gorm.DB) error {
 	return nil
 }
 
+// GenerationsEntity represents generations entity.
+type GenerationsEntity struct {
+	ID            int64         `gorm:"column:id;primaryKey;auto_increment;not null"`
+	SessionID     int64         `gorm:"column:session_id;not null"`
+	Name          string        `gorm:"column:name;not null"`
+	Type          string        `gorm:"column:type;not null"`
+	Active        bool          `gorm:"column:active;not null"`
+	CreatedAt     time.Time     `gorm:"column:created_at;autoCreateTime"`
+	SessionEntity SessionEntity `gorm:"foreignKey:SessionID;references:ID"`
+}
+
+// TableName retrieves name of database table.
+func (*GenerationsEntity) TableName() string {
+	return "generations"
+}
+
+// TableView retrieves name of database table view.
+func (*GenerationsEntity) TableView() string {
+	return "GenerationsEntity"
+}
+
 // LobbyEntity represents lobbies entity.
 type LobbyEntity struct {
 	ID            int64         `gorm:"column:id;primaryKey;auto_increment;not null"`
@@ -147,12 +168,6 @@ func (m *MessageEntity) BeforeCreate(tx *gorm.DB) error {
 		First(&m.UserEntity).Error; err != nil {
 		return err
 	}
-
-	// cache.GetInstance().EvictUserSessions()
-
-	// cache.
-	// 	GetInstance().
-	// 	Evict(m.UserEntity.Name)
 
 	return nil
 }

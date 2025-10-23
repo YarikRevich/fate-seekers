@@ -1,7 +1,6 @@
 package lobby
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -170,8 +169,6 @@ func (ls *LobbyScreen) HandleInput() error {
 				value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
 
 		stream.GetGetSessionMetadataSubmitter().Clean(func() {
-			fmt.Println("STARTING SESSION METADATA")
-
 			stream.GetGetSessionMetadataSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetSessionMetadataResponse, err error) bool {
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
@@ -294,6 +291,11 @@ func newLobbyScreen() screen.Screen {
 
 					return
 				}
+
+				notification.GetInstance().Push(
+					translation.GetInstance().GetTranslation("client.networking.start-session-processing"),
+					time.Second*2,
+					common.NotificationInfoTextColor)
 
 				notification.GetInstance().Push(
 					translation.GetInstance().GetTranslation("client.lobby.transfering-to-session"),

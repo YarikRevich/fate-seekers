@@ -1,0 +1,62 @@
+{
+  "rotations": {
+    "right": "rotations/right.png",
+    "left": "rotations/left.png",
+    "up": "rotations/up.png",
+    "up-right": "rotations/up-right.png",
+    "up-left": "rotations/up-left.png",
+    "down": "rotations/down.png",
+    "down-right": "rotations/down-right.png",
+    "down-left": "rotations/down-left.png"
+  },
+  "animations": {
+    "down": [
+      "frames/down/frame_000.png",
+      "frames/down/frame_001.png",
+      "frames/down/frame_002.png",
+      "frames/down/frame_003.png"
+    ],
+    "down-right": [
+      "frames/down-right/frame_000.png",
+      "frames/down-right/frame_001.png",
+      "frames/down-right/frame_002.png",
+      "frames/down-right/frame_003.png"
+    ],
+    "left": [
+      "frames/left/frame_000.png",
+      "frames/left/frame_001.png",
+      "frames/left/frame_002.png",
+      "frames/left/frame_003.png"
+    ],
+    "up-left": [
+      "frames/up-left/frame_000.png",
+      "frames/up-left/frame_001.png",
+      "frames/up-left/frame_002.png",
+      "frames/up-left/frame_003.png"
+    ],
+    "up-right": [
+      "frames/up-right/frame_000.png",
+      "frames/up-right/frame_001.png",
+      "frames/up-right/frame_002.png",
+      "frames/up-right/frame_003.png"
+    ],
+    "down-left": [
+      "frames/down-left/frame_000.png",
+      "frames/down-left/frame_001.png",
+      "frames/down-left/frame_002.png",
+      "frames/down-left/frame_003.png"
+    ],
+    "right": [
+      "frames/right/frame_000.png",
+      "frames/right/frame_001.png",
+      "frames/right/frame_002.png",
+      "frames/right/frame_003.png"
+    ],
+    "up": [
+      "frames/up/frame_000.png",
+      "frames/up/frame_001.png",
+      "frames/up/frame_002.png",
+      "frames/up/frame_003.png"
+    ]
+  }
+}

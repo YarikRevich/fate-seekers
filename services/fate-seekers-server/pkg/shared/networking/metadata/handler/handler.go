@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"math/rand"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/cache"
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/events"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/utils"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository/converter"
 	"golang.org/x/exp/slices"
@@ -43,6 +45,8 @@ const (
 	getSessionMetadataFrequency = time.Second * 2
 	getLobbySetFrequency        = time.Second * 1
 	getUserMetadataFrequency    = time.Second * 2
+	getChestsFrequency          = time.Second
+	getHealthPacksFrequency     = time.Second
 	getEventsFrequency          = time.Second
 )
 
@@ -108,7 +112,7 @@ func (h *Handler) GetUserSessions(ctx context.Context, request *metadatav1.GetUs
 		for _, cachedSession := range cachedSessions {
 			response.Sessions = append(response.Sessions, &metadatav1.Session{
 				SessionId: cachedSession.ID,
-				Seed:      cachedSession.Seed,
+				Seed:      uint64(cachedSession.Seed),
 				Name:      cachedSession.Name,
 			})
 		}
@@ -195,7 +199,7 @@ func (h *Handler) GetFilteredSession(ctx context.Context, request *metadatav1.Ge
 		if value.Name == request.GetName() {
 			response.Session = &metadatav1.Session{
 				SessionId: value.ID,
-				Seed:      value.Seed,
+				Seed:      uint64(value.Seed),
 				Name:      value.Name,
 			}
 
@@ -574,7 +578,10 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		GetInstance().
 		BeginSessionsTransaction()
 
-	var sessionName string
+	var (
+		sessionName string
+		sessionSeed int64
+	)
 
 	cachedSession, ok := cache.
 		GetInstance().
@@ -600,6 +607,7 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		}
 
 		sessionName = session.Name
+		sessionSeed = session.Seed
 
 		cache.
 			GetInstance().
@@ -616,6 +624,7 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		}
 
 		sessionName = cachedSession.Name
+		sessionSeed = cachedSession.Seed
 	}
 
 	cache.
@@ -632,6 +641,12 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 				Started: true,
 			})
 
+	chests := utils.GenerateChestPositions(sessionSeed)
+
+	healthPacks := utils.GenerateHealthPackPositions(sessionSeed)
+
+	fmt.Println(chests, len(chests), healthPacks, len(healthPacks))
+
 	cache.
 		GetInstance().
 		BeginSessionsTransaction()
@@ -646,6 +661,10 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 
 		return nil, err
 	}
+
+	cache.GetInstance().
+		EvictSessions(
+			request.GetSessionId())
 
 	cache.
 		GetInstance().
@@ -1285,18 +1304,10 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 			CommitLobbySetTransaction()
 	}
 
-	repository.
-		GetLobbiesRepository().
-		Lock()
-
 	lobbies, _, err = repository.
 		GetLobbiesRepository().
 		GetBySessionID(request.GetSessionId())
 	if err != nil {
-		repository.
-			GetLobbiesRepository().
-			Unlock()
-
 		return nil, err
 	}
 
@@ -1324,10 +1335,6 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 						Skin:      uint64(selectedLobby.Skin),
 					})
 			if err != nil {
-				repository.
-					GetLobbiesRepository().
-					Unlock()
-
 				return nil, err
 			}
 		}
@@ -1337,16 +1344,8 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 		GetLobbiesRepository().
 		DeleteByUserIDAndSessionID(userID, request.GetSessionId())
 	if err != nil {
-		repository.
-			GetLobbiesRepository().
-			Unlock()
-
 		return nil, err
 	}
-
-	repository.
-		GetLobbiesRepository().
-		Unlock()
 
 	cache.
 		GetInstance().
@@ -1484,8 +1483,93 @@ func (h *Handler) GetUserMetadata(request *metadatav1.GetUsersMetadataRequest, s
 	}
 }
 
-func (h *Handler) GetChests(context.Context, *metadatav1.GetChestsRequest) (*metadatav1.GetChestsResponse, error) {
-	return nil, nil
+func (h *Handler) GetChests(request *metadatav1.GetChestsRequest, stream grpc.ServerStreamingServer[metadatav1.GetChestsResponse]) error {
+	return nil
+
+	// response := new(metadatav1.GetEventsResponse)
+
+	// ticker := time.NewTicker(getEventsFrequency)
+
+	// var sessionName string
+
+	// cache.
+	// 	GetInstance().
+	// 	BeginSessionsTransaction()
+
+	// cachedSession, ok := cache.
+	// 	GetInstance().
+	// 	GetSessions(request.GetSessionId())
+
+	// if !ok {
+	// 	session, exists, err := repository.
+	// 		GetSessionsRepository().
+	// 		GetByID(request.GetSessionId())
+	// 	if err != nil {
+	// 		cache.
+	// 			GetInstance().
+	// 			CommitSessionsTransaction()
+
+	// 		return err
+	// 	}
+
+	// 	if !exists {
+	// 		return ErrSessionDoesNotExists
+	// 	}
+
+	// 	if !session.Started {
+	// 		cache.
+	// 			GetInstance().
+	// 			CommitSessionsTransaction()
+
+	// 		return ErrSessionNotStarted
+	// 	}
+
+	// 	sessionName = session.Name
+
+	// 	cache.
+	// 		GetInstance().
+	// 		AddSessions(
+	// 			request.GetSessionId(),
+	// 			converter.ConvertSessionEntityToCacheSessionEntity(session))
+	// } else {
+	// 	if !cachedSession.Started {
+	// 		cache.
+	// 			GetInstance().
+	// 			CommitSessionsTransaction()
+
+	// 		return ErrSessionNotStarted
+	// 	}
+
+	// 	sessionName = cachedSession.Name
+	// }
+
+	// for {
+	// 	select {
+	// 	case <-ticker.C:
+	// 		ticker.Stop()
+
+	// 		response.Name = ""
+
+	// 		sessionEvent, ok := events.GetSessionEvents()[sessionName]
+	// 		if ok {
+	// 			response.Name = sessionEvent.Name
+	// 		}
+
+	// 		err := stream.Send(response)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+
+	// 		ticker.Reset(getEventsFrequency)
+	// 	case <-stream.Context().Done():
+	// 		return nil
+	// 	}
+	// }
+}
+
+func (h *Handler) GetHealthPacks(request *metadatav1.GetHealthPacksRequest, stream grpc.ServerStreamingServer[metadatav1.GetHealthPacksResponse]) error {
+
+	return nil
 }
 
 func (h *Handler) GetEvents(request *metadatav1.GetEventsRequest, stream grpc.ServerStreamingServer[metadatav1.GetEventsResponse]) error {

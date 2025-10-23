@@ -12,15 +12,19 @@ import (
 )
 
 var (
-	ErrPersistingSessions = errors.New("err happened during the process of session creation response data save.")
-	ErrPersistingLobbies  = errors.New("err happened during the process of lobby creation response data save.")
-	ErrPersistingMessages = errors.New("err happened during the process of message creation response data save.")
-	ErrPersistingUsers    = errors.New("err happened during the process of user creation response data save.")
+	ErrPersistingSessions    = errors.New("err happened during the process of session creation response data save.")
+	ErrPersistingGenerations = errors.New("err happened during the process of generation creation response data save.")
+	ErrPersistingLobbies     = errors.New("err happened during the process of lobby creation response data save.")
+	ErrPersistingMessages    = errors.New("err happened during the process of message creation response data save.")
+	ErrPersistingUsers       = errors.New("err happened during the process of user creation response data save.")
 )
 
 var (
 	// GetSessionsRepository retrieves instance of the sessions repository, performing initial creation if needed.
 	GetSessionsRepository = sync.OnceValue[SessionsRepository](createSessionsRepository)
+
+	// GetGenerationRepository retrieves instance of the generations repository, performing initial creation if needed.
+	GetGenerationRepository = sync.OnceValue[GenerationsRepository](createGenerationsRepository)
 
 	// GetLobbiesRepository retrieves instance of the lobbies repository, performing initial creation if needed.
 	GetLobbiesRepository = sync.OnceValue[LobbiesRepository](createLobbiesRepository)
@@ -48,7 +52,7 @@ type sessionsRepositoryImpl struct {
 	mu sync.RWMutex
 }
 
-// Insert inserts new sessions entity to the storage or updates existing ones.
+// InsertOrUpdate inserts or updates new sessions entity to the storage or updates existing ones.
 func (w *sessionsRepositoryImpl) InsertOrUpdate(request dto.SessionsRepositoryInsertOrUpdateRequest) error {
 	w.mu.Lock()
 
@@ -207,23 +211,84 @@ func createSessionsRepository() SessionsRepository {
 	return new(sessionsRepositoryImpl)
 }
 
+// GenerationsRepository represents generations entity repository.
+type GenerationsRepository interface {
+	InsertOrUpdate(request dto.GenerationsRepositoryInsertOrUpdateRequest) error
+	GetBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error)
+}
+
+// generationsRepositoryImpl represents implementation of GenerationsRepository.
+type generationsRepositoryImpl struct {
+	// Represents mutex used for database generation repository related operations.
+	mu sync.RWMutex
+}
+
+// InsertOrUpdate inserts new generations entity to the storage or updates existing ones.
+func (w *generationsRepositoryImpl) InsertOrUpdate(request dto.GenerationsRepositoryInsertOrUpdateRequest) error {
+	w.mu.Lock()
+
+	instance := db.GetInstance()
+
+	err := instance.Clauses(clause.OnConflict{
+		Columns: []clause.Column{
+			{Name: "id"},
+		},
+		DoUpdates: clause.AssignmentColumns([]string{
+			"active",
+		}),
+	}).Create(&entity.GenerationsEntity{
+		ID:        request.ID,
+		SessionID: request.SessionID,
+		Name:      request.Name,
+		Type:      request.Type,
+		Active:    request.Active,
+	}).Error
+
+	if err != nil {
+		w.mu.Unlock()
+
+		return errors.Wrap(err, ErrPersistingGenerations.Error())
+	}
+
+	w.mu.Unlock()
+
+	return nil
+}
+
+// GetBySessionID retrieves all available generations for the provided session id.
+func (w *generationsRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var result []*entity.GenerationsEntity
+
+	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
+		Where("session_id = ?", sessionID).
+		Find(&result).Error
+
+	w.mu.RUnlock()
+
+	return result, err
+}
+
+// createGenerationsRepository initializes generationsRepositoryImpl.
+func createGenerationsRepository() GenerationsRepository {
+	return new(generationsRepositoryImpl)
+}
+
 // LobbiesRepository represents lobbies entity repository.
 type LobbiesRepository interface {
 	InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error
 	DeleteByUserIDAndSessionID(userID, sessionID int64) error
 	GetByUserID(userID int64) ([]*entity.LobbyEntity, bool, error)
 	GetBySessionID(sessionID int64) ([]*entity.LobbyEntity, bool, error)
-	Lock()
-	Unlock()
 }
 
 // lobbiesRepositoryImpl represents implementation of LobbiesRepository.
 type lobbiesRepositoryImpl struct {
 	// Represents internal mutex used for database lobbies repository related operations.
 	mu sync.RWMutex
-
-	// Represents exposed mutex to be used for database lobbies repository access restriction.
-	lock sync.Mutex
 }
 
 // InsertOrUpdate inserts new lobbies entity to the storage or updates existing ones.
@@ -356,16 +421,6 @@ func (w *lobbiesRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.Lobby
 	w.mu.RUnlock()
 
 	return result, true, nil
-}
-
-// Lock locks access to lobbies repository.
-func (w *lobbiesRepositoryImpl) Lock() {
-	w.lock.Lock()
-}
-
-// Unlock unlocks access to lobbies repository.
-func (w *lobbiesRepositoryImpl) Unlock() {
-	w.lock.Unlock()
 }
 
 // createLobbiesRepository initializes lobbiesRepositoryImpl.

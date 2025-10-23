@@ -175,6 +175,15 @@ type SessionsRepositoryGetByFiltersRequest struct {
 	Name string
 }
 
+// GenerationsRepositoryInsertOrUpdateRequest represents generations repository entity update request.
+type GenerationsRepositoryInsertOrUpdateRequest struct {
+	ID        int64
+	SessionID int64
+	Name      string
+	Type      string
+	Active    bool
+}
+
 // LobbiesRepositoryInsertOrUpdateRequest represents lobbies repository entity update request.
 type LobbiesRepositoryInsertOrUpdateRequest struct {
 	UserID     int64
@@ -191,7 +200,7 @@ type LobbiesRepositoryInsertOrUpdateRequest struct {
 // CacheSessionEntity represent cache session entity used by global networking cache.
 type CacheSessionEntity struct {
 	ID      int64
-	Seed    uint64
+	Seed    int64
 	Name    string
 	Started bool
 }
@@ -225,4 +234,18 @@ type SessionEvent struct {
 	// If name is empty, but other fields are not, it means that event
 	// has ended and awaits for the pause to end to start another event shuffle.
 	Name string
+}
+
+// CacheGenerationsEntity represent generations entity used by global networking cache.
+type CacheGenerationsEntity struct {
+	ID        int64
+	SessionID int64
+	Name      string
+	Type      string
+	Active    bool
+}
+
+// Position represents a set of coordinates.
+type Position struct {
+	X, Y int
 }

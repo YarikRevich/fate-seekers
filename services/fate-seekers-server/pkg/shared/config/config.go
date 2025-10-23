@@ -40,7 +40,12 @@ var (
 
 	operationDebug bool
 
-	operationMaxSessionsAmount int
+	operationMaxSessionsAmount,
+	operationGenerationAreaWidth,
+	operationGenerationAreaHeight,
+	operationGenerationMaxRadius,
+	operationMaxChestsAmount,
+	operationMaxHealthPacksAmount int
 
 	databaseName                 string
 	databaseConnectionRetryDelay time.Duration
@@ -77,6 +82,21 @@ const (
 const (
 	// One session contains max 8 players.
 	maxSessionsAmount = 128
+
+	// Max chests amount per session.
+	maxChestsAmount = 20
+
+	// Max health packs amount per session.
+	maxHealthPacksAmount = 15
+
+	// Item generation area width value.
+	generationAreaWidth = 1000
+
+	// Item generation area height value.
+	generationAreaHeight = 1000
+
+	// Item generation max radius value.
+	generationMaxRadius = 100
 )
 
 // Represents session related static values.
@@ -110,6 +130,11 @@ func SetupDefaultConfig() {
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
 	viper.SetDefault("operation.debug", false)
 	viper.SetDefault("operation.max-sessions-amount", maxSessionsAmount)
+	viper.SetDefault("operation.generation.area-width", generationAreaWidth)
+	viper.SetDefault("operation.generation.area-height", generationAreaHeight)
+	viper.SetDefault("operation.generation.max-radius", generationMaxRadius)
+	viper.SetDefault("operation.max-chests-amount", maxChestsAmount)
+	viper.SetDefault("operation.max-health-packs-amount", maxHealthPacksAmount)
 	viper.SetDefault("database.name", "fate_seekers.db")
 	viper.SetDefault("database.connection-retry-delay", time.Second*3)
 	viper.SetDefault("logging.level", "info")
@@ -174,6 +199,11 @@ func Init() {
 
 	operationDebug = viper.GetBool("operation.debug")
 	operationMaxSessionsAmount = viper.GetInt("operation.max-sessions-amount")
+	operationGenerationAreaWidth = viper.GetInt("operation.generation.area-width")
+	operationGenerationAreaHeight = viper.GetInt("operation.generation.area-height")
+	operationGenerationMaxRadius = viper.GetInt("operation.generation.max-radius")
+	operationMaxChestsAmount = viper.GetInt("operation.max-chests-amount")
+	operationMaxHealthPacksAmount = viper.GetInt("operation.max-health-packs-amount")
 	databaseName = viper.GetString("database.name")
 	databaseConnectionRetryDelay = viper.GetDuration("database.connection-retry-delay")
 	loggingLevel = viper.GetString("logging.level")
@@ -283,6 +313,26 @@ func GetOperationDebug() bool {
 
 func GetOperationMaxSessionsAmount() int {
 	return operationMaxSessionsAmount
+}
+
+func GetOperationGenerationAreaWidth() int {
+	return operationGenerationAreaWidth
+}
+
+func GetOperationGenerationAreaHeight() int {
+	return operationGenerationAreaHeight
+}
+
+func GetOperationGenerationMaxRadius() int {
+	return operationGenerationMaxRadius
+}
+
+func GetOperationMaxChestsAmount() int {
+	return operationMaxChestsAmount
+}
+
+func GetOperationMaxHealthPacksAmount() int {
+	return operationMaxHealthPacksAmount
 }
 
 func GetDatabaseName() string {
