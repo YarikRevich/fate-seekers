@@ -159,6 +159,13 @@ func GetEventRetrievalStartedNetworking() string {
 	return instance.GetState(networking.EVENT_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
 }
 
+// GetUsersMetadataRetrievalStartedNetworking retrieves users metadata retrieval started networking state value.
+func GetUsersMetadataRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
 // GetLetterUpdated retrieves letter updated state value.
 func GetLetterUpdated() string {
 	instance := GetInstance()

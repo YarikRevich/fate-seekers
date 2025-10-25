@@ -28,6 +28,9 @@ var (
 
 	// GetGetEventsSubmitter retrieves instance of the events retrieval submitter, performing initial creation if needed.
 	GetGetEventsSubmitter = sync.OnceValue[*getEventsSubmitter](newGetEventsSubmitter)
+
+	// GetGetUsersMetadataSubmitter retrieves instance of the users metadata retrieval submitter, performing initial creation if needed.
+	GetGetUsersMetadataSubmitter = sync.OnceValue[*getUsersMetadataSubmitter](newGetUsersMetadataSubmitter)
 )
 
 // updateSessionsActivitySubmitter represents update sessions activity submitter.
@@ -387,4 +390,150 @@ func (ges *getEventsSubmitter) Clean(callback func()) {
 // newGetEventsSubmitter initializes getEventsSubmitter.
 func newGetEventsSubmitter() *getEventsSubmitter {
 	return new(getEventsSubmitter)
+}
+
+// // PerformGetUsersMetadata performs users metadata request.
+// func PerformGetUsersMetadata(sessionID int64, callback func(response *metadatav1.GetUsersMetadataResponse, err error)) {
+// 	go func() {
+// 		_, err := connector.
+// 			GetInstance().
+// 			GetClient().
+// 			GetUsersMetadata(
+// 				context.Background(),
+// 				&metadatav1.GetUsersMetadataRequest{
+// 					SessionId: sessionID,
+// 					Issuer:    store.GetRepositoryUUID(),
+// 				})
+
+// 		if err != nil {
+// 			if status.Code(err) == codes.Unavailable {
+// 				dispatcher.
+// 					GetInstance().
+// 					Dispatch(
+// 						action.NewSetStateResetApplicationAction(
+// 							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
+// 				dispatcher.GetInstance().Dispatch(
+// 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+// 				callback(common.ErrConnectionLost)
+
+// 				return
+// 			}
+
+// 			errRaw, ok := status.FromError(err)
+// 			if !ok {
+// 				callback(err)
+
+// 				return
+// 			}
+
+// 			callback(errors.New(errRaw.Message()))
+
+// 			return
+// 		}
+
+// 		callback(nil)
+// 	}()
+// }
+
+// getUsersMetadataSubmitter represents users metadata retrieval submitter.
+type getUsersMetadataSubmitter struct {
+	// Represents general context used to manage submitted context.
+	ctx context.Context
+
+	// Represents channel, which is used to close the submitted action.
+	cancel context.CancelFunc
+}
+
+// close performs stream submitter close operation.
+func (gums *getUsersMetadataSubmitter) close() {
+	if gums.ctx != nil {
+		select {
+		case <-gums.ctx.Done():
+		default:
+			gums.cancel()
+		}
+	}
+}
+
+// Submit performs a submittion of users metadata retrieval action. Callback is required
+// to return boolean value, which defines whether submitter should be closed or not.
+func (gums *getUsersMetadataSubmitter) Submit(sessionID int64, callback func(response *metadatav1.GetUsersMetadataResponse, err error) bool) {
+	gums.ctx, gums.cancel = context.WithCancel(context.Background())
+
+	go func() {
+		stream, err := connector.
+			GetInstance().
+			GetClient().
+			GetUsersMetadata(
+				gums.ctx,
+				&metadatav1.GetUsersMetadataRequest{
+					SessionId: sessionID,
+					Issuer:    store.GetRepositoryUUID(),
+				})
+		if err != nil {
+			if callback(nil, err) {
+				gums.close()
+			}
+
+			return
+		}
+
+		for {
+			response, err := stream.Recv()
+			if err != nil {
+				if status.Code(err) == codes.Unavailable {
+					dispatcher.
+						GetInstance().
+						Dispatch(
+							action.NewSetStateResetApplicationAction(
+								value.STATE_RESET_APPLICATION_TRUE_VALUE))
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+					if callback(nil, common.ErrConnectionLost) {
+						gums.close()
+					}
+
+					return
+				}
+
+				errRaw, ok := status.FromError(err)
+				if !ok {
+					if callback(nil, err) {
+						gums.close()
+					}
+
+					return
+				}
+
+				if callback(nil, errors.New(errRaw.Message())) {
+					gums.close()
+				}
+
+				break
+			}
+
+			if callback(response, nil) {
+				gums.close()
+			}
+		}
+	}()
+}
+
+// Clean perform delayed submitter close operation, which results in a called
+// provided callback when operation is finished.
+func (gums *getUsersMetadataSubmitter) Clean(callback func()) {
+	go func() {
+		gums.close()
+
+		callback()
+	}()
+}
+
+// newGetUsersMetadataSubmitter initializes getUsersMetadataSubmitter.
+func newGetUsersMetadataSubmitter() *getUsersMetadataSubmitter {
+	return new(getUsersMetadataSubmitter)
 }

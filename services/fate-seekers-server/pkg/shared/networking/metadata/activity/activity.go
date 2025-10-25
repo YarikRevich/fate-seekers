@@ -28,6 +28,14 @@ func Run() {
 		for range ticker.C {
 			ticker.Stop()
 
+			cache.
+				GetInstance().
+				BeginLobbySetTransaction()
+
+			cache.
+				GetInstance().
+				BeginMetadataTransaction()
+
 			for key, value := range cache.
 				GetInstance().
 				GetMetadataMappings() {
@@ -43,10 +51,26 @@ func Run() {
 						GetUsersRepository().
 						GetByName(key)
 					if err != nil {
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
 						logging.GetInstance().Fatal(err.Error())
 					}
 
 					if !exists {
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
 						logging.GetInstance().Fatal(ErrUserDoesNotExist.Error())
 					}
 
@@ -67,10 +91,26 @@ func Run() {
 								PositionY:  lobby.PositionY,
 							})
 					if err != nil {
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
 						logging.GetInstance().Fatal(err.Error())
 					}
 				}
 			}
+
+			cache.
+				GetInstance().
+				CommitLobbySetTransaction()
+
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
 
 			ticker.Reset(metadataTickerDuration)
 		}

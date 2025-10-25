@@ -223,6 +223,10 @@
         "one": "Unable to perform events retrieval",
         "other": "Unable to perform events retrieval"
     },
+    "client.networking.users-metadata-retrieval-failure": {
+        "one": "Unable to perform users metadata retrieval",
+        "other": "Unable to perform users metadata retrieval"
+    },
     "client.networking.event-toxic-rain-starated": {
         "one": "Toxic rain event has started",
         "other": "Toxic rain event has started"

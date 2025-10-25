@@ -42,7 +42,7 @@ CREATE TABLE lobbies (
     active BOOLEAN NOT NULL,
     host BOOLEAN NOT NULL,
     skin INTEGER NOT NULL,
-    health INTEGER NOT NULL,
+    health INTEGER NOT NULL DEFAULT 100,
     eliminated BOOLEAN NOT NULL,
     position_x REAL NOT NULL,
     position_y REAL NOT NULL,

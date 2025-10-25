@@ -36,6 +36,14 @@ func Run() {
 		for range ticker.C {
 			ticker.Stop()
 
+			cache.
+				GetInstance().
+				BeginLobbySetTransaction()
+
+			cache.
+				GetInstance().
+				BeginSessionsTransaction()
+
 			for key, value := range cache.
 				GetInstance().
 				GetLobbySetMappings() {
@@ -102,7 +110,9 @@ func Run() {
 							for _, metadata := range metadataSet {
 								switch sessionEvent.Name {
 								case dto.EVENT_NAME_TOXIC_RAIN:
-									metadata.Health -= dto.EVENT_HIT_RATE_TOXIC_RAIN
+									if metadata.Health-dto.EVENT_HIT_RATE_TOXIC_RAIN >= 0 {
+										metadata.Health -= dto.EVENT_HIT_RATE_TOXIC_RAIN
+									}
 								}
 							}
 						}
@@ -114,6 +124,14 @@ func Run() {
 					}
 				}
 			}
+
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			cache.
+				GetInstance().
+				CommitLobbySetTransaction()
 
 			ticker.Reset(eventsTickerDuration)
 		}

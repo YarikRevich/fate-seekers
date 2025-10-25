@@ -1,10 +1,18 @@
 package handler
 
 import (
-	"fmt"
+	"errors"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/cache"
 	contentv1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/content/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository/converter"
 	"google.golang.org/protobuf/proto"
+)
+
+var (
+	ErrUserDoesNotExist  = errors.New("err happened user does not exist")
+	ErrLobbyDoesNotExist = errors.New("err happened lobby does not exist")
 )
 
 // Handler performs content connector state management.
@@ -19,9 +27,87 @@ func (h *Handler) Process(key string, value []byte) error {
 			return err
 		}
 
-		fmt.Println(message)
+		cache.
+			GetInstance().
+			BeginMetadataTransaction()
 
-		// TODO: safe user position in the lobby metadata.
+		metadata, ok := cache.
+			GetInstance().
+			GetMetadata(message.GetIssuer())
+		if !ok {
+			var userID int64
+
+			cachedUserID, ok := cache.
+				GetInstance().
+				GetUsers(message.GetIssuer())
+			if ok {
+				userID = cachedUserID
+			} else {
+				user, exists, err := repository.
+					GetUsersRepository().
+					GetByName(message.GetIssuer())
+				if err != nil {
+					cache.
+						GetInstance().
+						CommitMetadataTransaction()
+
+					return err
+				}
+
+				if !exists {
+					cache.
+						GetInstance().
+						CommitMetadataTransaction()
+
+					return ErrUserDoesNotExist
+				}
+
+				userID = user.ID
+			}
+
+			lobbies, exists, err := repository.
+				GetLobbiesRepository().
+				GetByUserID(userID)
+			if err != nil {
+				cache.
+					GetInstance().
+					CommitMetadataTransaction()
+
+				return err
+			}
+
+			if !exists {
+				cache.
+					GetInstance().
+					CommitMetadataTransaction()
+
+				return ErrLobbyDoesNotExist
+			}
+
+			newLobbies := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies)
+
+			for _, newLobby := range newLobbies {
+				if newLobby.LobbyID == message.GetLobbyId() {
+					newLobby.PositionX = message.GetPosition().X
+					newLobby.PositionY = message.GetPosition().Y
+				}
+			}
+
+			cache.
+				GetInstance().
+				AddMetadata(message.GetIssuer(), newLobbies)
+		} else {
+			for _, lobby := range metadata {
+				if lobby.LobbyID == message.GetLobbyId() {
+					lobby.PositionX = message.GetPosition().X
+					lobby.PositionY = message.GetPosition().Y
+				}
+			}
+		}
+
+		cache.
+			GetInstance().
+			CommitMetadataTransaction()
 	case contentv1.OPEN_GENERATED_CHEST:
 	case contentv1.OPEN_GENERATED_HEALTH_PACK:
 	case contentv1.SEND_CHAT_MESSAGE:

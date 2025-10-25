@@ -2,7 +2,6 @@ package stream
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -64,8 +63,6 @@ func (uumps *updateUserMetadataPositionsSubmitter) Submit(
 				if position == uumps.previousPosition {
 					continue
 				}
-
-				fmt.Println(position)
 
 				message, err := proto.Marshal(&contentv1.UpdateUserMetadataPositionsRequest{
 					Issuer:  store.GetRepositoryUUID(),

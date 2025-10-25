@@ -39,18 +39,6 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 
 	cache.
 		GetInstance().
-		BeginSessionsTransaction()
-
-	cache.
-		GetInstance().
-		BeginLobbySetTransaction()
-
-	cache.
-		GetInstance().
-		BeginUserSessionsTransaction()
-
-	cache.
-		GetInstance().
 		EvictSessionsByName(s.Name)
 
 	cache.
@@ -60,23 +48,6 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 	cache.
 		GetInstance().
 		EvictLobbySet(s.ID)
-
-	return nil
-}
-
-// AfterCreate performs sessions cache entity transaction commit after sessions entity create.
-func (s *SessionEntity) AfterCreate(tx *gorm.DB) error {
-	cache.
-		GetInstance().
-		CommitSessionsTransaction()
-
-	cache.
-		GetInstance().
-		CommitUserSessionsTransaction()
-
-	cache.
-		GetInstance().
-		CommitLobbySetTransaction()
 
 	return nil
 }
@@ -108,7 +79,7 @@ type LobbyEntity struct {
 	UserID        int64         `gorm:"column:user_id;not null"`
 	SessionID     int64         `gorm:"column:session_id;not null"`
 	Skin          int64         `gorm:"column:skin;not null"`
-	Health        int64         `gorm:"column:health;not null"`
+	Health        int64         `gorm:"column:health;not null;default:100"`
 	Active        bool          `gorm:"column:active;not null"`
 	Host          bool          `gorm:"column:host;not null"`
 	Eliminated    bool          `gorm:"column:eliminated;not null"`
@@ -128,20 +99,7 @@ func (*LobbyEntity) TableName() string {
 func (l *LobbyEntity) BeforeCreate(tx *gorm.DB) error {
 	cache.
 		GetInstance().
-		BeginLobbySetTransaction()
-
-	cache.
-		GetInstance().
 		EvictLobbySet(l.SessionID)
-
-	return nil
-}
-
-// AfterCreate performs lobbies cache entity transaction commit after lobbies entity create.
-func (l *LobbyEntity) AfterCreate(tx *gorm.DB) error {
-	cache.
-		GetInstance().
-		CommitLobbySetTransaction()
 
 	return nil
 }

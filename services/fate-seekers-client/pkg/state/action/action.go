@@ -39,6 +39,7 @@ const (
 	SET_SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION     = "SET_SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION"
 	SET_UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_ACTION = "SET_UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_ACTION"
 	SET_EVENT_RETRIEVAL_STARTED_NETWORKING_ACTION                = "SET_EVENT_RETRIEVAL_STARTED_NETWORKING_ACTION"
+	SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION       = "SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION"
 )
 
 // Describes all the available state actions for letter reducer.
@@ -243,6 +244,14 @@ func NewSetSessionMetadataRetrievalStartedNetworkingAction(value string) godux.A
 func NewSetUpdateUserMetadataPositionsStartedNetworking(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetUsersMetadataRetrievalStartedNetworking creates new set users metadata retrieval started networking action.
+func NewSetUsersMetadataRetrievalStartedNetworking(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION,
 		Value: value,
 	}
 }

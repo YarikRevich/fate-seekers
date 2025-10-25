@@ -38,6 +38,14 @@ func Run() {
 
 			clear(affectedSessions)
 
+			cache.
+				GetInstance().
+				BeginLobbySetTransaction()
+
+			cache.
+				GetInstance().
+				BeginMetadataTransaction()
+
 			for key, value := range cache.
 				GetInstance().
 				GetMetadataMappings() {
@@ -53,10 +61,26 @@ func Run() {
 						GetUsersRepository().
 						GetByName(key)
 					if err != nil {
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
 						logging.GetInstance().Fatal(err.Error())
 					}
 
 					if !exists {
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
 						logging.GetInstance().Fatal(ErrUserDoesNotExist.Error())
 					}
 
@@ -79,6 +103,14 @@ func Run() {
 								PositionY:  metadata.PositionY,
 							})
 					if err != nil {
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
 						logging.GetInstance().Fatal(err.Error())
 					}
 
@@ -91,6 +123,14 @@ func Run() {
 					GetLobbiesRepository().
 					GetBySessionID(sessionID)
 				if err != nil {
+					cache.
+						GetInstance().
+						CommitMetadataTransaction()
+
+					cache.
+						GetInstance().
+						CommitLobbySetTransaction()
+
 					logging.GetInstance().Fatal(err.Error())
 				}
 
@@ -115,6 +155,14 @@ func Run() {
 						AddLobbySet(sessionID, lobbySet)
 				}
 			}
+
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			cache.
+				GetInstance().
+				CommitLobbySetTransaction()
 
 			ticker.Reset(metadataTickerDuration)
 		}

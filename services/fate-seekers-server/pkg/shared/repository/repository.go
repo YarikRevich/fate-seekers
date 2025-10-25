@@ -280,22 +280,27 @@ func createGenerationsRepository() GenerationsRepository {
 // LobbiesRepository represents lobbies entity repository.
 type LobbiesRepository interface {
 	InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error
+	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.LobbiesRepositoryInsertOrUpdateRequest) error
 	DeleteByUserIDAndSessionID(userID, sessionID int64) error
+	DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error
 	GetByUserID(userID int64) ([]*entity.LobbyEntity, bool, error)
 	GetBySessionID(sessionID int64) ([]*entity.LobbyEntity, bool, error)
+	Lock()
+	Unlock()
 }
 
 // lobbiesRepositoryImpl represents implementation of LobbiesRepository.
 type lobbiesRepositoryImpl struct {
 	// Represents internal mutex used for database lobbies repository related operations.
 	mu sync.RWMutex
+
+	// Represents external mutex used for database management.
+	externalLock sync.Mutex
 }
 
-// InsertOrUpdate inserts new lobbies entity to the storage or updates existing ones.
-func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
+// insertOrUpdate inserts new lobbies entity to the storage or updates existing ones with the provided db instance.
+func (w *lobbiesRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
 	w.mu.Lock()
-
-	instance := db.GetInstance()
 
 	err := instance.Clauses(clause.OnConflict{
 		Columns: []clause.Column{
@@ -334,11 +339,19 @@ func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInse
 	return nil
 }
 
-// DeleteByUserID deletes lobby by the provided user id.
-func (w *lobbiesRepositoryImpl) DeleteByUserIDAndSessionID(userID, sessionID int64) error {
-	w.mu.Lock()
+// InsertOrUpdate inserts new lobbies entity to the storage or updates existing ones.
+func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(db.GetInstance(), request)
+}
 
-	instance := db.GetInstance()
+// InsertOrUpdateWithTransaction inserts new lobbies entity to the storage or updates existing ones with provided transaction.
+func (w *lobbiesRepositoryImpl) InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(transaction, request)
+}
+
+// deleteByUserIDAndSessionID deletes lobby by the provided user id with provided db instance.
+func (w *lobbiesRepositoryImpl) deleteByUserIDAndSessionID(instance *gorm.DB, userID, sessionID int64) error {
+	w.mu.Lock()
 
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
 		Where("user_id = ? AND session_id = ?", userID, sessionID).
@@ -347,6 +360,16 @@ func (w *lobbiesRepositoryImpl) DeleteByUserIDAndSessionID(userID, sessionID int
 	w.mu.Unlock()
 
 	return err
+}
+
+// DeleteByUserIDAndSessionID deletes lobby by the provided user id.
+func (w *lobbiesRepositoryImpl) DeleteByUserIDAndSessionID(userID, sessionID int64) error {
+	return w.deleteByUserIDAndSessionID(db.GetInstance(), userID, sessionID)
+}
+
+// DeleteByUserIDAndSessionIDWithTransaction deletes lobby by the provided user id with provided transaction.
+func (w *lobbiesRepositoryImpl) DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error {
+	return w.deleteByUserIDAndSessionID(transaction, userID, sessionID)
 }
 
 // GetByUserID retrieves lobby by the provided user id.
@@ -421,6 +444,16 @@ func (w *lobbiesRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.Lobby
 	w.mu.RUnlock()
 
 	return result, true, nil
+}
+
+// Lock locks external lock mutex
+func (w *lobbiesRepositoryImpl) Lock() {
+	w.externalLock.Lock()
+}
+
+// Unlock unlocks external lock mutex
+func (w *lobbiesRepositoryImpl) Unlock() {
+	w.externalLock.Unlock()
 }
 
 // createLobbiesRepository initializes lobbiesRepositoryImpl.

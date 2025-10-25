@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -127,6 +128,45 @@ type SessionScreen struct {
 	toxicRainEventShaderEffect *toxicrain.ToxicRainEventEffect
 }
 
+// // DirectionFromPoints возвращает направление движения от (px,py) к (x,y).
+// // eps — dead zone: если |dx| и |dy| ≤ eps, вернёт "" (нет движения).
+// func DirectionFromPoints(px, py, x, y, eps float64) string {
+// 	dx := x - px
+// 	dy := y - py
+
+// 	if math.Abs(dx) <= eps && math.Abs(dy) <= eps {
+// 		return "" // no move
+// 	}
+
+// 	ang := math.Atan2(dy, dx) // (-π, π]
+
+// 	step := math.Pi / 4 // 45°
+// 	idx := int(math.Round(ang / step))
+
+// 	idx = ((idx % 8) + 8) % 8
+
+// 	switch idx {
+// 	case 0:
+// 		return RightMovableRotation
+// 	case 1:
+// 		return UpRightMovableRotation
+// 	case 2:
+// 		return UpMovableRotation
+// 	case 3:
+// 		return UpLeftMovableRotation
+// 	case 4:
+// 		return LeftMovableRotation
+// 	case 5:
+// 		return DownLeftMovableRotation
+// 	case 6:
+// 		return DownMovableRotation
+// 	case 7:
+// 		return DownRightMovableRotation
+// 	default:
+// 		return ""
+// 	}
+// }
+
 func (ss *SessionScreen) HandleInput() error {
 	if store.GetUpdateUserMetadataPositionsStartedNetworking() == value.UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_FALSE_VALUE {
 		dispatcher.GetInstance().Dispatch(
@@ -147,7 +187,7 @@ func (ss *SessionScreen) HandleInput() error {
 					if err != nil {
 						notification.GetInstance().Push(
 							common.ComposeMessage(
-								translation.GetInstance().GetTranslation("client.update-user-metadata-positions-failure"),
+								translation.GetInstance().GetTranslation("client.networking.update-user-metadata-positions-failure"),
 								err.Error()),
 							time.Second*3,
 							common.NotificationErrorTextColor)
@@ -215,6 +255,40 @@ func (ss *SessionScreen) HandleInput() error {
 		})
 	}
 
+	if store.GetUsersMetadataRetrievalStartedNetworking() == value.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetUsersMetadataRetrievalStartedNetworking(
+				value.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE))
+
+		metadatastream.GetGetUsersMetadataSubmitter().Clean(func() {
+			metadatastream.GetGetUsersMetadataSubmitter().Submit(
+				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetUsersMetadataResponse, err error) bool {
+					if store.GetActiveScreen() != value.ACTIVE_SCREEN_SESSION_VALUE {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetUsersMetadataRetrievalStartedNetworking(
+								value.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
+
+						return true
+					}
+
+					fmt.Println(response, err)
+
+					if err != nil {
+						notification.GetInstance().Push(
+							common.ComposeMessage(
+								translation.GetInstance().GetTranslation("client.networking.users-metadata-retrieval-failure"),
+								err.Error()),
+							time.Second*3,
+							common.NotificationErrorTextColor)
+
+						return true
+					}
+
+					return false
+				})
+		})
+	}
+
 	{
 		// if !sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
 		// 	sound.GetInstance().GetSoundMusicManager().StartMusic(loader.EnergetykMusicSound)
@@ -234,13 +308,19 @@ func (ss *SessionScreen) HandleInput() error {
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
 		dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
 
-	} else if ebiten.IsKeyPressed(ebiten.KeyW) {
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
 		dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
 
-	} else if ebiten.IsKeyPressed(ebiten.KeyS) {
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyS) {
 		dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
 
-	} else if ebiten.IsKeyPressed(ebiten.KeyD) {
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyD) {
 		dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
 	}
 
@@ -306,6 +386,9 @@ func (ss *SessionScreen) HandleInput() error {
 
 	return nil
 }
+
+// objects
+// map(may include )
 
 func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 	ss.world.Clear()

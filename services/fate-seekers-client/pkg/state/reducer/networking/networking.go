@@ -22,6 +22,7 @@ const (
 	SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE     = "session_metadata_retrieval_started"
 	UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_STATE = "update_user_metadata_positions_started_networking_state"
 	EVENT_RETRIEVAL_STARTED_NETWORKING_STATE                = "event_retrieval_started"
+	USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE       = "users_metadata_retrieval_started"
 )
 
 // NetworkingStateReducer represents reducer used for networking state management.
@@ -58,6 +59,9 @@ func (nsr *NetworkingStateReducer) Init() {
 	nsr.store.SetState(
 		EVENT_RETRIEVAL_STARTED_NETWORKING_STATE,
 		value.EVENT_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE)
+	nsr.store.SetState(
+		USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE,
+		value.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE)
 }
 
 func (nsr *NetworkingStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -122,6 +126,11 @@ func (nsr *NetworkingStateReducer) GetProcessor() func(value godux.Action) inter
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{
 					Key: EVENT_RETRIEVAL_STARTED_NETWORKING_STATE, Value: value.Value})
+
+		case action.SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE, Value: value.Value})
 
 		default:
 			return nil
