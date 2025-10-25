@@ -952,7 +952,6 @@ func (h *Handler) GetLobbySet(request *metadatav1.GetLobbySetRequest, stream grp
 			cachedLobbySet, ok := cache.
 				GetInstance().
 				GetLobbySet(request.GetSessionId())
-
 			if !ok {
 				lobbies, exists, err := repository.
 					GetLobbiesRepository().
@@ -990,10 +989,6 @@ func (h *Handler) GetLobbySet(request *metadatav1.GetLobbySetRequest, stream grp
 						Host:   lobby.Host,
 					})
 				}
-
-				cache.
-					GetInstance().
-					EvictLobbySet(request.GetSessionId())
 
 				cache.
 					GetInstance().
@@ -1495,48 +1490,32 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 
 			response.UserMetadata = response.UserMetadata[:0]
 
+			fmt.Println("OUTSIDE")
+
 			cache.
 				GetInstance().
 				BeginMetadataTransaction()
 
-			metadata, ok := cache.
+			fmt.Println("OUTSIDE 1")
+
+			cache.
 				GetInstance().
-				GetMetadata(request.GetIssuer())
+				BeginLobbySetTransaction()
+
+			fmt.Println("INSIDE")
+
+			cachedLobbySet, ok := cache.
+				GetInstance().
+				GetLobbySet(request.GetSessionId())
 			if !ok {
-				var userID int64
-
-				cachedUserID, ok := cache.
-					GetInstance().
-					GetUsers(request.GetIssuer())
-				if ok {
-					userID = cachedUserID
-				} else {
-					user, exists, err := repository.
-						GetUsersRepository().
-						GetByName(request.GetIssuer())
-					if err != nil {
-						cache.
-							GetInstance().
-							CommitMetadataTransaction()
-
-						return err
-					}
-
-					if !exists {
-						cache.
-							GetInstance().
-							CommitMetadataTransaction()
-
-						return ErrUserDoesNotExist
-					}
-
-					userID = user.ID
-				}
-
 				lobbies, exists, err := repository.
 					GetLobbiesRepository().
-					GetByUserID(userID)
+					GetBySessionID(request.GetSessionId())
 				if err != nil {
+					cache.
+						GetInstance().
+						CommitLobbySetTransaction()
+
 					cache.
 						GetInstance().
 						CommitMetadataTransaction()
@@ -1547,50 +1526,219 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 				if !exists {
 					cache.
 						GetInstance().
+						CommitLobbySetTransaction()
+
+					cache.
+						GetInstance().
 						CommitMetadataTransaction()
 
-					return ErrLobbyDoesNotExist
+					return ErrLobbySetDoesNotExist
 				}
+
+				var lobbySet []dto.CacheLobbySetEntity
+
+				for _, lobby := range lobbies {
+					lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
+						ID:     lobby.ID,
+						Issuer: lobby.UserEntity.Name,
+						Skin:   uint64(lobby.Skin),
+						Host:   lobby.Host,
+					})
+				}
+
+				cachedLobbySet = lobbySet
 
 				cache.
 					GetInstance().
-					AddMetadata(
-						request.GetIssuer(),
-						converter.ConvertLobbyEntityToCacheMetadataEntity(
-							lobbies))
+					AddLobbySet(request.GetSessionId(), lobbySet)
+			}
 
-				for _, lobby := range lobbies {
-					if lobby.SessionID == request.GetSessionId() {
-						fmt.Println(lobby, "LOBBY")
+			for _, lobbySet := range cachedLobbySet {
+				cachedMetadata, ok := cache.
+					GetInstance().
+					GetMetadata(lobbySet.Issuer)
+				if !ok {
+					var userID int64
 
-						response.UserMetadata = append(response.UserMetadata, &metadatav1.UserMetadata{
-							Health:     uint64(lobby.Health),
-							Skin:       uint64(lobby.Skin),
-							Eliminated: lobby.Eliminated,
-							Position: &metadatav1.Position{
-								X: lobby.PositionX,
-								Y: lobby.PositionY,
-							},
-						})
+					cachedUserID, ok := cache.
+						GetInstance().
+						GetUsers(lobbySet.Issuer)
+					if ok {
+						userID = cachedUserID
+					} else {
+						user, exists, err := repository.
+							GetUsersRepository().
+							GetByName(lobbySet.Issuer)
+						if err != nil {
+							cache.
+								GetInstance().
+								CommitLobbySetTransaction()
+
+							cache.
+								GetInstance().
+								CommitMetadataTransaction()
+
+							return err
+						}
+
+						if !exists {
+							cache.
+								GetInstance().
+								CommitLobbySetTransaction()
+
+							cache.
+								GetInstance().
+								CommitMetadataTransaction()
+
+							return ErrUserDoesNotExist
+						}
+
+						userID = user.ID
 					}
-				}
-			} else {
-				for _, value := range metadata {
-					if value.SessionID == request.GetSessionId() {
-						fmt.Println(value, "LOBBY VALUE")
 
+					lobbies, exists, err := repository.
+						GetLobbiesRepository().
+						GetByUserID(userID)
+					if err != nil {
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						return err
+					}
+
+					if !exists {
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						return ErrLobbyDoesNotExist
+					}
+
+					metadata := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies)
+
+					cachedMetadata = metadata
+
+					cache.
+						GetInstance().
+						AddMetadata(lobbySet.Issuer, metadata)
+				}
+
+				for _, metadata := range cachedMetadata {
+					if metadata.SessionID == request.GetSessionId() {
 						response.UserMetadata = append(response.UserMetadata, &metadatav1.UserMetadata{
-							Health:     value.Health,
-							Skin:       value.Skin,
-							Eliminated: value.Eliminated,
+							Health:     metadata.Health,
+							Skin:       metadata.Skin,
+							Eliminated: metadata.Eliminated,
 							Position: &metadatav1.Position{
-								X: value.PositionX,
-								Y: value.PositionY,
+								X: metadata.PositionX,
+								Y: metadata.PositionY,
 							},
 						})
 					}
 				}
 			}
+
+			// metadata, ok := cache.
+			// 	GetInstance().
+			// 	GetMetadata(request.GetIssuer())
+			// if !ok {
+			// 	var userID int64
+
+			// 	cachedUserID, ok := cache.
+			// 		GetInstance().
+			// 		GetUsers(request.GetIssuer())
+			// 	if ok {
+			// 		userID = cachedUserID
+			// 	} else {
+			// 		user, exists, err := repository.
+			// 			GetUsersRepository().
+			// 			GetByName(request.GetIssuer())
+			// 		if err != nil {
+			// 			cache.
+			// 				GetInstance().
+			// 				CommitMetadataTransaction()
+
+			// 			return err
+			// 		}
+
+			// 		if !exists {
+			// 			cache.
+			// 				GetInstance().
+			// 				CommitMetadataTransaction()
+
+			// 			return ErrUserDoesNotExist
+			// 		}
+
+			// 		userID = user.ID
+			// 	}
+
+			// 	lobbies, exists, err := repository.
+			// 		GetLobbiesRepository().
+			// 		GetByUserID(userID)
+			// 	if err != nil {
+			// 		cache.
+			// 			GetInstance().
+			// 			CommitMetadataTransaction()
+
+			// 		return err
+			// 	}
+
+			// 	if !exists {
+			// 		cache.
+			// 			GetInstance().
+			// 			CommitMetadataTransaction()
+
+			// 		return ErrLobbyDoesNotExist
+			// 	}
+
+			// 	cache.
+			// 		GetInstance().
+			// 		AddMetadata(
+			// 			request.GetIssuer(),
+			// 			converter.ConvertLobbyEntityToCacheMetadataEntity(
+			// 				lobbies))
+
+			// 	for _, lobby := range lobbies {
+			// 		if lobby.SessionID == request.GetSessionId() {
+			// 			response.UserMetadata = append(response.UserMetadata, &metadatav1.UserMetadata{
+			// 				Health:     uint64(lobby.Health),
+			// 				Skin:       uint64(lobby.Skin),
+			// 				Eliminated: lobby.Eliminated,
+			// 				Position: &metadatav1.Position{
+			// 					X: lobby.PositionX,
+			// 					Y: lobby.PositionY,
+			// 				},
+			// 			})
+			// 		}
+			// 	}
+			// } else {
+			// 	for _, value := range metadata {
+			// 		if value.SessionID == request.GetSessionId() {
+			// 			response.UserMetadata = append(response.UserMetadata, &metadatav1.UserMetadata{
+			// 				Health:     value.Health,
+			// 				Skin:       value.Skin,
+			// 				Eliminated: value.Eliminated,
+			// 				Position: &metadatav1.Position{
+			// 					X: value.PositionX,
+			// 					Y: value.PositionY,
+			// 				},
+			// 			})
+			// 		}
+			// 	}
+			// }
+
+			cache.
+				GetInstance().
+				CommitLobbySetTransaction()
 
 			cache.
 				GetInstance().
@@ -1754,6 +1902,10 @@ func (h *Handler) GetEvents(request *metadatav1.GetEventsRequest, stream grpc.Se
 
 		sessionName = cachedSession.Name
 	}
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
 
 	for {
 		select {
