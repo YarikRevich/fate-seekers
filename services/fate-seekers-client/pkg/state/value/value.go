@@ -146,5 +146,6 @@ var (
 
 // Describes available session reducer store values.
 var (
-	POSITION_SESSION_EMPTY_VALUE dto.Position
+	POSITION_SESSION_EMPTY_VALUE         dto.Position
+	RETRIEVED_USERS_METADATA_EMPTY_VALUE dto.RetrievedUsersMetadataSessionSet = make(dto.RetrievedUsersMetadataSessionSet)
 )

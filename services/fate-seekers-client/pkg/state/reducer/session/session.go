@@ -10,7 +10,9 @@ import (
 
 // Describes all the available session reducer store states.
 const (
-	POSITION_SESSION_STATE = "position"
+	POSITION_SESSION_STATE                 = "position"
+	RETRIEVED_USERS_METADATA_SESSION_STATE = "retrieved_users_metadata"
+	// SESSION_ALREADY_STARTED_METADATA_STATE = "session_already_started"
 )
 
 // SessionStateReducer represents reducer used for session state management.
@@ -21,6 +23,7 @@ type SessionStateReducer struct {
 
 func (ssr *SessionStateReducer) Init() {
 	ssr.store.SetState(POSITION_SESSION_STATE, value.POSITION_SESSION_EMPTY_VALUE)
+	ssr.store.SetState(RETRIEVED_USERS_METADATA_SESSION_STATE, value.RETRIEVED_USERS_METADATA_EMPTY_VALUE)
 }
 
 func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -53,6 +56,10 @@ func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interfac
 
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: POSITION_SESSION_STATE, Value: valueRaw})
+
+		case action.SET_RETRIEVED_USERS_METADATA_SESSION_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: RETRIEVED_USERS_METADATA_SESSION_STATE, Value: value.Value})
 
 		default:
 			return nil

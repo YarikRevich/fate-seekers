@@ -177,6 +177,20 @@ type Position struct {
 	Y float64
 }
 
+// RetrievedUsersMetadataSessionUnit represents retrieved users metadata session content unit.
+type RetrievedUsersMetadataSessionUnit struct {
+	Health             uint64
+	Skin               uint64
+	Active             bool
+	Eliminated         bool
+	AnimationDirection string
+	AnimationStatic    bool
+	Position           Position
+}
+
+// RetrievedUsersMetadataSessionSet represents retrieved users metadata seession content set of units
+type RetrievedUsersMetadataSessionSet map[string]RetrievedUsersMetadataSessionUnit
+
 // RawMovableMetadata represents provided raw movable metadata
 type RawMovableMetadata struct {
 	Rotations  map[string]string   `json:"rotations"`
@@ -189,5 +203,17 @@ type ProcessedMovableMetadataUnit struct {
 	Frames   []*ebiten.Image
 }
 
-// ProcessedMovableMetadataSet reprsents movable metadata set.
+// ProcessedMovableMetadataSet represents movable metadata set.
 type ProcessedMovableMetadataSet map[string]ProcessedMovableMetadataUnit
+
+// Describes all the available moveable rotation directions
+const (
+	LeftMovableRotation      = "left"
+	RightMovableRotation     = "right"
+	UpMovableRotation        = "up"
+	UpLeftMovableRotation    = "up-left"
+	UpRightMovableRotation   = "up-right"
+	DownMovableRotation      = "down"
+	DownLeftMovableRotation  = "down-left"
+	DownRightMovableRotation = "down-right"
+)

@@ -92,10 +92,11 @@ const (
 
 // Describes all the available state actions for session reducer.
 const (
-	INCREMENT_X_POSITION_SESSION_ACTION = "INCREMENT_X_POSITION_SESSION_ACTION"
-	INCREMENT_Y_POSITION_SESSION_ACTION = "INCREMENT_Y_POSITION_SESSION_ACTION"
-	DECREMENT_X_POSITION_SESSION_ACTION = "DECREMENT_X_POSITION_SESSION_ACTION"
-	DECREMENT_Y_POSITION_SESSION_ACTION = "DECREMENT_Y_POSITION_SESSION_ACTION"
+	INCREMENT_X_POSITION_SESSION_ACTION         = "INCREMENT_X_POSITION_SESSION_ACTION"
+	INCREMENT_Y_POSITION_SESSION_ACTION         = "INCREMENT_Y_POSITION_SESSION_ACTION"
+	DECREMENT_X_POSITION_SESSION_ACTION         = "DECREMENT_X_POSITION_SESSION_ACTION"
+	DECREMENT_Y_POSITION_SESSION_ACTION         = "DECREMENT_Y_POSITION_SESSION_ACTION"
+	SET_RETRIEVED_USERS_METADATA_SESSION_ACTION = "SET_RETRIEVED_USERS_METADATA_SESSION_ACTION"
 )
 
 // NewSetActiveScreenAction creates new set active screen action.
@@ -449,5 +450,13 @@ func NewDecrementXPositionSession() godux.Action {
 func NewDecrementYPositionSession() godux.Action {
 	return godux.Action{
 		Type: DECREMENT_Y_POSITION_SESSION_ACTION,
+	}
+}
+
+// NewSetRetrievedUsersMetadataSession creates new set retrieved users metadata session action.
+func NewSetRetrievedUsersMetadataSession(value dto.RetrievedUsersMetadataSessionSet) godux.Action {
+	return godux.Action{
+		Type:  SET_RETRIEVED_USERS_METADATA_SESSION_ACTION,
+		Value: value,
 	}
 }

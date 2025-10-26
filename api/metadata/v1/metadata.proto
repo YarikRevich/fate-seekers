@@ -217,11 +217,12 @@ message GetUsersMetadataRequest {
 
 // Represents common user metadata message.
 message UserMetadata {
-    uint64 health = 1;
-    uint64 skin = 2;
-    bool eliminated = 3;
-    bool active = 4;
-    Position position = 5;
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
+    uint64 health = 2;
+    uint64 skin = 3;
+    bool eliminated = 4;
+    bool active = 5;
+    Position position = 6;
 };
 
 // Represents users metadata retrieval response message.

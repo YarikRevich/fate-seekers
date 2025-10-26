@@ -94,18 +94,6 @@ const (
 	Skin1Movable = "skin/1"
 )
 
-// Describes all the available moveable rotation directions
-const (
-	LeftMovableRotation      = "left"
-	RightMovableRotation     = "right"
-	UpMovableRotation        = "up"
-	UpLeftMovableRotation    = "up-left"
-	UpRightMovableRotation   = "up-right"
-	DownMovableRotation      = "down"
-	DownLeftMovableRotation  = "down-left"
-	DownRightMovableRotation = "down-right"
-)
-
 // Describes all the available animations to be loaded.
 const (
 	SkullAnimation  = "skull/skull.json"

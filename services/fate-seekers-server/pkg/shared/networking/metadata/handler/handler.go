@@ -1490,19 +1490,13 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 
 			response.UserMetadata = response.UserMetadata[:0]
 
-			fmt.Println("OUTSIDE")
-
 			cache.
 				GetInstance().
 				BeginMetadataTransaction()
 
-			fmt.Println("OUTSIDE 1")
-
 			cache.
 				GetInstance().
 				BeginLobbySetTransaction()
-
-			fmt.Println("INSIDE")
 
 			cachedLobbySet, ok := cache.
 				GetInstance().
@@ -1635,8 +1629,10 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 				for _, metadata := range cachedMetadata {
 					if metadata.SessionID == request.GetSessionId() {
 						response.UserMetadata = append(response.UserMetadata, &metadatav1.UserMetadata{
+							Issuer:     lobbySet.Issuer,
 							Health:     metadata.Health,
 							Skin:       metadata.Skin,
+							Active:     metadata.Active,
 							Eliminated: metadata.Eliminated,
 							Position: &metadatav1.Position{
 								X: metadata.PositionX,

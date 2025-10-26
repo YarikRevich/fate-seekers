@@ -306,6 +306,13 @@ func GetPositionSession() dto.Position {
 	return instance.GetState(session.POSITION_SESSION_STATE).(dto.Position)
 }
 
+// GetRetrievedUsersMetadataSession retrieves retrieved users metadata session state value.
+func GetRetrievedUsersMetadataSession() dto.RetrievedUsersMetadataSessionSet {
+	instance := GetInstance()
+
+	return instance.GetState(session.RETRIEVED_USERS_METADATA_SESSION_STATE).(dto.RetrievedUsersMetadataSessionSet)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()

@@ -1,7 +1,6 @@
 package session
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -13,11 +12,14 @@ import (
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
 	metadatastream "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/stream"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/animation/animator"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/animation/direction"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -106,6 +108,9 @@ type SessionScreen struct {
 	// Represents attached user interface.
 	ui *ebitenui.UI
 
+	// Represents attached animator instance.
+	animator *animator.Animator
+
 	// Represents attached pressed user interface.
 	pressedInterface *ebitenui.UI
 
@@ -118,8 +123,11 @@ type SessionScreen struct {
 	// Represents transparent transition effect used for toxic rain event component, when event is ended.
 	toxicRainEventEndTransparentTransitionEffect transition.TransitionEffect
 
-	// Represents global world view.
-	world *ebiten.Image
+	// Represents interface world view.
+	interfaceWorld *ebiten.Image
+
+	// Represents internal world view.
+	internalWorld *ebiten.Image
 
 	// Represents event world view.
 	eventWorld *ebiten.Image
@@ -127,45 +135,6 @@ type SessionScreen struct {
 	// Represents session toxic rain event shader effect.
 	toxicRainEventShaderEffect *toxicrain.ToxicRainEventEffect
 }
-
-// // DirectionFromPoints возвращает направление движения от (px,py) к (x,y).
-// // eps — dead zone: если |dx| и |dy| ≤ eps, вернёт "" (нет движения).
-// func DirectionFromPoints(px, py, x, y, eps float64) string {
-// 	dx := x - px
-// 	dy := y - py
-
-// 	if math.Abs(dx) <= eps && math.Abs(dy) <= eps {
-// 		return "" // no move
-// 	}
-
-// 	ang := math.Atan2(dy, dx) // (-π, π]
-
-// 	step := math.Pi / 4 // 45°
-// 	idx := int(math.Round(ang / step))
-
-// 	idx = ((idx % 8) + 8) % 8
-
-// 	switch idx {
-// 	case 0:
-// 		return RightMovableRotation
-// 	case 1:
-// 		return UpRightMovableRotation
-// 	case 2:
-// 		return UpMovableRotation
-// 	case 3:
-// 		return UpLeftMovableRotation
-// 	case 4:
-// 		return LeftMovableRotation
-// 	case 5:
-// 		return DownLeftMovableRotation
-// 	case 6:
-// 		return DownMovableRotation
-// 	case 7:
-// 		return DownRightMovableRotation
-// 	default:
-// 		return ""
-// 	}
-// }
 
 func (ss *SessionScreen) HandleInput() error {
 	if store.GetUpdateUserMetadataPositionsStartedNetworking() == value.UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_FALSE_VALUE {
@@ -271,8 +240,6 @@ func (ss *SessionScreen) HandleInput() error {
 						return true
 					}
 
-					fmt.Println(response, err)
-
 					if err != nil {
 						notification.GetInstance().Push(
 							common.ComposeMessage(
@@ -282,6 +249,43 @@ func (ss *SessionScreen) HandleInput() error {
 							common.NotificationErrorTextColor)
 
 						return true
+					}
+
+					var (
+						animationDirection string
+						animationStatic    bool
+					)
+
+					for _, userMetadata := range response.GetUserMetadata() {
+						previousUsersMetadata, ok := store.GetRetrievedUsersMetadataSession()[userMetadata.GetIssuer()]
+						if !ok {
+							animationDirection = dto.RightMovableRotation
+							animationStatic = true
+						} else if previousUsersMetadata.Position.X != userMetadata.GetPosition().GetX() ||
+							previousUsersMetadata.Position.Y != userMetadata.GetPosition().GetY() {
+							animationDirection = direction.GetAnimationDirection(
+								previousUsersMetadata.Position.X,
+								previousUsersMetadata.Position.Y,
+								userMetadata.GetPosition().GetX(),
+								userMetadata.GetPosition().GetY())
+						} else {
+							animationDirection = previousUsersMetadata.AnimationDirection
+							animationStatic = true
+						}
+
+						store.GetRetrievedUsersMetadataSession()[userMetadata.GetIssuer()] =
+							dto.RetrievedUsersMetadataSessionUnit{
+								Health:             userMetadata.GetHealth(),
+								Skin:               userMetadata.GetSkin(),
+								Active:             userMetadata.GetActive(),
+								Eliminated:         userMetadata.GetEliminated(),
+								AnimationDirection: animationDirection,
+								AnimationStatic:    animationStatic,
+								Position: dto.Position{
+									X: userMetadata.GetPosition().GetX(),
+									Y: userMetadata.GetPosition().GetY(),
+								},
+							}
 					}
 
 					return false
@@ -324,7 +328,7 @@ func (ss *SessionScreen) HandleInput() error {
 		dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
 	}
 
-	// TODO: update animator.
+	ss.animator.Update()
 
 	if !ss.transparentTransitionEffect.Done() {
 		if !ss.transparentTransitionEffect.OnEnd() {
@@ -387,21 +391,22 @@ func (ss *SessionScreen) HandleInput() error {
 	return nil
 }
 
-// objects
-// map(may include )
-
 func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
-	ss.world.Clear()
+	ss.interfaceWorld.Clear()
 
 	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
 		ss.eventWorld.Clear()
 	}
 
-	ss.ui.Draw(ss.world)
+	ss.ui.Draw(ss.interfaceWorld)
 
-	screen.DrawImage(ss.world, &ebiten.DrawImageOptions{
+	screen.DrawImage(ss.interfaceWorld, &ebiten.DrawImageOptions{
 		ColorM: options.GetTransparentDrawOptions(
 			ss.transparentTransitionEffect.GetValue()).ColorM})
+
+	ss.animator.Draw(ss.internalWorld)
+
+	screen.DrawImage(ss.internalWorld, &ebiten.DrawImageOptions{})
 
 	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
 		switch store.GetEventName() {
@@ -422,14 +427,16 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 // newSessionScreen initializes SessionScreen.
 func newSessionScreen() screen.Screen {
 	return &SessionScreen{
-		ui: builder.Build(),
+		ui:       builder.Build(),
+		animator: animator.NewAnimator(),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(
 			true, 255, 0, 5, time.Microsecond*10),
 		toxicRainEventStartTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(
 			true, 10, 0, 0.5, time.Millisecond*200),
 		toxicRainEventEndTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(
 			false, 0, 10, 0.5, time.Millisecond*200),
-		world:                      ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		interfaceWorld:             ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		internalWorld:              ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		eventWorld:                 ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		toxicRainEventShaderEffect: toxicrain.NewToxicRainEventEffect(),
 	}
