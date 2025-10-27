@@ -13,13 +13,16 @@ import (
 	metadatastream "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/stream"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/animation/animator"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/animation/animator/movable"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/animation/direction"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/camera"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -103,6 +106,11 @@ var (
 	GetInstance = sync.OnceValue[screen.Screen](newSessionScreen)
 )
 
+var (
+	// Represents shared users metadata issuers map.
+	sharedUsersMetadataIssuers = make(map[string]bool)
+)
+
 // SessionScreen represents session screen implementation.
 type SessionScreen struct {
 	// Represents attached user interface.
@@ -110,6 +118,9 @@ type SessionScreen struct {
 
 	// Represents attached animator instance.
 	animator *animator.Animator
+
+	// Represents attached camera instance.
+	camera *camera.Camera
 
 	// Represents attached pressed user interface.
 	pressedInterface *ebitenui.UI
@@ -286,6 +297,33 @@ func (ss *SessionScreen) HandleInput() error {
 									Y: userMetadata.GetPosition().GetY(),
 								},
 							}
+
+						sharedUsersMetadataIssuers[userMetadata.GetIssuer()] = true
+					}
+
+					ss.animator.GetMovables().Prune(sharedUsersMetadataIssuers)
+
+					for issuer := range sharedUsersMetadataIssuers {
+						if issuer != store.GetRepositoryUUID() {
+							retrievedUsersMetadata := store.GetRetrievedUsersMetadataSession()[issuer]
+
+							if !ss.animator.GetMovables().Exists(issuer) {
+								movableUnit := movable.NewMovableUnit(
+									loader.GetMovableSkinsPath(retrievedUsersMetadata.Skin))
+
+								movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
+								movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
+								movableUnit.SetPosition(retrievedUsersMetadata.Position)
+
+								ss.animator.GetMovables().Add(issuer, movableUnit)
+							} else {
+								movableUnit := ss.animator.GetMovables().Get(issuer)
+
+								movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
+								movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
+								movableUnit.SetPosition(retrievedUsersMetadata.Position)
+							}
+						}
 					}
 
 					return false
@@ -312,21 +350,61 @@ func (ss *SessionScreen) HandleInput() error {
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
 		dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
 
+		ss.camera.DecrementPositionX()
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
 		dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
 
+		ss.camera.IncrementPositionY()
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyS) {
 		dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
 
+		ss.camera.DecrementPositionY()
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
 		dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+
+		ss.camera.IncrementPositionX()
 	}
+
+	selectedLobbySet := store.GetSelectedLobbySetUnitMetadata()
+
+	// fmt.Println(store.GetPreviousPositionSession(), store.GetPositionSession())
+
+	if !ss.animator.GetMovables().Exists(selectedLobbySet.Issuer) {
+		movableUnit := movable.NewMovableUnit(
+			loader.GetMovableSkinsPath(selectedLobbySet.Skin))
+
+		movableUnit.SetDirection(dto.RightMovableRotation)
+		movableUnit.SetStatic(true)
+		movableUnit.SetPosition(store.GetPositionSession())
+
+		ss.animator.GetMovables().Add(selectedLobbySet.Issuer, movableUnit)
+	} else {
+		movableUnit := ss.animator.GetMovables().Get(selectedLobbySet.Issuer)
+
+		if store.GetPreviousPositionSession().X != store.GetPositionSession().X ||
+			store.GetPreviousPositionSession().Y != store.GetPositionSession().Y {
+			movableUnit.SetDirection(direction.GetAnimationDirection(
+				store.GetPreviousPositionSession().X,
+				store.GetPreviousPositionSession().Y,
+				store.GetPositionSession().X,
+				store.GetPositionSession().Y))
+			movableUnit.SetStatic(false)
+
+		} else {
+			movableUnit.SetStatic(true)
+		}
+
+		movableUnit.SetPosition(store.GetPositionSession())
+	}
+
+	dispatcher.GetInstance().Dispatch(
+		action.NewSyncPreviousPositionSession())
 
 	ss.animator.Update()
 
@@ -394,6 +472,8 @@ func (ss *SessionScreen) HandleInput() error {
 func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 	ss.interfaceWorld.Clear()
 
+	ss.internalWorld.Clear()
+
 	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
 		ss.eventWorld.Clear()
 	}
@@ -406,7 +486,9 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 
 	ss.animator.Draw(ss.internalWorld)
 
-	screen.DrawImage(ss.internalWorld, &ebiten.DrawImageOptions{})
+	screen.DrawImage(ss.internalWorld, &ebiten.DrawImageOptions{
+		// GeoM: ss.camera.GetWorldMatrix(),
+	})
 
 	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
 		switch store.GetEventName() {
@@ -429,6 +511,7 @@ func newSessionScreen() screen.Screen {
 	return &SessionScreen{
 		ui:       builder.Build(),
 		animator: animator.NewAnimator(),
+		camera:   camera.NewCamera(float64(config.GetWorldWidth()), float64(config.GetWorldHeight())),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(
 			true, 255, 0, 5, time.Microsecond*10),
 		toxicRainEventStartTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(

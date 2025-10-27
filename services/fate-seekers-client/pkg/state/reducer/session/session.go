@@ -11,8 +11,8 @@ import (
 // Describes all the available session reducer store states.
 const (
 	POSITION_SESSION_STATE                 = "position"
+	PREVIOUS_POSITION_SESSION_STATE        = "previous_position"
 	RETRIEVED_USERS_METADATA_SESSION_STATE = "retrieved_users_metadata"
-	// SESSION_ALREADY_STARTED_METADATA_STATE = "session_already_started"
 )
 
 // SessionStateReducer represents reducer used for session state management.
@@ -23,14 +23,22 @@ type SessionStateReducer struct {
 
 func (ssr *SessionStateReducer) Init() {
 	ssr.store.SetState(POSITION_SESSION_STATE, value.POSITION_SESSION_EMPTY_VALUE)
+	ssr.store.SetState(PREVIOUS_POSITION_SESSION_STATE, value.POSITION_SESSION_EMPTY_VALUE)
 	ssr.store.SetState(RETRIEVED_USERS_METADATA_SESSION_STATE, value.RETRIEVED_USERS_METADATA_EMPTY_VALUE)
 }
 
 func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interface{} {
 	return func(value godux.Action) interface{} {
 		switch value.Type {
+		case action.SYNC_PREVIOUS_POSITION_SESSION_ACTION:
+			value := ssr.store.GetState(POSITION_SESSION_STATE).(dto.Position)
+
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: PREVIOUS_POSITION_SESSION_STATE, Value: value})
+
 		case action.INCREMENT_X_POSITION_SESSION_ACTION:
 			valueRaw := ssr.store.GetState(POSITION_SESSION_STATE).(dto.Position)
+
 			valueRaw.X += 1
 
 			return dto.ComposeReducerResult(
@@ -38,6 +46,7 @@ func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interfac
 
 		case action.INCREMENT_Y_POSITION_SESSION_ACTION:
 			valueRaw := ssr.store.GetState(POSITION_SESSION_STATE).(dto.Position)
+
 			valueRaw.Y += 1
 
 			return dto.ComposeReducerResult(
@@ -45,6 +54,7 @@ func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interfac
 
 		case action.DECREMENT_X_POSITION_SESSION_ACTION:
 			valueRaw := ssr.store.GetState(POSITION_SESSION_STATE).(dto.Position)
+
 			valueRaw.X -= 1
 
 			return dto.ComposeReducerResult(
@@ -52,6 +62,7 @@ func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interfac
 
 		case action.DECREMENT_Y_POSITION_SESSION_ACTION:
 			valueRaw := ssr.store.GetState(POSITION_SESSION_STATE).(dto.Position)
+
 			valueRaw.Y -= 1
 
 			return dto.ComposeReducerResult(

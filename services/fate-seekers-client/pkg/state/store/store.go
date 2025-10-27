@@ -306,6 +306,13 @@ func GetPositionSession() dto.Position {
 	return instance.GetState(session.POSITION_SESSION_STATE).(dto.Position)
 }
 
+// GetPreviousPositionSession retrieves previous position session state value.
+func GetPreviousPositionSession() dto.Position {
+	instance := GetInstance()
+
+	return instance.GetState(session.PREVIOUS_POSITION_SESSION_STATE).(dto.Position)
+}
+
 // GetRetrievedUsersMetadataSession retrieves retrieved users metadata session state value.
 func GetRetrievedUsersMetadataSession() dto.RetrievedUsersMetadataSessionSet {
 	instance := GetInstance()

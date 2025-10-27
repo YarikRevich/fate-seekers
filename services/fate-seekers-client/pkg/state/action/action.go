@@ -92,6 +92,7 @@ const (
 
 // Describes all the available state actions for session reducer.
 const (
+	SYNC_PREVIOUS_POSITION_SESSION_ACTION       = "SYNC_PREVIOUS_POSITION_SESSION_ACTION"
 	INCREMENT_X_POSITION_SESSION_ACTION         = "INCREMENT_X_POSITION_SESSION_ACTION"
 	INCREMENT_Y_POSITION_SESSION_ACTION         = "INCREMENT_Y_POSITION_SESSION_ACTION"
 	DECREMENT_X_POSITION_SESSION_ACTION         = "DECREMENT_X_POSITION_SESSION_ACTION"
@@ -422,6 +423,13 @@ func NewSetSessionAlreadyStartedMetadata(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_SESSION_ALREADY_STARTED_METADATA_ACTION,
 		Value: value,
+	}
+}
+
+// NewSyncPreviousPositionSession creates new sync previous position session action.
+func NewSyncPreviousPositionSession() godux.Action {
+	return godux.Action{
+		Type: SYNC_PREVIOUS_POSITION_SESSION_ACTION,
 	}
 }
 

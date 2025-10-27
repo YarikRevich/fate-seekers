@@ -24,13 +24,14 @@ import (
 )
 
 var (
-	ErrReadingFile      = errors.New("err happened during file read operation")
-	ErrLoadingShader    = errors.New("err happened during shader loading operation")
-	ErrLoadingFont      = errors.New("err happened during font loading operation")
-	ErrLoadingStatic    = errors.New("err happened during image loading operation")
-	ErrLoadingAnimation = errors.New("err happened during animation loading operation")
-	ErrLoadingMovable   = errors.New("err happened during movable loading operation")
-	ErrParsingMovable   = errors.New("err happened during movable parsing operation")
+	ErrReadingFile                       = errors.New("err happened during file read operation")
+	ErrLoadingShader                     = errors.New("err happened during shader loading operation")
+	ErrLoadingFont                       = errors.New("err happened during font loading operation")
+	ErrLoadingStatic                     = errors.New("err happened during image loading operation")
+	ErrLoadingAnimation                  = errors.New("err happened during animation loading operation")
+	ErrLoadingMovable                    = errors.New("err happened during movable loading operation")
+	ErrIncorrectMovableSkinIdentificator = errors.New("err happened incorrect movable skin identificator has been provided")
+	ErrParsingMovable                    = errors.New("err happened during movable parsing operation")
 )
 
 var (
@@ -89,9 +90,21 @@ const (
 	UkrainianSharedTemplate = "uk/uk_shared.json"
 )
 
-// Describes all the available movables to be loaded
+// Describes all the available movables to be loaded.
 const (
-	Skin1Movable = "skin/1"
+	Skins0Movable = "skins/0"
+	Skins1Movable = "skins/0"
+	Skins2Movable = "skins/0"
+	Skins3Movable = "skins/0"
+	Skins4Movable = "skins/0"
+	Skins5Movable = "skins/0"
+	Skins6Movable = "skins/0"
+	Skins7Movable = "skins/0"
+)
+
+// Describes movable metadata file.
+const (
+	MovableMetadataFile = "metadata.json"
 )
 
 // Describes all the available animations to be loaded.
@@ -337,6 +350,33 @@ func (l *Loader) GetSoundFX(name string) *vorbis.Stream {
 	return stream
 }
 
+// GetMovableSkinsPath retrieves movable skins path according to the provided
+// skin identificator.
+func GetMovableSkinsPath(skin uint64) string {
+	switch skin {
+	case 0:
+		return Skins0Movable
+	case 1:
+		return Skins1Movable
+	case 2:
+		return Skins2Movable
+	case 3:
+		return Skins3Movable
+	case 4:
+		return Skins4Movable
+	case 5:
+		return Skins5Movable
+	case 6:
+		return Skins6Movable
+	case 7:
+		return Skins7Movable
+	default:
+		logging.GetInstance().Fatal(ErrIncorrectMovableSkinIdentificator.Error())
+
+		return ""
+	}
+}
+
 // GetMovable retrieves movable content with the given name.
 func (l *Loader) GetMovable(name string) dto.ProcessedMovableMetadataSet {
 	result, ok := l.movable.Load(name)
@@ -344,7 +384,7 @@ func (l *Loader) GetMovable(name string) dto.ProcessedMovableMetadataSet {
 		return result.(dto.ProcessedMovableMetadataSet)
 	}
 
-	file, err := common.ReadFile(filepath.Join(MovablePath, name))
+	file, err := common.ReadFile(filepath.Join(MovablePath, name, MovableMetadataFile))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}

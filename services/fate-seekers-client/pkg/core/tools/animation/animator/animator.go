@@ -5,32 +5,30 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// TODO: create animator with direction objects
-
 // Animator represents movable animation animator.
 type Animator struct {
 	// Represents a set of movable objects, which are used for in the animator processing.
 	movables *movable.Movables
 }
 
+// GetMovables retrieves configured animator movables holders.
 func (a *Animator) GetMovables() *movable.Movables {
 	return a.movables
 }
 
+// Clean performs clean operation for the configured animator holders.
 func (a *Animator) Clean() {
 	a.movables.Clean()
 }
 
+// Update performs update operation for the configured animator holders.
 func (a *Animator) Update() {
-	for _, movable := range a.movables {
-		movable.Update()
-	}
+	a.movables.Update()
 }
 
+// Draw performs draw operation for the provided screen image for configured animator holders.
 func (a *Animator) Draw(screen *ebiten.Image) {
-	for _, movable := range a.movables {
-		movable.Draw(screen)
-	}
+	a.movables.Draw(screen)
 }
 
 // NewAnimator initializes Animator.

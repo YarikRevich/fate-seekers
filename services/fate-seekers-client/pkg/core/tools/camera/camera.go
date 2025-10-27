@@ -62,6 +62,26 @@ func (c *Camera) TranslatePositionY(y float64) {
 	c.position[1] += y
 }
 
+// IncrementPositionX increments camera horizontal position.
+func (c *Camera) IncrementPositionX() {
+	c.position[0] += 1
+}
+
+// IncrementPositionY increments camera vertical position.
+func (c *Camera) IncrementPositionY() {
+	c.position[1] += 1
+}
+
+// DecrementPositionX decrements camera horizontal position.
+func (c *Camera) DecrementPositionX() {
+	c.position[0] -= 1
+}
+
+// DecrementPositionY decrements camera vertical position.
+func (c *Camera) DecrementPositionY() {
+	c.position[1] -= 1
+}
+
 // ZoomIn zooms in camera.
 func (c *Camera) ZoomIn() {
 	c.zoom++
