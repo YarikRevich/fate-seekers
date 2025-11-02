@@ -61,6 +61,9 @@ func (ms *MenuScreen) HandleInput() error {
 			action.NewSetRetrievedLobbySetMetadata([]dto.RetrievedLobbySetMetadata{}))
 
 		dispatcher.GetInstance().Dispatch(
+			action.NewSetSelectedLobbySetUnitMetadata(nil))
+
+		dispatcher.GetInstance().Dispatch(
 			action.NewSetSelectedSessionMetadata(nil))
 
 		dispatcher.GetInstance().Dispatch(

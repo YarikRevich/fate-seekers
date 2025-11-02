@@ -44,6 +44,9 @@ type LobbyScreen struct {
 
 	// Represents global world view.
 	world *ebiten.Image
+
+	// Represents internal state reset flag.
+	stateReset bool
 }
 
 func (ls *LobbyScreen) HandleInput() error {
@@ -74,7 +77,7 @@ func (ls *LobbyScreen) HandleInput() error {
 							GetInstance().
 							Dispatch(
 								action.NewSetStateResetApplicationAction(
-									value.STATE_RESET_APPLICATION_TRUE_VALUE))
+									value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 						dispatcher.
 							GetInstance().
@@ -100,7 +103,9 @@ func (ls *LobbyScreen) HandleInput() error {
 						}
 					}
 
-					if isLobbySetUpdated {
+					if isLobbySetUpdated || ls.stateReset {
+						ls.stateReset = false
+
 						for _, value := range response.GetLobbySet() {
 							if value.GetIssuer() == store.GetRepositoryUUID() {
 								dispatcher.
@@ -187,7 +192,7 @@ func (ls *LobbyScreen) HandleInput() error {
 							GetInstance().
 							Dispatch(
 								action.NewSetStateResetApplicationAction(
-									value.STATE_RESET_APPLICATION_TRUE_VALUE))
+									value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 						dispatcher.
 							GetInstance().
@@ -282,7 +287,7 @@ func newLobbyScreen() screen.Screen {
 						GetInstance().
 						Dispatch(
 							action.NewSetStateResetApplicationAction(
-								value.STATE_RESET_APPLICATION_TRUE_VALUE))
+								value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 					dispatcher.
 						GetInstance().
@@ -309,9 +314,18 @@ func newLobbyScreen() screen.Screen {
 			})
 	})
 
+	instance := &LobbyScreen{
+		ui: builder.Build(
+			lobby.GetInstance().GetContainer()),
+		transparentTransitionEffect: transparentTransitionEffect,
+		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+	}
+
 	lobby.GetInstance().SetBackCallback(func() {
 		handler.PerformRemoveLobby(store.GetSelectedSessionMetadata().ID, func(err error) {
 			transparentTransitionEffect.Reset()
+
+			instance.stateReset = true
 
 			lobby.GetInstance().HideStartButton()
 
@@ -338,10 +352,5 @@ func newLobbyScreen() screen.Screen {
 
 	lobby.GetInstance().HideStartButton()
 
-	return &LobbyScreen{
-		ui: builder.Build(
-			lobby.GetInstance().GetContainer()),
-		transparentTransitionEffect: transparentTransitionEffect,
-		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
-	}
+	return instance
 }

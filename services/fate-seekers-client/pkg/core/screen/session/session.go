@@ -262,26 +262,23 @@ func (ss *SessionScreen) HandleInput() error {
 						return true
 					}
 
-					var (
-						animationDirection string
-						animationStatic    bool
-					)
+					var animationDirection string
 
 					for _, userMetadata := range response.GetUserMetadata() {
 						previousUsersMetadata, ok := store.GetRetrievedUsersMetadataSession()[userMetadata.GetIssuer()]
 						if !ok {
 							animationDirection = dto.RightMovableRotation
-							animationStatic = true
-						} else if previousUsersMetadata.Position.X != userMetadata.GetPosition().GetX() ||
-							previousUsersMetadata.Position.Y != userMetadata.GetPosition().GetY() {
-							animationDirection = direction.GetAnimationDirection(
-								previousUsersMetadata.Position.X,
-								previousUsersMetadata.Position.Y,
-								userMetadata.GetPosition().GetX(),
-								userMetadata.GetPosition().GetY())
 						} else {
-							animationDirection = previousUsersMetadata.AnimationDirection
-							animationStatic = true
+							if previousUsersMetadata.Position.X != userMetadata.GetPosition().GetX() ||
+								previousUsersMetadata.Position.Y != userMetadata.GetPosition().GetY() {
+								animationDirection = direction.GetAnimationDirection(
+									previousUsersMetadata.Position.X,
+									previousUsersMetadata.Position.Y,
+									userMetadata.GetPosition().GetX(),
+									userMetadata.GetPosition().GetY())
+							} else {
+								animationDirection = previousUsersMetadata.AnimationDirection
+							}
 						}
 
 						store.GetRetrievedUsersMetadataSession()[userMetadata.GetIssuer()] =
@@ -291,38 +288,38 @@ func (ss *SessionScreen) HandleInput() error {
 								Active:             userMetadata.GetActive(),
 								Eliminated:         userMetadata.GetEliminated(),
 								AnimationDirection: animationDirection,
-								AnimationStatic:    animationStatic,
+								AnimationStatic:    userMetadata.GetStatic(),
 								Position: dto.Position{
 									X: userMetadata.GetPosition().GetX(),
 									Y: userMetadata.GetPosition().GetY(),
 								},
 							}
 
-						sharedUsersMetadataIssuers[userMetadata.GetIssuer()] = true
+						if userMetadata.GetIssuer() != store.GetRepositoryUUID() {
+							sharedUsersMetadataIssuers[userMetadata.GetIssuer()] = true
+						}
 					}
 
-					ss.animator.GetMovables().Prune(sharedUsersMetadataIssuers)
+					ss.animator.GetMovables().PruneSecondary(sharedUsersMetadataIssuers)
 
 					for issuer := range sharedUsersMetadataIssuers {
-						if issuer != store.GetRepositoryUUID() {
-							retrievedUsersMetadata := store.GetRetrievedUsersMetadataSession()[issuer]
+						retrievedUsersMetadata := store.GetRetrievedUsersMetadataSession()[issuer]
 
-							if !ss.animator.GetMovables().Exists(issuer) {
-								movableUnit := movable.NewMovableUnit(
-									loader.GetMovableSkinsPath(retrievedUsersMetadata.Skin))
+						if !ss.animator.GetMovables().SecondaryExists(issuer) {
+							movableUnit := movable.NewMovableUnit(
+								loader.GetMovableSkinsPath(retrievedUsersMetadata.Skin))
 
-								movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
-								movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
-								movableUnit.SetPosition(retrievedUsersMetadata.Position)
+							movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
+							movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
+							movableUnit.AddPosition(retrievedUsersMetadata.Position)
 
-								ss.animator.GetMovables().Add(issuer, movableUnit)
-							} else {
-								movableUnit := ss.animator.GetMovables().Get(issuer)
+							ss.animator.GetMovables().AddSecondary(issuer, movableUnit)
+						} else {
+							movableUnit := ss.animator.GetMovables().GetSecondary(issuer)
 
-								movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
-								movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
-								movableUnit.SetPosition(retrievedUsersMetadata.Position)
-							}
+							movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
+							movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
+							movableUnit.AddPosition(retrievedUsersMetadata.Position)
 						}
 					}
 
@@ -373,19 +370,17 @@ func (ss *SessionScreen) HandleInput() error {
 
 	selectedLobbySet := store.GetSelectedLobbySetUnitMetadata()
 
-	// fmt.Println(store.GetPreviousPositionSession(), store.GetPositionSession())
-
-	if !ss.animator.GetMovables().Exists(selectedLobbySet.Issuer) {
+	if !ss.animator.GetMovables().MainExists(selectedLobbySet.Issuer) {
 		movableUnit := movable.NewMovableUnit(
 			loader.GetMovableSkinsPath(selectedLobbySet.Skin))
 
 		movableUnit.SetDirection(dto.RightMovableRotation)
 		movableUnit.SetStatic(true)
-		movableUnit.SetPosition(store.GetPositionSession())
+		movableUnit.AddPosition(store.GetPositionSession())
 
-		ss.animator.GetMovables().Add(selectedLobbySet.Issuer, movableUnit)
+		ss.animator.GetMovables().AddMain(selectedLobbySet.Issuer, movableUnit)
 	} else {
-		movableUnit := ss.animator.GetMovables().Get(selectedLobbySet.Issuer)
+		movableUnit := ss.animator.GetMovables().GetMain(selectedLobbySet.Issuer)
 
 		if store.GetPreviousPositionSession().X != store.GetPositionSession().X ||
 			store.GetPreviousPositionSession().Y != store.GetPositionSession().Y {
@@ -400,7 +395,7 @@ func (ss *SessionScreen) HandleInput() error {
 			movableUnit.SetStatic(true)
 		}
 
-		movableUnit.SetPosition(store.GetPositionSession())
+		movableUnit.AddPosition(store.GetPositionSession())
 	}
 
 	dispatcher.GetInstance().Dispatch(

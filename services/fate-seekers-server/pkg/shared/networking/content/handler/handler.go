@@ -108,6 +108,91 @@ func (h *Handler) Process(key string, value []byte) error {
 		cache.
 			GetInstance().
 			CommitMetadataTransaction()
+	case contentv1.UPDATE_USER_METADATA_STATIC:
+		var message contentv1.UpdateUserMetadataStaticRequest
+		if err := proto.Unmarshal(value, &message); err != nil {
+			return err
+		}
+
+		cache.
+			GetInstance().
+			BeginMetadataTransaction()
+
+		metadata, ok := cache.
+			GetInstance().
+			GetMetadata(message.GetIssuer())
+		if !ok {
+			var userID int64
+
+			cachedUserID, ok := cache.
+				GetInstance().
+				GetUsers(message.GetIssuer())
+			if ok {
+				userID = cachedUserID
+			} else {
+				user, exists, err := repository.
+					GetUsersRepository().
+					GetByName(message.GetIssuer())
+				if err != nil {
+					cache.
+						GetInstance().
+						CommitMetadataTransaction()
+
+					return err
+				}
+
+				if !exists {
+					cache.
+						GetInstance().
+						CommitMetadataTransaction()
+
+					return ErrUserDoesNotExist
+				}
+
+				userID = user.ID
+			}
+
+			lobbies, exists, err := repository.
+				GetLobbiesRepository().
+				GetByUserID(userID)
+			if err != nil {
+				cache.
+					GetInstance().
+					CommitMetadataTransaction()
+
+				return err
+			}
+
+			if !exists {
+				cache.
+					GetInstance().
+					CommitMetadataTransaction()
+
+				return ErrLobbyDoesNotExist
+			}
+
+			newLobbies := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies)
+
+			for _, newLobby := range newLobbies {
+				if newLobby.LobbyID == message.GetLobbyId() {
+					newLobby.PositionStatic = message.GetStatic()
+				}
+			}
+
+			cache.
+				GetInstance().
+				AddMetadata(message.GetIssuer(), newLobbies)
+		} else {
+			for _, lobby := range metadata {
+				if lobby.LobbyID == message.GetLobbyId() {
+					lobby.PositionStatic = message.GetStatic()
+				}
+			}
+		}
+
+		cache.
+			GetInstance().
+			CommitMetadataTransaction()
 	case contentv1.OPEN_GENERATED_CHEST:
 	case contentv1.OPEN_GENERATED_HEALTH_PACK:
 	case contentv1.SEND_CHAT_MESSAGE:

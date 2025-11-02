@@ -26,15 +26,16 @@ func ConvertLobbyEntityToCacheMetadataEntity(
 
 	for _, lobby := range input {
 		output = append(output, &dto.CacheMetadataEntity{
-			LobbyID:    lobby.ID,
-			SessionID:  lobby.SessionID,
-			PositionX:  lobby.PositionX,
-			PositionY:  lobby.PositionY,
-			Skin:       uint64(lobby.Skin),
-			Health:     uint64(lobby.Health),
-			Active:     lobby.Active,
-			Eliminated: lobby.Eliminated,
-			Host:       lobby.Host,
+			LobbyID:        lobby.ID,
+			SessionID:      lobby.SessionID,
+			PositionX:      lobby.PositionX,
+			PositionY:      lobby.PositionY,
+			PositionStatic: lobby.PositionStatic,
+			Skin:           uint64(lobby.Skin),
+			Health:         uint64(lobby.Health),
+			Active:         lobby.Active,
+			Eliminated:     lobby.Eliminated,
+			Host:           lobby.Host,
 		})
 	}
 

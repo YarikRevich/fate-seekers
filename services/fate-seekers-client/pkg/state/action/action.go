@@ -92,6 +92,7 @@ const (
 
 // Describes all the available state actions for session reducer.
 const (
+	SET_STATIC_POSITION_SESSION_ACTION          = "SET_STATIC_POSITION_SESSION_ACTION"
 	SYNC_PREVIOUS_POSITION_SESSION_ACTION       = "SYNC_PREVIOUS_POSITION_SESSION_ACTION"
 	INCREMENT_X_POSITION_SESSION_ACTION         = "INCREMENT_X_POSITION_SESSION_ACTION"
 	INCREMENT_Y_POSITION_SESSION_ACTION         = "INCREMENT_Y_POSITION_SESSION_ACTION"
@@ -422,6 +423,14 @@ func NewSetSelectedLobbySetUnitMetadata(value *dto.SelectedLobbySetUnitMetadata)
 func NewSetSessionAlreadyStartedMetadata(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_SESSION_ALREADY_STARTED_METADATA_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetStaticPositionSession creates new set static position session action.
+func NewSetStaticPositionSession(value bool) godux.Action {
+	return godux.Action{
+		Type:  SET_STATIC_POSITION_SESSION_ACTION,
 		Value: value,
 	}
 }

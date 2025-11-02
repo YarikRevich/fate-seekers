@@ -137,7 +137,7 @@ func (gsms *getSessionMetadataSubmitter) Submit(sessionID int64, callback func(r
 						GetInstance().
 						Dispatch(
 							action.NewSetStateResetApplicationAction(
-								value.STATE_RESET_APPLICATION_TRUE_VALUE))
+								value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 					dispatcher.GetInstance().Dispatch(
 						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
@@ -240,7 +240,7 @@ func (glsms *getLobbySetMetadataSubmitter) Submit(sessionID int64, callback func
 						GetInstance().
 						Dispatch(
 							action.NewSetStateResetApplicationAction(
-								value.STATE_RESET_APPLICATION_TRUE_VALUE))
+								value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 					dispatcher.GetInstance().Dispatch(
 						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
@@ -342,7 +342,7 @@ func (ges *getEventsSubmitter) Submit(sessionID int64, callback func(response *m
 						GetInstance().
 						Dispatch(
 							action.NewSetStateResetApplicationAction(
-								value.STATE_RESET_APPLICATION_TRUE_VALUE))
+								value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 					dispatcher.GetInstance().Dispatch(
 						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
@@ -411,7 +411,7 @@ func newGetEventsSubmitter() *getEventsSubmitter {
 // 					GetInstance().
 // 					Dispatch(
 // 						action.NewSetStateResetApplicationAction(
-// 							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+// 							value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 // 				dispatcher.GetInstance().Dispatch(
 // 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
@@ -488,7 +488,7 @@ func (gums *getUsersMetadataSubmitter) Submit(sessionID int64, callback func(res
 						GetInstance().
 						Dispatch(
 							action.NewSetStateResetApplicationAction(
-								value.STATE_RESET_APPLICATION_TRUE_VALUE))
+								value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 					dispatcher.GetInstance().Dispatch(
 						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))

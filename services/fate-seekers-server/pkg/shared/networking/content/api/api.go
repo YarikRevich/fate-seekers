@@ -4,7 +4,8 @@ package contentv1
 // by content connector.
 const (
 	UPDATE_USER_METADATA_POSITIONS = "0"
-	OPEN_GENERATED_CHEST           = "1"
-	OPEN_GENERATED_HEALTH_PACK     = "2"
-	SEND_CHAT_MESSAGE              = "3"
+	UPDATE_USER_METADATA_STATIC    = "1"
+	OPEN_GENERATED_CHEST           = "2"
+	OPEN_GENERATED_HEALTH_PACK     = "3"
+	SEND_CHAT_MESSAGE              = "4"
 )

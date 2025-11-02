@@ -46,6 +46,7 @@ CREATE TABLE lobbies (
     eliminated BOOLEAN NOT NULL,
     position_x REAL NOT NULL,
     position_y REAL NOT NULL,
+    position_static BOOLEAN NOT NULL,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
     FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE

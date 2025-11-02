@@ -92,15 +92,16 @@ func Run() {
 						GetLobbiesRepository().
 						InsertOrUpdate(
 							dto.LobbiesRepositoryInsertOrUpdateRequest{
-								UserID:     userID,
-								SessionID:  metadata.SessionID,
-								Skin:       metadata.Skin,
-								Health:     metadata.Health,
-								Active:     metadata.Active,
-								Eliminated: metadata.Eliminated,
-								Host:       metadata.Host,
-								PositionX:  metadata.PositionX,
-								PositionY:  metadata.PositionY,
+								UserID:         userID,
+								SessionID:      metadata.SessionID,
+								Skin:           metadata.Skin,
+								Health:         metadata.Health,
+								Active:         metadata.Active,
+								Eliminated:     metadata.Eliminated,
+								Host:           metadata.Host,
+								PositionX:      metadata.PositionX,
+								PositionY:      metadata.PositionY,
+								PositionStatic: metadata.PositionStatic,
 							})
 					if err != nil {
 						cache.

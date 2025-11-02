@@ -186,6 +186,7 @@ type RetrievedUsersMetadataSessionUnit struct {
 	AnimationDirection string
 	AnimationStatic    bool
 	Position           Position
+	Change             time.Time
 }
 
 // RetrievedUsersMetadataSessionSet represents retrieved users metadata seession content set of units
@@ -216,4 +217,16 @@ const (
 	DownMovableRotation      = "down"
 	DownLeftMovableRotation  = "down-left"
 	DownRightMovableRotation = "down-right"
+)
+
+// AnimatorMovablePositionItem represents animator movable position item.
+type AnimatorMovablePositionItem struct {
+	Issuer string
+	Type   int
+}
+
+// Describes all the available animator movable object position item type.
+const (
+	AnimatorMovablePositionItemMain = iota
+	AnimatorMovablePositionItemSecondary
 )

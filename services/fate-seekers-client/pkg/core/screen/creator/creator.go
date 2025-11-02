@@ -1,7 +1,6 @@
 package creator
 
 import (
-	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -106,11 +105,7 @@ func newCreatorScreen() screen.Screen {
 						time.Second*3,
 						common.NotificationErrorTextColor)
 				} else {
-					fmt.Println("SENT CREATE SESSION REQUEST")
-
 					handler.PerformCreateSession(name, seedUint, func(err error) {
-						fmt.Println("RECEIVED CREATE SESSION RESPONSE", err)
-
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetSessionCreationStartedNetworkingAction(
 								value.SESSION_CREATION_STARTED_NETWORKING_FALSE_VALUE))

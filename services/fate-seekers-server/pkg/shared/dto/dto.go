@@ -186,15 +186,16 @@ type GenerationsRepositoryInsertOrUpdateRequest struct {
 
 // LobbiesRepositoryInsertOrUpdateRequest represents lobbies repository entity update request.
 type LobbiesRepositoryInsertOrUpdateRequest struct {
-	UserID     int64
-	SessionID  int64
-	Skin       uint64
-	Health     uint64
-	Active     bool
-	Host       bool
-	Eliminated bool
-	PositionX  float64
-	PositionY  float64
+	UserID         int64
+	SessionID      int64
+	Skin           uint64
+	Health         uint64
+	Active         bool
+	Host           bool
+	Eliminated     bool
+	PositionX      float64
+	PositionY      float64
+	PositionStatic bool
 }
 
 // CacheSessionEntity represent cache session entity used by global networking cache.
@@ -207,15 +208,16 @@ type CacheSessionEntity struct {
 
 // CacheMetadataEntity represent cache metadata entity used by global networking cache.
 type CacheMetadataEntity struct {
-	LobbyID    int64
-	SessionID  int64
-	PositionX  float64
-	PositionY  float64
-	Skin       uint64
-	Health     uint64
-	Active     bool
-	Eliminated bool
-	Host       bool
+	LobbyID        int64
+	SessionID      int64
+	PositionX      float64
+	PositionY      float64
+	PositionStatic bool
+	Skin           uint64
+	Health         uint64
+	Active         bool
+	Eliminated     bool
+	Host           bool
 }
 
 // CacheLobbySetEntity represent cache lobby set entity used by global networking cache.

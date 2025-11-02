@@ -1,7 +1,6 @@
 package store
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
@@ -428,8 +427,6 @@ func newStore() *godux.Store {
 		if result != nil {
 			return result
 		}
-
-		fmt.Println(action.Type)
 
 		return nil
 	})

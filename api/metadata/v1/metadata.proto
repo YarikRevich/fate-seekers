@@ -223,6 +223,9 @@ message UserMetadata {
     bool eliminated = 4;
     bool active = 5;
     Position position = 6;
+    
+    // Represents current animation state.
+    bool static = 7;
 };
 
 // Represents users metadata retrieval response message.

@@ -317,15 +317,16 @@ func (w *lobbiesRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.Lo
 			"host",
 		}),
 	}).Create(&entity.LobbyEntity{
-		UserID:     request.UserID,
-		SessionID:  request.SessionID,
-		Skin:       int64(request.Skin),
-		Health:     int64(request.Health),
-		Active:     request.Active,
-		Host:       request.Host,
-		Eliminated: request.Eliminated,
-		PositionX:  request.PositionX,
-		PositionY:  request.PositionY,
+		UserID:         request.UserID,
+		SessionID:      request.SessionID,
+		Skin:           int64(request.Skin),
+		Health:         int64(request.Health),
+		Active:         request.Active,
+		Host:           request.Host,
+		Eliminated:     request.Eliminated,
+		PositionX:      request.PositionX,
+		PositionY:      request.PositionY,
+		PositionStatic: request.PositionStatic,
 	}).Error
 
 	if err != nil {

@@ -32,6 +32,9 @@ type updateUserMetadataPositionsSubmitter struct {
 
 	// Represents previously retrieved position value.
 	previousPosition dto.Position
+
+	// Represents static position value.
+	staticPosition bool
 }
 
 // close performs stream submitter close operation.
@@ -61,6 +64,32 @@ func (uumps *updateUserMetadataPositionsSubmitter) Submit(
 				position := store.GetPositionSession()
 
 				if position == uumps.previousPosition {
+					if !uumps.staticPosition {
+						message, err := proto.Marshal(&contentv1.UpdateUserMetadataStaticRequest{
+							Issuer:  store.GetRepositoryUUID(),
+							LobbyId: lobbyID,
+							Static:  true,
+						})
+						if err != nil {
+							if callback(err) {
+								uumps.close()
+							}
+
+							return
+						}
+
+						err = handler.GetInstance().Send(contentv1.UPDATE_USER_METADATA_STATIC, message)
+						if err != nil {
+							if callback(err) {
+								uumps.close()
+							}
+
+							return
+						}
+
+						uumps.staticPosition = true
+					}
+
 					continue
 				}
 
@@ -90,6 +119,32 @@ func (uumps *updateUserMetadataPositionsSubmitter) Submit(
 				}
 
 				uumps.previousPosition = position
+
+				if uumps.staticPosition {
+					message, err := proto.Marshal(&contentv1.UpdateUserMetadataStaticRequest{
+						Issuer:  store.GetRepositoryUUID(),
+						LobbyId: lobbyID,
+						Static:  false,
+					})
+					if err != nil {
+						if callback(err) {
+							uumps.close()
+						}
+
+						return
+					}
+
+					err = handler.GetInstance().Send(contentv1.UPDATE_USER_METADATA_STATIC, message)
+					if err != nil {
+						if callback(err) {
+							uumps.close()
+						}
+
+						return
+					}
+
+					uumps.staticPosition = false
+				}
 
 				if callback(nil) {
 					uumps.close()

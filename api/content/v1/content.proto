@@ -22,6 +22,17 @@ message UpdateUserMetadataPositionsRequest {
 message UpdateUserMetadataPositionsResponse {
 };
 
+// UpdateUserMetadataStaticRequest represents users static update request message.
+message UpdateUserMetadataStaticRequest {
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
+    int64 lobby_id = 2;
+    bool static = 3;
+};
+
+// UpdateUserMetadataStaticResponse represents users static update response message;
+message UpdateUserMetadataStaticResponse {
+};
+
 // OpenGeneratedChestRequest represents open generation chest request message.
 message OpenGeneratedChestRequest {
     string issuer = 1 [(buf.validate.field).string.uuid = true];

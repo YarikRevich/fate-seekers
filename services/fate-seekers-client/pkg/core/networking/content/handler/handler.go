@@ -44,30 +44,6 @@ func (h *Handler) Send(key string, value []byte) error {
 		})
 }
 
-// // PerformGetUserMetadataPositions performs get user positions retrieval.
-// func (h *Handler) PerformGetUserMetadataPositions(callback func(err error)) {
-// 	go func() {
-// 		message, err := proto.Marshal(&contentv1.GetUserMetadataPositionsRequest{
-// 			Issuer:    store.GetRepositoryUUID(),
-// 			SessionId: "",
-// 		})
-// 		if err != nil {
-// 			callback(err)
-
-// 			return
-// 		}
-
-// 		err = h.send(api.GET_USER_METADATA_POSITIONS, message)
-// 		if err != nil {
-// 			callback(err)
-
-// 			return
-// 		}
-
-// 		callback(nil)
-// 	}()
-// }
-
 // newHandler initializes Handler.
 func newHandler() *Handler {
 	configuration := udpt.NewDefaultConfig()
