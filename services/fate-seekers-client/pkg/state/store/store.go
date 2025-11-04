@@ -17,6 +17,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/session"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/statistics"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/travel"
 	"github.com/luisvinicius167/godux"
 )
 
@@ -319,6 +320,13 @@ func GetRetrievedUsersMetadataSession() dto.RetrievedUsersMetadataSessionSet {
 	return instance.GetState(session.RETRIEVED_USERS_METADATA_SESSION_STATE).(dto.RetrievedUsersMetadataSessionSet)
 }
 
+// GetResetTravel retrieves reset travel state value.
+func GetResetTravel() string {
+	instance := GetInstance()
+
+	return instance.GetState(travel.RESET_TRAVEL_STATE).(string)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()
@@ -361,6 +369,9 @@ func newStore() *godux.Store {
 
 	sessionReducer := session.NewSessionStateReducer(store)
 	sessionReducer.Init()
+
+	travelReducer := travel.NewTravelStateReducer(store)
+	travelReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
@@ -424,6 +435,11 @@ func newStore() *godux.Store {
 		}
 
 		result = sessionReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = travelReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

@@ -10,6 +10,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -35,11 +36,21 @@ type TravelScreen struct {
 func (ts *TravelScreen) HandleInput() error {
 	ts.ui.Update()
 
+	if store.GetResetTravel() == value.RESET_TRAVEL_FALSE_VALUE {
+		ts.loadingStarsParticleEffect.Reset()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetResetTravel(value.RESET_TRAVEL_TRUE_VALUE))
+	}
+
 	if !ts.loadingStarsParticleEffect.Done() {
 		if !ts.loadingStarsParticleEffect.OnEnd() {
 			ts.loadingStarsParticleEffect.Update()
 		} else {
 			ts.loadingStarsParticleEffect.Clean()
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetResetTravel(value.RESET_TRAVEL_FALSE_VALUE))
 
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))

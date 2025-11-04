@@ -16,6 +16,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/prompt"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/encryptionkey"
@@ -73,6 +74,8 @@ func (ms *MenuScreen) HandleInput() error {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetLobbySetRetrievalCycleFinishedNetworkingAction(
 				value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_FALSE_VALUE))
+
+		prompt.GetInstance().ShowSubmitButton()
 	}
 
 	if !ms.transparentTransitionEffect.Done() {
@@ -286,7 +289,7 @@ func newMenuScreen() screen.Screen {
 					}
 				},
 				func() {
-
+					dispatcher.GetInstance().Dispatch(action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_DEATH_VALUE))
 				},
 				func() {
 

@@ -38,6 +38,10 @@ func Run() {
 
 			cache.
 				GetInstance().
+				BeginMetadataTransaction()
+
+			cache.
+				GetInstance().
 				BeginLobbySetTransaction()
 
 			cache.
@@ -105,13 +109,20 @@ func Run() {
 					}
 				} else if sessionEvent.FrequencyRate.Before(time.Now()) {
 					for _, lobby := range value {
-						metadataSet, ok := cache.GetInstance().GetMetadata(lobby.Issuer)
+						metadataSet, ok := cache.
+							GetInstance().
+							GetMetadata(lobby.Issuer)
 						if ok {
 							for _, metadata := range metadataSet {
-								switch sessionEvent.Name {
-								case dto.EVENT_NAME_TOXIC_RAIN:
-									if metadata.Health-dto.EVENT_HIT_RATE_TOXIC_RAIN >= 0 {
-										metadata.Health -= dto.EVENT_HIT_RATE_TOXIC_RAIN
+								if !metadata.Eliminated {
+									switch sessionEvent.Name {
+									case dto.EVENT_NAME_TOXIC_RAIN:
+										if metadata.Health-dto.EVENT_HIT_RATE_TOXIC_RAIN >= 0 {
+											metadata.Health -= dto.EVENT_HIT_RATE_TOXIC_RAIN
+										} else if metadata.Health != 0 {
+											metadata.Health = 0
+											metadata.Eliminated = true
+										}
 									}
 								}
 							}
@@ -132,6 +143,10 @@ func Run() {
 			cache.
 				GetInstance().
 				CommitLobbySetTransaction()
+
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
 
 			ticker.Reset(eventsTickerDuration)
 		}

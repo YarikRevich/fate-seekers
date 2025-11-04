@@ -46,6 +46,9 @@ service MetadataService {
     // RemoveLobby performs lobby removal operation by the configured user. Allowed for lobby owner only.
     rpc RemoveLobby(RemoveLobbyRequest) returns (RemoveLobbyResponse) {};
 
+    // LeaveLobby performs lobby leave operation by the configured user.
+    rpc LeaveLobby(LeaveLobbyRequest) returns (LeaveLobbyResponse) {};
+
     // GetUsersMetadata performs users metadata retrieval request by the configured user.
     rpc GetUsersMetadata(GetUsersMetadataRequest) returns (stream GetUsersMetadataResponse) {};
 
@@ -209,6 +212,16 @@ message RemoveLobbyRequest {
 message RemoveLobbyResponse {
 };
 
+// LeaveLobbyRequest represents user leave lobby request.
+message LeaveLobbyRequest {
+    int64 session_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
+};
+
+// LeaveLobbyResponse represents user leave lobby response.
+message LeaveLobbyResponse {
+};
+
 // Represents users metadata retrieval request message.
 message GetUsersMetadataRequest {
     int64 session_id = 1;
@@ -223,7 +236,7 @@ message UserMetadata {
     bool eliminated = 4;
     bool active = 5;
     Position position = 6;
-    
+
     // Represents current animation state.
     bool static = 7;
 };

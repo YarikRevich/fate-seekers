@@ -79,6 +79,13 @@ func (ls *LobbyScreen) HandleInput() error {
 								action.NewSetStateResetApplicationAction(
 									value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
+								value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
 						dispatcher.
 							GetInstance().
 							Dispatch(
@@ -194,6 +201,13 @@ func (ls *LobbyScreen) HandleInput() error {
 								action.NewSetStateResetApplicationAction(
 									value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
+								value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
 						dispatcher.
 							GetInstance().
 							Dispatch(
@@ -219,6 +233,19 @@ func (ls *LobbyScreen) HandleInput() error {
 								action.NewSetLobbySetRetrievalCycleFinishedNetworkingAction(
 									value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_FALSE_VALUE))
 						}
+
+						lobby.GetInstance().CleanSelection()
+
+						lobby.GetInstance().CleanListsEntries()
+
+						lobby.GetInstance().HideStartButton()
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
+								value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
 						dispatcher.
 							GetInstance().
@@ -283,6 +310,19 @@ func newLobbyScreen() screen.Screen {
 						time.Second*3,
 						common.NotificationErrorTextColor)
 
+					lobby.GetInstance().CleanSelection()
+
+					lobby.GetInstance().CleanListsEntries()
+
+					lobby.GetInstance().HideStartButton()
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
+							value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
 					dispatcher.
 						GetInstance().
 						Dispatch(
@@ -307,6 +347,19 @@ func newLobbyScreen() screen.Screen {
 					time.Second*4,
 					common.NotificationInfoTextColor)
 
+				lobby.GetInstance().CleanSelection()
+
+				lobby.GetInstance().CleanListsEntries()
+
+				lobby.GetInstance().HideStartButton()
+
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
+						value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
 				dispatcher.
 					GetInstance().
 					Dispatch(
@@ -326,6 +379,10 @@ func newLobbyScreen() screen.Screen {
 			transparentTransitionEffect.Reset()
 
 			instance.stateReset = true
+
+			lobby.GetInstance().CleanSelection()
+
+			lobby.GetInstance().CleanListsEntries()
 
 			lobby.GetInstance().HideStartButton()
 
@@ -349,6 +406,10 @@ func newLobbyScreen() screen.Screen {
 				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SELECTOR_VALUE))
 		})
 	})
+
+	lobby.GetInstance().CleanSelection()
+
+	lobby.GetInstance().CleanListsEntries()
 
 	lobby.GetInstance().HideStartButton()
 

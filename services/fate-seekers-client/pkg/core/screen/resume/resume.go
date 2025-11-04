@@ -7,13 +7,18 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/resume"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
@@ -112,10 +117,25 @@ func newResumeScreen() screen.Screen {
 				func() {
 					transparentTransitionEffect.Reset()
 
-					// TODO: do some disconnect operation here.
+					handler.PerformLeaveLobby(store.GetSelectedSessionMetadata().ID, func(err error) {
+						if err != nil {
+							notification.GetInstance().Push(
+								common.ComposeMessage(
+									translation.GetInstance().GetTranslation("client.networking.leave-lobby-failure"),
+									err.Error()),
+								time.Second*3,
+								common.NotificationErrorTextColor)
+						}
 
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+						dispatcher.
+							GetInstance().
+							Dispatch(
+								action.NewSetStateResetApplicationAction(
+									value.STATE_RESET_APPLICATION_FALSE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+					})
 				})),
 		transparentTransitionEffect: transparentTransitionEffect,
 		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),

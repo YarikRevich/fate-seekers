@@ -31,6 +31,7 @@ const (
 	MetadataService_GetLobbySet_FullMethodName           = "/metadata.v1.MetadataService/GetLobbySet"
 	MetadataService_CreateLobby_FullMethodName           = "/metadata.v1.MetadataService/CreateLobby"
 	MetadataService_RemoveLobby_FullMethodName           = "/metadata.v1.MetadataService/RemoveLobby"
+	MetadataService_LeaveLobby_FullMethodName            = "/metadata.v1.MetadataService/LeaveLobby"
 	MetadataService_GetUsersMetadata_FullMethodName      = "/metadata.v1.MetadataService/GetUsersMetadata"
 	MetadataService_GetChests_FullMethodName             = "/metadata.v1.MetadataService/GetChests"
 	MetadataService_GetHealthPacks_FullMethodName        = "/metadata.v1.MetadataService/GetHealthPacks"
@@ -72,6 +73,8 @@ type MetadataServiceClient interface {
 	CreateLobby(ctx context.Context, in *CreateLobbyRequest, opts ...grpc.CallOption) (*CreateLobbyResponse, error)
 	// RemoveLobby performs lobby removal operation by the configured user. Allowed for lobby owner only.
 	RemoveLobby(ctx context.Context, in *RemoveLobbyRequest, opts ...grpc.CallOption) (*RemoveLobbyResponse, error)
+	// LeaveLobby performs lobby leave operation by the configured user.
+	LeaveLobby(ctx context.Context, in *LeaveLobbyRequest, opts ...grpc.CallOption) (*LeaveLobbyResponse, error)
 	// GetUsersMetadata performs users metadata retrieval request by the configured user.
 	GetUsersMetadata(ctx context.Context, in *GetUsersMetadataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetUsersMetadataResponse], error)
 	// GetChests performs chests retrieval for the selected session by the configured user.
@@ -237,6 +240,16 @@ func (c *metadataServiceClient) RemoveLobby(ctx context.Context, in *RemoveLobby
 	return out, nil
 }
 
+func (c *metadataServiceClient) LeaveLobby(ctx context.Context, in *LeaveLobbyRequest, opts ...grpc.CallOption) (*LeaveLobbyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LeaveLobbyResponse)
+	err := c.cc.Invoke(ctx, MetadataService_LeaveLobby_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *metadataServiceClient) GetUsersMetadata(ctx context.Context, in *GetUsersMetadataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetUsersMetadataResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[3], MetadataService_GetUsersMetadata_FullMethodName, cOpts...)
@@ -393,6 +406,8 @@ type MetadataServiceServer interface {
 	CreateLobby(context.Context, *CreateLobbyRequest) (*CreateLobbyResponse, error)
 	// RemoveLobby performs lobby removal operation by the configured user. Allowed for lobby owner only.
 	RemoveLobby(context.Context, *RemoveLobbyRequest) (*RemoveLobbyResponse, error)
+	// LeaveLobby performs lobby leave operation by the configured user.
+	LeaveLobby(context.Context, *LeaveLobbyRequest) (*LeaveLobbyResponse, error)
 	// GetUsersMetadata performs users metadata retrieval request by the configured user.
 	GetUsersMetadata(*GetUsersMetadataRequest, grpc.ServerStreamingServer[GetUsersMetadataResponse]) error
 	// GetChests performs chests retrieval for the selected session by the configured user.
@@ -452,6 +467,9 @@ func (UnimplementedMetadataServiceServer) CreateLobby(context.Context, *CreateLo
 }
 func (UnimplementedMetadataServiceServer) RemoveLobby(context.Context, *RemoveLobbyRequest) (*RemoveLobbyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveLobby not implemented")
+}
+func (UnimplementedMetadataServiceServer) LeaveLobby(context.Context, *LeaveLobbyRequest) (*LeaveLobbyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LeaveLobby not implemented")
 }
 func (UnimplementedMetadataServiceServer) GetUsersMetadata(*GetUsersMetadataRequest, grpc.ServerStreamingServer[GetUsersMetadataResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method GetUsersMetadata not implemented")
@@ -686,6 +704,24 @@ func _MetadataService_RemoveLobby_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MetadataService_LeaveLobby_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LeaveLobbyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServiceServer).LeaveLobby(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MetadataService_LeaveLobby_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServiceServer).LeaveLobby(ctx, req.(*LeaveLobbyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MetadataService_GetUsersMetadata_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(GetUsersMetadataRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -812,6 +848,10 @@ var MetadataService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveLobby",
 			Handler:    _MetadataService_RemoveLobby_Handler,
+		},
+		{
+			MethodName: "LeaveLobby",
+			Handler:    _MetadataService_LeaveLobby_Handler,
 		},
 		{
 			MethodName: "CreateChatMessage",

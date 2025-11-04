@@ -191,6 +191,10 @@
         "one": "Unable to remove lobby for selected session",
         "other": "Unable to remove lobby for selected session"
     },
+    "client.networking.leave-lobby-failure": {
+        "one": "Unable to leave lobby for selected session",
+        "other": "Unable to leave lobby for selected session"
+    },
     "client.networking.joining-existing-lobby": {
         "one": "Joining existing lobby for selected session",
         "other": "Joining existing lobby for selected session"

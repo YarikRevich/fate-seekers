@@ -11,6 +11,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/creator"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/death"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/intro"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/lobby"
@@ -195,6 +196,9 @@ func (r *Runtime) Update() error {
 
 	case value.ACTIVE_SCREEN_RESUME_VALUE:
 		r.activeScreen = resume.GetInstance()
+
+	case value.ACTIVE_SCREEN_DEATH_VALUE:
+		r.activeScreen = death.GetInstance()
 	}
 
 	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {

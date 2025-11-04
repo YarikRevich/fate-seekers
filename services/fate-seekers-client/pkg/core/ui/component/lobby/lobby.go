@@ -57,6 +57,16 @@ func (lc *LobbyComponent) SetSelectionBySkin(value uint64) {
 			fmt.Sprintf("client.skin.%d.name", value))
 }
 
+// CleanSelection cleans selection text widget.
+func (lc *LobbyComponent) CleanSelection() {
+	lc.selection.Label = ""
+}
+
+// CleanListsEntries cleans lists entries to the list widget.
+func (lc *LobbyComponent) CleanListsEntries() {
+	lc.list.SetEntries([]interface{}{})
+}
+
 // SetListsEntries sets lists entries to the list widget.
 func (lc *LobbyComponent) SetListsEntries(value []interface{}) {
 	lc.list.SetEntries(value)

@@ -101,6 +101,11 @@ const (
 	SET_RETRIEVED_USERS_METADATA_SESSION_ACTION = "SET_RETRIEVED_USERS_METADATA_SESSION_ACTION"
 )
 
+// Describes all the available state actions for travel reducer.
+const (
+	SET_RESET_TRAVEL_ACTION = "SET_RESET"
+)
+
 // NewSetActiveScreenAction creates new set active screen action.
 func NewSetActiveScreenAction(value string) godux.Action {
 	return godux.Action{
@@ -474,6 +479,14 @@ func NewDecrementYPositionSession() godux.Action {
 func NewSetRetrievedUsersMetadataSession(value dto.RetrievedUsersMetadataSessionSet) godux.Action {
 	return godux.Action{
 		Type:  SET_RETRIEVED_USERS_METADATA_SESSION_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetResetTravel creates new set reset travel action.
+func NewSetResetTravel(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_RESET_TRAVEL_ACTION,
 		Value: value,
 	}
 }

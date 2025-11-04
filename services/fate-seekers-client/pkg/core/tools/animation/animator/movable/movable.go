@@ -42,6 +42,11 @@ type MovableUnit struct {
 	ticker *time.Ticker
 }
 
+// InvokeNormalHit
+func (m *MovableUnit) InvokeNormalHit() {
+
+}
+
 // SetDirection sets direction value for the movable unit.
 func (m *MovableUnit) SetDirection(value string) {
 	if m.direction != value {

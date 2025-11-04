@@ -10,6 +10,7 @@ import (
 
 // Describes all the available session reducer store states.
 const (
+	RESET_SESSION_STATE                    = "reset"
 	STATIC_SESSION_STATE                   = "static"
 	POSITION_SESSION_STATE                 = "position"
 	PREVIOUS_POSITION_SESSION_STATE        = "previous_position"
@@ -23,6 +24,7 @@ type SessionStateReducer struct {
 }
 
 func (ssr *SessionStateReducer) Init() {
+	ssr.store.SetState(RESET_SESSION_STATE, value.RESET_SESSION_FALSE_VALUE)
 	ssr.store.SetState(STATIC_SESSION_STATE, value.STATIC_SESSION_EMPTY_VALUE)
 	ssr.store.SetState(POSITION_SESSION_STATE, value.POSITION_SESSION_EMPTY_VALUE)
 	ssr.store.SetState(PREVIOUS_POSITION_SESSION_STATE, value.POSITION_SESSION_EMPTY_VALUE)

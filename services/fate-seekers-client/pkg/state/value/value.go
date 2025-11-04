@@ -19,6 +19,7 @@ const (
 	ACTIVE_SCREEN_TRAVEL_VALUE       = "travel"
 	ACTIVE_SCREEN_ANSWER_INPUT_VALUE = "answer_input"
 	ACTIVE_SCREEN_RESUME_VALUE       = "resume"
+	ACTIVE_SCREEN_DEATH_VALUE        = "death"
 
 	PREVIOUS_SCREEN_MENU_VALUE   = "menu"
 	PREVIOUS_SCREEN_RESUME_VALUE = "resume"
@@ -113,7 +114,7 @@ var (
 )
 
 // Describes available event reducer store values.
-var (
+const (
 	EVENT_NAME_EMPTY_VALUE      = ""
 	EVENT_NAME_TOXIC_RAIN_VALUE = "toxic_rain"
 	EVENT_STARTED_FALSE_VALUE   = "false"
@@ -123,7 +124,7 @@ var (
 )
 
 // Describes available sound reducer store values.
-var (
+const (
 	SOUND_MUSIC_UPDATED_FALSE_VALUE = "false"
 	SOUND_MUSIC_UPDATED_TRUE_VALUE  = "true"
 )
@@ -135,19 +136,33 @@ const (
 )
 
 // Describes available metadata reducer store values.
-var (
-	RETRIEVED_SESSIONS_METADATA_EMPTY_VALUE            = []interface{}{}
+const (
 	SELECTED_SESSION_METADATA_EMPTY_VALUE              = ""
-	RETRIEVED_LOBBY_SET_METADATA_EMPTY_VALUE           = []interface{}{}
 	SELECTED_LOBBY_SET_UNIT_METADATA_EMPTY_VALUE       = ""
 	SESSION_ALREADY_STARTED_METADATA_STATE_TRUE_VALUE  = "true"
 	SESSION_ALREADY_STARTED_METADATA_STATE_FALSE_VALUE = "false"
 )
 
-// Describes available session reducer store values.
 var (
-	STATIC_SESSION_EMPTY_VALUE            bool
+	RETRIEVED_SESSIONS_METADATA_EMPTY_VALUE  = []interface{}{}
+	RETRIEVED_LOBBY_SET_METADATA_EMPTY_VALUE = []interface{}{}
+)
+
+// Describes available session reducer store values.
+const (
+	RESET_SESSION_FALSE_VALUE  = "false"
+	RESET_SESSION_TRUE_VALUE   = "true"
+	STATIC_SESSION_EMPTY_VALUE = false
+)
+
+var (
 	POSITION_SESSION_EMPTY_VALUE          dto.Position
 	PREVIOUS_POSITION_SESSION_EMPTY_VALUE dto.Position
 	RETRIEVED_USERS_METADATA_EMPTY_VALUE  dto.RetrievedUsersMetadataSessionSet = make(dto.RetrievedUsersMetadataSessionSet)
+)
+
+// Describes available travel reducer store values.
+const (
+	RESET_TRAVEL_FALSE_VALUE = "false"
+	RESET_TRAVEL_TRUE_VALUE  = "true"
 )
