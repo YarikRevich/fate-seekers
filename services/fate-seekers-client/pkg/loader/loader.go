@@ -61,6 +61,8 @@ const (
 	ComboIdleButton      = "ui/combo-button-idle.png"
 
 	TextInputIdle = "ui/text-input-idle.png"
+
+	Heart = "heart/heart.png"
 )
 
 // Describes all the available shaders to be loaded.

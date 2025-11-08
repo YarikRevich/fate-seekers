@@ -92,18 +92,22 @@ const (
 
 // Describes all the available state actions for session reducer.
 const (
-	SET_STATIC_POSITION_SESSION_ACTION          = "SET_STATIC_POSITION_SESSION_ACTION"
-	SYNC_PREVIOUS_POSITION_SESSION_ACTION       = "SYNC_PREVIOUS_POSITION_SESSION_ACTION"
-	INCREMENT_X_POSITION_SESSION_ACTION         = "INCREMENT_X_POSITION_SESSION_ACTION"
-	INCREMENT_Y_POSITION_SESSION_ACTION         = "INCREMENT_Y_POSITION_SESSION_ACTION"
-	DECREMENT_X_POSITION_SESSION_ACTION         = "DECREMENT_X_POSITION_SESSION_ACTION"
-	DECREMENT_Y_POSITION_SESSION_ACTION         = "DECREMENT_Y_POSITION_SESSION_ACTION"
-	SET_RETRIEVED_USERS_METADATA_SESSION_ACTION = "SET_RETRIEVED_USERS_METADATA_SESSION_ACTION"
+	SET_STATIC_POSITION_SESSION_ACTION    = "SET_STATIC_POSITION_SESSION_ACTION"
+	SYNC_PREVIOUS_POSITION_SESSION_ACTION = "SYNC_PREVIOUS_POSITION_SESSION_ACTION"
+	INCREMENT_X_POSITION_SESSION_ACTION   = "INCREMENT_X_POSITION_SESSION_ACTION"
+	INCREMENT_Y_POSITION_SESSION_ACTION   = "INCREMENT_Y_POSITION_SESSION_ACTION"
+	DECREMENT_X_POSITION_SESSION_ACTION   = "DECREMENT_X_POSITION_SESSION_ACTION"
+	DECREMENT_Y_POSITION_SESSION_ACTION   = "DECREMENT_Y_POSITION_SESSION_ACTION"
 )
 
 // Describes all the available state actions for travel reducer.
 const (
 	SET_RESET_TRAVEL_ACTION = "SET_RESET"
+)
+
+// Describes all the available state actions for death reducer.
+const (
+	SET_RESET_DEATH_ACTION = "SET_RESET"
 )
 
 // NewSetActiveScreenAction creates new set active screen action.
@@ -475,18 +479,18 @@ func NewDecrementYPositionSession() godux.Action {
 	}
 }
 
-// NewSetRetrievedUsersMetadataSession creates new set retrieved users metadata session action.
-func NewSetRetrievedUsersMetadataSession(value dto.RetrievedUsersMetadataSessionSet) godux.Action {
-	return godux.Action{
-		Type:  SET_RETRIEVED_USERS_METADATA_SESSION_ACTION,
-		Value: value,
-	}
-}
-
 // NewSetResetTravel creates new set reset travel action.
 func NewSetResetTravel(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_RESET_TRAVEL_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetResetDeath creates new set reset death action.
+func NewSetResetDeath(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_RESET_DEATH_ACTION,
 		Value: value,
 	}
 }

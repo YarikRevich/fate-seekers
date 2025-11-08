@@ -76,10 +76,6 @@ func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interfac
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: POSITION_SESSION_STATE, Value: valueRaw})
 
-		case action.SET_RETRIEVED_USERS_METADATA_SESSION_ACTION:
-			return dto.ComposeReducerResult(
-				dto.ReducerResultUnit{Key: RETRIEVED_USERS_METADATA_SESSION_STATE, Value: value.Value})
-
 		default:
 			return nil
 		}

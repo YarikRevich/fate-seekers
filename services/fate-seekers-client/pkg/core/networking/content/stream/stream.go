@@ -14,7 +14,7 @@ import (
 
 // Describes constant values used for stream management.
 const (
-	updateUserMetadataPositionsFrequency = time.Millisecond * 100
+	updateUserMetadataPositionsFrequency = time.Millisecond * 50
 )
 
 var (

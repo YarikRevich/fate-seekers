@@ -7,6 +7,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/creator"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/death"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/event"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/metadata"
@@ -313,6 +314,9 @@ func GetPreviousPositionSession() dto.Position {
 	return instance.GetState(session.PREVIOUS_POSITION_SESSION_STATE).(dto.Position)
 }
 
+// RetrievedUsersMetadataSessionSyncHelper represents retrieved users metadata session sync helper.
+var RetrievedUsersMetadataSessionSyncHelper sync.Mutex
+
 // GetRetrievedUsersMetadataSession retrieves retrieved users metadata session state value.
 func GetRetrievedUsersMetadataSession() dto.RetrievedUsersMetadataSessionSet {
 	instance := GetInstance()
@@ -325,6 +329,13 @@ func GetResetTravel() string {
 	instance := GetInstance()
 
 	return instance.GetState(travel.RESET_TRAVEL_STATE).(string)
+}
+
+// GetResetDeath retrieves reset death state value.
+func GetResetDeath() string {
+	instance := GetInstance()
+
+	return instance.GetState(death.RESET_DEATH_STATE).(string)
 }
 
 // newStore creates new instance of application store.
@@ -372,6 +383,9 @@ func newStore() *godux.Store {
 
 	travelReducer := travel.NewTravelStateReducer(store)
 	travelReducer.Init()
+
+	deathReducer := death.NewDeathStateReducer(store)
+	deathReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
@@ -440,6 +454,11 @@ func newStore() *godux.Store {
 		}
 
 		result = travelReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = deathReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

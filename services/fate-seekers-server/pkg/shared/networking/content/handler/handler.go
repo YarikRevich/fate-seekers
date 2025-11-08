@@ -13,6 +13,7 @@ import (
 var (
 	ErrUserDoesNotExist  = errors.New("err happened user does not exist")
 	ErrLobbyDoesNotExist = errors.New("err happened lobby does not exist")
+	ErrUserIsEliminated  = errors.New("err happened user has been eliminated")
 )
 
 // Handler performs content connector state management.
@@ -88,6 +89,10 @@ func (h *Handler) Process(key string, value []byte) error {
 
 			for _, newLobby := range newLobbies {
 				if newLobby.LobbyID == message.GetLobbyId() {
+					if newLobby.Eliminated {
+						return ErrUserIsEliminated
+					}
+
 					newLobby.PositionX = message.GetPosition().X
 					newLobby.PositionY = message.GetPosition().Y
 				}
@@ -99,6 +104,10 @@ func (h *Handler) Process(key string, value []byte) error {
 		} else {
 			for _, lobby := range metadata {
 				if lobby.LobbyID == message.GetLobbyId() {
+					if lobby.Eliminated {
+						return ErrUserIsEliminated
+					}
+
 					lobby.PositionX = message.GetPosition().X
 					lobby.PositionY = message.GetPosition().Y
 				}
@@ -175,6 +184,10 @@ func (h *Handler) Process(key string, value []byte) error {
 
 			for _, newLobby := range newLobbies {
 				if newLobby.LobbyID == message.GetLobbyId() {
+					if newLobby.Eliminated {
+						return ErrUserIsEliminated
+					}
+
 					newLobby.PositionStatic = message.GetStatic()
 				}
 			}
@@ -185,6 +198,10 @@ func (h *Handler) Process(key string, value []byte) error {
 		} else {
 			for _, lobby := range metadata {
 				if lobby.LobbyID == message.GetLobbyId() {
+					if lobby.Eliminated {
+						return ErrUserIsEliminated
+					}
+
 					lobby.PositionStatic = message.GetStatic()
 				}
 			}

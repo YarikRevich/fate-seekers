@@ -604,8 +604,6 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 
 		var selectedLobby *entity.LobbyEntity
 
-		fmt.Println(request.GetLobbyId(), request.GetSessionId(), lobbies, "INSIDE")
-
 		for _, lobby := range lobbies {
 			if lobby.ID == request.GetLobbyId() &&
 				lobby.SessionID == request.GetSessionId() {
@@ -630,8 +628,6 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		}
 	} else {
 		var selectedLobby *dto.CacheMetadataEntity
-
-		fmt.Println(request.GetLobbyId(), request.GetSessionId(), metadata, "INSIDE CACHED")
 
 		for _, value := range metadata {
 			if value.LobbyID == request.GetLobbyId() &&
@@ -868,11 +864,7 @@ func (h *Handler) GetSessionMetadata(request *metadatav1.GetSessionMetadataReque
 
 		var found bool
 
-		fmt.Println(lobbies, "RETRIEVED LOBBIES")
-
 		for _, lobby := range lobbies {
-			fmt.Println(lobby.SessionID)
-
 			if lobby.SessionID == request.GetSessionId() {
 				found = true
 
@@ -890,11 +882,7 @@ func (h *Handler) GetSessionMetadata(request *metadatav1.GetSessionMetadataReque
 	} else {
 		var found bool
 
-		fmt.Println(metadata, "RETRIEVED LOBBIES METADATA")
-
 		for _, value := range metadata {
-			fmt.Println(value.SessionID)
-
 			if value.SessionID == request.GetSessionId() {
 				found = true
 
@@ -1189,8 +1177,6 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 			return nil, status.Errorf(codes.InvalidArgument, ErrSessionAlreadyStarted.Error())
 		}
 	} else {
-		fmt.Println("CACHED SESSION VALUE", cachedSession.Started)
-
 		if cachedSession.Started {
 			cache.
 				GetInstance().

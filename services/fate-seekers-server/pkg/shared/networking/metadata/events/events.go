@@ -119,7 +119,11 @@ func Run() {
 									case dto.EVENT_NAME_TOXIC_RAIN:
 										if metadata.Health-dto.EVENT_HIT_RATE_TOXIC_RAIN >= 0 {
 											metadata.Health -= dto.EVENT_HIT_RATE_TOXIC_RAIN
-										} else if metadata.Health != 0 {
+
+											if metadata.Health == 0 {
+												metadata.Eliminated = true
+											}
+										} else {
 											metadata.Health = 0
 											metadata.Eliminated = true
 										}

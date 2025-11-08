@@ -1,4 +1,4 @@
-package death
+package gameover
 
 import (
 	"sync"

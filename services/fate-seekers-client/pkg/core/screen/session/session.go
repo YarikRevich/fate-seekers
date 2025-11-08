@@ -18,6 +18,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/camera"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/bar"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
@@ -113,8 +114,11 @@ var (
 
 // SessionScreen represents session screen implementation.
 type SessionScreen struct {
-	// Represents attached user interface.
-	ui *ebitenui.UI
+	// Represents attached passive user interface.
+	passiveUI *ebitenui.UI
+
+	// Represents attached active user interface.
+	activeUI *ebitenui.UI
 
 	// Represents attached animator instance.
 	animator *animator.Animator
@@ -134,8 +138,11 @@ type SessionScreen struct {
 	// Represents transparent transition effect used for toxic rain event component, when event is ended.
 	toxicRainEventEndTransparentTransitionEffect transition.TransitionEffect
 
-	// Represents interface world view.
-	interfaceWorld *ebiten.Image
+	// Represents passive interface world view.
+	passiveInterfaceWorld *ebiten.Image
+
+	// Represents active interface world view.
+	activeInterfaceWorld *ebiten.Image
 
 	// Represents internal world view.
 	internalWorld *ebiten.Image
@@ -220,7 +227,8 @@ func (ss *SessionScreen) HandleInput() error {
 									action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
 							}
 						}
-					} else if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
+					} else if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE &&
+						store.GetEventEnding() != value.EVENT_ENDING_TRUE_VALUE {
 						notification.GetInstance().Push(
 							translation.GetInstance().GetTranslation("client.networking.event-finished"),
 							time.Second*3,
@@ -265,7 +273,29 @@ func (ss *SessionScreen) HandleInput() error {
 					var animationDirection string
 
 					for _, userMetadata := range response.GetUserMetadata() {
-						previousUsersMetadata, ok := store.GetRetrievedUsersMetadataSession()[userMetadata.GetIssuer()]
+						if userMetadata.Issuer == store.GetRepositoryUUID() && userMetadata.Eliminated {
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetEventRetrievalStartedNetworking(
+									value.EVENT_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetUsersMetadataRetrievalStartedNetworking(
+									value.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetResetDeath(value.RESET_DEATH_TRUE_VALUE))
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_DEATH_VALUE))
+
+							return true
+						}
+
+						store.RetrievedUsersMetadataSessionSyncHelper.Lock()
+
+						retrievedUsersMetadataSession := store.GetRetrievedUsersMetadataSession()
+
+						previousUsersMetadata, ok := retrievedUsersMetadataSession[userMetadata.GetIssuer()]
 						if !ok {
 							animationDirection = dto.RightMovableRotation
 						} else {
@@ -281,7 +311,13 @@ func (ss *SessionScreen) HandleInput() error {
 							}
 						}
 
-						store.GetRetrievedUsersMetadataSession()[userMetadata.GetIssuer()] =
+						if userMetadata.Issuer == store.GetRepositoryUUID() {
+							if previousUsersMetadata.Health != userMetadata.Health {
+								bar.GetInstance().SetHealthText(userMetadata.Health)
+							}
+						}
+
+						retrievedUsersMetadataSession[userMetadata.GetIssuer()] =
 							dto.RetrievedUsersMetadataSessionUnit{
 								Health:             userMetadata.GetHealth(),
 								Skin:               userMetadata.GetSkin(),
@@ -294,6 +330,8 @@ func (ss *SessionScreen) HandleInput() error {
 									Y: userMetadata.GetPosition().GetY(),
 								},
 							}
+
+						store.RetrievedUsersMetadataSessionSyncHelper.Unlock()
 
 						if userMetadata.GetIssuer() != store.GetRepositoryUUID() {
 							sharedUsersMetadataIssuers[userMetadata.GetIssuer()] = true
@@ -339,34 +377,42 @@ func (ss *SessionScreen) HandleInput() error {
 		// }
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
+	store.RetrievedUsersMetadataSessionSyncHelper.Lock()
+
+	retrievedUsersMetadataSession := store.GetRetrievedUsersMetadataSession()
+
+	if _, ok := retrievedUsersMetadataSession[store.GetRepositoryUUID()]; ok {
+		if ebiten.IsKeyPressed(ebiten.KeyEscape) {
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
+		}
+
+		if ebiten.IsKeyPressed(ebiten.KeyA) {
+			dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
+
+			ss.camera.DecrementPositionX()
+		}
+
+		if ebiten.IsKeyPressed(ebiten.KeyW) {
+			dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
+
+			ss.camera.IncrementPositionY()
+		}
+
+		if ebiten.IsKeyPressed(ebiten.KeyS) {
+			dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
+
+			ss.camera.DecrementPositionY()
+		}
+
+		if ebiten.IsKeyPressed(ebiten.KeyD) {
+			dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+
+			ss.camera.IncrementPositionX()
+		}
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
-
-		ss.camera.DecrementPositionX()
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyW) {
-		dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
-
-		ss.camera.IncrementPositionY()
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyS) {
-		dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
-
-		ss.camera.DecrementPositionY()
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
-
-		ss.camera.IncrementPositionX()
-	}
+	store.RetrievedUsersMetadataSessionSyncHelper.Unlock()
 
 	selectedLobbySet := store.GetSelectedLobbySetUnitMetadata()
 
@@ -411,7 +457,9 @@ func (ss *SessionScreen) HandleInput() error {
 		}
 	}
 
-	ss.ui.Update()
+	ss.passiveUI.Update()
+
+	ss.activeUI.Update()
 
 	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
 		if store.GetEventEnding() == value.EVENT_ENDING_TRUE_VALUE {
@@ -465,7 +513,9 @@ func (ss *SessionScreen) HandleInput() error {
 }
 
 func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
-	ss.interfaceWorld.Clear()
+	ss.passiveInterfaceWorld.Clear()
+
+	ss.activeInterfaceWorld.Clear()
 
 	ss.internalWorld.Clear()
 
@@ -473,17 +523,22 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 		ss.eventWorld.Clear()
 	}
 
-	ss.ui.Draw(ss.interfaceWorld)
-
-	screen.DrawImage(ss.interfaceWorld, &ebiten.DrawImageOptions{
-		ColorM: options.GetTransparentDrawOptions(
-			ss.transparentTransitionEffect.GetValue()).ColorM})
-
 	ss.animator.Draw(ss.internalWorld)
 
 	screen.DrawImage(ss.internalWorld, &ebiten.DrawImageOptions{
 		// GeoM: ss.camera.GetWorldMatrix(),
 	})
+
+	ss.passiveUI.Draw(ss.passiveInterfaceWorld)
+
+	ss.activeUI.Draw(ss.activeInterfaceWorld)
+
+	screen.DrawImage(ss.passiveInterfaceWorld, &ebiten.DrawImageOptions{
+		ColorM: options.GetTransparentDrawOptions(ss.transparentTransitionEffect.GetValue()).ColorM})
+
+	screen.DrawImage(ss.activeInterfaceWorld, &ebiten.DrawImageOptions{
+		ColorM: options.GetTransparentDrawOptions(
+			ss.transparentTransitionEffect.GetValue()).ColorM})
 
 	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
 		switch store.GetEventName() {
@@ -504,7 +559,9 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 // newSessionScreen initializes SessionScreen.
 func newSessionScreen() screen.Screen {
 	return &SessionScreen{
-		ui:       builder.Build(),
+		passiveUI: builder.Build(
+			bar.GetInstance().GetContainer()),
+		activeUI: builder.Build(),
 		animator: animator.NewAnimator(),
 		camera:   camera.NewCamera(float64(config.GetWorldWidth()), float64(config.GetWorldHeight())),
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(
@@ -513,7 +570,8 @@ func newSessionScreen() screen.Screen {
 			true, 10, 0, 0.5, time.Millisecond*200),
 		toxicRainEventEndTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(
 			false, 0, 10, 0.5, time.Millisecond*200),
-		interfaceWorld:             ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		passiveInterfaceWorld:      ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		activeInterfaceWorld:       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		internalWorld:              ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		eventWorld:                 ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
 		toxicRainEventShaderEffect: toxicrain.NewToxicRainEventEffect(),

@@ -20,6 +20,7 @@ const (
 	ACTIVE_SCREEN_ANSWER_INPUT_VALUE = "answer_input"
 	ACTIVE_SCREEN_RESUME_VALUE       = "resume"
 	ACTIVE_SCREEN_DEATH_VALUE        = "death"
+	ACTIVE_SCREEN_GAMEOVER_VALUE     = "gameover"
 
 	PREVIOUS_SCREEN_MENU_VALUE   = "menu"
 	PREVIOUS_SCREEN_RESUME_VALUE = "resume"
@@ -165,4 +166,10 @@ var (
 const (
 	RESET_TRAVEL_FALSE_VALUE = "false"
 	RESET_TRAVEL_TRUE_VALUE  = "true"
+)
+
+// Describes available death reducer store values.
+const (
+	RESET_DEATH_FALSE_VALUE = "false"
+	RESET_DEATH_TRUE_VALUE  = "true"
 )

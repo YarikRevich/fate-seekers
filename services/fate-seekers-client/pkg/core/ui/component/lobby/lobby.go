@@ -31,6 +31,7 @@ var (
 
 // LobbyComponent represents component, which contains lobby menu.
 type LobbyComponent struct {
+	// Represents selection text.
 	selection *widget.Text
 
 	// Represents sessions list widget.

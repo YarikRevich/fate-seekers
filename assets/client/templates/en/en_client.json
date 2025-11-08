@@ -111,6 +111,10 @@
         "one": "Server key is not set or is not valid. \nProceed with its configuration?",
         "other": "Server key is not set or is not valid. \nProceed with its configuration?"
     },
+    "client.prompt.death": {
+        "one": "You are dead!",
+        "other": "You are dead!"
+    },
     "client.answerinput.solvetext": {
         "one": "Please solve",
         "other": "Please solve"
