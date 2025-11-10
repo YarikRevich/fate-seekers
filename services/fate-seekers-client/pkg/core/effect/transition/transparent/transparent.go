@@ -6,7 +6,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 )
 
-// TransparentTransitionEffect represents transparent transition effect.
+// TransparentTransitionEffect represents transparent(in this case means seamless) transition effect.
 type TransparentTransitionEffect struct {
 	// Represents transition direction progression.
 	forward bool
@@ -47,9 +47,17 @@ func (tte *TransparentTransitionEffect) Update() {
 		tte.ticker.Stop()
 
 		if tte.forward {
-			tte.counter += tte.shift
+			if tte.counter+tte.shift <= tte.maxCounter {
+				tte.counter += tte.shift
+			} else {
+				tte.counter = tte.maxCounter
+			}
 		} else {
-			tte.counter -= tte.shift
+			if tte.counter-tte.shift >= tte.maxCounter {
+				tte.counter -= tte.shift
+			} else {
+				tte.counter = tte.maxCounter
+			}
 		}
 
 		tte.ticker.Reset(tte.period)

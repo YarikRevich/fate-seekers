@@ -58,8 +58,9 @@ func newBarComponent() *BarComponent {
 			widget.RowLayoutOpts.Spacing(
 				scaler.GetPercentageOf(config.GetWorldWidth(), 69)),
 			widget.RowLayoutOpts.Padding(widget.Insets{
-				Left:  scaler.GetPercentageOf(config.GetWorldWidth(), 3),
-				Right: scaler.GetPercentageOf(config.GetWorldWidth(), 3),
+				Left:   scaler.GetPercentageOf(config.GetWorldWidth(), 3),
+				Right:  scaler.GetPercentageOf(config.GetWorldWidth(), 3),
+				Bottom: scaler.GetPercentageOf(config.GetWorldWidth(), 1),
 			}),
 		)))
 

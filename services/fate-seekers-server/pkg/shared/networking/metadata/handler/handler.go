@@ -50,7 +50,7 @@ const (
 	getUserMetadataFrequency    = time.Millisecond * 25
 	getChestsFrequency          = time.Second
 	getHealthPacksFrequency     = time.Second
-	getEventsFrequency          = time.Second
+	getEventsFrequency          = time.Millisecond * 100
 )
 
 // Handler represents handler implementation of metadatav1.MetadataServer.

@@ -26,7 +26,7 @@ type Camera struct {
 func (c *Camera) GetWorldMatrix() ebiten.GeoM {
 	var matrix ebiten.GeoM
 
-	matrix.Translate(-c.position[0], -c.position[1])
+	matrix.Translate(c.position[0], -c.position[1])
 
 	matrix.Translate(-c.viewPortCenter[0], -c.viewPortCenter[1])
 

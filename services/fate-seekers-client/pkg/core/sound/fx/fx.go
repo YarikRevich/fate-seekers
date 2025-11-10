@@ -149,6 +149,11 @@ func (svm *SoundFXManager) Init() {
 	}()
 }
 
+// IsFXPlaying checks if fx player is currently active and playing.
+func (svm *SoundFXManager) IsFXPlaying() bool {
+	return svm.currentPlayer.Load() != nil
+}
+
 // PushWithHandbrake pushes a new track immediately to the queue at the highest priority
 // stopping previously playing track.
 func (svm *SoundFXManager) PushWithHandbrake(name string) {
@@ -163,6 +168,8 @@ func (svm *SoundFXManager) PushWithHandbrake(name string) {
 		if err != nil {
 			logging.GetInstance().Fatal(errors.Wrap(err, common.ErrSoundPlayerAccess.Error()).Error())
 		}
+
+		svm.processingBatch = svm.processingBatch[:0]
 
 		svm.processingBatch = append([]*dto.FXSoundUnit{{
 			Duration: time.Second * time.Duration(sound.Length()) / common.BytesPerSample / common.SampleRate,
