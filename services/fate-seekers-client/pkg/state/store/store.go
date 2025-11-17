@@ -55,11 +55,25 @@ func GetApplicationLoading() int {
 	return instance.GetState(application.LOADING_APPLICATION_STATE).(int)
 }
 
+// GetApplicationStateReset retrieves state reset application state value.
 func GetApplicationStateReset() string {
-	// GetApplicationStateReset retrieves state reset application state value.
 	instance := GetInstance()
 
 	return instance.GetState(application.STATE_RESET_APPLICATION_STATE).(string)
+}
+
+// GetApplicationStateGamepadEnabled retrieves state gamepad enabled application state value.
+func GetApplicationStateGamepadEnabled() string {
+	instance := GetInstance()
+
+	return instance.GetState(application.GAMEPAD_ENABLED_APPLICATION_STATE).(string)
+}
+
+// GetApplicationStateGamepadPointerPosition retrieves gamepad pointer position application action.
+func GetApplicationStateGamepadPointerPosition() dto.Position {
+	instance := GetInstance()
+
+	return instance.GetState(application.GAMEPAD_POINTER_POSITION_APPLICATION_STATE).(dto.Position)
 }
 
 // GetRepositoryUUID retrieves uuid repository state value.

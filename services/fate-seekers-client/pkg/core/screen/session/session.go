@@ -13,10 +13,11 @@ import (
 	metadatastream "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/stream"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/animation/animator"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/animation/animator/movable"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/animation/direction"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/gamepad"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/movable"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/bar"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
@@ -63,46 +64,6 @@ import (
 // 	}
 // 	}
 
-// if ebiten.IsKeyPressed(ebiten.KeyU) {
-// 	ms.animation.Update()
-// }
-
-// if ebiten.IsKeyPressed(ebiten.KeyA) || ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
-// 	ms.camera.TranslatePositionX(-1)
-// }
-// if ebiten.IsKeyPressed(ebiten.KeyD) || ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
-// 	ms.camera.TranslatePositionX(1)
-// }
-// if ebiten.IsKeyPressed(ebiten.KeyW) || ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
-// 	ms.camera.TranslatePositionY(-1)
-// }
-// if ebiten.IsKeyPressed(ebiten.KeyS) || ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
-// 	ms.camera.TranslatePositionY(1)
-// }
-
-// if ebiten.IsKeyPressed(ebiten.KeyQ) {
-// 	if ms.camera.GetZoom() > -2400 {
-// 		ms.camera.ZoomOutBy(10)
-// 	}
-// }
-// if ebiten.IsKeyPressed(ebiten.KeyE) {
-// 	if ms.camera.GetZoom() < 2400 {
-// 		ms.camera.ZoomInBy(10)
-// 	}
-// }
-
-// if ebiten.IsKeyPressed(ebiten.KeyR) {
-// 	ms.camera.RotateLeft()
-// }
-
-// if ebiten.IsKeyPressed(ebiten.KeyT) {
-// 	ms.camera.RotateRight()
-// }
-
-// if ebiten.IsKeyPressed(ebiten.KeySpace) {
-// 	ms.camera.Reset()
-// }
-
 var (
 	// GetInstance retrieves instance of the session screen, performing initilization if needed.
 	GetInstance = sync.OnceValue[screen.Screen](newSessionScreen)
@@ -124,8 +85,8 @@ type SessionScreen struct {
 	// Represents attached active user interface.
 	activeUI *ebitenui.UI
 
-	// Represents attached animator instance.
-	animator *animator.Animator
+	// Represents attached renderer instance.
+	renderer *renderer.Renderer
 
 	// Represents attached camera instance.
 	camera *kamera.Camera
@@ -318,14 +279,25 @@ func (ss *SessionScreen) HandleInput() error {
 								animationDirection = previousUsersMetadata.AnimationDirection
 							}
 
-							if userMetadata.Issuer == store.GetRepositoryUUID() {
-								if previousUsersMetadata.Health != userMetadata.Health {
-									bar.GetInstance().SetHealthText(userMetadata.Health)
+							if userMetadata.GetIssuer() == store.GetRepositoryUUID() {
+								if previousUsersMetadata.Health != userMetadata.GetHealth() {
+									bar.GetInstance().SetHealthText(userMetadata.GetHealth())
 								}
 							}
 
 							if previousUsersMetadata.Health != userMetadata.Health {
 								sharedUsersMetadataHealthHitsIssuers[userMetadata.GetIssuer()] = true
+							}
+						}
+
+						if userMetadata.GetIssuer() == store.GetRepositoryUUID() {
+							if _, ok := retrievedUsersMetadataSession[userMetadata.GetIssuer()]; !ok {
+								dispatcher.GetInstance().Dispatch(
+									action.NewSetPositionSession(dto.Position{
+										X: userMetadata.GetPosition().GetX(),
+										Y: userMetadata.GetPosition().GetY(),
+									}),
+								)
 							}
 						}
 
@@ -350,12 +322,12 @@ func (ss *SessionScreen) HandleInput() error {
 						}
 					}
 
-					ss.animator.GetMovables().PruneSecondary(sharedUsersMetadataIssuers)
+					ss.renderer.GetMovables().PruneSecondary(sharedUsersMetadataIssuers)
 
 					for issuer := range sharedUsersMetadataIssuers {
 						retrievedUsersMetadata := store.GetRetrievedUsersMetadataSession()[issuer]
 
-						if !ss.animator.GetMovables().SecondaryExists(issuer) {
+						if !ss.renderer.GetMovables().SecondaryExists(issuer) {
 							movableUnit := movable.NewMovableUnit(
 								loader.GetMovableSkinsPath(retrievedUsersMetadata.Skin))
 
@@ -363,9 +335,9 @@ func (ss *SessionScreen) HandleInput() error {
 							movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
 							movableUnit.AddPosition(retrievedUsersMetadata.Position)
 
-							ss.animator.GetMovables().AddSecondary(issuer, movableUnit)
+							ss.renderer.GetMovables().AddSecondary(issuer, movableUnit)
 						} else {
-							movableUnit := ss.animator.GetMovables().GetSecondary(issuer)
+							movableUnit := ss.renderer.GetMovables().GetSecondary(issuer)
 
 							movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
 							movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
@@ -376,13 +348,13 @@ func (ss *SessionScreen) HandleInput() error {
 					var movableUnit *movable.MovableUnit
 
 					for issuer := range sharedUsersMetadataHealthHitsIssuers {
-						if ss.animator.GetMovables().SecondaryExists(issuer) {
-							movableUnit = ss.animator.GetMovables().GetSecondary(issuer)
+						if ss.renderer.GetMovables().SecondaryExists(issuer) {
+							movableUnit = ss.renderer.GetMovables().GetSecondary(issuer)
 						} else {
-							if ss.animator.GetMovables().MainExists(issuer) {
+							if ss.renderer.GetMovables().MainExists(issuer) {
 								sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ToxicRainFXSound)
 
-								movableUnit = ss.animator.GetMovables().GetMain(issuer)
+								movableUnit = ss.renderer.GetMovables().GetMain(issuer)
 							} else {
 								continue
 							}
@@ -412,25 +384,54 @@ func (ss *SessionScreen) HandleInput() error {
 	retrievedUsersMetadataSession := store.GetRetrievedUsersMetadataSession()
 
 	if _, ok := retrievedUsersMetadataSession[store.GetRepositoryUUID()]; ok {
-		if ebiten.IsKeyPressed(ebiten.KeyEscape) {
-			dispatcher.GetInstance().Dispatch(
-				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
-		}
+		if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE && ebiten.IsFocused() {
+			gamepadID := ebiten.GamepadIDs()[0]
 
-		if ebiten.IsKeyPressed(ebiten.KeyA) {
-			dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
-		}
+			direction := gamepad.GetGamepadLeftStickDirection(gamepadID)
 
-		if ebiten.IsKeyPressed(ebiten.KeyW) {
-			dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
-		}
+			switch direction {
+			case gamepad.DirUp:
+				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
+			case gamepad.DirDown:
+				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
+			case gamepad.DirLeft:
+				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
+			case gamepad.DirRight:
+				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+			case gamepad.DirUpLeft:
+				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
+				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
+			case gamepad.DirUpRight:
+				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
+				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+			case gamepad.DirDownLeft:
+				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
+				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
+			case gamepad.DirDownRight:
+				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
+				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+			}
+		} else {
+			if ebiten.IsKeyPressed(ebiten.KeyEscape) {
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
+			}
 
-		if ebiten.IsKeyPressed(ebiten.KeyS) {
-			dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
-		}
+			if ebiten.IsKeyPressed(ebiten.KeyA) {
+				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
+			}
 
-		if ebiten.IsKeyPressed(ebiten.KeyD) {
-			dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+			if ebiten.IsKeyPressed(ebiten.KeyW) {
+				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
+			}
+
+			if ebiten.IsKeyPressed(ebiten.KeyS) {
+				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
+			}
+
+			if ebiten.IsKeyPressed(ebiten.KeyD) {
+				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+			}
 		}
 	}
 
@@ -438,24 +439,23 @@ func (ss *SessionScreen) HandleInput() error {
 		ss.camera.AddTrauma(0.1)
 	}
 
-	ss.camera.LookAt(store.GetPositionSession().X, -store.GetPositionSession().Y)
-
 	store.RetrievedUsersMetadataSessionSyncHelper.Unlock()
 
 	selectedLobbySet := store.GetSelectedLobbySetUnitMetadata()
 
-	if !ss.animator.GetMovables().MainExists(selectedLobbySet.Issuer) {
-		movableUnit := movable.NewMovableUnit(
+	var movableUnit *movable.MovableUnit
+
+	if !ss.renderer.GetMovables().MainExists(selectedLobbySet.Issuer) {
+		movableUnit = movable.NewMovableUnit(
 			loader.GetMovableSkinsPath(selectedLobbySet.Skin))
 
 		movableUnit.SetDirection(dto.RightMovableRotation)
 		movableUnit.SetCameraLock(true)
 		movableUnit.SetStatic(true)
-		// movableUnit.AddPosition(store.GetPositionSession())
 
-		ss.animator.GetMovables().AddMain(selectedLobbySet.Issuer, movableUnit)
+		ss.renderer.GetMovables().AddMain(selectedLobbySet.Issuer, movableUnit)
 	} else {
-		movableUnit := ss.animator.GetMovables().GetMain(selectedLobbySet.Issuer)
+		movableUnit = ss.renderer.GetMovables().GetMain(selectedLobbySet.Issuer)
 
 		if store.GetPreviousPositionSession().X != store.GetPositionSession().X ||
 			store.GetPreviousPositionSession().Y != store.GetPositionSession().Y {
@@ -469,14 +469,18 @@ func (ss *SessionScreen) HandleInput() error {
 		} else {
 			movableUnit.SetStatic(true)
 		}
-
-		// movableUnit.AddPosition(store.GetPositionSession())
 	}
+
+	shiftWidth, shiftHeight := movableUnit.GetShiftBounds()
+
+	ss.camera.LookAt(
+		store.GetPositionSession().X+(shiftWidth/2),
+		-store.GetPositionSession().Y+(shiftHeight/2))
 
 	dispatcher.GetInstance().Dispatch(
 		action.NewSyncPreviousPositionSession())
 
-	ss.animator.Update()
+	ss.renderer.Update()
 
 	if !ss.transparentTransitionEffect.Done() {
 		if !ss.transparentTransitionEffect.OnEnd() {
@@ -552,7 +556,7 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 		ss.eventWorld.Clear()
 	}
 
-	ss.animator.Draw(ss.internalWorld, ss.camera)
+	ss.renderer.Draw(ss.internalWorld, ss.camera)
 
 	screen.DrawImage(ss.internalWorld, &ebiten.DrawImageOptions{})
 
@@ -594,7 +598,7 @@ func newSessionScreen() screen.Screen {
 		passiveUI: builder.Build(
 			bar.GetInstance().GetContainer()),
 		activeUI: builder.Build(),
-		animator: animator.NewAnimator(),
+		renderer: renderer.NewRenderer(),
 		camera:   camera,
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(
 			true, 255, 0, 5, time.Microsecond*10),

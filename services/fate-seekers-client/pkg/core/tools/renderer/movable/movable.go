@@ -107,6 +107,21 @@ func (m *MovableUnit) GetPosition() dto.Position {
 	return m.position
 }
 
+// GetShiftBounds retrieves animation shift bounds.
+func (m *MovableUnit) GetShiftBounds() (float64, float64) {
+	var shiftWidth, shiftHeight int
+
+	if m.static {
+		shiftWidth = m.metadata[m.direction].Rotation.Bounds().Dx()
+		shiftHeight = m.metadata[m.direction].Rotation.Bounds().Dy()
+	} else {
+		shiftWidth = m.metadata[m.direction].Frames[m.frame].Bounds().Dx()
+		shiftHeight = m.metadata[m.direction].Frames[m.frame].Bounds().Dy()
+	}
+
+	return float64(shiftWidth), float64(shiftHeight)
+}
+
 // Update performs update operation for the movable unit.
 func (m *MovableUnit) Update() {
 	if !m.static {
@@ -149,19 +164,11 @@ func (m *MovableUnit) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 	if !m.cameraLock {
 		m.opts.GeoM.Translate(m.position.X, -m.position.Y)
 	} else {
-		var shiftWidth, shiftHeight int
-
-		if m.static {
-			shiftWidth = m.metadata[m.direction].Rotation.Bounds().Dx()
-			shiftHeight = m.metadata[m.direction].Rotation.Bounds().Dy()
-		} else {
-			shiftWidth = m.metadata[m.direction].Frames[m.frame].Bounds().Dx()
-			shiftHeight = m.metadata[m.direction].Frames[m.frame].Bounds().Dy()
-		}
+		shiftWidth, shiftHeight := m.GetShiftBounds()
 
 		m.opts.GeoM.Translate(
-			float64(config.GetWorldWidth()-shiftWidth)/2,
-			float64(config.GetWorldHeight()-shiftHeight)/2)
+			((float64(config.GetWorldWidth()))/2)-(shiftWidth/2),
+			(float64(config.GetWorldHeight())/2)-(shiftHeight/2))
 	}
 
 	if !m.normalHitTransparentTransitionEffect.Done() {
@@ -367,15 +374,15 @@ func (m *Movables) Update() {
 
 		m.objectPositionMutex.RLock()
 
-		var shiftHeight int
+		// var shiftHeight int
 
-		if movable.static {
-			shiftHeight = movable.metadata[movable.direction].Rotation.Bounds().Dy()
-		} else {
-			shiftHeight = movable.metadata[movable.direction].Frames[movable.frame].Bounds().Dy()
-		}
+		// if movable.static {
+		// 	shiftHeight = movable.metadata[movable.direction].Rotation.Bounds().Dy()
+		// } else {
+		// 	shiftHeight = movable.metadata[movable.direction].Frames[movable.frame].Bounds().Dy()
+		// }
 
-		presentObjectPositions, ok = m.objectPosition.Get(float64(config.GetWorldHeight()-shiftHeight) / 2)
+		presentObjectPositions, ok = m.objectPosition.Get(movable.position.Y) //float64(config.GetWorldHeight()-shiftHeight) / 2)
 		if ok {
 			presentObjectPositions = append(
 				presentObjectPositions,
@@ -393,7 +400,7 @@ func (m *Movables) Update() {
 
 		m.objectPositionMutex.Lock()
 
-		m.objectPosition.Set(float64(config.GetWorldHeight()-shiftHeight)/2, presentObjectPositions)
+		m.objectPosition.Set(movable.position.Y, presentObjectPositions)
 
 		m.objectPositionMutex.Unlock()
 	}

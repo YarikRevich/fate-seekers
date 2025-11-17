@@ -38,6 +38,10 @@ func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interfac
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: STATIC_SESSION_STATE, Value: value.Value})
 
+		case action.SET_POSITION_SESSION_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: PREVIOUS_POSITION_SESSION_STATE, Value: value.Value})
+
 		case action.SYNC_PREVIOUS_POSITION_SESSION_ACTION:
 			value := ssr.store.GetState(POSITION_SESSION_STATE).(dto.Position)
 

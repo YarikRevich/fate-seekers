@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/YarikRevich/fate-seekers/assets"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
@@ -14,6 +15,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/lafriks/go-tiled"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -37,6 +39,16 @@ var (
 var (
 	// GetInstance retrieves instance of the asset loader manager, performing initial creation if needed.
 	GetInstance = sync.OnceValue[*Loader](newLoader)
+)
+
+// Describes all the available maps to be loaded.
+const (
+	FirstMap = "1"
+)
+
+// Describes tilemap configuration source file.
+const (
+	MapTilemap = "tilemap/tilemap.tmx"
 )
 
 // Describes all the available statics to be loaded.
@@ -63,6 +75,8 @@ const (
 	TextInputIdle = "ui/text-input-idle.png"
 
 	Heart = "heart/heart.png"
+
+	Pointer = "pointer/pointer.png"
 )
 
 // Describes all the available shaders to be loaded.
@@ -139,6 +153,7 @@ const (
 
 // Decsribes all the embedded files specific paths.
 const (
+	MapsPath       = "maps"
 	ShadersPath    = "shaders"
 	FontsPath      = "fonts"
 	StaticsPath    = "statics"
@@ -151,6 +166,9 @@ const (
 
 // Loader represents low level asset loading manager, which operates in a lazy mode manner.
 type Loader struct {
+	// Represents cache map of embedded maps.
+	maps sync.Map
+
 	// Represents cache map of embedded statics.
 	statics sync.Map
 
@@ -174,6 +192,26 @@ type Loader struct {
 
 	// Represents cache map of embedded sounds.
 	sounds sync.Map
+}
+
+// GetMap retrieves map content with the given name.
+func (l *Loader) GetMap(name string) *tiled.Map {
+	result, ok := l.maps.Load(name)
+	if ok {
+		return result.(*tiled.Map)
+	}
+
+	file, err := tiled.LoadFile(
+		filepath.Join(MapsPath, name, MapTilemap), tiled.WithFileSystem(assets.AssetsClient))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	l.maps.Store(name, file)
+
+	logging.GetInstance().Debug("Map has been loaded", zap.String("name", name))
+
+	return file
 }
 
 // GetStatic retrieves static content with the given name.

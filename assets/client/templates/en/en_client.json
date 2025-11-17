@@ -243,6 +243,14 @@
         "one": "Event has finished",
         "other": "Event has finished"
     },
+    "client.gamepad.connected": {
+        "one": "Controller has been connected",
+        "other": "Controller has been connected"
+    },
+    "client.gamepad.disconnected": {
+        "one": "Controller has been disconnected",
+        "other": "Controller has been disconnected"
+    },
     "client.skin.0.name": {
         "one": "Ariyan",
         "other": "Ariyan"

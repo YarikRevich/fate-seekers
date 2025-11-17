@@ -35,6 +35,9 @@ const (
 
 	STATE_RESET_APPLICATION_TRUE_VALUE  = "true"
 	STATE_RESET_APPLICATION_FALSE_VALUE = "false"
+
+	GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE  = "true"
+	GAMEPAD_ENABLED_APPLICATION_FALSE_VALUE = "false"
 )
 
 // Describes all the available repository reducer store values.

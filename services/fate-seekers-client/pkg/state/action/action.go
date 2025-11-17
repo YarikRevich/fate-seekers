@@ -13,10 +13,15 @@ const (
 
 // Describes all the available state actions for application reducer.
 const (
-	SET_EXIT_APPLICATION_ACTION          = "SET_EXIT_APPLICATION_ACTION"
-	INCREMENT_LOADING_APPLICATION_ACTION = "INCREMENT_LOADING_APPLICATION_ACTION"
-	DECREMENT_LOADING_APPLICATION_ACTION = "DECREMENT_LOADING_APPLICATION_ACTION"
-	SET_STATE_RESET_APPLICATION_ACTION   = "SET_STATE_RESET_APPLICATION_ACTION"
+	SET_EXIT_APPLICATION_ACTION                             = "SET_EXIT_APPLICATION_ACTION"
+	INCREMENT_LOADING_APPLICATION_ACTION                    = "INCREMENT_LOADING_APPLICATION_ACTION"
+	DECREMENT_LOADING_APPLICATION_ACTION                    = "DECREMENT_LOADING_APPLICATION_ACTION"
+	SET_STATE_RESET_APPLICATION_ACTION                      = "SET_STATE_RESET_APPLICATION_ACTION"
+	SET_GAMEPAD_ENABLED_APPLICATION_ACTION                  = "SET_GAMEPAD_ENABLED_APPLICATION_ACTION"
+	INCREMENT_X_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION = "INCREMENT_X_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION"
+	INCREMENT_Y_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION = "INCREMENT_Y_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION"
+	DECREMENT_X_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION = "DECREMENT_X_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION"
+	DECREMENT_Y_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION = "DECREMENT_Y_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION"
 )
 
 // Describes all the available state actions for repository reducer.
@@ -93,6 +98,7 @@ const (
 // Describes all the available state actions for session reducer.
 const (
 	SET_STATIC_POSITION_SESSION_ACTION    = "SET_STATIC_POSITION_SESSION_ACTION"
+	SET_POSITION_SESSION_ACTION           = "SET_POSITION_SESSION_ACTION"
 	SYNC_PREVIOUS_POSITION_SESSION_ACTION = "SYNC_PREVIOUS_POSITION_SESSION_ACTION"
 	INCREMENT_X_POSITION_SESSION_ACTION   = "INCREMENT_X_POSITION_SESSION_ACTION"
 	INCREMENT_Y_POSITION_SESSION_ACTION   = "INCREMENT_Y_POSITION_SESSION_ACTION"
@@ -134,6 +140,14 @@ func NewSetExitApplicationAction(value string) godux.Action {
 	}
 }
 
+// NewSetGamepadEnabledApplicationAction creates new set gamepad enabled application action.
+func NewSetGamepadEnabledApplicationAction(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_GAMEPAD_ENABLED_APPLICATION_ACTION,
+		Value: value,
+	}
+}
+
 // NewSetUUIDRepositoryAction creates new set uuid repository action.
 func NewSetUUIDRepositoryAction(value string) godux.Action {
 	return godux.Action{
@@ -169,6 +183,34 @@ func NewSetStateResetApplicationAction(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_STATE_RESET_APPLICATION_ACTION,
 		Value: value,
+	}
+}
+
+// NewIncrementXGamepadPointerPositionApplication creates new increment x gamepad pointer position application action.
+func NewIncrementXGamepadPointerPositionApplication() godux.Action {
+	return godux.Action{
+		Type: INCREMENT_X_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION,
+	}
+}
+
+// NewIncrementYGamepadPointerPositionApplication creates new increment y gamepad pointer position application action.
+func NewIncrementYGamepadPointerPositionApplication() godux.Action {
+	return godux.Action{
+		Type: INCREMENT_Y_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION,
+	}
+}
+
+// NewDecrementXGamepadPointerPositionApplication creates new decrement x gamepad pointer position application action.
+func NewDecrementXGamepadPointerPositionApplication() godux.Action {
+	return godux.Action{
+		Type: DECREMENT_X_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION,
+	}
+}
+
+// NewDecrementYGamepadPointerPositionApplication creates new decrement y gamepad position application action.
+func NewDecrementYGamepadPointerPositionApplication() godux.Action {
+	return godux.Action{
+		Type: DECREMENT_Y_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION,
 	}
 }
 
@@ -440,6 +482,14 @@ func NewSetSessionAlreadyStartedMetadata(value string) godux.Action {
 func NewSetStaticPositionSession(value bool) godux.Action {
 	return godux.Action{
 		Type:  SET_STATIC_POSITION_SESSION_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetPositionSession creates new position session action.
+func NewSetPositionSession(value dto.Position) godux.Action {
+	return godux.Action{
+		Type:  SET_POSITION_SESSION_ACTION,
 		Value: value,
 	}
 }
