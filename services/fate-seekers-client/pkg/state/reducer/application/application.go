@@ -19,6 +19,11 @@ const (
 	GAMEPAD_POINTER_POSITION_APPLICATION_STATE = "gamepad_position"
 )
 
+// Describes gamepad pointer position change parameters.
+const (
+	GAMEPAD_POINTER_POSITION_DECREMENTOR = 3
+)
+
 // ApplicationStateReducer represents reducer used for application state management.
 type ApplicationStateReducer struct {
 	// Represents of instance of state store.
@@ -76,7 +81,13 @@ func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) inte
 		case action.INCREMENT_X_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION:
 			valueRaw := asr.store.GetState(GAMEPAD_POINTER_POSITION_APPLICATION_STATE).(dto.Position)
 
-			valueRaw.X += 3
+			pointer := loader.GetInstance().GetStatic(loader.Pointer)
+
+			shiftWidth := pointer.Bounds().Dx()
+
+			if int(valueRaw.X+GAMEPAD_POINTER_POSITION_DECREMENTOR) <= (config.GetWorldWidth() - shiftWidth) {
+				valueRaw.X += GAMEPAD_POINTER_POSITION_DECREMENTOR
+			}
 
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw})
@@ -84,7 +95,13 @@ func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) inte
 		case action.INCREMENT_Y_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION:
 			valueRaw := asr.store.GetState(GAMEPAD_POINTER_POSITION_APPLICATION_STATE).(dto.Position)
 
-			valueRaw.Y += 3
+			pointer := loader.GetInstance().GetStatic(loader.Pointer)
+
+			shiftHeight := pointer.Bounds().Dy()
+
+			if int(valueRaw.Y+GAMEPAD_POINTER_POSITION_DECREMENTOR) <= (config.GetWorldHeight() - shiftHeight) {
+				valueRaw.Y += GAMEPAD_POINTER_POSITION_DECREMENTOR
+			}
 
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw})
@@ -92,7 +109,9 @@ func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) inte
 		case action.DECREMENT_X_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION:
 			valueRaw := asr.store.GetState(GAMEPAD_POINTER_POSITION_APPLICATION_STATE).(dto.Position)
 
-			valueRaw.X -= 3
+			if int(valueRaw.X-GAMEPAD_POINTER_POSITION_DECREMENTOR) >= 0 {
+				valueRaw.X -= GAMEPAD_POINTER_POSITION_DECREMENTOR
+			}
 
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw})
@@ -100,7 +119,9 @@ func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) inte
 		case action.DECREMENT_Y_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION:
 			valueRaw := asr.store.GetState(GAMEPAD_POINTER_POSITION_APPLICATION_STATE).(dto.Position)
 
-			valueRaw.Y -= 3
+			if int(valueRaw.Y-GAMEPAD_POINTER_POSITION_DECREMENTOR) >= 0 {
+				valueRaw.Y -= GAMEPAD_POINTER_POSITION_DECREMENTOR
+			}
 
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw})

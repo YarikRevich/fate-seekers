@@ -97,6 +97,7 @@ const (
 
 // Describes all the available state actions for session reducer.
 const (
+	SET_RESET_SESSION_ACTION              = "SET_RESET_SESSION_ACTION"
 	SET_STATIC_POSITION_SESSION_ACTION    = "SET_STATIC_POSITION_SESSION_ACTION"
 	SET_POSITION_SESSION_ACTION           = "SET_POSITION_SESSION_ACTION"
 	SYNC_PREVIOUS_POSITION_SESSION_ACTION = "SYNC_PREVIOUS_POSITION_SESSION_ACTION"
@@ -108,12 +109,12 @@ const (
 
 // Describes all the available state actions for travel reducer.
 const (
-	SET_RESET_TRAVEL_ACTION = "SET_RESET"
+	SET_RESET_TRAVEL_ACTION = "SET_RESET_TRAVEL_ACTION"
 )
 
 // Describes all the available state actions for death reducer.
 const (
-	SET_RESET_DEATH_ACTION = "SET_RESET"
+	SET_RESET_DEATH_ACTION = "SET_RESET_DEATH_ACTION"
 )
 
 // NewSetActiveScreenAction creates new set active screen action.
@@ -474,6 +475,14 @@ func NewSetSelectedLobbySetUnitMetadata(value *dto.SelectedLobbySetUnitMetadata)
 func NewSetSessionAlreadyStartedMetadata(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_SESSION_ALREADY_STARTED_METADATA_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetResetSession creates new set reset session action.
+func NewSetResetSession(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_RESET_SESSION_ACTION,
 		Value: value,
 	}
 }

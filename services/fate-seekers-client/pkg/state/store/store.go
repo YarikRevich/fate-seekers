@@ -314,6 +314,13 @@ func GetSessionAlreadyStartedMetadata() string {
 	return instance.GetState(metadata.SESSION_ALREADY_STARTED_METADATA_STATE).(string)
 }
 
+// GetResetSession retrieves reset session state value.
+func GetResetSession() string {
+	instance := GetInstance()
+
+	return instance.GetState(session.RESET_SESSION_STATE).(string)
+}
+
 // GetPositionSession retrieves position session state value.
 func GetPositionSession() dto.Position {
 	instance := GetInstance()

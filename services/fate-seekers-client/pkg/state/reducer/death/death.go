@@ -10,7 +10,7 @@ import (
 
 // Describes all the available death reducer store states.
 const (
-	RESET_DEATH_STATE = "reset"
+	RESET_DEATH_STATE = "reset_death"
 )
 
 // DeathStateReducer represents reducer used for death state management.

@@ -10,7 +10,7 @@ import (
 
 // Describes all the available travel reducer store states.
 const (
-	RESET_TRAVEL_STATE = "reset"
+	RESET_TRAVEL_STATE = "reset_travel"
 )
 
 // TravelStateReducer represents reducer used for travel state management.

@@ -1,40 +1,299 @@
 package renderer
 
 import (
+	"sync"
+
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/movable"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/tile"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
+	"github.com/elliotchance/orderedmap/v3"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/setanarut/kamera/v2"
+	"github.com/tidwall/btree"
 )
 
-// Renderer represents object renderer.
+var (
+	// GetInstance retrieves instance of the renderer, performing initial creation if needed.
+	GetInstance = sync.OnceValue[*Renderer](newRenderer)
+)
+
+// Renderer represents object renderer. It has three levels of rendered objects.
+// The first level is main objects to be rendered in the center of a screen.
+// The second level is for external objects to be rendered above the basic map layer.
+// The third level is for the basic map layer.
 type Renderer struct {
-	// Represents a set of movable objects, which are used for in the animator processing.
-	movables *movable.Movables
+	// // Represents a set of movable objects, which are used for in the animator processing.
+	// movables *movable.Movables
+
+	// Represents tertiary static objects mutex.
+	tertiaryTilemapObjectMutex sync.Mutex
+
+	// Represents tertiary tilemap object to be rendered in the background.
+	tertiaryTileObjects *orderedmap.OrderedMap[string, *tile.Tile]
+
+	// Represents secondary objects mutex.
+	secondaryTileObjectsMutex sync.RWMutex
+
+	// Represents secondary objects to be rendered in the background.
+	secondaryTileObjects *orderedmap.OrderedMap[string, *tile.Tile]
+
+	// Represents secondary objects mutex.
+	secondaryLocalMovableObjectsMutex sync.RWMutex
+
+	// Represents secondary objects to be rendered in the background.
+	secondaryLocalMovableObjects map[string]*movable.Movable
+
+	// Represents secondary objects mutex.
+	secondaryExternalMovableObjectsMutex sync.RWMutex
+
+	// Represents secondary objects to be rendered in the background.
+	secondaryExternalMovableObjects map[string]*movable.Movable
+
+	// Represents main objects mutex.
+	mainCenteredMovableObjectsMutex sync.RWMutex
+
+	// Represents main movable objects to be rendered in front
+	// (in this case main means character and visible inventory)
+	mainCenteredMovableObjects map[string]*movable.Movable
+
+	// Represents objects position mutex.
+	objectPositionMutex sync.RWMutex
+
+	// Represents objects positions, which define rendering order.
+	objectPosition *btree.Map[float64, []dto.RendererPositionItem]
 }
 
-// GetMovables retrieves configured animator movables holders.
-func (r *Renderer) GetMovables() *movable.Movables {
-	return r.movables
+// TertiaryTilemapObjectExists checks if tertiary tilemap object exists.
+func (r *Renderer) TertiaryTilemapObjectExists(name string) bool {
+	r.tertiaryTilemapObjectMutex.Lock()
+
+	ok := r.tertiaryTileObjects.Has(name)
+
+	r.tertiaryTilemapObjectMutex.Unlock()
+
+	return ok
+}
+
+// AddTertiaryTilemapObject adds new tertiary external tilemap object with the provided value.
+func (r *Renderer) AddTertiaryTilemapObject(name string, value *tile.Tile) {
+	r.tertiaryTilemapObjectMutex.Lock()
+
+	r.tertiaryTileObjects.Set(name, value)
+
+	r.tertiaryTilemapObjectMutex.Unlock()
+}
+
+// PruneSecondaryExternalMovableObjects performs clean operation for abondoned secondary external movables.
+func (r *Renderer) PruneSecondaryExternalMovableObjects(names map[string]bool) {
+	r.secondaryExternalMovableObjectsMutex.Lock()
+
+	for name := range r.secondaryExternalMovableObjects {
+		if _, ok := names[name]; !ok {
+			delete(r.secondaryExternalMovableObjects, name)
+		}
+	}
+
+	r.secondaryExternalMovableObjectsMutex.Unlock()
+}
+
+// SecondaryExternalMovableObjectExists checks if secondary external movable object with the provided name exists.
+func (r *Renderer) SecondaryExternalMovableObjectExists(name string) bool {
+	r.secondaryExternalMovableObjectsMutex.RLock()
+
+	_, ok := r.secondaryExternalMovableObjects[name]
+
+	r.secondaryExternalMovableObjectsMutex.RUnlock()
+
+	return ok
+}
+
+// AddSecondaryExternalMovableObject adds new secondary external movable object with the provided name and value.
+func (r *Renderer) AddSecondaryExternalMovableObject(name string, value *movable.Movable) {
+	r.secondaryExternalMovableObjectsMutex.Lock()
+
+	r.secondaryExternalMovableObjects[name] = value
+
+	r.secondaryExternalMovableObjectsMutex.Unlock()
+}
+
+// GetSecondaryExternalMovableObject retrieves secondary movable object with the provided name.
+func (r *Renderer) GetSecondaryExternalMovableObject(name string) *movable.Movable {
+	r.secondaryExternalMovableObjectsMutex.RLock()
+
+	result, _ := r.secondaryExternalMovableObjects[name]
+
+	r.secondaryExternalMovableObjectsMutex.RUnlock()
+
+	return result
+}
+
+// MainCenteredMovableObjectExists checks if main centered movable object with the provided name exists.
+func (r *Renderer) MainCenteredMovableObjectExists(name string) bool {
+	r.mainCenteredMovableObjectsMutex.RLock()
+
+	_, ok := r.mainCenteredMovableObjects[name]
+
+	r.mainCenteredMovableObjectsMutex.RUnlock()
+
+	return ok
+}
+
+// AddMainCenteredMovableObject adds new main centered movable object with the provided name and value.
+func (r *Renderer) AddMainCenteredMovableObject(name string, value *movable.Movable) {
+	r.mainCenteredMovableObjectsMutex.Lock()
+
+	r.mainCenteredMovableObjects[name] = value
+
+	r.mainCenteredMovableObjectsMutex.Unlock()
+}
+
+// GetMainCenteredMovableObject retrieves main centered movable object with the provided name.
+func (r *Renderer) GetMainCenteredMovableObject(name string) *movable.Movable {
+	r.mainCenteredMovableObjectsMutex.RLock()
+
+	result, _ := r.mainCenteredMovableObjects[name]
+
+	r.mainCenteredMovableObjectsMutex.RUnlock()
+
+	return result
 }
 
 // Clean performs clean operation for the configured animator holders.
 func (r *Renderer) Clean() {
-	r.movables.Clean()
+	r.secondaryExternalMovableObjectsMutex.Lock()
+
+	clear(r.secondaryExternalMovableObjects)
+
+	r.secondaryExternalMovableObjectsMutex.Unlock()
+
+	r.mainCenteredMovableObjectsMutex.Lock()
+
+	clear(r.mainCenteredMovableObjects)
+
+	r.mainCenteredMovableObjectsMutex.Unlock()
+
+	r.objectPositionMutex.Lock()
+
+	r.objectPosition.Clear()
+
+	r.objectPositionMutex.Unlock()
 }
 
-// Update performs update operation for the configured animator holders.
+// Update performs update operation and position rearangemenet for all the configured objects.
 func (r *Renderer) Update() {
-	r.movables.Update()
+	r.secondaryExternalMovableObjectsMutex.RLock()
+
+	r.objectPosition.Clear()
+
+	var (
+		presentObjectPositions []dto.RendererPositionItem
+		ok                     bool
+	)
+
+	for name, movable := range r.secondaryExternalMovableObjects {
+		movable.Update()
+
+		r.objectPositionMutex.RLock()
+
+		presentObjectPositions, ok = r.objectPosition.Get(movable.GetPosition().Y)
+		if ok {
+			presentObjectPositions = append(
+				presentObjectPositions,
+				dto.RendererPositionItem{
+					Name: name,
+					Type: dto.RendererPositionItemSecondaryExternalMovable})
+		} else {
+			presentObjectPositions = []dto.RendererPositionItem{
+				dto.RendererPositionItem{
+					Name: name,
+					Type: dto.RendererPositionItemSecondaryExternalMovable}}
+		}
+
+		r.objectPositionMutex.RUnlock()
+
+		r.objectPositionMutex.Lock()
+
+		r.objectPosition.Set(movable.GetPosition().Y, presentObjectPositions)
+
+		r.objectPositionMutex.Unlock()
+	}
+
+	// TODO: add tertiary second level parsing.
+
+	r.secondaryExternalMovableObjectsMutex.RUnlock()
+
+	r.mainCenteredMovableObjectsMutex.RLock()
+
+	for name, movable := range r.mainCenteredMovableObjects {
+		movable.Update()
+
+		r.objectPositionMutex.RLock()
+
+		_, shiftHeight := movable.GetShiftBounds()
+
+		y := (float64(config.GetWorldHeight()) / 2) - (shiftHeight / 2)
+
+		presentObjectPositions, ok = r.objectPosition.Get(y)
+		if ok {
+			presentObjectPositions = append(
+				presentObjectPositions,
+				dto.RendererPositionItem{
+					Name: name,
+					Type: dto.RendererPositionItemMainCenteredMovable})
+		} else {
+			presentObjectPositions = []dto.RendererPositionItem{
+				dto.RendererPositionItem{
+					Name: name,
+					Type: dto.RendererPositionItemMainCenteredMovable}}
+		}
+
+		r.objectPositionMutex.RUnlock()
+
+		r.objectPositionMutex.Lock()
+
+		r.objectPosition.Set(y, presentObjectPositions)
+
+		r.objectPositionMutex.Unlock()
+	}
+
+	r.mainCenteredMovableObjectsMutex.RUnlock()
 }
 
-// Draw performs draw operation for the provided screens image for configured animator holders.
+// Draw performs draw operation for all the configured objects.
 func (r *Renderer) Draw(screen *ebiten.Image, camera *kamera.Camera) {
-	r.movables.Draw(screen, camera)
+	for iter := r.tertiaryTileObjects.Front(); iter != nil; iter = iter.Next() {
+		iter.Value.Draw(screen, camera)
+	}
+
+	r.objectPositionMutex.RLock()
+
+	r.objectPosition.Reverse(func(key float64, value []dto.RendererPositionItem) bool {
+		for _, movable := range value {
+			switch movable.Type {
+			case dto.RendererPositionItemSecondaryExternalMovable:
+				r.secondaryExternalMovableObjects[movable.Name].Draw(screen, false, camera)
+
+			case dto.RendererPositionItemMainCenteredMovable:
+				r.mainCenteredMovableObjects[movable.Name].Draw(screen, true, camera)
+
+			}
+		}
+
+		return true
+	})
+
+	r.objectPositionMutex.RUnlock()
 }
 
-// NewRenderer initializes Renderer.
-func NewRenderer() *Renderer {
+// newRenderer initializes Renderer.
+func newRenderer() *Renderer {
 	return &Renderer{
-		movables: movable.NewMovables(),
+		tertiaryTileObjects:             orderedmap.NewOrderedMap[string, *tile.Tile](),
+		secondaryTileObjects:            orderedmap.NewOrderedMap[string, *tile.Tile](),
+		secondaryLocalMovableObjects:    make(map[string]*movable.Movable),
+		secondaryExternalMovableObjects: make(map[string]*movable.Movable),
+		mainCenteredMovableObjects:      make(map[string]*movable.Movable),
+		objectPosition:                  btree.NewMap[float64, []dto.RendererPositionItem](32),
 	}
 }

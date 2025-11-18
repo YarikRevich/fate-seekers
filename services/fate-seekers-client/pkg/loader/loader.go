@@ -4,13 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"image"
+	"io/fs"
 	"path/filepath"
+	"sort"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/assets"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
+	"github.com/disintegration/imaging"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
@@ -44,6 +47,12 @@ var (
 // Describes all the available maps to be loaded.
 const (
 	FirstMap = "1"
+)
+
+// Describes all the available map layers to be loaded.
+const (
+	FirstMapThirdLayer  = "third"
+	FirstMapSecondLayer = "second"
 )
 
 // Describes tilemap configuration source file.
@@ -202,7 +211,8 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 	}
 
 	file, err := tiled.LoadFile(
-		filepath.Join(MapsPath, name, MapTilemap), tiled.WithFileSystem(assets.AssetsClient))
+		filepath.Join(common.ClientBasePath, MapsPath, name, MapTilemap),
+		tiled.WithFileSystem(assets.AssetsClient))
 	if err != nil {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
@@ -212,6 +222,76 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 	logging.GetInstance().Debug("Map has been loaded", zap.String("name", name))
 
 	return file
+}
+
+// GetMapLayerTiles retrieves map layer tiles for the provided layer.
+func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) []*dto.ProcessedTile {
+	var result []*dto.ProcessedTile
+
+	var tiles sync.Map
+
+	i := 0
+
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			if layer.Tiles[i].IsNil() {
+				i++
+				continue
+			}
+
+			tileImage, ok := tiles.Load(layer.Tiles[i].Tileset.FirstGID + layer.Tiles[i].ID)
+			if !ok {
+				for k := uint32(0); k < uint32(layer.Tiles[i].Tileset.TileCount); k++ {
+					tiles.Store(k+layer.Tiles[i].Tileset.FirstGID, getMapTileImage(
+						layer.Tiles[i].Tileset.GetFileFullPath(layer.Tiles[i].Tileset.Image.Source),
+						layer.Tiles[i].Tileset.GetTileRect(uint32(k))))
+
+					if layer.Tiles[i].ID == k {
+						tileImage, _ = tiles.Load(layer.Tiles[i].Tileset.FirstGID + layer.Tiles[i].ID)
+					}
+				}
+			}
+
+			result = append(result, &dto.ProcessedTile{
+				Position: getMapTilePosition(x, y, tileWidth, tileHeight),
+				Image:    tileImage.(*ebiten.Image),
+			})
+
+			i++
+		}
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Position.Y > result[j].Position.Y
+	})
+
+	// TODO: replace with binary tree
+
+	return result
+}
+
+// getMapTileImage reads cropped tile from the provided tilemap and the provided tile dimension.
+func getMapTileImage(path string, rect image.Rectangle) *ebiten.Image {
+	file, err := fs.ReadFile(assets.AssetsClient, path)
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	image, _, err := image.Decode(bytes.NewReader(file))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	// return ebiten.NewImageFromImage(imaging.FlipV(imaging.Rotate270(imaging.Crop(image, rect))))
+	return ebiten.NewImageFromImage(imaging.Crop(image, rect))
+}
+
+// getMapTilePosition retrieves map tile position by the provided dimension.
+func getMapTilePosition(x, y, tileWidth, tileHeight int) dto.Position {
+	return dto.Position{
+		X: float64((x - y) * (tileWidth / 2)),
+		Y: float64((x + y) * (tileHeight / 2)),
+	}
 }
 
 // GetStatic retrieves static content with the given name.

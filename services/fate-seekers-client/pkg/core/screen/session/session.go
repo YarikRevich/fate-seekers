@@ -18,6 +18,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/movable"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/utils"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/bar"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
@@ -33,36 +34,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/setanarut/kamera/v2"
 )
-
-// const (
-// 	tileSize   = 16
-// 	tileXCount = 25
-// )
-// worldSizeX  = worldWidth / tileSize
-
-// var (
-// 	tilesImage *ebiten.Image
-// )
-
-// func init() {
-// 	// Decode an image from the image file's byte slice.
-// 	img, _, err := image.Decode(bytes.NewReader(images.Tiles_png))
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	tilesImage = ebiten.NewImageFromImage(img)
-// }
-
-// for _, l := range r.layers {
-// 	for i, t := range l {
-// 		op := &ebiten.DrawImageOptions{}
-// 		op.GeoM.Translate(float64((i%worldSizeX)*tileSize), float64((i/worldSizeX)*tileSize))
-
-// 		sx := (t % tileXCount) * tileSize
-// 		sy := (t / tileXCount) * tileSize
-// 		r.world.DrawImage(tilesImage.SubImage(image.Rect(sx, sy, sx+tileSize, sy+tileSize)).(*ebiten.Image), op)
-// 	}
-// 	}
 
 var (
 	// GetInstance retrieves instance of the session screen, performing initilization if needed.
@@ -84,9 +55,6 @@ type SessionScreen struct {
 
 	// Represents attached active user interface.
 	activeUI *ebitenui.UI
-
-	// Represents attached renderer instance.
-	renderer *renderer.Renderer
 
 	// Represents attached camera instance.
 	camera *kamera.Camera
@@ -120,6 +88,13 @@ type SessionScreen struct {
 }
 
 func (ss *SessionScreen) HandleInput() error {
+	if store.GetResetSession() == value.RESET_SESSION_TRUE_VALUE {
+		utils.LoadMap(loader.GetInstance().GetMap(loader.FirstMap))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetResetSession(value.RESET_SESSION_FALSE_VALUE))
+	}
+
 	if store.GetUpdateUserMetadataPositionsStartedNetworking() == value.UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_FALSE_VALUE {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetUpdateUserMetadataPositionsStartedNetworking(
@@ -322,22 +297,22 @@ func (ss *SessionScreen) HandleInput() error {
 						}
 					}
 
-					ss.renderer.GetMovables().PruneSecondary(sharedUsersMetadataIssuers)
+					renderer.GetInstance().PruneSecondaryExternalMovableObjects(sharedUsersMetadataIssuers)
 
 					for issuer := range sharedUsersMetadataIssuers {
 						retrievedUsersMetadata := store.GetRetrievedUsersMetadataSession()[issuer]
 
-						if !ss.renderer.GetMovables().SecondaryExists(issuer) {
-							movableUnit := movable.NewMovableUnit(
+						if !renderer.GetInstance().SecondaryExternalMovableObjectExists(issuer) {
+							movableUnit := movable.NewMovable(
 								loader.GetMovableSkinsPath(retrievedUsersMetadata.Skin))
 
 							movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
 							movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
 							movableUnit.AddPosition(retrievedUsersMetadata.Position)
 
-							ss.renderer.GetMovables().AddSecondary(issuer, movableUnit)
+							renderer.GetInstance().AddSecondaryExternalMovableObject(issuer, movableUnit)
 						} else {
-							movableUnit := ss.renderer.GetMovables().GetSecondary(issuer)
+							movableUnit := renderer.GetInstance().GetSecondaryExternalMovableObject(issuer)
 
 							movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
 							movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
@@ -345,16 +320,16 @@ func (ss *SessionScreen) HandleInput() error {
 						}
 					}
 
-					var movableUnit *movable.MovableUnit
+					var movableUnit *movable.Movable
 
 					for issuer := range sharedUsersMetadataHealthHitsIssuers {
-						if ss.renderer.GetMovables().SecondaryExists(issuer) {
-							movableUnit = ss.renderer.GetMovables().GetSecondary(issuer)
+						if renderer.GetInstance().SecondaryExternalMovableObjectExists(issuer) {
+							movableUnit = renderer.GetInstance().GetSecondaryExternalMovableObject(issuer)
 						} else {
-							if ss.renderer.GetMovables().MainExists(issuer) {
+							if renderer.GetInstance().MainCenteredMovableObjectExists(issuer) {
 								sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ToxicRainFXSound)
 
-								movableUnit = ss.renderer.GetMovables().GetMain(issuer)
+								movableUnit = renderer.GetInstance().GetMainCenteredMovableObject(issuer)
 							} else {
 								continue
 							}
@@ -390,24 +365,24 @@ func (ss *SessionScreen) HandleInput() error {
 			direction := gamepad.GetGamepadLeftStickDirection(gamepadID)
 
 			switch direction {
-			case gamepad.DirUp:
+			case dto.DirUp:
 				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
-			case gamepad.DirDown:
+			case dto.DirDown:
 				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
-			case gamepad.DirLeft:
+			case dto.DirLeft:
 				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
-			case gamepad.DirRight:
+			case dto.DirRight:
 				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
-			case gamepad.DirUpLeft:
+			case dto.DirUpLeft:
 				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
 				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
-			case gamepad.DirUpRight:
+			case dto.DirUpRight:
 				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
 				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
-			case gamepad.DirDownLeft:
+			case dto.DirDownLeft:
 				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
 				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
-			case gamepad.DirDownRight:
+			case dto.DirDownRight:
 				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
 				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
 			}
@@ -443,19 +418,18 @@ func (ss *SessionScreen) HandleInput() error {
 
 	selectedLobbySet := store.GetSelectedLobbySetUnitMetadata()
 
-	var movableUnit *movable.MovableUnit
+	var movableUnit *movable.Movable
 
-	if !ss.renderer.GetMovables().MainExists(selectedLobbySet.Issuer) {
-		movableUnit = movable.NewMovableUnit(
+	if !renderer.GetInstance().MainCenteredMovableObjectExists(selectedLobbySet.Issuer) {
+		movableUnit = movable.NewMovable(
 			loader.GetMovableSkinsPath(selectedLobbySet.Skin))
 
 		movableUnit.SetDirection(dto.RightMovableRotation)
-		movableUnit.SetCameraLock(true)
 		movableUnit.SetStatic(true)
 
-		ss.renderer.GetMovables().AddMain(selectedLobbySet.Issuer, movableUnit)
+		renderer.GetInstance().AddMainCenteredMovableObject(selectedLobbySet.Issuer, movableUnit)
 	} else {
-		movableUnit = ss.renderer.GetMovables().GetMain(selectedLobbySet.Issuer)
+		movableUnit = renderer.GetInstance().GetMainCenteredMovableObject(selectedLobbySet.Issuer)
 
 		if store.GetPreviousPositionSession().X != store.GetPositionSession().X ||
 			store.GetPreviousPositionSession().Y != store.GetPositionSession().Y {
@@ -480,7 +454,7 @@ func (ss *SessionScreen) HandleInput() error {
 	dispatcher.GetInstance().Dispatch(
 		action.NewSyncPreviousPositionSession())
 
-	ss.renderer.Update()
+	renderer.GetInstance().Update()
 
 	if !ss.transparentTransitionEffect.Done() {
 		if !ss.transparentTransitionEffect.OnEnd() {
@@ -556,7 +530,7 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 		ss.eventWorld.Clear()
 	}
 
-	ss.renderer.Draw(ss.internalWorld, ss.camera)
+	renderer.GetInstance().Draw(ss.internalWorld, ss.camera)
 
 	screen.DrawImage(ss.internalWorld, &ebiten.DrawImageOptions{})
 
@@ -598,7 +572,6 @@ func newSessionScreen() screen.Screen {
 		passiveUI: builder.Build(
 			bar.GetInstance().GetContainer()),
 		activeUI: builder.Build(),
-		renderer: renderer.NewRenderer(),
 		camera:   camera,
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(
 			true, 255, 0, 5, time.Microsecond*10),

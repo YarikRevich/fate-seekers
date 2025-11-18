@@ -37,6 +37,7 @@ import (
 	notificationmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	subtitlesmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/subtitles"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
@@ -121,6 +122,10 @@ func (r *Runtime) Update() error {
 				return inpututil.IsStandardGamepadButtonJustPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonRightBottom)
 			})
 
+			external.SetExternalMiddleMouseClick(func() bool {
+				return ebiten.IsStandardGamepadButtonPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonLeftStick)
+			})
+
 			notificationmanager.GetInstance().Push(
 				translation.GetInstance().GetTranslation("client.gamepad.connected"),
 				time.Second*3,
@@ -137,6 +142,8 @@ func (r *Runtime) Update() error {
 			external.SetExternalCursorPositionSource(nil)
 
 			external.SetExternalLeftMouseClick(nil)
+
+			external.SetExternalMiddleMouseClick(nil)
 
 			notificationmanager.GetInstance().Push(
 				translation.GetInstance().GetTranslation("client.gamepad.disconnected"),
@@ -163,24 +170,24 @@ func (r *Runtime) Update() error {
 		direction := gamepad.GetGamepadRightStickDirection(gamepadID)
 
 		switch direction {
-		case gamepad.DirUp:
+		case dto.DirUp:
 			dispatcher.GetInstance().Dispatch(action.NewIncrementYGamepadPointerPositionApplication())
-		case gamepad.DirDown:
+		case dto.DirDown:
 			dispatcher.GetInstance().Dispatch(action.NewDecrementYGamepadPointerPositionApplication())
-		case gamepad.DirLeft:
+		case dto.DirLeft:
 			dispatcher.GetInstance().Dispatch(action.NewDecrementXGamepadPointerPositionApplication())
-		case gamepad.DirRight:
+		case dto.DirRight:
 			dispatcher.GetInstance().Dispatch(action.NewIncrementXGamepadPointerPositionApplication())
-		case gamepad.DirUpLeft:
+		case dto.DirUpLeft:
 			dispatcher.GetInstance().Dispatch(action.NewIncrementYGamepadPointerPositionApplication())
 			dispatcher.GetInstance().Dispatch(action.NewDecrementXGamepadPointerPositionApplication())
-		case gamepad.DirUpRight:
+		case dto.DirUpRight:
 			dispatcher.GetInstance().Dispatch(action.NewIncrementYGamepadPointerPositionApplication())
 			dispatcher.GetInstance().Dispatch(action.NewIncrementXGamepadPointerPositionApplication())
-		case gamepad.DirDownLeft:
+		case dto.DirDownLeft:
 			dispatcher.GetInstance().Dispatch(action.NewDecrementYGamepadPointerPositionApplication())
 			dispatcher.GetInstance().Dispatch(action.NewDecrementXGamepadPointerPositionApplication())
-		case gamepad.DirDownRight:
+		case dto.DirDownRight:
 			dispatcher.GetInstance().Dispatch(action.NewDecrementYGamepadPointerPositionApplication())
 			dispatcher.GetInstance().Dispatch(action.NewIncrementXGamepadPointerPositionApplication())
 		}

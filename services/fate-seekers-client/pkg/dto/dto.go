@@ -219,14 +219,36 @@ const (
 	DownRightMovableRotation = "down-right"
 )
 
-// AnimatorMovablePositionItem represents animator movable position item.
-type AnimatorMovablePositionItem struct {
-	Issuer string
-	Type   int
+// ProcessedTile represents processed tile.
+type ProcessedTile struct {
+	Position Position
+	Image    *ebiten.Image
+}
+
+// RendererPositionItem represents renderer position item.
+type RendererPositionItem struct {
+	Name string
+	Type int
 }
 
 // Describes all the available animator movable object position item type.
 const (
-	AnimatorMovablePositionItemMain = iota
-	AnimatorMovablePositionItemSecondary
+	RendererPositionItemMainCenteredMovable = iota
+	RendererPositionItemSecondaryExternalMovable
+)
+
+// Represents direction type used for gamepad stick direction processing.
+type Direction int
+
+// Represents available stick directions.
+const (
+	DirNone Direction = iota
+	DirUp
+	DirDown
+	DirLeft
+	DirRight
+	DirUpLeft
+	DirUpRight
+	DirDownLeft
+	DirDownRight
 )
