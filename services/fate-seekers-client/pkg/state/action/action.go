@@ -97,14 +97,18 @@ const (
 
 // Describes all the available state actions for session reducer.
 const (
-	SET_RESET_SESSION_ACTION              = "SET_RESET_SESSION_ACTION"
-	SET_STATIC_POSITION_SESSION_ACTION    = "SET_STATIC_POSITION_SESSION_ACTION"
-	SET_POSITION_SESSION_ACTION           = "SET_POSITION_SESSION_ACTION"
-	SYNC_PREVIOUS_POSITION_SESSION_ACTION = "SYNC_PREVIOUS_POSITION_SESSION_ACTION"
-	INCREMENT_X_POSITION_SESSION_ACTION   = "INCREMENT_X_POSITION_SESSION_ACTION"
-	INCREMENT_Y_POSITION_SESSION_ACTION   = "INCREMENT_Y_POSITION_SESSION_ACTION"
-	DECREMENT_X_POSITION_SESSION_ACTION   = "DECREMENT_X_POSITION_SESSION_ACTION"
-	DECREMENT_Y_POSITION_SESSION_ACTION   = "DECREMENT_Y_POSITION_SESSION_ACTION"
+	SET_RESET_SESSION_ACTION                    = "SET_RESET_SESSION_ACTION"
+	SET_STATIC_POSITION_SESSION_ACTION          = "SET_STATIC_POSITION_SESSION_ACTION"
+	SET_POSITION_SESSION_ACTION                 = "SET_POSITION_SESSION_ACTION"
+	SYNC_PREVIOUS_POSITION_SESSION_ACTION       = "SYNC_PREVIOUS_POSITION_SESSION_ACTION"
+	INCREMENT_X_POSITION_SESSION_ACTION         = "INCREMENT_X_POSITION_SESSION_ACTION"
+	INCREMENT_Y_POSITION_SESSION_ACTION         = "INCREMENT_Y_POSITION_SESSION_ACTION"
+	DECREMENT_X_POSITION_SESSION_ACTION         = "DECREMENT_X_POSITION_SESSION_ACTION"
+	DECREMENT_Y_POSITION_SESSION_ACTION         = "DECREMENT_Y_POSITION_SESSION_ACTION"
+	DIAGONAL_UP_LEFT_POSITION_SESSION_ACTION    = "DIAGONAL_UP_LEFT_POSITION_SESSION_ACTION"
+	DIAGONAL_UP_RIGHT_POSITION_SESSION_ACTION   = "DIAGONAL_UP_RIGHT_POSITION_SESSION_ACTION"
+	DIAGONAL_DOWN_LEFT_POSITION_SESSION_ACTION  = "DIAGONAL_DOWN_LEFT_POSITION_SESSION_ACTION"
+	DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION = "DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION"
 )
 
 // Describes all the available state actions for travel reducer.
@@ -535,6 +539,34 @@ func NewDecrementXPositionSession() godux.Action {
 func NewDecrementYPositionSession() godux.Action {
 	return godux.Action{
 		Type: DECREMENT_Y_POSITION_SESSION_ACTION,
+	}
+}
+
+// NewDiagonalUpLeftPositionSession creates new diagonal up left position change session action.
+func NewDiagonalUpLeftPositionSession() godux.Action {
+	return godux.Action{
+		Type: DIAGONAL_UP_LEFT_POSITION_SESSION_ACTION,
+	}
+}
+
+// NewDiagonalUpRightPositionSession creates new diagonal up right position change session action.
+func NewDiagonalUpRightPositionSession() godux.Action {
+	return godux.Action{
+		Type: DIAGONAL_UP_RIGHT_POSITION_SESSION_ACTION,
+	}
+}
+
+// NewDiagonalDownLeftPositionSession creates new diagonal down left position change session action.
+func NewDiagonalDownLeftPositionSession() godux.Action {
+	return godux.Action{
+		Type: DIAGONAL_DOWN_LEFT_POSITION_SESSION_ACTION,
+	}
+}
+
+// NewDiagonalDownRightPositionSession creates new diagonal down right position change session action.
+func NewDiagonalDownRightPositionSession() godux.Action {
+	return godux.Action{
+		Type: DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION,
 	}
 }
 

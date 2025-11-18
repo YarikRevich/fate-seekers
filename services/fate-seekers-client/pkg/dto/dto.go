@@ -235,6 +235,7 @@ type RendererPositionItem struct {
 const (
 	RendererPositionItemMainCenteredMovable = iota
 	RendererPositionItemSecondaryExternalMovable
+	RendererPositionItemSecondaryTile
 )
 
 // Represents direction type used for gamepad stick direction processing.

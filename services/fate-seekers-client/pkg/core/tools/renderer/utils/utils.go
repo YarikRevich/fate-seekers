@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"fmt"
-
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/tile"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
@@ -21,13 +19,15 @@ func LoadMap(tilemap *tiled.Map) {
 
 			switch layer.Name {
 			case loader.FirstMapThirdLayer:
-				if !renderer.GetInstance().TertiaryTilemapObjectExists(name) {
-					fmt.Println(layerTile.Position)
-
-					renderer.GetInstance().AddTertiaryTilemapObject(
+				if !renderer.GetInstance().TertiaryTileObjectExists(name) {
+					renderer.GetInstance().AddTertiaryTileObject(
 						name, tile.NewTile(layerTile))
 				}
 			case loader.FirstMapSecondLayer:
+				if !renderer.GetInstance().TertiaryTileObjectExists(name) {
+					renderer.GetInstance().AddTertiaryTileObject(
+						name, tile.NewTile(layerTile))
+				}
 			}
 		}
 	}

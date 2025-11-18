@@ -14,6 +14,11 @@ type Tile struct {
 	opts ebiten.DrawImageOptions
 }
 
+// GetPosition retrieves processed position.
+func (t *Tile) GetPosition() dto.Position {
+	return t.processed.Position
+}
+
 // Draw performs draw operation for the tile with the provided camera.
 func (t *Tile) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 	t.opts.GeoM.Reset()

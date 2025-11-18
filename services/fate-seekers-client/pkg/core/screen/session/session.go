@@ -374,17 +374,13 @@ func (ss *SessionScreen) HandleInput() error {
 			case dto.DirRight:
 				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
 			case dto.DirUpLeft:
-				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
-				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
+				dispatcher.GetInstance().Dispatch(action.NewDiagonalUpLeftPositionSession())
 			case dto.DirUpRight:
-				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
-				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+				dispatcher.GetInstance().Dispatch(action.NewDiagonalUpRightPositionSession())
 			case dto.DirDownLeft:
-				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
-				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
+				dispatcher.GetInstance().Dispatch(action.NewDiagonalDownLeftPositionSession())
 			case dto.DirDownRight:
-				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
-				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+				dispatcher.GetInstance().Dispatch(action.NewDiagonalDownRightPositionSession())
 			}
 		} else {
 			if ebiten.IsKeyPressed(ebiten.KeyEscape) {
@@ -392,19 +388,21 @@ func (ss *SessionScreen) HandleInput() error {
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
 			}
 
-			if ebiten.IsKeyPressed(ebiten.KeyA) {
+			if ebiten.IsKeyPressed(ebiten.KeyW) && ebiten.IsKeyPressed(ebiten.KeyA) {
+				dispatcher.GetInstance().Dispatch(action.NewDiagonalUpLeftPositionSession())
+			} else if ebiten.IsKeyPressed(ebiten.KeyW) && ebiten.IsKeyPressed(ebiten.KeyD) {
+				dispatcher.GetInstance().Dispatch(action.NewDiagonalUpRightPositionSession())
+			} else if ebiten.IsKeyPressed(ebiten.KeyS) && ebiten.IsKeyPressed(ebiten.KeyA) {
+				dispatcher.GetInstance().Dispatch(action.NewDiagonalDownLeftPositionSession())
+			} else if ebiten.IsKeyPressed(ebiten.KeyS) && ebiten.IsKeyPressed(ebiten.KeyD) {
+				dispatcher.GetInstance().Dispatch(action.NewDiagonalDownRightPositionSession())
+			} else if ebiten.IsKeyPressed(ebiten.KeyA) {
 				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
-			}
-
-			if ebiten.IsKeyPressed(ebiten.KeyW) {
+			} else if ebiten.IsKeyPressed(ebiten.KeyW) {
 				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
-			}
-
-			if ebiten.IsKeyPressed(ebiten.KeyS) {
+			} else if ebiten.IsKeyPressed(ebiten.KeyS) {
 				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
-			}
-
-			if ebiten.IsKeyPressed(ebiten.KeyD) {
+			} else if ebiten.IsKeyPressed(ebiten.KeyD) {
 				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
 			}
 		}

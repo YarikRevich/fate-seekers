@@ -84,6 +84,42 @@ func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interfac
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: POSITION_SESSION_STATE, Value: valueRaw})
 
+		case action.DIAGONAL_UP_LEFT_POSITION_SESSION_ACTION:
+			valueRaw := ssr.store.GetState(POSITION_SESSION_STATE).(dto.Position)
+
+			valueRaw.X = valueRaw.X - 2.0/2.2360679775
+			valueRaw.Y = valueRaw.Y + 1.0/2.2360679775
+
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: POSITION_SESSION_STATE, Value: valueRaw})
+
+		case action.DIAGONAL_UP_RIGHT_POSITION_SESSION_ACTION:
+			valueRaw := ssr.store.GetState(POSITION_SESSION_STATE).(dto.Position)
+
+			valueRaw.X = valueRaw.X + 2.0/2.2360679775
+			valueRaw.Y = valueRaw.Y + 1.0/2.2360679775
+
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: POSITION_SESSION_STATE, Value: valueRaw})
+
+		case action.DIAGONAL_DOWN_LEFT_POSITION_SESSION_ACTION:
+			valueRaw := ssr.store.GetState(POSITION_SESSION_STATE).(dto.Position)
+
+			valueRaw.X = valueRaw.X - 2.0/2.2360679775
+			valueRaw.Y = valueRaw.Y - 1.0/2.2360679775
+
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: POSITION_SESSION_STATE, Value: valueRaw})
+
+		case action.DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION:
+			valueRaw := ssr.store.GetState(POSITION_SESSION_STATE).(dto.Position)
+
+			valueRaw.X = valueRaw.X + 2.0/2.2360679775
+			valueRaw.Y = valueRaw.Y - 1.0/2.2360679775
+
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: POSITION_SESSION_STATE, Value: valueRaw})
+
 		default:
 			return nil
 		}

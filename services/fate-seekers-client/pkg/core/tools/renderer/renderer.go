@@ -27,13 +27,13 @@ type Renderer struct {
 	// movables *movable.Movables
 
 	// Represents tertiary static objects mutex.
-	tertiaryTilemapObjectMutex sync.Mutex
+	tertiaryTileObjectMutex sync.Mutex
 
 	// Represents tertiary tilemap object to be rendered in the background.
 	tertiaryTileObjects *orderedmap.OrderedMap[string, *tile.Tile]
 
 	// Represents secondary objects mutex.
-	secondaryTileObjectsMutex sync.RWMutex
+	secondaryTileObjectMutex sync.RWMutex
 
 	// Represents secondary objects to be rendered in the background.
 	secondaryTileObjects *orderedmap.OrderedMap[string, *tile.Tile]
@@ -64,24 +64,44 @@ type Renderer struct {
 	objectPosition *btree.Map[float64, []dto.RendererPositionItem]
 }
 
-// TertiaryTilemapObjectExists checks if tertiary tilemap object exists.
-func (r *Renderer) TertiaryTilemapObjectExists(name string) bool {
-	r.tertiaryTilemapObjectMutex.Lock()
+// TertiaryTileObjectExists checks if tertiary tile object exists.
+func (r *Renderer) TertiaryTileObjectExists(name string) bool {
+	r.tertiaryTileObjectMutex.Lock()
 
 	ok := r.tertiaryTileObjects.Has(name)
 
-	r.tertiaryTilemapObjectMutex.Unlock()
+	r.tertiaryTileObjectMutex.Unlock()
+
+	return ok
+}
+
+// AddTertiaryTileObject adds new tertiary external tile object with the provided value.
+func (r *Renderer) AddTertiaryTileObject(name string, value *tile.Tile) {
+	r.tertiaryTileObjectMutex.Lock()
+
+	r.tertiaryTileObjects.Set(name, value)
+
+	r.tertiaryTileObjectMutex.Unlock()
+}
+
+// SecondaryTileObjectExists checks if secondary tile object exists.
+func (r *Renderer) SecondaryTileObjectExists(name string) bool {
+	r.secondaryTileObjectMutex.Lock()
+
+	ok := r.secondaryTileObjects.Has(name)
+
+	r.secondaryTileObjectMutex.Unlock()
 
 	return ok
 }
 
 // AddTertiaryTilemapObject adds new tertiary external tilemap object with the provided value.
-func (r *Renderer) AddTertiaryTilemapObject(name string, value *tile.Tile) {
-	r.tertiaryTilemapObjectMutex.Lock()
+func (r *Renderer) AddSecondaryTilemapObject(name string, value *tile.Tile) {
+	r.secondaryTileObjectMutex.Lock()
 
-	r.tertiaryTileObjects.Set(name, value)
+	r.secondaryTileObjects.Set(name, value)
 
-	r.tertiaryTilemapObjectMutex.Unlock()
+	r.secondaryTileObjectMutex.Unlock()
 }
 
 // PruneSecondaryExternalMovableObjects performs clean operation for abondoned secondary external movables.
@@ -219,7 +239,31 @@ func (r *Renderer) Update() {
 		r.objectPositionMutex.Unlock()
 	}
 
-	// TODO: add tertiary second level parsing.
+	for iter := r.secondaryTileObjects.Front(); iter != nil; iter = iter.Next() {
+		r.objectPositionMutex.RLock()
+
+		presentObjectPositions, ok = r.objectPosition.Get(iter.Value.GetPosition().Y)
+		if ok {
+			presentObjectPositions = append(
+				presentObjectPositions,
+				dto.RendererPositionItem{
+					Name: iter.Key,
+					Type: dto.RendererPositionItemSecondaryTile})
+		} else {
+			presentObjectPositions = []dto.RendererPositionItem{
+				dto.RendererPositionItem{
+					Name: iter.Key,
+					Type: dto.RendererPositionItemSecondaryTile}}
+		}
+
+		r.objectPositionMutex.RUnlock()
+
+		r.objectPositionMutex.Lock()
+
+		r.objectPosition.Set(iter.Value.GetPosition().Y, presentObjectPositions)
+
+		r.objectPositionMutex.Unlock()
+	}
 
 	r.secondaryExternalMovableObjectsMutex.RUnlock()
 
@@ -269,14 +313,18 @@ func (r *Renderer) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 	r.objectPositionMutex.RLock()
 
 	r.objectPosition.Reverse(func(key float64, value []dto.RendererPositionItem) bool {
-		for _, movable := range value {
-			switch movable.Type {
+		for _, item := range value {
+			switch item.Type {
+			case dto.RendererPositionItemSecondaryTile:
+				value, _ := r.secondaryTileObjects.Get(item.Name)
+
+				value.Draw(screen, camera)
+
 			case dto.RendererPositionItemSecondaryExternalMovable:
-				r.secondaryExternalMovableObjects[movable.Name].Draw(screen, false, camera)
+				r.secondaryExternalMovableObjects[item.Name].Draw(screen, false, camera)
 
 			case dto.RendererPositionItemMainCenteredMovable:
-				r.mainCenteredMovableObjects[movable.Name].Draw(screen, true, camera)
-
+				r.mainCenteredMovableObjects[item.Name].Draw(screen, true, camera)
 			}
 		}
 
