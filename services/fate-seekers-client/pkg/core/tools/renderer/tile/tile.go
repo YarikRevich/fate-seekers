@@ -19,6 +19,14 @@ func (t *Tile) GetPosition() dto.Position {
 	return t.processed.Position
 }
 
+// GetShiftBounds retrieves tile shift bounds.
+func (t *Tile) GetShiftBounds() (float64, float64) {
+	shiftWidth := t.processed.Image.Bounds().Dx()
+	shiftHeight := t.processed.Image.Bounds().Dy()
+
+	return float64(shiftWidth), float64(shiftHeight)
+}
+
 // Draw performs draw operation for the tile with the provided camera.
 func (t *Tile) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 	t.opts.GeoM.Reset()

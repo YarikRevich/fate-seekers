@@ -443,6 +443,8 @@ func (ss *SessionScreen) HandleInput() error {
 		}
 	}
 
+	movableUnit.SetPosition(store.GetPositionSession())
+
 	shiftWidth, shiftHeight := movableUnit.GetShiftBounds()
 
 	ss.camera.LookAt(
@@ -452,7 +454,7 @@ func (ss *SessionScreen) HandleInput() error {
 	dispatcher.GetInstance().Dispatch(
 		action.NewSyncPreviousPositionSession())
 
-	renderer.GetInstance().Update()
+	renderer.GetInstance().Update(ss.camera)
 
 	if !ss.transparentTransitionEffect.Done() {
 		if !ss.transparentTransitionEffect.OnEnd() {

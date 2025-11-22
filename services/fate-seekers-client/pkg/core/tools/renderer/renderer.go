@@ -1,9 +1,9 @@
 package renderer
 
 import (
+	"fmt"
 	"sync"
 
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/movable"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/tile"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
@@ -95,8 +95,8 @@ func (r *Renderer) SecondaryTileObjectExists(name string) bool {
 	return ok
 }
 
-// AddTertiaryTilemapObject adds new tertiary external tilemap object with the provided value.
-func (r *Renderer) AddSecondaryTilemapObject(name string, value *tile.Tile) {
+// AddSecondaryTileObject adds new secondary external tile object with the provided value.
+func (r *Renderer) AddSecondaryTileObject(name string, value *tile.Tile) {
 	r.secondaryTileObjectMutex.Lock()
 
 	r.secondaryTileObjects.Set(name, value)
@@ -201,7 +201,7 @@ func (r *Renderer) Clean() {
 }
 
 // Update performs update operation and position rearangemenet for all the configured objects.
-func (r *Renderer) Update() {
+func (r *Renderer) Update(camera *kamera.Camera) {
 	r.secondaryExternalMovableObjectsMutex.RLock()
 
 	r.objectPosition.Clear()
@@ -216,7 +216,9 @@ func (r *Renderer) Update() {
 
 		r.objectPositionMutex.RLock()
 
-		presentObjectPositions, ok = r.objectPosition.Get(movable.GetPosition().Y)
+		x, y := camera.ScreenToWorld(int(movable.GetPosition().X), int(movable.GetPosition().Y))
+
+		presentObjectPositions, ok = r.objectPosition.Get(x + y)
 		if ok {
 			presentObjectPositions = append(
 				presentObjectPositions,
@@ -234,7 +236,7 @@ func (r *Renderer) Update() {
 
 		r.objectPositionMutex.Lock()
 
-		r.objectPosition.Set(movable.GetPosition().Y, presentObjectPositions)
+		r.objectPosition.Set(x+y, presentObjectPositions)
 
 		r.objectPositionMutex.Unlock()
 	}
@@ -242,7 +244,12 @@ func (r *Renderer) Update() {
 	for iter := r.secondaryTileObjects.Front(); iter != nil; iter = iter.Next() {
 		r.objectPositionMutex.RLock()
 
-		presentObjectPositions, ok = r.objectPosition.Get(iter.Value.GetPosition().Y)
+		// x, y := camera.ScreenToWorld(int(iter.Value.GetPosition().X), int(iter.Value.GetPosition().Y))
+		position := iter.Value.GetPosition()
+
+		_, shiftHeight := iter.Value.GetShiftBounds()
+
+		presentObjectPositions, ok = r.objectPosition.Get((position.X) + position.Y + shiftHeight)
 		if ok {
 			presentObjectPositions = append(
 				presentObjectPositions,
@@ -260,7 +267,10 @@ func (r *Renderer) Update() {
 
 		r.objectPositionMutex.Lock()
 
-		r.objectPosition.Set(iter.Value.GetPosition().Y, presentObjectPositions)
+		fmt.Println(position.X+position.Y+shiftHeight, "OBJECT")
+		// _, shiftHeight := iter.Value.GetShiftBounds()
+
+		r.objectPosition.Set((position.X)+position.Y+shiftHeight, presentObjectPositions)
 
 		r.objectPositionMutex.Unlock()
 	}
@@ -274,11 +284,16 @@ func (r *Renderer) Update() {
 
 		r.objectPositionMutex.RLock()
 
-		_, shiftHeight := movable.GetShiftBounds()
+		// shiftWidth, shiftHeight := movable.GetShiftBounds()
 
-		y := (float64(config.GetWorldHeight()) / 2) - (shiftHeight / 2)
+		// x := (float64(config.GetWorldWidth()) / 2) - (shiftWidth / 2)
+		// y := (float64(config.GetWorldHeight()) / 2) - (shiftHeight / 2)
 
-		presentObjectPositions, ok = r.objectPosition.Get(y)
+		position := movable.GetPosition()
+
+		fmt.Println(position.X+position.Y, "USER")
+
+		presentObjectPositions, ok = r.objectPosition.Get(position.X + position.Y)
 		if ok {
 			presentObjectPositions = append(
 				presentObjectPositions,
@@ -296,7 +311,7 @@ func (r *Renderer) Update() {
 
 		r.objectPositionMutex.Lock()
 
-		r.objectPosition.Set(y, presentObjectPositions)
+		r.objectPosition.Set((position.X)+(position.Y), presentObjectPositions)
 
 		r.objectPositionMutex.Unlock()
 	}

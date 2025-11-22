@@ -6,7 +6,6 @@ import (
 	"image"
 	"io/fs"
 	"path/filepath"
-	"sort"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/assets"
@@ -20,6 +19,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/lafriks/go-tiled"
 	"github.com/pkg/errors"
+	"github.com/tidwall/btree"
 	"go.uber.org/zap"
 
 	_ "image/jpeg"
@@ -84,6 +84,8 @@ const (
 	TextInputIdle = "ui/text-input-idle.png"
 
 	Heart = "heart/heart.png"
+
+	DefaultLaserGun = "default_laser_gun/default_laser_gun.png"
 
 	Pointer = "pointer/pointer.png"
 )
@@ -225,8 +227,8 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 }
 
 // GetMapLayerTiles retrieves map layer tiles for the provided layer.
-func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) []*dto.ProcessedTile {
-	var result []*dto.ProcessedTile
+func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) *btree.Map[float64, []*dto.ProcessedTile] {
+	result := btree.NewMap[float64, []*dto.ProcessedTile](32)
 
 	var tiles sync.Map
 
@@ -236,6 +238,7 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 		for x := 0; x < width; x++ {
 			if layer.Tiles[i].IsNil() {
 				i++
+
 				continue
 			}
 
@@ -252,20 +255,27 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 				}
 			}
 
-			result = append(result, &dto.ProcessedTile{
-				Position: getMapTilePosition(x, y, tileWidth, tileHeight),
+			position := getMapTilePosition(x, y, tileWidth, tileHeight)
+
+			tile := &dto.ProcessedTile{
+				Position: position,
 				Image:    tileImage.(*ebiten.Image),
-			})
+			}
+
+			var values []*dto.ProcessedTile
+
+			values, ok = result.Get(position.Y)
+			if ok {
+				values = append(values, tile)
+			} else {
+				values = []*dto.ProcessedTile{tile}
+			}
+
+			result.Set(position.Y, values)
 
 			i++
 		}
 	}
-
-	sort.Slice(result, func(i, j int) bool {
-		return result[i].Position.Y > result[j].Position.Y
-	})
-
-	// TODO: replace with binary tree
 
 	return result
 }
@@ -282,7 +292,6 @@ func getMapTileImage(path string, rect image.Rectangle) *ebiten.Image {
 		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
 	}
 
-	// return ebiten.NewImageFromImage(imaging.FlipV(imaging.Rotate270(imaging.Crop(image, rect))))
 	return ebiten.NewImageFromImage(imaging.Crop(image, rect))
 }
 

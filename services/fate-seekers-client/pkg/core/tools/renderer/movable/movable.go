@@ -60,6 +60,11 @@ func (m *Movable) TriggerNormalHit() {
 	}
 }
 
+// SetPosition sets position value for the movable unit.
+func (m *Movable) SetPosition(value dto.Position) {
+	m.position = value
+}
+
 // SetDirection sets direction value for the movable unit.
 func (m *Movable) SetDirection(value string) {
 	if m.direction != value {

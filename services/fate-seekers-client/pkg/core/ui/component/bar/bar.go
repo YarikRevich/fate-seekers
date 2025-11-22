@@ -115,17 +115,45 @@ func newBarComponent() *BarComponent {
 
 	weapon := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(
-				scaler.GetPercentageOf(config.GetWorldWidth(), 15),
-				scaler.GetPercentageOf(config.GetWorldHeight(), 7),
-			),
 			widget.WidgetOpts.TrackHover(false),
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 				Position: widget.RowLayoutPositionEnd,
-				MaxWidth: scaler.GetPercentageOf(config.GetWorldWidth(), 15),
+				MaxWidth: scaler.GetPercentageOf(config.GetWorldWidth(), 13),
 				Stretch:  true,
 			})),
-		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)))
+		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)),
+		widget.ContainerOpts.Layout(widget.NewRowLayout(
+			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
+			widget.RowLayoutOpts.Spacing(
+				scaler.GetPercentageOf(config.GetWorldWidth(), 1)),
+			widget.RowLayoutOpts.Padding(widget.Insets{
+				Left:  scaler.GetPercentageOf(config.GetWorldWidth(), 2),
+				Right: scaler.GetPercentageOf(config.GetWorldWidth(), 6),
+			}),
+		)))
+
+	weapon.AddChild(widget.NewGraphic(
+		widget.GraphicOpts.Image(loader.GetInstance().GetStatic(loader.DefaultLaserGun)),
+		widget.GraphicOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+				Position: widget.RowLayoutPositionStart,
+				Stretch:  true,
+			}),
+		),
+	))
+
+	weaponText := widget.NewText(
+		widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionCenter),
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
+			Position: widget.RowLayoutPositionEnd,
+			Stretch:  true,
+		})),
+		widget.TextOpts.Text(
+			"100 / 100",
+			generalFont,
+			color.White))
+
+	weapon.AddChild(weaponText)
 
 	container.AddChild(weapon)
 
