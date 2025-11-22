@@ -10,6 +10,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
@@ -23,6 +24,12 @@ type BarComponent struct {
 	// Represents health text.
 	healthText *widget.Text
 
+	// Represents weapon text.
+	weaponText *widget.Text
+
+	// Represents weapon graphic.
+	weaponGraphic *widget.Graphic
+
 	// Represents container widget.
 	container *widget.Container
 }
@@ -30,6 +37,16 @@ type BarComponent struct {
 // SetHealthText sets label by the provided value for health text widget.
 func (bc *BarComponent) SetHealthText(value uint64) {
 	bc.healthText.Label = fmt.Sprintf("%d%%", value)
+}
+
+// SetWeaponText sets label by the provided value for weapon text widget.
+func (bc *BarComponent) SetWeaponText(currentValue, maxValue uint64) {
+	bc.weaponText.Label = fmt.Sprintf("%d / %d", currentValue, maxValue)
+}
+
+// SetWeaponGraphic sets graphic by the provided value for weapon graphic widget.
+func (bc *BarComponent) SetWeaponGraphic(value *ebiten.Image) {
+	bc.weaponGraphic.Image = value
 }
 
 // GetContainer retrieves container widget.
@@ -132,7 +149,7 @@ func newBarComponent() *BarComponent {
 			}),
 		)))
 
-	weapon.AddChild(widget.NewGraphic(
+	weaponGraphic := widget.NewGraphic(
 		widget.GraphicOpts.Image(loader.GetInstance().GetStatic(loader.DefaultLaserGun)),
 		widget.GraphicOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
@@ -140,7 +157,9 @@ func newBarComponent() *BarComponent {
 				Stretch:  true,
 			}),
 		),
-	))
+	)
+
+	weapon.AddChild(weaponGraphic)
 
 	weaponText := widget.NewText(
 		widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionCenter),
@@ -149,7 +168,7 @@ func newBarComponent() *BarComponent {
 			Stretch:  true,
 		})),
 		widget.TextOpts.Text(
-			"100 / 100",
+			"0 / 0",
 			generalFont,
 			color.White))
 
@@ -158,8 +177,10 @@ func newBarComponent() *BarComponent {
 	container.AddChild(weapon)
 
 	result = &BarComponent{
-		healthText: healthText,
-		container:  container,
+		healthText:    healthText,
+		weaponText:    weaponText,
+		weaponGraphic: weaponGraphic,
+		container:     container,
 	}
 
 	return result
