@@ -16,7 +16,7 @@ func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables []dto.Position)
 		var spawnables []dto.Position
 
 		for _, layer := range tilemap.Layers {
-			layerTiles, spawnableTiles, soundableTiles := loader.GetMapLayerTiles(
+			layerTiles, spawnableTiles, collidableTiles, soundableTiles := loader.GetMapLayerTiles(
 				layer, tilemap.Height, tilemap.Width, tilemap.TileHeight, tilemap.TileWidth)
 
 			spawnables = append(spawnables, spawnableTiles...)
@@ -25,11 +25,13 @@ func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables []dto.Position)
 				sounder.GetInstance().AddSoundableTileObject(soundableTile)
 			}
 
+			for _, collidableTile := range collidableTiles {
+				collidable.GetInstance().AddCollidableTileObject(collidableTile)
+			}
+
 			layerTiles.Reverse(func(key float64, tiles []*dto.ProcessedTile) bool {
 				for _, value := range tiles {
 					name := uuid.New().String()
-
-					// TODO: add tiles to collistion handler and sound handler.
 
 					switch layer.Name {
 					case loader.FirstMapThirdLayer:

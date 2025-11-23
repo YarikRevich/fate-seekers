@@ -88,6 +88,13 @@ type SessionScreen struct {
 }
 
 func (ss *SessionScreen) HandleInput() error {
+	if store.GetResetSession() == value.RESET_SESSION_TRUE_VALUE {
+		renderer.GetInstance().Clean()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetResetSession(value.RESET_SESSION_FALSE_VALUE))
+	}
+
 	if store.GetUpdateUserMetadataPositionsStartedNetworking() == value.UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_FALSE_VALUE {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetUpdateUserMetadataPositionsStartedNetworking(

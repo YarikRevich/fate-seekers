@@ -236,7 +236,7 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 
 // GetMapLayerTiles retrieves map layer tiles for the provided layer.
 func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) (
-	*btree.Map[float64, []*dto.ProcessedTile], []dto.Position, []*dto.SoundableTile) {
+	*btree.Map[float64, []*dto.ProcessedTile], []dto.Position, []dto.Position, []*dto.SoundableTile) {
 	var (
 		result                  = btree.NewMap[float64, []*dto.ProcessedTile](32)
 		collidables, spawnables []dto.Position
@@ -312,7 +312,7 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 		}
 	}
 
-	return result, spawnables, soundables
+	return result, spawnables, collidables, soundables
 }
 
 // getMapTileImage reads cropped tile from the provided tilemap and the provided tile dimension.

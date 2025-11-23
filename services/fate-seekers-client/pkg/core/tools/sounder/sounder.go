@@ -13,7 +13,7 @@ var (
 
 // Sounder represents active map sound manager.
 type Sounder struct {
-	// Represents tertiary static objects mutex.
+	// Represents soundable objects mutex.
 	soundableTileObjectMutex sync.Mutex
 
 	// Represents soundable tile objects.
@@ -87,7 +87,22 @@ func (s *Sounder) Update() {
 	s.soundableTileObjectMutex.Unlock()
 }
 
-// newRenderer initializes Sounder.
+// Clean performs clean operation for the configured soundable holders.
+func (s *Sounder) Clean() {
+	s.soundableTileObjectMutex.Lock()
+
+	clear(s.soundableTileObjects)
+
+	s.soundableTileObjectMutex.Unlock()
+
+	s.externalTrackableObjectMutex.Lock()
+
+	clear(s.externalTrackableObjects)
+
+	s.externalTrackableObjectMutex.Unlock()
+}
+
+// newSounder initializes Sounder.
 func newSounder() *Sounder {
 	return &Sounder{
 		externalTrackableObjects: make(map[string]dto.Position),
