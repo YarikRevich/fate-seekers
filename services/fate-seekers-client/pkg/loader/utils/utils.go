@@ -3,6 +3,7 @@ package utils
 import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/tile"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/sounder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/google/uuid"
@@ -15,14 +16,20 @@ func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables []dto.Position)
 		var spawnables []dto.Position
 
 		for _, layer := range tilemap.Layers {
-			layerTiles, spawnableTiles := loader.GetMapLayerTiles(
+			layerTiles, spawnableTiles, soundableTiles := loader.GetMapLayerTiles(
 				layer, tilemap.Height, tilemap.Width, tilemap.TileHeight, tilemap.TileWidth)
 
 			spawnables = append(spawnables, spawnableTiles...)
 
+			for _, soundableTile := range soundableTiles {
+				sounder.GetInstance().AddSoundableTileObject(soundableTile)
+			}
+
 			layerTiles.Reverse(func(key float64, tiles []*dto.ProcessedTile) bool {
 				for _, value := range tiles {
 					name := uuid.New().String()
+
+					// TODO: add tiles to collistion handler and sound handler.
 
 					switch layer.Name {
 					case loader.FirstMapThirdLayer:

@@ -6,4 +6,9 @@
    <property name="collidable" type="bool" value="true"/>
   </properties>
  </tile>
+ <tile id="48">
+  <properties>
+   <property name="sound" value="rock"/>
+  </properties>
+ </tile>
 </tileset>

@@ -79,3 +79,33 @@ func ConvertPositionsToStartSessionSpawnables(input []dto.Position) []*metadatav
 
 	return output
 }
+
+// ConvertPositionsToStartSessionChestLocations converts provided dto.Position array
+// to an array of metadatav1.Positions used as chest locations.
+func ConvertPositionsToStartSessionChestLocations(input []dto.Position) []*metadatav1.Position {
+	var output []*metadatav1.Position
+
+	for _, lobby := range input {
+		output = append(output, &metadatav1.Position{
+			X: lobby.X,
+			Y: lobby.Y,
+		})
+	}
+
+	return output
+}
+
+// ConvertPositionsToStartSessionHealthPackLocations converts provided dto.Position array
+// to an array of metadatav1.Positions used as health pack locations.
+func ConvertPositionsToStartSessionHealthPackLocations(input []dto.Position) []*metadatav1.Position {
+	var output []*metadatav1.Position
+
+	for _, lobby := range input {
+		output = append(output, &metadatav1.Position{
+			X: lobby.X,
+			Y: lobby.Y,
+		})
+	}
+
+	return output
+}

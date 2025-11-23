@@ -22,7 +22,7 @@ var (
 
 // Represents static rendering options.
 const (
-	CAMERA_RENDERING_OFFSET = 50
+	CAMERA_RENDERING_OFFSET = 60
 )
 
 // Renderer represents object renderer. It has three levels of rendered objects.

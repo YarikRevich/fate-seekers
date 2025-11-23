@@ -10,7 +10,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/converter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/utils"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/lobby"
@@ -18,6 +17,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader/utils"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -57,6 +57,8 @@ func (ts *TravelScreen) HandleInput() error {
 					store.GetSelectedSessionMetadata().ID,
 					store.GetSelectedLobbySetUnitMetadata().ID,
 					converter.ConvertPositionsToStartSessionSpawnables(spawnables),
+					converter.ConvertPositionsToStartSessionChestLocations(spawnables),
+					converter.ConvertPositionsToStartSessionHealthPackLocations(spawnables),
 					func(err error) {
 						if err != nil {
 							notification.GetInstance().Push(

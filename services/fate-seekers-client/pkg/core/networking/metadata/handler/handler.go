@@ -288,7 +288,13 @@ func PerformRemoveSession(sessionID int64, callback func(err error)) {
 }
 
 // PerformStartSession performs session start request.
-func PerformStartSession(sessionID, lobbyID int64, spawnables []*metadatav1.Position, callback func(err error)) {
+func PerformStartSession(
+	sessionID,
+	lobbyID int64,
+	spawnables,
+	chestLocations,
+	healthPackLocations []*metadatav1.Position,
+	callback func(err error)) {
 	go func() {
 		_, err := connector.
 			GetInstance().
@@ -296,10 +302,12 @@ func PerformStartSession(sessionID, lobbyID int64, spawnables []*metadatav1.Posi
 			StartSession(
 				context.Background(),
 				&metadatav1.StartSessionRequest{
-					SessionId:  sessionID,
-					LobbyId:    lobbyID,
-					Issuer:     store.GetRepositoryUUID(),
-					Spawnables: spawnables,
+					SessionId:           sessionID,
+					LobbyId:             lobbyID,
+					Issuer:              store.GetRepositoryUUID(),
+					Spawnables:          spawnables,
+					ChestLocations:      chestLocations,
+					HealthPackLocations: healthPackLocations,
 				})
 
 		if err != nil {

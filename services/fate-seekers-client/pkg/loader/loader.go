@@ -236,10 +236,11 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 
 // GetMapLayerTiles retrieves map layer tiles for the provided layer.
 func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) (
-	*btree.Map[float64, []*dto.ProcessedTile], []dto.Position) {
+	*btree.Map[float64, []*dto.ProcessedTile], []dto.Position, []*dto.SoundableTile) {
 	var (
-		result     = btree.NewMap[float64, []*dto.ProcessedTile](32)
-		spawnables []dto.Position
+		result                  = btree.NewMap[float64, []*dto.ProcessedTile](32)
+		collidables, spawnables []dto.Position
+		soundables              []*dto.SoundableTile
 	)
 
 	var tiles sync.Map
@@ -276,13 +277,21 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 
 			for _, tile := range layer.Tiles[i].Tileset.Tiles {
 				if layer.Tiles[i].Tileset.FirstGID+layer.Tiles[i].ID == tile.ID+layer.Tiles[i].Tileset.FirstGID {
-					processedTile.Collidable = tile.Properties.GetBool(TilemapCollidableProperty)
-					processedTile.Sound = tile.Properties.GetString(TilemapSoundProperty)
+					collidableProperty := tile.Properties.GetBool(TilemapCollidableProperty)
+					if collidableProperty {
+						collidables = append(collidables, position)
+					}
+
+					soundableProperty := tile.Properties.GetString(TilemapSoundProperty)
+					if soundableProperty != "" {
+						soundables = append(soundables, &dto.SoundableTile{
+							Position: position,
+							Name:     soundableProperty,
+						})
+					}
 
 					spawnableProperty := tile.Properties.GetBool(TilemapSpawnableProperty)
 					if spawnableProperty {
-						processedTile.Spawnable = spawnableProperty
-
 						spawnables = append(spawnables, position)
 					}
 				}
@@ -303,7 +312,7 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 		}
 	}
 
-	return result, spawnables
+	return result, spawnables, soundables
 }
 
 // getMapTileImage reads cropped tile from the provided tilemap and the provided tile dimension.

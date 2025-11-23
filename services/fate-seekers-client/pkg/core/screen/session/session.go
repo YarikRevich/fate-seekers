@@ -18,6 +18,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/movable"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/sounder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/bar"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
@@ -289,10 +290,14 @@ func (ss *SessionScreen) HandleInput() error {
 						}
 					}
 
+					sounder.GetInstance().PruneExternalTrackableObjects(sharedUsersMetadataIssuers)
+
 					renderer.GetInstance().PruneSecondaryExternalMovableObjects(sharedUsersMetadataIssuers)
 
 					for issuer := range sharedUsersMetadataIssuers {
 						retrievedUsersMetadata := store.GetRetrievedUsersMetadataSession()[issuer]
+
+						sounder.GetInstance().SetExternalTrackableObject(issuer, retrievedUsersMetadata.Position)
 
 						if !renderer.GetInstance().SecondaryExternalMovableObjectExists(issuer) {
 							movableUnit := movable.NewMovable(
@@ -319,7 +324,7 @@ func (ss *SessionScreen) HandleInput() error {
 							movableUnit = renderer.GetInstance().GetSecondaryExternalMovableObject(issuer)
 						} else {
 							if renderer.GetInstance().MainCenteredMovableObjectExists(issuer) {
-								sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ToxicRainFXSound)
+								sound.GetInstance().GetSoundEventsFxManager().PushWithHandbrake(loader.ToxicRainFXSound)
 
 								movableUnit = renderer.GetInstance().GetMainCenteredMovableObject(issuer)
 							} else {
@@ -408,6 +413,8 @@ func (ss *SessionScreen) HandleInput() error {
 
 	selectedLobbySet := store.GetSelectedLobbySetUnitMetadata()
 
+	sounder.GetInstance().SetMainTrackableObject(store.GetPositionSession())
+
 	var movableUnit *movable.Movable
 
 	if !renderer.GetInstance().MainCenteredMovableObjectExists(selectedLobbySet.Issuer) {
@@ -447,6 +454,8 @@ func (ss *SessionScreen) HandleInput() error {
 		action.NewSyncPreviousPositionSession())
 
 	renderer.GetInstance().Update(ss.camera)
+
+	sounder.GetInstance().Update()
 
 	if !ss.transparentTransitionEffect.Done() {
 		if !ss.transparentTransitionEffect.OnEnd() {

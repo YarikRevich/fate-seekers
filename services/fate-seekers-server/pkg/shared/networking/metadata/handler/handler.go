@@ -768,6 +768,8 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		GetInstance().
 		CommitLobbySetTransaction()
 
+	fmt.Println(sessionSeed)
+
 	// TODO: replace with the generation based on the provided available positions.
 
 	// chests := utils.GenerateChestPositions(sessionSeed)
