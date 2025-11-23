@@ -2,6 +2,7 @@ package selector
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -135,6 +136,8 @@ func newSelectorScreen() screen.Screen {
 					func(value dto.RetrievedSessionMetadata) bool {
 						return value.Name == sessionName
 					}) {
+					fmt.Println("does not exist in cache")
+
 					var sessionID int64
 
 					for _, session := range store.GetRetrievedSessionsMetadata() {
@@ -183,6 +186,8 @@ func newSelectorScreen() screen.Screen {
 							return
 						}
 
+						fmt.Println(err)
+
 						transparentTransitionEffect.Reset()
 
 						dispatcher.GetInstance().Dispatch(
@@ -201,6 +206,8 @@ func newSelectorScreen() screen.Screen {
 					})
 				} else {
 					handler.PerformGetUserSessions(func(response *metadatav1.GetUserSessionsResponse, err error) {
+						fmt.Println("retrieved user sessions", response.GetSessions(), err)
+
 						if err != nil {
 							notification.GetInstance().Push(
 								common.ComposeMessage(

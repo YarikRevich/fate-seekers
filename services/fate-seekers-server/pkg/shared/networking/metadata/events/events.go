@@ -2,6 +2,7 @@ package events
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -39,6 +40,7 @@ func Run() {
 			cache.
 				GetInstance().
 				BeginMetadataTransaction()
+			fmt.Println("BEFORE 2")
 
 			cache.
 				GetInstance().

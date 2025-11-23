@@ -288,7 +288,7 @@ func PerformRemoveSession(sessionID int64, callback func(err error)) {
 }
 
 // PerformStartSession performs session start request.
-func PerformStartSession(sessionID, lobbyID int64, callback func(err error)) {
+func PerformStartSession(sessionID, lobbyID int64, spawnables []*metadatav1.Position, callback func(err error)) {
 	go func() {
 		_, err := connector.
 			GetInstance().
@@ -296,9 +296,10 @@ func PerformStartSession(sessionID, lobbyID int64, callback func(err error)) {
 			StartSession(
 				context.Background(),
 				&metadatav1.StartSessionRequest{
-					SessionId: sessionID,
-					LobbyId:   lobbyID,
-					Issuer:    store.GetRepositoryUUID(),
+					SessionId:  sessionID,
+					LobbyId:    lobbyID,
+					Issuer:     store.GetRepositoryUUID(),
+					Spawnables: spawnables,
 				})
 
 		if err != nil {

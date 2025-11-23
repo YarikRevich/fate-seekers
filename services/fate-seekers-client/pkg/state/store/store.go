@@ -2,6 +2,7 @@ package store
 
 import (
 	"sync"
+	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/answerinput"
@@ -74,6 +75,13 @@ func GetApplicationStateGamepadPointerPosition() dto.Position {
 	instance := GetInstance()
 
 	return instance.GetState(application.GAMEPAD_POINTER_POSITION_APPLICATION_STATE).(dto.Position)
+}
+
+// GetApplicationStateGamepadPointerUsage retrieves gamepad pointer usage application action.
+func GetApplicationStateGamepadPointerUsage() time.Time {
+	instance := GetInstance()
+
+	return instance.GetState(application.GAMEPAD_POINTER_USAGE_APPLICATION_STATE).(time.Time)
 }
 
 // GetRepositoryUUID retrieves uuid repository state value.
@@ -350,6 +358,13 @@ func GetResetTravel() string {
 	instance := GetInstance()
 
 	return instance.GetState(travel.RESET_TRAVEL_STATE).(string)
+}
+
+// GetStartSessionTravel retrieves start session travel state value.
+func GetStartSessionTravel() string {
+	instance := GetInstance()
+
+	return instance.GetState(travel.START_SESSION_TRAVEL_STATE).(string)
 }
 
 // GetResetDeath retrieves reset death state value.

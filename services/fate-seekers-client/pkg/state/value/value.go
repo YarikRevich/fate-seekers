@@ -1,6 +1,10 @@
 package value
 
-import "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
+import (
+	"time"
+
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
+)
 
 // Describes all the available screen reducer store values.
 const (
@@ -38,6 +42,10 @@ const (
 
 	GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE  = "true"
 	GAMEPAD_ENABLED_APPLICATION_FALSE_VALUE = "false"
+)
+
+var (
+	GAMEPAD_USAGE_APPLICATION_DEFAULT_VALUE time.Time
 )
 
 // Describes all the available repository reducer store values.
@@ -169,6 +177,9 @@ var (
 const (
 	RESET_TRAVEL_FALSE_VALUE = "false"
 	RESET_TRAVEL_TRUE_VALUE  = "true"
+
+	START_SESSION_TRAVEL_FALSE_VALUE = "false"
+	START_SESSION_TRAVEL_TRUE_VALUE  = "true"
 )
 
 // Describes available death reducer store values.

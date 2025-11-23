@@ -60,6 +60,13 @@ const (
 	MapTilemap = "tilemap/tilemap.tmx"
 )
 
+// Describes available tilemap properties
+const (
+	TilemapCollidableProperty = "collidable"
+	TilemapSoundProperty      = "sound"
+	TilemapSpawnableProperty  = "spawnable"
+)
+
 // Describes all the available statics to be loaded.
 const (
 	ButtonIdleButton  = "ui/button-idle.png"
@@ -160,6 +167,7 @@ const (
 
 	ButtonFXSound    = "fx/button/button.ogg"
 	ToxicRainFXSound = "fx/toxicrain/toxicrain.ogg"
+	RockFootFXSound  = "fx/rock_foot/rock_foot.ogg"
 )
 
 // Decsribes all the embedded files specific paths.
@@ -227,8 +235,12 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 }
 
 // GetMapLayerTiles retrieves map layer tiles for the provided layer.
-func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) *btree.Map[float64, []*dto.ProcessedTile] {
-	result := btree.NewMap[float64, []*dto.ProcessedTile](32)
+func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) (
+	*btree.Map[float64, []*dto.ProcessedTile], []dto.Position) {
+	var (
+		result     = btree.NewMap[float64, []*dto.ProcessedTile](32)
+		spawnables []dto.Position
+	)
 
 	var tiles sync.Map
 
@@ -257,18 +269,32 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 
 			position := getMapTilePosition(x, y, tileWidth, tileHeight)
 
-			tile := &dto.ProcessedTile{
+			processedTile := &dto.ProcessedTile{
 				Position: position,
 				Image:    tileImage.(*ebiten.Image),
+			}
+
+			for _, tile := range layer.Tiles[i].Tileset.Tiles {
+				if layer.Tiles[i].Tileset.FirstGID+layer.Tiles[i].ID == tile.ID+layer.Tiles[i].Tileset.FirstGID {
+					processedTile.Collidable = tile.Properties.GetBool(TilemapCollidableProperty)
+					processedTile.Sound = tile.Properties.GetString(TilemapSoundProperty)
+
+					spawnableProperty := tile.Properties.GetBool(TilemapSpawnableProperty)
+					if spawnableProperty {
+						processedTile.Spawnable = spawnableProperty
+
+						spawnables = append(spawnables, position)
+					}
+				}
 			}
 
 			var values []*dto.ProcessedTile
 
 			values, ok = result.Get(position.Y)
 			if ok {
-				values = append(values, tile)
+				values = append(values, processedTile)
 			} else {
-				values = []*dto.ProcessedTile{tile}
+				values = []*dto.ProcessedTile{processedTile}
 			}
 
 			result.Set(position.Y, values)
@@ -277,7 +303,7 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 		}
 	}
 
-	return result
+	return result, spawnables
 }
 
 // getMapTileImage reads cropped tile from the provided tilemap and the provided tile dimension.

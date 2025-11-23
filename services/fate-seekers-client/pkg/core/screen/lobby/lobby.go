@@ -1,6 +1,7 @@
 package lobby
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -57,6 +58,8 @@ func (ls *LobbyScreen) HandleInput() error {
 		stream.GetGetLobbySetSubmitter().Clean(func() {
 			stream.GetGetLobbySetSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetLobbySetResponse, err error) bool {
+					fmt.Println(response.GetLobbySet(), err)
+
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetLobbySetRetrievalStartedNetworkingAction(
@@ -298,73 +301,13 @@ func newLobbyScreen() screen.Screen {
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
 	lobby.GetInstance().SetStartCallback(func() {
-		handler.PerformStartSession(
-			store.GetSelectedSessionMetadata().ID,
-			store.GetSelectedLobbySetUnitMetadata().ID,
-			func(err error) {
-				if err != nil {
-					notification.GetInstance().Push(
-						common.ComposeMessage(
-							translation.GetInstance().GetTranslation("client.networking.start-session-failure"),
-							err.Error()),
-						time.Second*3,
-						common.NotificationErrorTextColor)
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetStartSessionTravel(value.START_SESSION_TRAVEL_TRUE_VALUE))
 
-					lobby.GetInstance().CleanSelection()
-
-					lobby.GetInstance().CleanListsEntries()
-
-					lobby.GetInstance().HideStartButton()
-
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
-
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
-							value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
-
-					dispatcher.
-						GetInstance().
-						Dispatch(
-							action.NewSetStateResetApplicationAction(
-								value.STATE_RESET_APPLICATION_FALSE_VALUE))
-
-					dispatcher.
-						GetInstance().
-						Dispatch(
-							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
-
-					return
-				}
-
-				notification.GetInstance().Push(
-					translation.GetInstance().GetTranslation("client.networking.start-session-processing"),
-					time.Second*2,
-					common.NotificationInfoTextColor)
-
-				notification.GetInstance().Push(
-					translation.GetInstance().GetTranslation("client.lobby.transfering-to-session"),
-					time.Second*4,
-					common.NotificationInfoTextColor)
-
-				lobby.GetInstance().CleanSelection()
-
-				lobby.GetInstance().CleanListsEntries()
-
-				lobby.GetInstance().HideStartButton()
-
-				dispatcher.GetInstance().Dispatch(
-					action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
-
-				dispatcher.GetInstance().Dispatch(
-					action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
-						value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
-
-				dispatcher.
-					GetInstance().
-					Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_TRAVEL_VALUE))
-			})
+		dispatcher.
+			GetInstance().
+			Dispatch(
+				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_TRAVEL_VALUE))
 	})
 
 	instance := &LobbyScreen{

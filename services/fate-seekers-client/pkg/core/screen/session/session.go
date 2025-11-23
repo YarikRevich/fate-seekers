@@ -18,7 +18,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/movable"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/utils"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/bar"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
@@ -88,13 +87,6 @@ type SessionScreen struct {
 }
 
 func (ss *SessionScreen) HandleInput() error {
-	if store.GetResetSession() == value.RESET_SESSION_TRUE_VALUE {
-		utils.LoadMap(loader.GetInstance().GetMap(loader.FirstMap))
-
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetResetSession(value.RESET_SESSION_FALSE_VALUE))
-	}
-
 	if store.GetUpdateUserMetadataPositionsStartedNetworking() == value.UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_FALSE_VALUE {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetUpdateUserMetadataPositionsStartedNetworking(

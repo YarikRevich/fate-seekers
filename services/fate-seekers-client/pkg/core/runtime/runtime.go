@@ -49,6 +49,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+// Represents static values used for gamepad usage management.
+const (
+	GAMEPAD_USAGE_DEADLINE = time.Second * 3
+)
+
 // Runtime represents main runtime flow implementation.
 type Runtime struct {
 	// Represents attached subtitles user interface.
@@ -126,6 +131,28 @@ func (r *Runtime) Update() error {
 				return ebiten.IsStandardGamepadButtonPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonLeftStick)
 			})
 
+			external.SetExternalWheelMouse(func() (float64, float64) {
+				var x, y float64
+
+				if ebiten.IsStandardGamepadButtonPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonLeftTop) {
+					y += 0.3
+				}
+
+				if ebiten.IsStandardGamepadButtonPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonLeftLeft) {
+					x -= 0.3
+				}
+
+				if ebiten.IsStandardGamepadButtonPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonLeftRight) {
+					x += 0.3
+				}
+
+				if ebiten.IsStandardGamepadButtonPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonLeftBottom) {
+					y -= 0.3
+				}
+
+				return x, y
+			})
+
 			notificationmanager.GetInstance().Push(
 				translation.GetInstance().GetTranslation("client.gamepad.connected"),
 				time.Second*3,
@@ -144,6 +171,8 @@ func (r *Runtime) Update() error {
 			external.SetExternalLeftMouseClick(nil)
 
 			external.SetExternalMiddleMouseClick(nil)
+
+			external.SetExternalWheelMouse(nil)
 
 			notificationmanager.GetInstance().Push(
 				translation.GetInstance().GetTranslation("client.gamepad.disconnected"),
@@ -432,13 +461,15 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 	}
 
 	if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE {
-		var opts ebiten.DrawImageOptions
+		if time.Since(store.GetApplicationStateGamepadPointerUsage()) < GAMEPAD_USAGE_DEADLINE {
+			var opts ebiten.DrawImageOptions
 
-		position := store.GetApplicationStateGamepadPointerPosition()
+			position := store.GetApplicationStateGamepadPointerPosition()
 
-		opts.GeoM.Translate(position.X, position.Y)
+			opts.GeoM.Translate(position.X, position.Y)
 
-		screen.DrawImage(loader.GetInstance().GetStatic(loader.Pointer), &opts)
+			screen.DrawImage(loader.GetInstance().GetStatic(loader.Pointer), &opts)
+		}
 	}
 }
 

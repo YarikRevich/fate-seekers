@@ -70,6 +70,14 @@ func (spe *StarsParticleEffect) Reset() {
 	spe.finished = false
 }
 
+func (spe *StarsParticleEffect) HoldProgression() {
+	spe.ticker.Stop()
+}
+
+func (spe *StarsParticleEffect) ResumeProgression() {
+	spe.ticker.Reset(updateTickerFrequency)
+}
+
 func (spe *StarsParticleEffect) Update() {
 	select {
 	case <-spe.ticker.C:

@@ -10,7 +10,8 @@ import (
 
 // Describes all the available travel reducer store states.
 const (
-	RESET_TRAVEL_STATE = "reset_travel"
+	RESET_TRAVEL_STATE         = "reset_travel"
+	START_SESSION_TRAVEL_STATE = "start_session_travel"
 )
 
 // TravelStateReducer represents reducer used for travel state management.
@@ -20,7 +21,8 @@ type TravelStateReducer struct {
 }
 
 func (tsr *TravelStateReducer) Init() {
-	tsr.store.SetState(RESET_TRAVEL_STATE, value.RESET_TRAVEL_TRUE_VALUE)
+	tsr.store.SetState(RESET_TRAVEL_STATE, value.RESET_TRAVEL_FALSE_VALUE)
+	tsr.store.SetState(START_SESSION_TRAVEL_STATE, value.START_SESSION_TRAVEL_FALSE_VALUE)
 }
 
 func (tsr *TravelStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -29,6 +31,10 @@ func (tsr *TravelStateReducer) GetProcessor() func(value godux.Action) interface
 		case action.SET_RESET_TRAVEL_ACTION:
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: RESET_TRAVEL_STATE, Value: value.Value})
+
+		case action.SET_START_SESSION_TRAVEL_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: START_SESSION_TRAVEL_STATE, Value: value.Value})
 
 		default:
 			return nil

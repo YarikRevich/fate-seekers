@@ -16,6 +16,12 @@ type ParticleEffect interface {
 	// Reset performes particle effect state reset.
 	Reset()
 
+	// HoldProgression holds effect progression.
+	HoldProgression()
+
+	// ResumeProgression resumes effect progression.
+	ResumeProgression()
+
 	// Update performs update operation for all particles.
 	Update()
 

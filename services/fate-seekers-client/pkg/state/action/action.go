@@ -113,7 +113,8 @@ const (
 
 // Describes all the available state actions for travel reducer.
 const (
-	SET_RESET_TRAVEL_ACTION = "SET_RESET_TRAVEL_ACTION"
+	SET_RESET_TRAVEL_ACTION         = "SET_RESET_TRAVEL_ACTION"
+	SET_START_SESSION_TRAVEL_ACTION = "SET_START_SESSION_TRAVEL_ACTION"
 )
 
 // Describes all the available state actions for death reducer.
@@ -574,6 +575,14 @@ func NewDiagonalDownRightPositionSession() godux.Action {
 func NewSetResetTravel(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_RESET_TRAVEL_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetStartSessionTravel creates new set start session travel action.
+func NewSetStartSessionTravel(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_START_SESSION_TRAVEL_ACTION,
 		Value: value,
 	}
 }

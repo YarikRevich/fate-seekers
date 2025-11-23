@@ -155,7 +155,10 @@ message RemoveSessionResponse {
 message StartSessionRequest {
     int64 session_id = 1;
     int64 lobby_id = 2;
-    string issuer = 3 [(buf.validate.field).string.uuid = true];
+    repeated Position spawnables = 3;
+    repeated Position chest_locations = 4;
+    repeated Position health_pack_locations = 5;
+    string issuer = 6 [(buf.validate.field).string.uuid = true];
 };
 
 // StartSessionResponse represents start session response.

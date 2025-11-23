@@ -2,11 +2,13 @@ package renderer
 
 import (
 	"fmt"
+	"math"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/movable"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/tile"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/elliotchance/orderedmap/v3"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/setanarut/kamera/v2"
@@ -16,6 +18,11 @@ import (
 var (
 	// GetInstance retrieves instance of the renderer, performing initial creation if needed.
 	GetInstance = sync.OnceValue[*Renderer](newRenderer)
+)
+
+// Represents static rendering options.
+const (
+	CAMERA_RENDERING_OFFSET = 50
 )
 
 // Renderer represents object renderer. It has three levels of rendered objects.
@@ -202,6 +209,12 @@ func (r *Renderer) Clean() {
 
 // Update performs update operation and position rearangemenet for all the configured objects.
 func (r *Renderer) Update(camera *kamera.Camera) {
+	minCameraViewportWidth := store.GetPositionSession().X - (math.Abs(camera.CenterOffsetX) + CAMERA_RENDERING_OFFSET)
+	maxCameraViewportWidth := store.GetPositionSession().X + (math.Abs(camera.CenterOffsetX) + CAMERA_RENDERING_OFFSET)
+
+	minCameraViewportHeight := store.GetPositionSession().Y - (math.Abs(camera.CenterOffsetY) + CAMERA_RENDERING_OFFSET)
+	maxCameraViewportHeight := store.GetPositionSession().Y + (math.Abs(camera.CenterOffsetY) + CAMERA_RENDERING_OFFSET)
+
 	r.secondaryExternalMovableObjectsMutex.RLock()
 
 	r.objectPosition.Clear()
@@ -212,6 +225,11 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 	)
 
 	for name, movable := range r.secondaryExternalMovableObjects {
+		if (movable.GetPosition().X < minCameraViewportWidth || movable.GetPosition().X > maxCameraViewportWidth) ||
+			(movable.GetPosition().Y < minCameraViewportHeight || movable.GetPosition().Y > maxCameraViewportHeight) {
+			continue
+		}
+
 		movable.Update()
 
 		r.objectPositionMutex.RLock()
@@ -242,6 +260,11 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 	}
 
 	for iter := r.secondaryTileObjects.Front(); iter != nil; iter = iter.Next() {
+		if (iter.Value.GetPosition().X < minCameraViewportWidth || iter.Value.GetPosition().X > maxCameraViewportWidth) ||
+			(iter.Value.GetPosition().Y < minCameraViewportHeight || iter.Value.GetPosition().Y > maxCameraViewportHeight) {
+			continue
+		}
+
 		r.objectPositionMutex.RLock()
 
 		// x, y := camera.ScreenToWorld(int(iter.Value.GetPosition().X), int(iter.Value.GetPosition().Y))
@@ -291,8 +314,6 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 
 		position := movable.GetPosition()
 
-		fmt.Println(position.X+position.Y, "USER")
-
 		presentObjectPositions, ok = r.objectPosition.Get(position.X + position.Y)
 		if ok {
 			presentObjectPositions = append(
@@ -321,8 +342,17 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 
 // Draw performs draw operation for all the configured objects.
 func (r *Renderer) Draw(screen *ebiten.Image, camera *kamera.Camera) {
+	minCameraViewportWidth := store.GetPositionSession().X - (math.Abs(camera.CenterOffsetX) + CAMERA_RENDERING_OFFSET)
+	maxCameraViewportWidth := store.GetPositionSession().X + (math.Abs(camera.CenterOffsetX) + CAMERA_RENDERING_OFFSET)
+
+	minCameraViewportHeight := store.GetPositionSession().Y - (math.Abs(camera.CenterOffsetY) + CAMERA_RENDERING_OFFSET)
+	maxCameraViewportHeight := store.GetPositionSession().Y + (math.Abs(camera.CenterOffsetY) + CAMERA_RENDERING_OFFSET)
+
 	for iter := r.tertiaryTileObjects.Front(); iter != nil; iter = iter.Next() {
-		iter.Value.Draw(screen, camera)
+		if (iter.Value.GetPosition().X >= minCameraViewportWidth && iter.Value.GetPosition().X <= maxCameraViewportWidth) &&
+			(iter.Value.GetPosition().Y >= minCameraViewportHeight && iter.Value.GetPosition().Y <= maxCameraViewportHeight) {
+			iter.Value.Draw(screen, camera)
+		}
 	}
 
 	r.objectPositionMutex.RLock()

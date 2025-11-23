@@ -1,6 +1,8 @@
 package application
 
 import (
+	"time"
+
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
@@ -17,6 +19,7 @@ const (
 	STATE_RESET_APPLICATION_STATE              = "state_reset"
 	GAMEPAD_ENABLED_APPLICATION_STATE          = "gamepad_enabled"
 	GAMEPAD_POINTER_POSITION_APPLICATION_STATE = "gamepad_position"
+	GAMEPAD_POINTER_USAGE_APPLICATION_STATE    = "gamepad_usage"
 )
 
 // Describes gamepad pointer position change parameters.
@@ -45,6 +48,8 @@ func (asr *ApplicationStateReducer) Init() {
 		X: (float64(config.GetWorldWidth()/2) - (float64(shiftWidth) / 2)),
 		Y: (float64(config.GetWorldHeight()/2) - (float64(shiftHeight) / 2)),
 	})
+
+	asr.store.SetState(GAMEPAD_POINTER_USAGE_APPLICATION_STATE, value.GAMEPAD_USAGE_APPLICATION_DEFAULT_VALUE)
 }
 
 func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -90,7 +95,8 @@ func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) inte
 			}
 
 			return dto.ComposeReducerResult(
-				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw})
+				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw},
+				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_USAGE_APPLICATION_STATE, Value: time.Now()})
 
 		case action.INCREMENT_Y_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION:
 			valueRaw := asr.store.GetState(GAMEPAD_POINTER_POSITION_APPLICATION_STATE).(dto.Position)
@@ -104,7 +110,8 @@ func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) inte
 			}
 
 			return dto.ComposeReducerResult(
-				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw})
+				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw},
+				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_USAGE_APPLICATION_STATE, Value: time.Now()})
 
 		case action.DECREMENT_X_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION:
 			valueRaw := asr.store.GetState(GAMEPAD_POINTER_POSITION_APPLICATION_STATE).(dto.Position)
@@ -114,7 +121,8 @@ func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) inte
 			}
 
 			return dto.ComposeReducerResult(
-				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw})
+				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw},
+				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_USAGE_APPLICATION_STATE, Value: time.Now()})
 
 		case action.DECREMENT_Y_GAMEPAD_POINTER_POSITION_APPLICATION_ACTION:
 			valueRaw := asr.store.GetState(GAMEPAD_POINTER_POSITION_APPLICATION_STATE).(dto.Position)
@@ -124,7 +132,8 @@ func (asr *ApplicationStateReducer) GetProcessor() func(value godux.Action) inte
 			}
 
 			return dto.ComposeReducerResult(
-				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw})
+				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_POSITION_APPLICATION_STATE, Value: valueRaw},
+				dto.ReducerResultUnit{Key: GAMEPAD_POINTER_USAGE_APPLICATION_STATE, Value: time.Now()})
 
 		default:
 			return nil

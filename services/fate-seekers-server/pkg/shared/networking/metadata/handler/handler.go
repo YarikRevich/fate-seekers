@@ -15,7 +15,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/cache"
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/events"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/utils"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository/converter"
 	"golang.org/x/exp/slices"
@@ -293,6 +292,8 @@ func (h *Handler) CreateSession(ctx context.Context, request *metadatav1.CreateS
 		GetInstance().
 		BeginSessionsTransaction()
 
+	fmt.Println("BEFORE 3")
+
 	cache.
 		GetInstance().
 		BeginLobbySetTransaction()
@@ -437,6 +438,8 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 
 		userID = user.ID
 	}
+
+	fmt.Println("BEFORE 4")
 
 	cache.
 		GetInstance().
@@ -718,6 +721,8 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		sessionSeed = cachedSession.Seed
 	}
 
+	fmt.Println("BEFORE 5")
+
 	cache.
 		GetInstance().
 		BeginLobbySetTransaction()
@@ -738,6 +743,14 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 	if err != nil {
 		cache.
 			GetInstance().
+			CommitUserSessionsTransaction()
+
+		cache.
+			GetInstance().
+			CommitLobbySetTransaction()
+
+		cache.
+			GetInstance().
 			CommitMetadataTransaction()
 
 		cache.
@@ -755,11 +768,13 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		GetInstance().
 		CommitLobbySetTransaction()
 
-	chests := utils.GenerateChestPositions(sessionSeed)
+	// TODO: replace with the generation based on the provided available positions.
 
-	healthPacks := utils.GenerateHealthPackPositions(sessionSeed)
+	// chests := utils.GenerateChestPositions(sessionSeed)
 
-	fmt.Println(chests, len(chests), healthPacks, len(healthPacks))
+	// healthPacks := utils.GenerateHealthPackPositions(sessionSeed)
+
+	// fmt.Println(chests, len(chests), healthPacks, len(healthPacks))
 
 	session, _, err := repository.
 		GetSessionsRepository().
@@ -973,9 +988,15 @@ func (h *Handler) GetLobbySet(request *metadatav1.GetLobbySetRequest, stream grp
 
 			response.LobbySet = response.LobbySet[:0]
 
+			fmt.Println("BEFORE LOBBY SET LOCK")
+
+			fmt.Println("BEFORE 6")
+
 			cache.
 				GetInstance().
 				BeginLobbySetTransaction()
+
+			fmt.Println("AFTER LOBBY SET LOCK")
 
 			cachedLobbySet, ok := cache.
 				GetInstance().
@@ -1189,6 +1210,8 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 	cache.
 		GetInstance().
 		CommitSessionsTransaction()
+
+	fmt.Println("BEFORE 7")
 
 	cache.
 		GetInstance().
@@ -1405,6 +1428,8 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 	cache.
 		GetInstance().
 		CommitSessionsTransaction()
+
+	fmt.Println("BEFORE 8")
 
 	cache.
 		GetInstance().
@@ -1645,6 +1670,8 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 			cache.
 				GetInstance().
 				BeginMetadataTransaction()
+
+			fmt.Println("BEFORE 9")
 
 			cache.
 				GetInstance().

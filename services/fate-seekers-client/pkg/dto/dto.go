@@ -223,6 +223,15 @@ const (
 type ProcessedTile struct {
 	Position Position
 	Image    *ebiten.Image
+
+	// Represents collidable option for the tile.
+	Collidable bool
+
+	// Represents boot sound for the tile.
+	Sound string
+
+	// Represents spawnable tile property.
+	Spawnable bool
 }
 
 // RendererPositionItem represents renderer position item.

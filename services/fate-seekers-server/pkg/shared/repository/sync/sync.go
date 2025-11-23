@@ -2,6 +2,7 @@ package sync
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
@@ -37,6 +38,8 @@ func Run() {
 			ticker.Stop()
 
 			clear(affectedSessions)
+
+			fmt.Println("BEFORE 10")
 
 			cache.
 				GetInstance().
