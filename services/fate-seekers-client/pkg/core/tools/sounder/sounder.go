@@ -91,7 +91,7 @@ func (s *Sounder) Update() {
 func (s *Sounder) Clean() {
 	s.soundableTileObjectMutex.Lock()
 
-	clear(s.soundableTileObjects)
+	s.soundableTileObjects = s.soundableTileObjects[:0]
 
 	s.soundableTileObjectMutex.Unlock()
 

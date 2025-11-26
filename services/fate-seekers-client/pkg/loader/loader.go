@@ -236,11 +236,12 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 
 // GetMapLayerTiles retrieves map layer tiles for the provided layer.
 func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) (
-	*btree.Map[float64, []*dto.ProcessedTile], []dto.Position, []dto.Position, []*dto.SoundableTile) {
+	*btree.Map[float64, []*dto.ProcessedTile], []dto.Position, []*dto.CollidableTile, []*dto.SoundableTile) {
 	var (
-		result                  = btree.NewMap[float64, []*dto.ProcessedTile](32)
-		collidables, spawnables []dto.Position
-		soundables              []*dto.SoundableTile
+		result      = btree.NewMap[float64, []*dto.ProcessedTile](32)
+		spawnables  []dto.Position
+		collidables []*dto.CollidableTile
+		soundables  []*dto.SoundableTile
 	)
 
 	var tiles sync.Map
@@ -279,14 +280,23 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 				if layer.Tiles[i].Tileset.FirstGID+layer.Tiles[i].ID == tile.ID+layer.Tiles[i].Tileset.FirstGID {
 					collidableProperty := tile.Properties.GetBool(TilemapCollidableProperty)
 					if collidableProperty {
-						collidables = append(collidables, position)
+						// red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
+						// processedTile.Image.Fill(red)
+
+						collidables = append(collidables, &dto.CollidableTile{
+							Position:   position,
+							TileWidth:  tileWidth,
+							TileHeight: tileHeight,
+						})
 					}
 
 					soundableProperty := tile.Properties.GetString(TilemapSoundProperty)
 					if soundableProperty != "" {
 						soundables = append(soundables, &dto.SoundableTile{
-							Position: position,
-							Name:     soundableProperty,
+							Position:   position,
+							Name:       soundableProperty,
+							TileWidth:  tileWidth,
+							TileHeight: tileHeight,
 						})
 					}
 

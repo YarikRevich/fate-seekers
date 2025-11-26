@@ -100,6 +100,10 @@ const (
 	SET_RESET_SESSION_ACTION                    = "SET_RESET_SESSION_ACTION"
 	SET_STATIC_POSITION_SESSION_ACTION          = "SET_STATIC_POSITION_SESSION_ACTION"
 	SET_POSITION_SESSION_ACTION                 = "SET_POSITION_SESSION_ACTION"
+	REVERT_STAGE_POSITION_X_SESSION_ACTION      = "REVERT_STAGE_POSITION_X_SESSION_ACTION"
+	REVERT_STAGE_POSITION_Y_SESSION_ACTION      = "REVERT_STAGE_POSITION_Y_SESSION_ACTION"
+	SYNC_STAGE_POSITION_X_SESSION_ACTION        = "SYNC_STAGE_POSITION_X_SESSION_ACTION"
+	SYNC_STAGE_POSITION_Y_SESSION_ACTION        = "SYNC_STAGE_POSITION_Y_SESSION_ACTION"
 	SYNC_PREVIOUS_POSITION_SESSION_ACTION       = "SYNC_PREVIOUS_POSITION_SESSION_ACTION"
 	INCREMENT_X_POSITION_SESSION_ACTION         = "INCREMENT_X_POSITION_SESSION_ACTION"
 	INCREMENT_Y_POSITION_SESSION_ACTION         = "INCREMENT_Y_POSITION_SESSION_ACTION"
@@ -505,6 +509,34 @@ func NewSetPositionSession(value dto.Position) godux.Action {
 	return godux.Action{
 		Type:  SET_POSITION_SESSION_ACTION,
 		Value: value,
+	}
+}
+
+// NewRevertStagePositionXSession creates new revert stage position x session action.
+func NewRevertStagePositionXSession() godux.Action {
+	return godux.Action{
+		Type: REVERT_STAGE_POSITION_X_SESSION_ACTION,
+	}
+}
+
+// NewRevertStagePositionYSession creates new revert stage position y session action.
+func NewRevertStagePositionYSession() godux.Action {
+	return godux.Action{
+		Type: REVERT_STAGE_POSITION_Y_SESSION_ACTION,
+	}
+}
+
+// NewSyncStagePositionXSession creates new sync stage position x session action.
+func NewSyncStagePositionXSession() godux.Action {
+	return godux.Action{
+		Type: SYNC_STAGE_POSITION_X_SESSION_ACTION,
+	}
+}
+
+// NewSyncStagePositionYSession creates new sync stage position y session action.
+func NewSyncStagePositionYSession() godux.Action {
+	return godux.Action{
+		Type: SYNC_STAGE_POSITION_Y_SESSION_ACTION,
 	}
 }
 

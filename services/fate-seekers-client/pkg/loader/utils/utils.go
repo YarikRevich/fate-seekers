@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/collision"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/tile"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/sounder"
@@ -26,7 +27,7 @@ func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables []dto.Position)
 			}
 
 			for _, collidableTile := range collidableTiles {
-				collidable.GetInstance().AddCollidableTileObject(collidableTile)
+				collision.GetInstance().AddCollidableTileObject(collidableTile)
 			}
 
 			layerTiles.Reverse(func(key float64, tiles []*dto.ProcessedTile) bool {

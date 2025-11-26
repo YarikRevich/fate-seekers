@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/animation/direction"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/collision"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/gamepad"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
@@ -89,6 +91,10 @@ type SessionScreen struct {
 
 func (ss *SessionScreen) HandleInput() error {
 	if store.GetResetSession() == value.RESET_SESSION_TRUE_VALUE {
+		collision.GetInstance().Clean()
+
+		sounder.GetInstance().Clean()
+
 		renderer.GetInstance().Clean()
 
 		dispatcher.GetInstance().Dispatch(
@@ -273,6 +279,10 @@ func (ss *SessionScreen) HandleInput() error {
 										Y: userMetadata.GetPosition().GetY(),
 									}),
 								)
+
+								ss.camera.SetCenter(
+									userMetadata.GetPosition().GetX(),
+									-userMetadata.GetPosition().GetY())
 							}
 						}
 
@@ -360,6 +370,8 @@ func (ss *SessionScreen) HandleInput() error {
 
 	store.RetrievedUsersMetadataSessionSyncHelper.Lock()
 
+	selectedLobbySet := store.GetSelectedLobbySetUnitMetadata()
+
 	retrievedUsersMetadataSession := store.GetRetrievedUsersMetadataSession()
 
 	if _, ok := retrievedUsersMetadataSession[store.GetRepositoryUUID()]; ok {
@@ -371,54 +383,107 @@ func (ss *SessionScreen) HandleInput() error {
 			switch direction {
 			case dto.DirUp:
 				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
+
 			case dto.DirDown:
 				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
+
 			case dto.DirLeft:
 				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
+
 			case dto.DirRight:
 				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+
 			case dto.DirUpLeft:
 				dispatcher.GetInstance().Dispatch(action.NewDiagonalUpLeftPositionSession())
+
 			case dto.DirUpRight:
 				dispatcher.GetInstance().Dispatch(action.NewDiagonalUpRightPositionSession())
+
 			case dto.DirDownLeft:
 				dispatcher.GetInstance().Dispatch(action.NewDiagonalDownLeftPositionSession())
+
 			case dto.DirDownRight:
 				dispatcher.GetInstance().Dispatch(action.NewDiagonalDownRightPositionSession())
+
 			}
 		} else {
 			if ebiten.IsKeyPressed(ebiten.KeyEscape) {
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetResetSession(value.RESET_SESSION_TRUE_VALUE))
+
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
 			}
 
 			if ebiten.IsKeyPressed(ebiten.KeyW) && ebiten.IsKeyPressed(ebiten.KeyA) {
 				dispatcher.GetInstance().Dispatch(action.NewDiagonalUpLeftPositionSession())
+
 			} else if ebiten.IsKeyPressed(ebiten.KeyW) && ebiten.IsKeyPressed(ebiten.KeyD) {
 				dispatcher.GetInstance().Dispatch(action.NewDiagonalUpRightPositionSession())
+
 			} else if ebiten.IsKeyPressed(ebiten.KeyS) && ebiten.IsKeyPressed(ebiten.KeyA) {
 				dispatcher.GetInstance().Dispatch(action.NewDiagonalDownLeftPositionSession())
+
 			} else if ebiten.IsKeyPressed(ebiten.KeyS) && ebiten.IsKeyPressed(ebiten.KeyD) {
 				dispatcher.GetInstance().Dispatch(action.NewDiagonalDownRightPositionSession())
+
 			} else if ebiten.IsKeyPressed(ebiten.KeyA) {
 				dispatcher.GetInstance().Dispatch(action.NewDecrementXPositionSession())
+
 			} else if ebiten.IsKeyPressed(ebiten.KeyW) {
 				dispatcher.GetInstance().Dispatch(action.NewIncrementYPositionSession())
+
 			} else if ebiten.IsKeyPressed(ebiten.KeyS) {
 				dispatcher.GetInstance().Dispatch(action.NewDecrementYPositionSession())
+
 			} else if ebiten.IsKeyPressed(ebiten.KeyD) {
 				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
+
+			}
+		}
+
+		if store.GetStagePositionSession().X != store.GetPositionSession().X ||
+			store.GetStagePositionSession().Y != store.GetPositionSession().Y {
+			if renderer.GetInstance().MainCenteredMovableObjectExists(selectedLobbySet.Issuer) {
+				movableUnit := renderer.GetInstance().GetMainCenteredMovableObject(selectedLobbySet.Issuer)
+
+				shiftWidth, shiftHeight := movableUnit.GetShiftBounds()
+
+				if store.GetStagePositionSession().X != store.GetPositionSession().X {
+					collision.GetInstance().SetMainTrackableObject(
+						dto.Position{
+							X: store.GetStagePositionSession().X,
+							Y: store.GetPositionSession().Y},
+						shiftWidth, shiftHeight)
+
+					if collision.GetInstance().IsColliding() {
+						dispatcher.GetInstance().Dispatch(action.NewRevertStagePositionXSession())
+					} else {
+						dispatcher.GetInstance().Dispatch(action.NewSyncStagePositionXSession())
+					}
+				}
+
+				if store.GetStagePositionSession().Y != store.GetPositionSession().Y {
+					collision.GetInstance().SetMainTrackableObject(
+						dto.Position{
+							X: store.GetPositionSession().X,
+							Y: store.GetStagePositionSession().Y},
+						shiftWidth, shiftHeight)
+
+					if collision.GetInstance().IsColliding() {
+						dispatcher.GetInstance().Dispatch(action.NewRevertStagePositionYSession())
+					} else {
+						dispatcher.GetInstance().Dispatch(action.NewSyncStagePositionYSession())
+					}
+				}
+			} else {
+				dispatcher.GetInstance().Dispatch(action.NewSyncStagePositionXSession())
+				dispatcher.GetInstance().Dispatch(action.NewSyncStagePositionYSession())
 			}
 		}
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyB) {
-		ss.camera.AddTrauma(0.1)
-	}
-
 	store.RetrievedUsersMetadataSessionSyncHelper.Unlock()
-
-	selectedLobbySet := store.GetSelectedLobbySetUnitMetadata()
 
 	sounder.GetInstance().SetMainTrackableObject(store.GetPositionSession())
 
@@ -452,6 +517,8 @@ func (ss *SessionScreen) HandleInput() error {
 	movableUnit.SetPosition(store.GetPositionSession())
 
 	shiftWidth, shiftHeight := movableUnit.GetShiftBounds()
+
+	fmt.Println(store.GetPositionSession())
 
 	ss.camera.LookAt(
 		store.GetPositionSession().X+(shiftWidth/2),
@@ -508,6 +575,8 @@ func (ss *SessionScreen) HandleInput() error {
 					} else {
 						ss.toxicRainEventStartTransparentTransitionEffect.Clean()
 
+						ss.camera.AddTrauma(0.1)
+
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetEventStarted(value.EVENT_STARTED_TRUE_VALUE))
 					}
@@ -528,45 +597,54 @@ func (ss *SessionScreen) HandleInput() error {
 }
 
 func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
-	ss.passiveInterfaceWorld.Clear()
+	// TODO: refactor to remove session sync helper lock usage.
+	store.RetrievedUsersMetadataSessionSyncHelper.Lock()
 
-	ss.activeInterfaceWorld.Clear()
+	retrievedUsersMetadataSession := store.GetRetrievedUsersMetadataSession()
 
-	ss.internalWorld.Clear()
+	if _, ok := retrievedUsersMetadataSession[store.GetRepositoryUUID()]; ok {
+		ss.passiveInterfaceWorld.Clear()
 
-	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
-		ss.eventWorld.Clear()
-	}
+		ss.activeInterfaceWorld.Clear()
 
-	renderer.GetInstance().Draw(ss.internalWorld, ss.camera)
+		ss.internalWorld.Clear()
 
-	screen.DrawImage(ss.internalWorld, &ebiten.DrawImageOptions{})
-
-	ss.passiveUI.Draw(ss.passiveInterfaceWorld)
-
-	ss.activeUI.Draw(ss.activeInterfaceWorld)
-
-	screen.DrawImage(ss.passiveInterfaceWorld, &ebiten.DrawImageOptions{
-		ColorM: options.GetTransparentDrawOptions(ss.transparentTransitionEffect.GetValue()).ColorM})
-
-	screen.DrawImage(ss.activeInterfaceWorld, &ebiten.DrawImageOptions{
-		ColorM: options.GetTransparentDrawOptions(
-			ss.transparentTransitionEffect.GetValue()).ColorM})
-
-	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
-		switch store.GetEventName() {
-		case value.EVENT_NAME_TOXIC_RAIN_VALUE:
-			if store.GetEventStarted() == value.EVENT_STARTED_TRUE_VALUE && store.GetEventEnding() == value.EVENT_ENDING_TRUE_VALUE {
-				ss.toxicRainEventShaderEffect.Draw(
-					ss.eventWorld, ss.toxicRainEventEndTransparentTransitionEffect.GetValue())
-			} else {
-				ss.toxicRainEventShaderEffect.Draw(
-					ss.eventWorld, ss.toxicRainEventStartTransparentTransitionEffect.GetValue())
-			}
+		if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
+			ss.eventWorld.Clear()
 		}
 
-		screen.DrawImage(ss.eventWorld, &ebiten.DrawImageOptions{})
+		renderer.GetInstance().Draw(ss.internalWorld, ss.camera)
+
+		screen.DrawImage(ss.internalWorld, &ebiten.DrawImageOptions{})
+
+		ss.passiveUI.Draw(ss.passiveInterfaceWorld)
+
+		ss.activeUI.Draw(ss.activeInterfaceWorld)
+
+		screen.DrawImage(ss.passiveInterfaceWorld, &ebiten.DrawImageOptions{
+			ColorM: options.GetTransparentDrawOptions(ss.transparentTransitionEffect.GetValue()).ColorM})
+
+		screen.DrawImage(ss.activeInterfaceWorld, &ebiten.DrawImageOptions{
+			ColorM: options.GetTransparentDrawOptions(
+				ss.transparentTransitionEffect.GetValue()).ColorM})
+
+		if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
+			switch store.GetEventName() {
+			case value.EVENT_NAME_TOXIC_RAIN_VALUE:
+				if store.GetEventStarted() == value.EVENT_STARTED_TRUE_VALUE && store.GetEventEnding() == value.EVENT_ENDING_TRUE_VALUE {
+					ss.toxicRainEventShaderEffect.Draw(
+						ss.eventWorld, ss.toxicRainEventEndTransparentTransitionEffect.GetValue())
+				} else {
+					ss.toxicRainEventShaderEffect.Draw(
+						ss.eventWorld, ss.toxicRainEventStartTransparentTransitionEffect.GetValue())
+				}
+			}
+
+			screen.DrawImage(ss.eventWorld, &ebiten.DrawImageOptions{})
+		}
 	}
+
+	store.RetrievedUsersMetadataSessionSyncHelper.Unlock()
 }
 
 // newSessionScreen initializes SessionScreen.

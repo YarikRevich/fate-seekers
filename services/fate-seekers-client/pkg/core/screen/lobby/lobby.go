@@ -1,7 +1,6 @@
 package lobby
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -58,8 +57,6 @@ func (ls *LobbyScreen) HandleInput() error {
 		stream.GetGetLobbySetSubmitter().Clean(func() {
 			stream.GetGetLobbySetSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetLobbySetResponse, err error) bool {
-					fmt.Println(response.GetLobbySet(), err)
-
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetLobbySetRetrievalStartedNetworkingAction(

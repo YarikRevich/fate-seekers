@@ -336,6 +336,13 @@ func GetPositionSession() dto.Position {
 	return instance.GetState(session.POSITION_SESSION_STATE).(dto.Position)
 }
 
+// GetStagePositionSession retrieves stage position session state value.
+func GetStagePositionSession() dto.Position {
+	instance := GetInstance()
+
+	return instance.GetState(session.STAGE_POSITION_SESSION_STATE).(dto.Position)
+}
+
 // GetPreviousPositionSession retrieves previous position session state value.
 func GetPreviousPositionSession() dto.Position {
 	instance := GetInstance()

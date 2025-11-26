@@ -76,9 +76,6 @@ func (ms *MenuScreen) HandleInput() error {
 				value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_FALSE_VALUE))
 
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetResetSession(value.RESET_SESSION_TRUE_VALUE))
-
-		dispatcher.GetInstance().Dispatch(
 			action.NewSetStartSessionTravel(value.START_SESSION_TRAVEL_FALSE_VALUE))
 
 		prompt.GetInstance().ShowSubmitButton()

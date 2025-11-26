@@ -186,8 +186,6 @@ func newSelectorScreen() screen.Screen {
 							return
 						}
 
-						fmt.Println(err)
-
 						transparentTransitionEffect.Reset()
 
 						dispatcher.GetInstance().Dispatch(

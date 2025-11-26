@@ -1,7 +1,6 @@
 package renderer
 
 import (
-	"fmt"
 	"math"
 	"sync"
 
@@ -270,9 +269,9 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 		// x, y := camera.ScreenToWorld(int(iter.Value.GetPosition().X), int(iter.Value.GetPosition().Y))
 		position := iter.Value.GetPosition()
 
-		_, shiftHeight := iter.Value.GetShiftBounds()
+		// _, shiftHeight := iter.Value.GetShiftBounds()
 
-		presentObjectPositions, ok = r.objectPosition.Get((position.X) + position.Y + shiftHeight)
+		presentObjectPositions, ok = r.objectPosition.Get((position.X) + position.Y)
 		if ok {
 			presentObjectPositions = append(
 				presentObjectPositions,
@@ -290,10 +289,9 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 
 		r.objectPositionMutex.Lock()
 
-		fmt.Println(position.X+position.Y+shiftHeight, "OBJECT")
 		// _, shiftHeight := iter.Value.GetShiftBounds()
 
-		r.objectPosition.Set((position.X)+position.Y+shiftHeight, presentObjectPositions)
+		r.objectPosition.Set((position.X)+position.Y, presentObjectPositions)
 
 		r.objectPositionMutex.Unlock()
 	}

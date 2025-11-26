@@ -25,21 +25,22 @@ import (
 )
 
 var (
-	ErrUserDoesNotExist                   = errors.New("err happened user does not exist")
-	ErrLobbySetDoesNotExist               = errors.New("err happened lobby set does not exist")
-	ErrLobbyDoesNotExist                  = errors.New("err happened lobby does not exist")
-	ErrLobbyAlreadyStarted                = errors.New("err happened lobby already started")
-	ErrLobbyAlreadyExists                 = errors.New("err happened lobby already exists")
-	ErrSessionDoesNotExists               = errors.New("err happened session does not exist")
-	ErrSessionAlreadyExists               = errors.New("err happened session already exists")
-	ErrSessionAlreadyStarted              = errors.New("err happened session already started")
-	ErrSessionNotStarted                  = errors.New("err happened session has not been started yet")
-	ErrFilteredSessionDoesNotExists       = errors.New("err happened filtered session does not exist")
-	ErrUserIsNotLobbyHost                 = errors.New("err happened user is not a host of a lobby")
-	ErrUserDoesNotOwnSession              = errors.New("err happened user does not own session")
-	ErrSessionHasMaxAmountOfLobbies       = errors.New("err happened session has max amount of lobbies")
-	ErrSessionHasLobbies                  = errors.New("err happened session has lobbies")
-	ErrSessionMetadataRetrievalNotAllowed = errors.New("err happened session metadata retrieval not allowed")
+	ErrUserDoesNotExist                     = errors.New("err happened user does not exist")
+	ErrLobbySetDoesNotExist                 = errors.New("err happened lobby set does not exist")
+	ErrLobbyDoesNotExist                    = errors.New("err happened lobby does not exist")
+	ErrLobbiesAmountExceedsSpawnablesAmount = errors.New("err happened lobbies exceed spawnables amount")
+	ErrLobbyAlreadyStarted                  = errors.New("err happened lobby already started")
+	ErrLobbyAlreadyExists                   = errors.New("err happened lobby already exists")
+	ErrSessionDoesNotExists                 = errors.New("err happened session does not exist")
+	ErrSessionAlreadyExists                 = errors.New("err happened session already exists")
+	ErrSessionAlreadyStarted                = errors.New("err happened session already started")
+	ErrSessionNotStarted                    = errors.New("err happened session has not been started yet")
+	ErrFilteredSessionDoesNotExists         = errors.New("err happened filtered session does not exist")
+	ErrUserIsNotLobbyHost                   = errors.New("err happened user is not a host of a lobby")
+	ErrUserDoesNotOwnSession                = errors.New("err happened user does not own session")
+	ErrSessionHasMaxAmountOfLobbies         = errors.New("err happened session has max amount of lobbies")
+	ErrSessionHasLobbies                    = errors.New("err happened session has lobbies")
+	ErrSessionMetadataRetrievalNotAllowed   = errors.New("err happened session metadata retrieval not allowed")
 )
 
 // Describes constant values used for handler management.
@@ -656,6 +657,72 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		}
 	}
 
+	lobbies, exists, err := repository.
+		GetLobbiesRepository().
+		GetBySessionID(request.GetSessionId())
+	if err != nil {
+		cache.
+			GetInstance().
+			CommitMetadataTransaction()
+
+		return nil, err
+	}
+
+	if !exists {
+		cache.
+			GetInstance().
+			CommitMetadataTransaction()
+
+		return nil, ErrLobbyDoesNotExist
+	}
+
+	if len(request.GetSpawnables()) < len(lobbies) {
+		cache.
+			GetInstance().
+			CommitMetadataTransaction()
+
+		return nil, ErrLobbiesAmountExceedsSpawnablesAmount
+	}
+
+	randomSpawnables := rand.Perm(len(request.GetSpawnables()))
+
+	err = db.GetInstance().Transaction(func(tx *gorm.DB) error {
+		for i, lobby := range lobbies {
+			spawnable := request.GetSpawnables()[randomSpawnables[i]]
+
+			err = repository.
+				GetLobbiesRepository().
+				InsertOrUpdateWithTransaction(
+					tx,
+					dto.LobbiesRepositoryInsertOrUpdateRequest{
+						UserID:         userID,
+						SessionID:      lobby.SessionID,
+						Skin:           uint64(lobby.Skin),
+						Health:         uint64(lobby.Health),
+						Active:         lobby.Active,
+						Eliminated:     lobby.Eliminated,
+						Host:           lobby.Host,
+						PositionX:      spawnable.GetX(),
+						PositionY:      spawnable.GetY(),
+						PositionStatic: lobby.PositionStatic,
+					})
+			if err != nil {
+				return ErrLobbyDoesNotExist
+			}
+
+			cache.GetInstance().EvictMetadata(lobby.UserEntity.Name)
+		}
+
+		return nil
+	})
+	if err != nil {
+		cache.
+			GetInstance().
+			CommitMetadataTransaction()
+
+		return nil, err
+	}
+
 	cache.
 		GetInstance().
 		BeginSessionsTransaction()
@@ -731,7 +798,7 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		GetInstance().
 		BeginUserSessionsTransaction()
 
-	err := repository.
+	err = repository.
 		GetSessionsRepository().
 		InsertOrUpdate(
 			dto.SessionsRepositoryInsertOrUpdateRequest{

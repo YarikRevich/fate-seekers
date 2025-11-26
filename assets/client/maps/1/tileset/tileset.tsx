@@ -9,6 +9,7 @@
  <tile id="48">
   <properties>
    <property name="sound" value="rock"/>
+   <property name="spawnable" type="bool" value="true"/>
   </properties>
  </tile>
 </tileset>

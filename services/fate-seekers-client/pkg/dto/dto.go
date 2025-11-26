@@ -226,9 +226,16 @@ type ProcessedTile struct {
 }
 
 // SoundableTile represents soundable tile.
+type CollidableTile struct {
+	Position              Position
+	TileWidth, TileHeight int
+}
+
+// SoundableTile represents soundable tile.
 type SoundableTile struct {
-	Position Position
-	Name     string
+	Position              Position
+	Name                  string
+	TileWidth, TileHeight int
 }
 
 // RendererPositionItem represents renderer position item.

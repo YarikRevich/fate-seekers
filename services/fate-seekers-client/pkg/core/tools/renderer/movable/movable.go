@@ -178,6 +178,22 @@ func (m *Movable) Draw(screen *ebiten.Image, centered bool, camera *kamera.Camer
 				A: 255})
 	}
 
+	// TODO: add object glow up setting.
+
+	// 	if !m.normalHitTransparentTransitionEffect.Done() {
+	//     // 1. Create a pulsing factor using time (0.0 to 1.0)
+	//     // This creates a smooth "breathing" animation
+	//     ticks := float64(time.Now().UnixMilli()) / 200.0 // Speed
+	//     pulse := (math.Sin(ticks) + 1.0) / 2.0           // Normalize to 0-1
+
+	//     // 2. Define base intensity
+	//     intensity := 0.3 * pulse
+
+	//     // 3. Apply a White/Gold Glow
+	//     // Adds color to existing pixels, making them look lit up
+	//     m.opts.ColorM.Translate(intensity, intensity, intensity*0.5, 0)
+	// }
+
 	if m.static {
 		if !centered {
 			camera.Draw(m.metadata[m.direction].Rotation, &m.opts, screen)
