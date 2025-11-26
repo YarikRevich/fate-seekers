@@ -160,6 +160,8 @@ func (ss *SessionScreen) HandleInput() error {
 						return true
 					}
 
+					fmt.Println(response.GetName())
+
 					if len(response.GetName()) != 0 {
 						switch response.GetName() {
 						case value.EVENT_NAME_TOXIC_RAIN_VALUE:
@@ -168,6 +170,8 @@ func (ss *SessionScreen) HandleInput() error {
 									translation.GetInstance().GetTranslation("client.networking.event-toxic-rain-starated"),
 									time.Second*3,
 									common.NotificationInfoTextColor)
+
+								ss.camera.AddTrauma(0.8)
 
 								dispatcher.GetInstance().Dispatch(
 									action.NewSetEventName(value.EVENT_NAME_TOXIC_RAIN_VALUE))
@@ -266,6 +270,8 @@ func (ss *SessionScreen) HandleInput() error {
 								}
 							}
 
+							fmt.Println(previousUsersMetadata.Health, userMetadata.Health)
+
 							if previousUsersMetadata.Health != userMetadata.Health {
 								sharedUsersMetadataHealthHitsIssuers[userMetadata.GetIssuer()] = true
 							}
@@ -279,6 +285,8 @@ func (ss *SessionScreen) HandleInput() error {
 										Y: userMetadata.GetPosition().GetY(),
 									}),
 								)
+
+								bar.GetInstance().SetHealthText(userMetadata.GetHealth())
 
 								ss.camera.SetCenter(
 									userMetadata.GetPosition().GetX(),
@@ -518,8 +526,6 @@ func (ss *SessionScreen) HandleInput() error {
 
 	shiftWidth, shiftHeight := movableUnit.GetShiftBounds()
 
-	fmt.Println(store.GetPositionSession())
-
 	ss.camera.LookAt(
 		store.GetPositionSession().X+(shiftWidth/2),
 		-store.GetPositionSession().Y+(shiftHeight/2))
@@ -574,8 +580,6 @@ func (ss *SessionScreen) HandleInput() error {
 						ss.toxicRainEventStartTransparentTransitionEffect.Update()
 					} else {
 						ss.toxicRainEventStartTransparentTransitionEffect.Clean()
-
-						ss.camera.AddTrauma(0.1)
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetEventStarted(value.EVENT_STARTED_TRUE_VALUE))
