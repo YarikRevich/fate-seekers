@@ -12,4 +12,30 @@
    <property name="spawnable" type="bool" value="true"/>
   </properties>
  </tile>
+ <tile id="159">
+  <properties>
+   <property name="spawnable" type="bool" value="true"/>
+  </properties>
+ </tile>
+ <tile id="44">
+  <properties>
+   <property name="collidable" type="bool" value="true"/>
+  </properties>
+ </tile>
+ <tile id="222">
+  <properties>
+   <property name="collidable" type="bool" value="true"/>
+  </properties>
+ </tile>
+ <tile id="287">
+  <properties>
+   <property name="collidable" type="bool" value="true"/>
+   <property name="sound" value="rock"/>
+  </properties>
+ </tile>
+ <tile id="292">
+  <properties>
+   <property name="collidable" type="bool" value="true"/>
+  </properties>
+ </tile>
 </tileset>

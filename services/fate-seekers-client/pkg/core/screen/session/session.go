@@ -1,7 +1,6 @@
 package session
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -160,7 +159,7 @@ func (ss *SessionScreen) HandleInput() error {
 						return true
 					}
 
-					fmt.Println(response.GetName())
+					// fmt.Println(response.GetName())
 
 					if len(response.GetName()) != 0 {
 						switch response.GetName() {
@@ -270,7 +269,7 @@ func (ss *SessionScreen) HandleInput() error {
 								}
 							}
 
-							fmt.Println(previousUsersMetadata.Health, userMetadata.Health)
+							// fmt.Println(previousUsersMetadata.Health, userMetadata.Health)
 
 							if previousUsersMetadata.Health != userMetadata.Health {
 								sharedUsersMetadataHealthHitsIssuers[userMetadata.GetIssuer()] = true
