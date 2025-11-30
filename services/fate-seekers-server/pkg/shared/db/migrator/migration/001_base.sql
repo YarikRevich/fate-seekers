@@ -22,13 +22,27 @@ CREATE TABLE sessions (
 CREATE TABLE generations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id INTEGER NOT NULL,
-    name TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
     type TEXT NOT NULL,
     active BOOLEAN NOT NULL,
     position_x REAL NOT NULL,
     position_y REAL NOT NULL,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+);
+
+--
+-- Name: associations; Type: TABLE; Schema: public;
+--
+
+CREATE TABLE associations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER NOT NULL,
+    generation_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+    FOREIGN KEY (generation_id) REFERENCES generations(id) ON DELETE CASCADE
 );
 
 --

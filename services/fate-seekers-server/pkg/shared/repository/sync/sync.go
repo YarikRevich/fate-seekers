@@ -2,7 +2,6 @@ package sync
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
@@ -28,7 +27,6 @@ var (
 // Run starts the repository sync worker, which takes latest updates
 // from certain cache instances.
 func Run() {
-
 	// TODO: create some mapping of hashes, which would help to avoid not necessary updates.
 
 	go func() {
@@ -38,8 +36,6 @@ func Run() {
 			ticker.Stop()
 
 			clear(affectedSessions)
-
-			fmt.Println("BEFORE 10")
 
 			cache.
 				GetInstance().

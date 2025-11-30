@@ -1,6 +1,7 @@
 package interpolation
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
@@ -19,6 +20,8 @@ func GetDelayedPositions(previousPosition, position dto.Position) []dto.Position
 
 		dist := math.Hypot(dx, dy)
 		if dist == 0 || dist <= 1 {
+			fmt.Println("IN A LOOP")
+
 			break
 		}
 

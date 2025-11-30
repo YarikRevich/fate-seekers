@@ -4,6 +4,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/collision"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/tile"
+	selected "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/selecter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/sounder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
@@ -17,7 +18,11 @@ func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables []dto.Position)
 		var spawnables []dto.Position
 
 		for _, layer := range tilemap.Layers {
-			layerTiles, spawnableTiles, collidableTiles, soundableTiles := loader.GetMapLayerTiles(
+			layerTiles,
+				spawnableTiles,
+				collidableTiles,
+				soundableTiles,
+				selectableTiles := loader.GetMapLayerTiles(
 				layer, tilemap.Height, tilemap.Width, tilemap.TileHeight, tilemap.TileWidth)
 
 			spawnables = append(spawnables, spawnableTiles...)
@@ -28,6 +33,10 @@ func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables []dto.Position)
 
 			for _, collidableTile := range collidableTiles {
 				collision.GetInstance().AddCollidableTileObject(collidableTile)
+			}
+
+			for _, selectableTile := range selectableTiles {
+				selected.GetInstance().AddSelectableTileObject(selectableTile)
 			}
 
 			layerTiles.Reverse(func(key float64, tiles []*dto.ProcessedTile) bool {

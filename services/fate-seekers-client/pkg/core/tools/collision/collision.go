@@ -60,13 +60,19 @@ func (c *Collision) AddCollidableTileObject(value *dto.CollidableTile) {
 func (c *Collision) IsColliding() bool {
 	c.collisionPolygonsMutex.Lock()
 
+	c.mainTrackableObjectMutex.Lock()
+
 	for _, polygon := range c.collisionPolygons {
 		if polygon.IsIntersecting(c.mainTrackableObject) {
 			c.collisionPolygonsMutex.Unlock()
 
+			c.mainTrackableObjectMutex.Unlock()
+
 			return true
 		}
 	}
+
+	c.mainTrackableObjectMutex.Unlock()
 
 	c.collisionPolygonsMutex.Unlock()
 

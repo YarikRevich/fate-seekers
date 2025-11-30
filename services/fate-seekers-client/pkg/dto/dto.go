@@ -221,12 +221,19 @@ const (
 
 // ProcessedTile represents processed tile.
 type ProcessedTile struct {
-	Position Position
-	Image    *ebiten.Image
+	Position              Position
+	TileWidth, TileHeight int
+	Image                 *ebiten.Image
 }
 
-// SoundableTile represents soundable tile.
+// CollidableTile represents collidable tile.
 type CollidableTile struct {
+	Position              Position
+	TileWidth, TileHeight int
+}
+
+// SelectableTile represents selectable tile.
+type SelectableTile struct {
 	Position              Position
 	TileWidth, TileHeight int
 }

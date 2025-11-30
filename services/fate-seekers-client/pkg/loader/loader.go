@@ -65,6 +65,7 @@ const (
 	TilemapCollidableProperty = "collidable"
 	TilemapSoundProperty      = "sound"
 	TilemapSpawnableProperty  = "spawnable"
+	TilemapSelectableProperty = "selectable"
 )
 
 // Describes all the available statics to be loaded.
@@ -236,12 +237,17 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 
 // GetMapLayerTiles retrieves map layer tiles for the provided layer.
 func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) (
-	*btree.Map[float64, []*dto.ProcessedTile], []dto.Position, []*dto.CollidableTile, []*dto.SoundableTile) {
+	*btree.Map[float64, []*dto.ProcessedTile],
+	[]dto.Position,
+	[]*dto.CollidableTile,
+	[]*dto.SoundableTile,
+	[]*dto.SelectableTile) {
 	var (
 		result      = btree.NewMap[float64, []*dto.ProcessedTile](32)
 		spawnables  []dto.Position
 		collidables []*dto.CollidableTile
 		soundables  []*dto.SoundableTile
+		selected    []*dto.SelectableTile
 	)
 
 	var tiles sync.Map
@@ -272,17 +278,16 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 			position := getMapTilePosition(x, y, tileWidth, tileHeight)
 
 			processedTile := &dto.ProcessedTile{
-				Position: position,
-				Image:    tileImage.(*ebiten.Image),
+				Position:   position,
+				TileWidth:  tileWidth,
+				TileHeight: tileHeight,
+				Image:      tileImage.(*ebiten.Image),
 			}
 
 			for _, tile := range layer.Tiles[i].Tileset.Tiles {
 				if layer.Tiles[i].Tileset.FirstGID+layer.Tiles[i].ID == tile.ID+layer.Tiles[i].Tileset.FirstGID {
 					collidableProperty := tile.Properties.GetBool(TilemapCollidableProperty)
 					if collidableProperty {
-						// red := color.RGBA{R: 255, G: 0, B: 0, A: 255}
-						// processedTile.Image.Fill(red)
-
 						collidables = append(collidables, &dto.CollidableTile{
 							Position:   position,
 							TileWidth:  tileWidth,
@@ -304,6 +309,15 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 					if spawnableProperty {
 						spawnables = append(spawnables, position)
 					}
+
+					selectableProperty := tile.Properties.GetBool(TilemapSelectableProperty)
+					if selectableProperty {
+						selected = append(selected, &dto.SelectableTile{
+							Position:   position,
+							TileWidth:  tileWidth,
+							TileHeight: tileHeight,
+						})
+					}
 				}
 			}
 
@@ -322,7 +336,7 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 		}
 	}
 
-	return result, spawnables, collidables, soundables
+	return result, spawnables, collidables, soundables, selected
 }
 
 // getMapTileImage reads cropped tile from the provided tilemap and the provided tile dimension.

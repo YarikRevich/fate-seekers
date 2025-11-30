@@ -2,6 +2,7 @@ package movable
 
 import (
 	"image/color"
+	"math"
 	"sync"
 	"time"
 
@@ -144,7 +145,7 @@ func (m *Movable) Update() {
 }
 
 // Draw performs draw operation for the movable unit.
-func (m *Movable) Draw(screen *ebiten.Image, centered bool, camera *kamera.Camera) {
+func (m *Movable) Draw(screen *ebiten.Image, selected, centered bool, camera *kamera.Camera) {
 	m.delayedMutex.Lock()
 
 	if len(m.delayedPositions) != 0 {
@@ -178,21 +179,14 @@ func (m *Movable) Draw(screen *ebiten.Image, centered bool, camera *kamera.Camer
 				A: 255})
 	}
 
-	// TODO: add object glow up setting.
+	if selected {
+		ticks := float64(time.Now().UnixMilli()) / 200.0
+		pulse := (math.Sin(ticks) + 1.0) / 2.0
 
-	// 	if !m.normalHitTransparentTransitionEffect.Done() {
-	//     // 1. Create a pulsing factor using time (0.0 to 1.0)
-	//     // This creates a smooth "breathing" animation
-	//     ticks := float64(time.Now().UnixMilli()) / 200.0 // Speed
-	//     pulse := (math.Sin(ticks) + 1.0) / 2.0           // Normalize to 0-1
+		intensity := 0.3 * pulse
 
-	//     // 2. Define base intensity
-	//     intensity := 0.3 * pulse
-
-	//     // 3. Apply a White/Gold Glow
-	//     // Adds color to existing pixels, making them look lit up
-	//     m.opts.ColorM.Translate(intensity, intensity, intensity*0.5, 0)
-	// }
+		m.opts.ColorM.Translate(intensity, intensity, intensity*0.5, 0)
+	}
 
 	if m.static {
 		if !centered {

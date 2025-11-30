@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -19,10 +20,12 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/movable"
+	selected "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/selecter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/sounder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/bar"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/press"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
@@ -33,6 +36,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/setanarut/kamera/v2"
 )
 
@@ -90,6 +94,8 @@ type SessionScreen struct {
 
 func (ss *SessionScreen) HandleInput() error {
 	if store.GetResetSession() == value.RESET_SESSION_TRUE_VALUE {
+		selected.GetInstance().Clean()
+
 		collision.GetInstance().Clean()
 
 		sounder.GetInstance().Clean()
@@ -158,8 +164,6 @@ func (ss *SessionScreen) HandleInput() error {
 
 						return true
 					}
-
-					// fmt.Println(response.GetName())
 
 					if len(response.GetName()) != 0 {
 						switch response.GetName() {
@@ -269,8 +273,6 @@ func (ss *SessionScreen) HandleInput() error {
 								}
 							}
 
-							// fmt.Println(previousUsersMetadata.Health, userMetadata.Health)
-
 							if previousUsersMetadata.Health != userMetadata.Health {
 								sharedUsersMetadataHealthHitsIssuers[userMetadata.GetIssuer()] = true
 							}
@@ -314,6 +316,8 @@ func (ss *SessionScreen) HandleInput() error {
 						}
 					}
 
+					selected.GetInstance().PruneExternalMovableObjects(sharedUsersMetadataIssuers)
+
 					sounder.GetInstance().PruneExternalTrackableObjects(sharedUsersMetadataIssuers)
 
 					renderer.GetInstance().PruneSecondaryExternalMovableObjects(sharedUsersMetadataIssuers)
@@ -323,8 +327,10 @@ func (ss *SessionScreen) HandleInput() error {
 
 						sounder.GetInstance().SetExternalTrackableObject(issuer, retrievedUsersMetadata.Position)
 
+						var movableUnit *movable.Movable
+
 						if !renderer.GetInstance().SecondaryExternalMovableObjectExists(issuer) {
-							movableUnit := movable.NewMovable(
+							movableUnit = movable.NewMovable(
 								loader.GetMovableSkinsPath(retrievedUsersMetadata.Skin))
 
 							movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
@@ -333,11 +339,26 @@ func (ss *SessionScreen) HandleInput() error {
 
 							renderer.GetInstance().AddSecondaryExternalMovableObject(issuer, movableUnit)
 						} else {
-							movableUnit := renderer.GetInstance().GetSecondaryExternalMovableObject(issuer)
+							movableUnit = renderer.GetInstance().GetSecondaryExternalMovableObject(issuer)
 
 							movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
 							movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
 							movableUnit.AddPosition(retrievedUsersMetadata.Position)
+						}
+
+						if !selected.GetInstance().ExternalMovableObjectExists(issuer) {
+							shiftWidth, shiftHeight := movableUnit.GetShiftBounds()
+
+							selected.GetInstance().AddExternalMovableObject(
+								issuer,
+								retrievedUsersMetadata.Position,
+								shiftWidth,
+								shiftHeight)
+						} else {
+							selectedUnit := selected.GetInstance().GetExternalMovableObject(issuer)
+
+							selectedUnit.SetPosition(
+								retrievedUsersMetadata.Position.X, retrievedUsersMetadata.Position.Y)
 						}
 					}
 
@@ -415,9 +436,6 @@ func (ss *SessionScreen) HandleInput() error {
 			}
 		} else {
 			if ebiten.IsKeyPressed(ebiten.KeyEscape) {
-				dispatcher.GetInstance().Dispatch(
-					action.NewSetResetSession(value.RESET_SESSION_TRUE_VALUE))
-
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
 			}
@@ -532,6 +550,23 @@ func (ss *SessionScreen) HandleInput() error {
 	dispatcher.GetInstance().Dispatch(
 		action.NewSyncPreviousPositionSession())
 
+	selectedPosition, ok := selected.GetInstance().Scan(ss.camera)
+	if ok {
+		renderer.GetInstance().SetSelectedObject(selectedPosition)
+
+		if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE && ebiten.IsFocused() {
+			if inpututil.IsStandardGamepadButtonJustPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonRightRight) {
+				fmt.Println("SELECTED GAMEPAD")
+			}
+		} else {
+			if ebiten.IsKeyPressed(ebiten.KeyE) {
+				fmt.Println("SELECTED KEYBOARD")
+			}
+		}
+	} else {
+		renderer.GetInstance().DisableSelectedObject()
+	}
+
 	renderer.GetInstance().Update(ss.camera)
 
 	sounder.GetInstance().Update()
@@ -589,7 +624,6 @@ func (ss *SessionScreen) HandleInput() error {
 	}
 
 	// TODO: click on the letter.
-	// dispatcher.GetInstance().Dispatch(action.NewSetLetterNameAction(""))
 
 	// dispatcher.GetInstance().Dispatch(action.NewSetLetterImageAction(""))
 
@@ -659,6 +693,7 @@ func newSessionScreen() screen.Screen {
 
 	return &SessionScreen{
 		passiveUI: builder.Build(
+			press.GetInstance().GetContainer(),
 			bar.GetInstance().GetContainer()),
 		activeUI: builder.Build(),
 		camera:   camera,
