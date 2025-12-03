@@ -1,7 +1,6 @@
 package session
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -55,6 +54,9 @@ var (
 
 // SessionScreen represents session screen implementation.
 type SessionScreen struct {
+	// Represents attached passive transition user interface.
+	passiveTransitionUI *ebitenui.UI
+
 	// Represents attached passive user interface.
 	passiveUI *ebitenui.UI
 
@@ -75,6 +77,12 @@ type SessionScreen struct {
 
 	// Represents transparent transition effect used for toxic rain event component, when event is ended.
 	toxicRainEventEndTransparentTransitionEffect transition.TransitionEffect
+
+	// Represents transparent transition effect used for press component, when there is no selectable anymore.
+	pressTransparentTransitionEffect transition.TransitionEffect
+
+	// Represents passive transition interface world view.
+	passiveTransitionInterfaceWorld *ebiten.Image
 
 	// Represents passive interface world view.
 	passiveInterfaceWorld *ebiten.Image
@@ -335,7 +343,7 @@ func (ss *SessionScreen) HandleInput() error {
 
 							movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
 							movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
-							movableUnit.AddPosition(retrievedUsersMetadata.Position)
+							movableUnit.SetPosition(retrievedUsersMetadata.Position)
 
 							renderer.GetInstance().AddSecondaryExternalMovableObject(issuer, movableUnit)
 						} else {
@@ -552,18 +560,38 @@ func (ss *SessionScreen) HandleInput() error {
 
 	selectedPosition, ok := selected.GetInstance().Scan(ss.camera)
 	if ok {
+		ss.pressTransparentTransitionEffect.Reset()
+
 		renderer.GetInstance().SetSelectedObject(selectedPosition)
 
+		var pressed bool
+
 		if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE && ebiten.IsFocused() {
+			press.GetInstance().SetPressType(press.GAMEPAD)
+
 			if inpututil.IsStandardGamepadButtonJustPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonRightRight) {
-				fmt.Println("SELECTED GAMEPAD")
+				pressed = true
 			}
 		} else {
+			press.GetInstance().SetPressType(press.KEYBOARD)
+
 			if ebiten.IsKeyPressed(ebiten.KeyE) {
-				fmt.Println("SELECTED KEYBOARD")
+				pressed = true
 			}
 		}
+
+		if pressed {
+			// TODO: check for saved location associations in memory.
+		}
 	} else {
+		if !ss.pressTransparentTransitionEffect.Done() {
+			if !ss.pressTransparentTransitionEffect.OnEnd() {
+				ss.pressTransparentTransitionEffect.Update()
+			} else {
+				ss.pressTransparentTransitionEffect.Clean()
+			}
+		}
+
 		renderer.GetInstance().DisableSelectedObject()
 	}
 
@@ -640,6 +668,8 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 	retrievedUsersMetadataSession := store.GetRetrievedUsersMetadataSession()
 
 	if _, ok := retrievedUsersMetadataSession[store.GetRepositoryUUID()]; ok {
+		ss.passiveTransitionInterfaceWorld.Clear()
+
 		ss.passiveInterfaceWorld.Clear()
 
 		ss.activeInterfaceWorld.Clear()
@@ -654,9 +684,16 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 
 		screen.DrawImage(ss.internalWorld, &ebiten.DrawImageOptions{})
 
+		ss.passiveTransitionUI.Draw(ss.passiveTransitionInterfaceWorld)
+
 		ss.passiveUI.Draw(ss.passiveInterfaceWorld)
 
 		ss.activeUI.Draw(ss.activeInterfaceWorld)
+
+		if !ss.pressTransparentTransitionEffect.Done() {
+			screen.DrawImage(ss.passiveTransitionInterfaceWorld, &ebiten.DrawImageOptions{
+				ColorM: options.GetTransparentDrawOptions(ss.pressTransparentTransitionEffect.GetValue()).ColorM})
+		}
 
 		screen.DrawImage(ss.passiveInterfaceWorld, &ebiten.DrawImageOptions{
 			ColorM: options.GetTransparentDrawOptions(ss.transparentTransitionEffect.GetValue()).ColorM})
@@ -691,9 +728,13 @@ func newSessionScreen() screen.Screen {
 	camera.ShakeEnabled = true
 	camera.SmoothType = kamera.Lerp
 
+	pressTransparentTransitionEffect := transparent.NewTransparentTransitionEffect(false, 0, 255, 5, time.Microsecond*10)
+	pressTransparentTransitionEffect.Clean()
+
 	return &SessionScreen{
+		passiveTransitionUI: builder.Build(
+			press.GetInstance().GetContainer()),
 		passiveUI: builder.Build(
-			press.GetInstance().GetContainer(),
 			bar.GetInstance().GetContainer()),
 		activeUI: builder.Build(),
 		camera:   camera,
@@ -703,10 +744,12 @@ func newSessionScreen() screen.Screen {
 			true, 10, 0, 0.5, time.Millisecond*200),
 		toxicRainEventEndTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(
 			false, 0, 10, 0.5, time.Millisecond*200),
-		passiveInterfaceWorld:      ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
-		activeInterfaceWorld:       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
-		internalWorld:              ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
-		eventWorld:                 ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
-		toxicRainEventShaderEffect: toxicrain.NewToxicRainEventEffect(),
+		pressTransparentTransitionEffect: pressTransparentTransitionEffect,
+		passiveTransitionInterfaceWorld:  ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		passiveInterfaceWorld:            ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		activeInterfaceWorld:             ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		internalWorld:                    ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		eventWorld:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+		toxicRainEventShaderEffect:       toxicrain.NewToxicRainEventEffect(),
 	}
 }

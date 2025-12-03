@@ -12,11 +12,12 @@ import (
 )
 
 var (
-	ErrPersistingSessions    = errors.New("err happened during the process of session creation response data save.")
-	ErrPersistingGenerations = errors.New("err happened during the process of generation creation response data save.")
-	ErrPersistingLobbies     = errors.New("err happened during the process of lobby creation response data save.")
-	ErrPersistingMessages    = errors.New("err happened during the process of message creation response data save.")
-	ErrPersistingUsers       = errors.New("err happened during the process of user creation response data save.")
+	ErrPersistingSessions     = errors.New("err happened during the process of session creation response data save.")
+	ErrPersistingGenerations  = errors.New("err happened during the process of generation creation response data save.")
+	ErrPersistingAssociations = errors.New("err happened during the process of associations creation response data save.")
+	ErrPersistingLobbies      = errors.New("err happened during the process of lobby creation response data save.")
+	ErrPersistingMessages     = errors.New("err happened during the process of message creation response data save.")
+	ErrPersistingUsers        = errors.New("err happened during the process of user creation response data save.")
 )
 
 var (
@@ -25,6 +26,9 @@ var (
 
 	// GetGenerationRepository retrieves instance of the generations repository, performing initial creation if needed.
 	GetGenerationRepository = sync.OnceValue[GenerationsRepository](createGenerationsRepository)
+
+	// GetAssociationsRepository retrieves instance of the associations repository, performing initial creation if needed.
+	GetAssociationsRepository = sync.OnceValue[AssociationsRepository](createAssociationsRepository)
 
 	// GetLobbiesRepository retrieves instance of the lobbies repository, performing initial creation if needed.
 	GetLobbiesRepository = sync.OnceValue[LobbiesRepository](createLobbiesRepository)
@@ -275,6 +279,64 @@ func (w *generationsRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.G
 // createGenerationsRepository initializes generationsRepositoryImpl.
 func createGenerationsRepository() GenerationsRepository {
 	return new(generationsRepositoryImpl)
+}
+
+// AssociationsRepository represents associations entity repository.
+type AssociationsRepository interface {
+	InsertOrUpdate(request dto.AssociationsRepositoryInsertOrUpdateRequest) error
+	GetByGenerationID(generationID int64) ([]*entity.AssociationsEntity, error)
+}
+
+// associationsRepositoryImpl represents implementation of AssociationsRepository.
+type associationsRepositoryImpl struct {
+	// Represents mutex used for database association repository related operations.
+	mu sync.RWMutex
+}
+
+// InsertOrUpdate inserts new associations entity to the storage or updates existing ones.
+func (w *associationsRepositoryImpl) InsertOrUpdate(request dto.AssociationsRepositoryInsertOrUpdateRequest) error {
+	w.mu.Lock()
+
+	instance := db.GetInstance()
+
+	err := instance.Create(&entity.AssociationsEntity{
+		ID:           request.ID,
+		SessionID:    request.SessionID,
+		GenerationID: request.GenerationID,
+		Name:         request.Name,
+	}).Error
+
+	if err != nil {
+		w.mu.Unlock()
+
+		return errors.Wrap(err, ErrPersistingAssociations.Error())
+	}
+
+	w.mu.Unlock()
+
+	return nil
+}
+
+// GetByGenerationID retrieves all available associations for the provided generation id.
+func (w *associationsRepositoryImpl) GetByGenerationID(generationID int64) ([]*entity.AssociationsEntity, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var result []*entity.AssociationsEntity
+
+	err := instance.Table((&entity.AssociationsEntity{}).TableName()).
+		Where("generation_id = ?", generationID).
+		Find(&result).Error
+
+	w.mu.RUnlock()
+
+	return result, err
+}
+
+// createAssociations initializes associationsRepositoryImpl.
+func createAssociationsRepository() AssociationsRepository {
+	return new(associationsRepositoryImpl)
 }
 
 // LobbiesRepository represents lobbies entity repository.

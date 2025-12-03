@@ -74,6 +74,13 @@ type Renderer struct {
 
 	// Represents selected object position, which is used to draw some additional glowing layer.
 	selectedObjectPosition dto.Position
+
+	// Represents ignored external movable objects mutex.
+	ignoredExternalMovableObjectsMutex sync.Mutex
+
+	// Represents ignored external movable objects, which are then used to reset delayed positions to show
+	// the objects immediately.
+	ignoredExternalMovableObjects map[string]bool
 }
 
 // TertiaryTileObjectExists checks if tertiary tile object exists.
@@ -259,8 +266,18 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 	)
 
 	for name, movable := range r.secondaryExternalMovableObjects {
-		if (movable.GetPosition().X < minCameraViewportWidth || movable.GetPosition().X > maxCameraViewportWidth) ||
-			(movable.GetPosition().Y < minCameraViewportHeight || movable.GetPosition().Y > maxCameraViewportHeight) {
+		finalPosition := movable.GetFinalPositions()
+
+		if (finalPosition.X < minCameraViewportWidth || finalPosition.X > maxCameraViewportWidth) ||
+			(finalPosition.Y < minCameraViewportHeight || finalPosition.Y > maxCameraViewportHeight) {
+			r.ignoredExternalMovableObjectsMutex.Lock()
+
+			if _, ok := r.ignoredExternalMovableObjects[name]; !ok {
+				r.ignoredExternalMovableObjects[name] = true
+			}
+
+			r.ignoredExternalMovableObjectsMutex.Unlock()
+
 			continue
 		}
 
@@ -268,9 +285,11 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 
 		r.objectPositionMutex.RLock()
 
-		x, y := camera.ScreenToWorld(int(movable.GetPosition().X), int(movable.GetPosition().Y))
+		shiftWidth, shiftHeight := movable.GetShiftBounds()
 
-		presentObjectPositions, ok = r.objectPosition.Get(x + y)
+		position := movable.GetPosition()
+
+		presentObjectPositions, ok = r.objectPosition.Get((position.X + (shiftWidth / 2)) + (position.Y + (shiftHeight)))
 		if ok {
 			presentObjectPositions = append(
 				presentObjectPositions,
@@ -288,7 +307,7 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 
 		r.objectPositionMutex.Lock()
 
-		r.objectPosition.Set(x+y, presentObjectPositions)
+		r.objectPosition.Set((position.X+(shiftWidth/2))+(position.Y+(shiftHeight)), presentObjectPositions)
 
 		r.objectPositionMutex.Unlock()
 	}
@@ -402,7 +421,10 @@ func (r *Renderer) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 
 	r.objectPosition.Reverse(func(key float64, value []dto.RendererPositionItem) bool {
 		for _, item := range value {
-			var selected bool
+			var (
+				selected              bool
+				resetDelayedPositions bool
+			)
 
 			switch item.Type {
 			case dto.RendererPositionItemSecondaryTile:
@@ -421,7 +443,17 @@ func (r *Renderer) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 					selected = true
 				}
 
-				movable.Draw(screen, selected, false, camera)
+				r.ignoredExternalMovableObjectsMutex.Lock()
+
+				if _, ok := r.ignoredExternalMovableObjects[item.Name]; ok {
+					resetDelayedPositions = true
+
+					delete(r.ignoredExternalMovableObjects, item.Name)
+				}
+
+				r.ignoredExternalMovableObjectsMutex.Unlock()
+
+				movable.Draw(screen, resetDelayedPositions, selected, false, camera)
 
 			case dto.RendererPositionItemMainCenteredMovable:
 				movable := r.mainCenteredMovableObjects[item.Name]
@@ -430,7 +462,7 @@ func (r *Renderer) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 					selected = true
 				}
 
-				movable.Draw(screen, selected, true, camera)
+				movable.Draw(screen, false, selected, true, camera)
 			}
 		}
 
@@ -449,5 +481,6 @@ func newRenderer() *Renderer {
 		secondaryExternalMovableObjects: make(map[string]*movable.Movable),
 		mainCenteredMovableObjects:      make(map[string]*movable.Movable),
 		objectPosition:                  btree.NewMap[float64, []dto.RendererPositionItem](32),
+		ignoredExternalMovableObjects:   make(map[string]bool),
 	}
 }

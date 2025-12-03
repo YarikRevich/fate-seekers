@@ -19,6 +19,9 @@ import (
 const (
 	// Repreesnts effect update ticker frequency.
 	updateTickerFrequency = time.Millisecond * 150
+
+	// Represents max delayed positions buffer size limit.
+	delayedPositionsLimit = 10
 )
 
 // Represents movable object to be rendered.
@@ -84,6 +87,10 @@ func (m *Movable) SetStatic(value bool) {
 
 // AddPosition adds position value for the movable unit.
 func (m *Movable) AddPosition(value dto.Position) {
+	if m.position == value {
+		return
+	}
+
 	m.delayedMutex.Lock()
 
 	var delayedPositions []dto.Position
@@ -95,7 +102,11 @@ func (m *Movable) AddPosition(value dto.Position) {
 	}
 
 	if len(delayedPositions) != 0 {
-		m.delayedPositions = append(m.delayedPositions, delayedPositions...)
+		if len(m.delayedPositions) > delayedPositionsLimit {
+			m.delayedPositions = delayedPositions
+		} else {
+			m.delayedPositions = append(m.delayedPositions, delayedPositions...)
+		}
 	}
 
 	m.delayedMutex.Unlock()
@@ -104,6 +115,19 @@ func (m *Movable) AddPosition(value dto.Position) {
 // GetPosition retrieves current position.
 func (m *Movable) GetPosition() dto.Position {
 	return m.position
+}
+
+// GetFinalPositions retrieves current position.
+func (m *Movable) GetFinalPositions() dto.Position {
+	m.delayedMutex.Lock()
+
+	defer m.delayedMutex.Unlock()
+
+	if len(m.delayedPositions) != 0 {
+		return m.delayedPositions[len(m.delayedPositions)-1]
+	} else {
+		return m.position
+	}
 }
 
 // GetShiftBounds retrieves animation shift bounds.
@@ -145,13 +169,21 @@ func (m *Movable) Update() {
 }
 
 // Draw performs draw operation for the movable unit.
-func (m *Movable) Draw(screen *ebiten.Image, selected, centered bool, camera *kamera.Camera) {
+func (m *Movable) Draw(screen *ebiten.Image, resetDelayedPositions, selected, centered bool, camera *kamera.Camera) {
 	m.delayedMutex.Lock()
 
-	if len(m.delayedPositions) != 0 {
-		m.position = m.delayedPositions[0]
+	if resetDelayedPositions {
+		if len(m.delayedPositions) != 0 {
+			m.position = m.delayedPositions[len(m.delayedPositions)-1]
 
-		m.delayedPositions = m.delayedPositions[1:]
+			m.delayedPositions = m.delayedPositions[:0]
+		}
+	} else {
+		if len(m.delayedPositions) != 0 {
+			m.position = m.delayedPositions[0]
+
+			m.delayedPositions = m.delayedPositions[1:]
+		}
 	}
 
 	m.delayedMutex.Unlock()

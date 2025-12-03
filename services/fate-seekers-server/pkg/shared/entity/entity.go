@@ -73,6 +73,27 @@ func (*GenerationsEntity) TableView() string {
 	return "GenerationsEntity"
 }
 
+// AssociationsEntity represents associations entity.
+type AssociationsEntity struct {
+	ID                int64             `gorm:"column:id;primaryKey;auto_increment;not null"`
+	SessionID         int64             `gorm:"column:session_id;not null"`
+	GenerationID      int64             `gorm:"column:generation_id;not null"`
+	Name              string            `gorm:"column:name;not null"`
+	CreatedAt         time.Time         `gorm:"column:created_at;autoCreateTime"`
+	SessionEntity     SessionEntity     `gorm:"foreignKey:SessionID;references:ID"`
+	GenerationsEntity GenerationsEntity `gorm:"foreignKey:GenerationID;references:ID"`
+}
+
+// TableName retrieves name of database table.
+func (*AssociationsEntity) TableName() string {
+	return "associations"
+}
+
+// TableView retrieves name of database table view.
+func (*AssociationsEntity) TableView() string {
+	return "AssociationsEntity"
+}
+
 // LobbyEntity represents lobbies entity.
 type LobbyEntity struct {
 	ID             int64         `gorm:"column:id;primaryKey;auto_increment;not null"`

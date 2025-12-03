@@ -175,6 +175,7 @@ func (s *Selected) Clean() {
 // newSelected initializes Selected.
 func newSelected() *Selected {
 	return &Selected{
-		cursorTrackableObject: resolv.NewRectangle(0, 0, 10, 10),
+		externalMovableObjects: make(map[string]*resolv.ConvexPolygon),
+		cursorTrackableObject:  resolv.NewRectangle(0, 0, 10, 10),
 	}
 }

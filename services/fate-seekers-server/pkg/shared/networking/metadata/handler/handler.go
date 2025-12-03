@@ -690,12 +690,14 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		for i, lobby := range lobbies {
 			spawnable := request.GetSpawnables()[randomSpawnables[i]]
 
+			fmt.Println(spawnable, "SPAWNABLE")
+
 			err = repository.
 				GetLobbiesRepository().
 				InsertOrUpdateWithTransaction(
 					tx,
 					dto.LobbiesRepositoryInsertOrUpdateRequest{
-						UserID:         userID,
+						UserID:         lobby.UserID,
 						SessionID:      lobby.SessionID,
 						Skin:           uint64(lobby.Skin),
 						Health:         uint64(lobby.Health),

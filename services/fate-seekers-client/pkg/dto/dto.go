@@ -234,7 +234,10 @@ type CollidableTile struct {
 
 // SelectableTile represents selectable tile.
 type SelectableTile struct {
-	Position              Position
+	Position Position
+
+	// Represents a kind of a selectable tile used for selected worker.
+	Kind                  string
 	TileWidth, TileHeight int
 }
 

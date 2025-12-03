@@ -131,6 +131,22 @@
         "one": "Закрити",
         "other": "Закрити"
     },
+    "client.answerinput.success": {
+        "one": "Відповідь правильна!",
+        "other": "Відповідь правильна!"
+    },
+    "client.answerinput.failure": {
+        "one": "Відповідь не правильна!",
+        "other": "Відповідь не правильна!"
+    },
+    "client.press.gamepad": {
+        "one": "Натисніть квадратну кнопку",
+        "other": "Натисніть квадратну кнопку"
+    },
+    "client.press.keyboard": {
+        "one": "Натисніть кнопку E",
+        "other": "Натисніть кнопку E"
+    },
     "client.selectormanager.invalid-session-name": {
         "one": "Надано некоректну назву сесії",
         "other": "Надано некоректну назву сесії"

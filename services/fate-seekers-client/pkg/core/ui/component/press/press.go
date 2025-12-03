@@ -7,6 +7,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -36,9 +37,10 @@ type PressComponent struct {
 func (pc *PressComponent) SetPressType(value int) {
 	switch value {
 	case GAMEPAD:
-		pc.text.Label = "PRESS GAMEPAD"
+		pc.text.Label = translation.GetInstance().GetTranslation("client.press.gamepad")
+
 	case KEYBOARD:
-		pc.text.Label = "PRESS KEYBOARD"
+		pc.text.Label = translation.GetInstance().GetTranslation("client.press.keyboard")
 	}
 }
 

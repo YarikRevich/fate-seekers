@@ -184,6 +184,14 @@ type GenerationsRepositoryInsertOrUpdateRequest struct {
 	Active    bool
 }
 
+// AssociationsRepositoryInsertOrUpdateRequest represents associations repository entity update request.
+type AssociationsRepositoryInsertOrUpdateRequest struct {
+	ID           int64
+	SessionID    int64
+	GenerationID int64
+	Name         string
+}
+
 // LobbiesRepositoryInsertOrUpdateRequest represents lobbies repository entity update request.
 type LobbiesRepositoryInsertOrUpdateRequest struct {
 	UserID         int64

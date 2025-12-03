@@ -139,6 +139,14 @@
         "one": "Answer is incorrect!",
         "other": "Answer is incorrect!"
     },
+    "client.press.gamepad": {
+        "one": "Please press square button",
+        "other": "Please press square button"
+    },
+    "client.press.keyboard": {
+        "one": "Please press button E",
+        "other": "Please press button E"
+    },
     "client.selectormanager.invalid-session-name": {
         "one": "Provided session name is invalid",
         "other": "Provided session name is invalid"
