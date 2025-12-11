@@ -15,6 +15,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/cache"
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/events"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/utils"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository/converter"
 	"golang.org/x/exp/slices"
@@ -35,6 +36,8 @@ var (
 	ErrSessionAlreadyExists                 = errors.New("err happened session already exists")
 	ErrSessionAlreadyStarted                = errors.New("err happened session already started")
 	ErrSessionNotStarted                    = errors.New("err happened session has not been started yet")
+	ErrSessionChestLocationsNotEnough       = errors.New("err happened session chest locations don't fulfil min chests per session amount")
+	ErrSessionHealthPacksLocationsNotEnough = errors.New("err happened session health packs locations don't fulfil min health packs per session amount")
 	ErrFilteredSessionDoesNotExists         = errors.New("err happened filtered session does not exist")
 	ErrUserIsNotLobbyHost                   = errors.New("err happened user is not a host of a lobby")
 	ErrUserDoesNotOwnSession                = errors.New("err happened user does not own session")
@@ -542,6 +545,12 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 }
 
 func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSessionRequest) (*metadatav1.StartSessionResponse, error) {
+	// // 4. Determine count (Min of available positions or Max limit of 10)
+	// count := 10
+	// if len(availablePositions) < count {
+	// 	count = len(availablePositions)
+	// }
+
 	cache.
 		GetInstance().
 		BeginMetadataTransaction()
@@ -684,45 +693,20 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		return nil, ErrLobbiesAmountExceedsSpawnablesAmount
 	}
 
-	randomSpawnables := rand.Perm(len(request.GetSpawnables()))
-
-	err = db.GetInstance().Transaction(func(tx *gorm.DB) error {
-		for i, lobby := range lobbies {
-			spawnable := request.GetSpawnables()[randomSpawnables[i]]
-
-			fmt.Println(spawnable, "SPAWNABLE")
-
-			err = repository.
-				GetLobbiesRepository().
-				InsertOrUpdateWithTransaction(
-					tx,
-					dto.LobbiesRepositoryInsertOrUpdateRequest{
-						UserID:         lobby.UserID,
-						SessionID:      lobby.SessionID,
-						Skin:           uint64(lobby.Skin),
-						Health:         uint64(lobby.Health),
-						Active:         lobby.Active,
-						Eliminated:     lobby.Eliminated,
-						Host:           lobby.Host,
-						PositionX:      spawnable.GetX(),
-						PositionY:      spawnable.GetY(),
-						PositionStatic: lobby.PositionStatic,
-					})
-			if err != nil {
-				return ErrLobbyDoesNotExist
-			}
-
-			cache.GetInstance().EvictMetadata(lobby.UserEntity.Name)
-		}
-
-		return nil
-	})
-	if err != nil {
+	if len(request.GetChestLocations()) < config.GetOperationMinChestsAmount() {
 		cache.
 			GetInstance().
 			CommitMetadataTransaction()
 
-		return nil, err
+		return nil, ErrSessionChestLocationsNotEnough
+	}
+
+	if len(request.GetHealthPackLocations()) < config.GetOperationMinHealthPacksAmount() {
+		cache.
+			GetInstance().
+			CommitMetadataTransaction()
+
+		return nil, ErrSessionHealthPacksLocationsNotEnough
 	}
 
 	cache.
@@ -800,15 +784,110 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		GetInstance().
 		BeginUserSessionsTransaction()
 
-	err = repository.
-		GetSessionsRepository().
-		InsertOrUpdate(
-			dto.SessionsRepositoryInsertOrUpdateRequest{
-				ID:      request.GetSessionId(),
-				Name:    sessionName,
-				Issuer:  userID,
-				Started: true,
-			})
+	randomSpawnables := rand.Perm(len(request.GetSpawnables()))
+
+	err = db.GetInstance().Transaction(func(tx *gorm.DB) error {
+		chests := utils.GenerateChests(request.GetChestLocations(), sessionSeed)
+
+		for _, chest := range chests {
+			err = repository.
+				GetGenerationRepository().
+				InsertOrUpdateWithTransaction(tx, dto.GenerationsRepositoryInsertOrUpdateRequest{
+					SessionID: request.GetSessionId(),
+					Instance:  chest.Instance,
+					Name:      chest.Name,
+					Type:      repository.ChestGenerationType,
+					Active:    true,
+				})
+			if err != nil {
+				return err
+			}
+
+			var generation *entity.GenerationsEntity
+
+			generation, err = repository.
+				GetGenerationRepository().
+				GetChestTypeByInstanceAndSessionIDWithTransaction(tx, chest.Instance, request.GetSessionId())
+			if err != nil {
+				return err
+			}
+
+			for _, chestItem := range chest.ChestItems {
+				err = repository.
+					GetAssociationsRepository().
+					InsertOrUpdateWithTransaction(tx, dto.AssociationsRepositoryInsertOrUpdateRequest{
+						SessionID:    request.GetSessionId(),
+						GenerationID: generation.ID,
+						Instance:     chestItem.Instance,
+						Name:         chestItem.Name,
+					})
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		healthPacks := utils.GenerateHealthPacks(request.GetHealthPackLocations(), sessionSeed)
+
+		for _, healthPack := range healthPacks {
+			err = repository.
+				GetGenerationRepository().
+				InsertOrUpdateWithTransaction(tx, dto.GenerationsRepositoryInsertOrUpdateRequest{
+					SessionID: request.GetSessionId(),
+					Instance:  healthPack.Instance,
+					Name:      healthPack.Name,
+					Type:      repository.HealthPackGenerationType,
+					Active:    true,
+				})
+			if err != nil {
+				return err
+			}
+		}
+
+		for i, lobby := range lobbies {
+			spawnable := request.GetSpawnables()[randomSpawnables[i]]
+
+			fmt.Println(spawnable, "SPAWNABLE")
+
+			err = repository.
+				GetLobbiesRepository().
+				InsertOrUpdateWithTransaction(
+					tx,
+					dto.LobbiesRepositoryInsertOrUpdateRequest{
+						UserID:         lobby.UserID,
+						SessionID:      lobby.SessionID,
+						Skin:           uint64(lobby.Skin),
+						Health:         uint64(lobby.Health),
+						Active:         lobby.Active,
+						Eliminated:     lobby.Eliminated,
+						Host:           lobby.Host,
+						PositionX:      spawnable.GetX(),
+						PositionY:      spawnable.GetY(),
+						PositionStatic: lobby.PositionStatic,
+					})
+			if err != nil {
+				return ErrLobbyDoesNotExist
+			}
+
+			cache.GetInstance().EvictMetadata(lobby.UserEntity.Name)
+		}
+
+		err = repository.
+			GetSessionsRepository().
+			InsertOrUpdateWithTransaction(
+				tx,
+				dto.SessionsRepositoryInsertOrUpdateRequest{
+					ID:      request.GetSessionId(),
+					Name:    sessionName,
+					Issuer:  userID,
+					Started: true,
+				})
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
 		cache.
 			GetInstance().
@@ -836,16 +915,6 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 	cache.
 		GetInstance().
 		CommitLobbySetTransaction()
-
-	fmt.Println(sessionSeed)
-
-	// TODO: replace with the generation based on the provided available positions.
-
-	// chests := utils.GenerateChestPositions(sessionSeed)
-
-	// healthPacks := utils.GenerateHealthPackPositions(sessionSeed)
-
-	// fmt.Println(chests, len(chests), healthPacks, len(healthPacks))
 
 	session, _, err := repository.
 		GetSessionsRepository().
@@ -1915,92 +1984,198 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 }
 
 func (h *Handler) GetChests(request *metadatav1.GetChestsRequest, stream grpc.ServerStreamingServer[metadatav1.GetChestsResponse]) error {
-	return nil
+	response := new(metadatav1.GetChestsResponse)
 
-	// response := new(metadatav1.GetEventsResponse)
+	ticker := time.NewTicker(getEventsFrequency)
 
-	// ticker := time.NewTicker(getEventsFrequency)
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
 
-	// var sessionName string
+	cachedSession, ok := cache.
+		GetInstance().
+		GetSessions(request.GetSessionId())
 
-	// cache.
-	// 	GetInstance().
-	// 	BeginSessionsTransaction()
+	if !ok {
+		session, exists, err := repository.
+			GetSessionsRepository().
+			GetByID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
 
-	// cachedSession, ok := cache.
-	// 	GetInstance().
-	// 	GetSessions(request.GetSessionId())
+			return err
+		}
 
-	// if !ok {
-	// 	session, exists, err := repository.
-	// 		GetSessionsRepository().
-	// 		GetByID(request.GetSessionId())
-	// 	if err != nil {
-	// 		cache.
-	// 			GetInstance().
-	// 			CommitSessionsTransaction()
+		if !exists {
+			return ErrSessionDoesNotExists
+		}
 
-	// 		return err
-	// 	}
+		if !session.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
 
-	// 	if !exists {
-	// 		return ErrSessionDoesNotExists
-	// 	}
+			return ErrSessionNotStarted
+		}
 
-	// 	if !session.Started {
-	// 		cache.
-	// 			GetInstance().
-	// 			CommitSessionsTransaction()
+		cache.
+			GetInstance().
+			AddSessions(
+				request.GetSessionId(),
+				converter.ConvertSessionEntityToCacheSessionEntity(session))
+	} else {
+		if !cachedSession.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
 
-	// 		return ErrSessionNotStarted
-	// 	}
+			return ErrSessionNotStarted
+		}
+	}
 
-	// 	sessionName = session.Name
+	for {
+		select {
+		case <-ticker.C:
+			ticker.Stop()
 
-	// 	cache.
-	// 		GetInstance().
-	// 		AddSessions(
-	// 			request.GetSessionId(),
-	// 			converter.ConvertSessionEntityToCacheSessionEntity(session))
-	// } else {
-	// 	if !cachedSession.Started {
-	// 		cache.
-	// 			GetInstance().
-	// 			CommitSessionsTransaction()
+			response.Chests = response.Chests[:0]
 
-	// 		return ErrSessionNotStarted
-	// 	}
+			chests, err := repository.
+				GetGenerationRepository().
+				GetChestTypeBySessionID(request.GetSessionId())
+			if err != nil {
+				return err
+			}
 
-	// 	sessionName = cachedSession.Name
-	// }
+			for _, chest := range chests {
+				var chestItems []*metadatav1.ChestItem
 
-	// for {
-	// 	select {
-	// 	case <-ticker.C:
-	// 		ticker.Stop()
+				associations, err := repository.
+					GetAssociationsRepository().
+					GetByGenerationID(chest.ID)
+				if err != nil {
+					return err
+				}
 
-	// 		response.Name = ""
+				for _, association := range associations {
+					chestItems = append(chestItems, &metadatav1.ChestItem{
+						ChestItemId: association.ID,
+						Name:        association.Name,
+					})
+				}
 
-	// 		sessionEvent, ok := events.GetSessionEvents()[sessionName]
-	// 		if ok {
-	// 			response.Name = sessionEvent.Name
-	// 		}
+				response.Chests = append(response.Chests, &metadatav1.Chest{
+					ChestId: chest.ID,
+					Active:  chest.Active,
+					Position: &metadatav1.Position{
+						X: chest.PositionX,
+						Y: chest.PositionY,
+					},
+					ChestItems: chestItems,
+				})
+			}
 
-	// 		err := stream.Send(response)
-	// 		if err != nil {
-	// 			return err
-	// 		}
+			err = stream.Send(response)
+			if err != nil {
+				return err
+			}
 
-	// 		ticker.Reset(getEventsFrequency)
-	// 	case <-stream.Context().Done():
-	// 		return nil
-	// 	}
-	// }
+			ticker.Reset(getEventsFrequency)
+		case <-stream.Context().Done():
+			return nil
+		}
+	}
 }
 
 func (h *Handler) GetHealthPacks(request *metadatav1.GetHealthPacksRequest, stream grpc.ServerStreamingServer[metadatav1.GetHealthPacksResponse]) error {
+	response := new(metadatav1.GetHealthPacksResponse)
 
-	return nil
+	ticker := time.NewTicker(getEventsFrequency)
+
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
+
+	cachedSession, ok := cache.
+		GetInstance().
+		GetSessions(request.GetSessionId())
+
+	if !ok {
+		session, exists, err := repository.
+			GetSessionsRepository().
+			GetByID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return err
+		}
+
+		if !exists {
+			return ErrSessionDoesNotExists
+		}
+
+		if !session.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return ErrSessionNotStarted
+		}
+
+		cache.
+			GetInstance().
+			AddSessions(
+				request.GetSessionId(),
+				converter.ConvertSessionEntityToCacheSessionEntity(session))
+	} else {
+		if !cachedSession.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return ErrSessionNotStarted
+		}
+	}
+
+	for {
+		select {
+		case <-ticker.C:
+			ticker.Stop()
+
+			response.HealthPacks = response.HealthPacks[:0]
+
+			healthPacks, err := repository.
+				GetGenerationRepository().
+				GetHealthPackTypeBySessionID(request.GetSessionId())
+			if err != nil {
+				return err
+			}
+
+			for _, healthPack := range healthPacks {
+				response.HealthPacks = append(response.HealthPacks, &metadatav1.HealthPack{
+					HealthPackId: healthPack.ID,
+					Active:       healthPack.Active,
+					Position: &metadatav1.Position{
+						X: healthPack.PositionX,
+						Y: healthPack.PositionY,
+					},
+				})
+			}
+
+			err = stream.Send(response)
+			if err != nil {
+				return err
+			}
+
+			ticker.Reset(getEventsFrequency)
+		case <-stream.Context().Done():
+			return nil
+		}
+	}
 }
 
 func (h *Handler) GetEvents(request *metadatav1.GetEventsRequest, stream grpc.ServerStreamingServer[metadatav1.GetEventsResponse]) error {

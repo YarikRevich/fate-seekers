@@ -45,6 +45,8 @@ const (
 	SET_UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_ACTION = "SET_UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_ACTION"
 	SET_EVENT_RETRIEVAL_STARTED_NETWORKING_ACTION                = "SET_EVENT_RETRIEVAL_STARTED_NETWORKING_ACTION"
 	SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION       = "SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION"
+	SET_CHESTS_RETRIEVAL_STARTED_NETWORKING_ACTION               = "SET_CHESTS_RETRIEVAL_STARTED_NETWORKING_ACTION"
+	SET_HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_ACTION         = "SET_HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_ACTION"
 )
 
 // Describes all the available state actions for letter reducer.
@@ -316,6 +318,22 @@ func NewSetUpdateUserMetadataPositionsStartedNetworking(value string) godux.Acti
 func NewSetUsersMetadataRetrievalStartedNetworking(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetChestsRetrievalStartedNetworking creates new set chests retrieval started networking action.
+func NewSetChestsRetrievalStartedNetworking(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_CHESTS_RETRIEVAL_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetHealthPacksRetrievalStartedNetworking creates new set health packs retrieval started networking action.
+func NewSetHealthPacksRetrievalStartedNetworking(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_ACTION,
 		Value: value,
 	}
 }

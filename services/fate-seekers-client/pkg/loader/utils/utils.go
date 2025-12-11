@@ -13,19 +13,27 @@ import (
 )
 
 // PerformLoadMap loads map to different renderer levels calling callback when it ends.
-func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables []dto.Position)) {
+func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables, chestLocations, healthPackLocations []dto.Position)) {
 	go func() {
-		var spawnables []dto.Position
+		var (
+			spawnables          []dto.Position
+			chestLocations      []dto.Position
+			healthPackLocations []dto.Position
+		)
 
 		for _, layer := range tilemap.Layers {
 			layerTiles,
 				spawnableTiles,
+				chestTiles,
+				healthPackTiles,
 				collidableTiles,
 				soundableTiles,
 				selectableTiles := loader.GetMapLayerTiles(
 				layer, tilemap.Height, tilemap.Width, tilemap.TileHeight, tilemap.TileWidth)
 
 			spawnables = append(spawnables, spawnableTiles...)
+			chestLocations = append(spawnables, chestTiles...)
+			healthPackLocations = append(spawnables, healthPackTiles...)
 
 			for _, soundableTile := range soundableTiles {
 				sounder.GetInstance().AddSoundableTileObject(soundableTile)
@@ -41,7 +49,7 @@ func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables []dto.Position)
 
 			layerTiles.Reverse(func(key float64, tiles []*dto.ProcessedTile) bool {
 				for _, value := range tiles {
-					name := uuid.New().String()
+					name := uuid.NewString()
 
 					switch layer.Name {
 					case loader.FirstMapThirdLayer:
@@ -61,6 +69,6 @@ func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables []dto.Position)
 			})
 		}
 
-		callback(spawnables)
+		callback(spawnables, chestLocations, healthPackLocations)
 	}()
 }

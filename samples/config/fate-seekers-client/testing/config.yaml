@@ -34,7 +34,7 @@ settings:
     music: 0
 
     # Represents FX level property.
-    fx: 50
+    fx: 0
 
 # Represents sector used for internal operation properties. 
 operation:
@@ -62,3 +62,5 @@ operation:
 
     # Represents output file directory.
     directory: "log"
+
+

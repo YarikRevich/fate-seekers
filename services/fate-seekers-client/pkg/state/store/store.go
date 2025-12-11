@@ -189,6 +189,20 @@ func GetUsersMetadataRetrievalStartedNetworking() string {
 	return instance.GetState(networking.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
 }
 
+// GetChestsRetrievalStartedNetworking retrieves chests retrieval started networking state value.
+func GetChestsRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.CHESTS_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetHealthPacksRetrievalStartedNetworking retrieves health packs retrieval started networking state value.
+func GetHealthPacksRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
 // GetLetterUpdated retrieves letter updated state value.
 func GetLetterUpdated() string {
 	instance := GetInstance()

@@ -179,6 +179,7 @@ type SessionsRepositoryGetByFiltersRequest struct {
 type GenerationsRepositoryInsertOrUpdateRequest struct {
 	ID        int64
 	SessionID int64
+	Instance  string
 	Name      string
 	Type      string
 	Active    bool
@@ -189,6 +190,7 @@ type AssociationsRepositoryInsertOrUpdateRequest struct {
 	ID           int64
 	SessionID    int64
 	GenerationID int64
+	Instance     string
 	Name         string
 }
 
@@ -255,7 +257,34 @@ type CacheGenerationsEntity struct {
 	Active    bool
 }
 
+// CacheAssociationsEntity represent associations entity used by global networking cache.
+type CacheAssociationsEntity struct {
+	ID   int64
+	Name string
+}
+
 // Position represents a set of coordinates.
 type Position struct {
 	X, Y int
+}
+
+// ChestItem represents chest item.
+type ChestItem struct {
+	Instance string
+	Name     string
+}
+
+// GeneratedChest represents generated chest.
+type GeneratedChest struct {
+	Instance   string
+	Position   Position
+	Name       string
+	ChestItems []ChestItem
+}
+
+// GeneratedHealthPack represents generated health pack.
+type GeneratedHealthPack struct {
+	Instance string
+	Position Position
+	Name     string
 }

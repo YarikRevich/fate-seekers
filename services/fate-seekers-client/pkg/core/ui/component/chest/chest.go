@@ -12,8 +12,6 @@ import (
 
 // NewChestComponent creates new session chest component.
 func NewChestComponent() *widget.Container {
-	//
-
 	result := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(400, 300)),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.TrackHover(false)),

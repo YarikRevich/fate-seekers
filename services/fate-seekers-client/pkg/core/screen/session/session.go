@@ -1,6 +1,7 @@
 package session
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -388,6 +389,34 @@ func (ss *SessionScreen) HandleInput() error {
 						movableUnit.TriggerNormalHit()
 					}
 
+					return false
+				})
+		})
+	}
+
+	if store.GetChestsRetrievalStartedNetworking() == value.CHESTS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetChestsRetrievalStartedNetworking(
+				value.CHESTS_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE))
+
+		metadatastream.GetGetChestsSubmitter().Clean(func() {
+			metadatastream.GetGetChestsSubmitter().Submit(
+				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetChestsResponse, err error) bool {
+					fmt.Println(response.GetChests(), err, "CHESTS")
+
+					return false
+				})
+		})
+	}
+
+	if store.GetHealthPacksRetrievalStartedNetworking() == value.HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetHealthPacksRetrievalStartedNetworking(
+				value.HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE))
+
+		metadatastream.GetGetHealthPacksSubmitter().Clean(func() {
+			metadatastream.GetGetHealthPacksSubmitter().Submit(
+				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetHealthPacksResponse, err error) bool {
 					return false
 				})
 		})

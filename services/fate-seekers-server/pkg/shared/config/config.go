@@ -41,11 +41,10 @@ var (
 	operationDebug bool
 
 	operationMaxSessionsAmount,
-	operationGenerationAreaWidth,
-	operationGenerationAreaHeight,
-	operationGenerationMaxRadius,
 	operationMaxChestsAmount,
-	operationMaxHealthPacksAmount int
+	operationMinChestsAmount,
+	operationMaxHealthPacksAmount,
+	operationMinHealthPacksAmount int
 
 	databaseName                 string
 	databaseConnectionRetryDelay time.Duration
@@ -106,6 +105,9 @@ const (
 
 	// Max types of session health packs.
 	MAX_SESSION_HEALTH_PACK_TYPES = 3
+
+	// Max chest items to be generated per chest.
+	MAX_CHEST_ITEMS_PER_CHEST = 6
 )
 
 const (
@@ -199,11 +201,10 @@ func Init() {
 
 	operationDebug = viper.GetBool("operation.debug")
 	operationMaxSessionsAmount = viper.GetInt("operation.max-sessions-amount")
-	operationGenerationAreaWidth = viper.GetInt("operation.generation.area-width")
-	operationGenerationAreaHeight = viper.GetInt("operation.generation.area-height")
-	operationGenerationMaxRadius = viper.GetInt("operation.generation.max-radius")
 	operationMaxChestsAmount = viper.GetInt("operation.max-chests-amount")
+	operationMinChestsAmount = viper.GetInt("operation.min-chests-amount")
 	operationMaxHealthPacksAmount = viper.GetInt("operation.max-health-packs-amount")
+	operationMinHealthPacksAmount = viper.GetInt("operation.min-health-packs-amount")
 	databaseName = viper.GetString("database.name")
 	databaseConnectionRetryDelay = viper.GetDuration("database.connection-retry-delay")
 	loggingLevel = viper.GetString("logging.level")
@@ -315,24 +316,20 @@ func GetOperationMaxSessionsAmount() int {
 	return operationMaxSessionsAmount
 }
 
-func GetOperationGenerationAreaWidth() int {
-	return operationGenerationAreaWidth
-}
-
-func GetOperationGenerationAreaHeight() int {
-	return operationGenerationAreaHeight
-}
-
-func GetOperationGenerationMaxRadius() int {
-	return operationGenerationMaxRadius
-}
-
 func GetOperationMaxChestsAmount() int {
 	return operationMaxChestsAmount
 }
 
+func GetOperationMinChestsAmount() int {
+	return operationMinChestsAmount
+}
+
 func GetOperationMaxHealthPacksAmount() int {
 	return operationMaxHealthPacksAmount
+}
+
+func GetOperationMinHealthPacksAmount() int {
+	return operationMinHealthPacksAmount
 }
 
 func GetDatabaseName() string {

@@ -22,6 +22,7 @@ CREATE TABLE sessions (
 CREATE TABLE generations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id INTEGER NOT NULL,
+    instance TEXT NOT NULL,
     name TEXT NOT NULL,
     type TEXT NOT NULL,
     active BOOLEAN NOT NULL,
@@ -39,6 +40,7 @@ CREATE TABLE associations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id INTEGER NOT NULL,
     generation_id INTEGER NOT NULL,
+    instance TEXT NOT NULL,
     name TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE

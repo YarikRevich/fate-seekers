@@ -40,9 +40,16 @@ var (
 	GetUsersRepository = sync.OnceValue[UsersRepository](createUsersRepository)
 )
 
+// Describes all the available generation types.
+const (
+	ChestGenerationType      = "chest"
+	HealthPackGenerationType = "health_pack"
+)
+
 // SessionsRepository represents sessions entity repository.
 type SessionsRepository interface {
 	InsertOrUpdate(request dto.SessionsRepositoryInsertOrUpdateRequest) error
+	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.SessionsRepositoryInsertOrUpdateRequest) error
 	DeleteByID(id int64) error
 	GetByID(id int64) (*entity.SessionEntity, bool, error)
 	GetByIssuer(issuer int64) ([]*entity.SessionEntity, error)
@@ -57,10 +64,8 @@ type sessionsRepositoryImpl struct {
 }
 
 // InsertOrUpdate inserts or updates new sessions entity to the storage or updates existing ones.
-func (w *sessionsRepositoryImpl) InsertOrUpdate(request dto.SessionsRepositoryInsertOrUpdateRequest) error {
+func (w *sessionsRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.SessionsRepositoryInsertOrUpdateRequest) error {
 	w.mu.Lock()
-
-	instance := db.GetInstance()
 
 	err := instance.Clauses(clause.OnConflict{
 		Columns: []clause.Column{
@@ -85,6 +90,16 @@ func (w *sessionsRepositoryImpl) InsertOrUpdate(request dto.SessionsRepositoryIn
 	w.mu.Unlock()
 
 	return nil
+}
+
+// InsertOrUpdate inserts new session entity to the storage or updates existing ones.
+func (w *sessionsRepositoryImpl) InsertOrUpdate(request dto.SessionsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(db.GetInstance(), request)
+}
+
+// InsertOrUpdateWithTransaction inserts new session entity to the storage or updates existing ones with provided transaction.
+func (w *sessionsRepositoryImpl) InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.SessionsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(transaction, request)
 }
 
 // DeleteByID deletes session by the provided id.
@@ -217,8 +232,11 @@ func createSessionsRepository() SessionsRepository {
 
 // GenerationsRepository represents generations entity repository.
 type GenerationsRepository interface {
-	InsertOrUpdate(request dto.GenerationsRepositoryInsertOrUpdateRequest) error
-	GetBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error)
+	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.GenerationsRepositoryInsertOrUpdateRequest) error
+	GetChestTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error)
+	GetChestTypeByInstanceAndSessionIDWithTransaction(
+		transaction *gorm.DB, instance string, sessionID int64) (*entity.GenerationsEntity, error)
+	GetHealthPackTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error)
 }
 
 // generationsRepositoryImpl represents implementation of GenerationsRepository.
@@ -227,13 +245,12 @@ type generationsRepositoryImpl struct {
 	mu sync.RWMutex
 }
 
-// InsertOrUpdate inserts new generations entity to the storage or updates existing ones.
-func (w *generationsRepositoryImpl) InsertOrUpdate(request dto.GenerationsRepositoryInsertOrUpdateRequest) error {
+// InsertOrUpdateWithTransaction inserts new generations entity to the storage or updates existing ones with transaction.
+func (w *generationsRepositoryImpl) InsertOrUpdateWithTransaction(
+	transaction *gorm.DB, request dto.GenerationsRepositoryInsertOrUpdateRequest) error {
 	w.mu.Lock()
 
-	instance := db.GetInstance()
-
-	err := instance.Clauses(clause.OnConflict{
+	err := transaction.Clauses(clause.OnConflict{
 		Columns: []clause.Column{
 			{Name: "id"},
 		},
@@ -259,8 +276,8 @@ func (w *generationsRepositoryImpl) InsertOrUpdate(request dto.GenerationsReposi
 	return nil
 }
 
-// GetBySessionID retrieves all available generations for the provided session id.
-func (w *generationsRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error) {
+// GetChestTypeBySessionID retrieves all available generations of chest type for the provided session id.
+func (w *generationsRepositoryImpl) GetChestTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error) {
 	w.mu.RLock()
 
 	instance := db.GetInstance()
@@ -268,7 +285,41 @@ func (w *generationsRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.G
 	var result []*entity.GenerationsEntity
 
 	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
-		Where("session_id = ?", sessionID).
+		Where("session_id = ? AND type = ?", sessionID, ChestGenerationType).
+		Find(&result).Error
+
+	w.mu.RUnlock()
+
+	return result, err
+}
+
+// GetChestTypeByInstanceAndSessionIDWithTransaction retrieves all available generations of chest
+// type for the provided instance and session id.
+func (w *generationsRepositoryImpl) GetChestTypeByInstanceAndSessionIDWithTransaction(
+	transaction *gorm.DB, instance string, sessionID int64) (*entity.GenerationsEntity, error) {
+	w.mu.RLock()
+
+	var result *entity.GenerationsEntity
+
+	err := transaction.Table((&entity.GenerationsEntity{}).TableName()).
+		Where("instance ? AND session_id = ? AND type = ?", instance, sessionID, ChestGenerationType).
+		Find(&result).Error
+
+	w.mu.RUnlock()
+
+	return result, err
+}
+
+// GetHealthPackTypeBySessionID retrieves all available generations of health pack type for the provided session id.
+func (w *generationsRepositoryImpl) GetHealthPackTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var result []*entity.GenerationsEntity
+
+	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
+		Where("session_id = ? AND type = ?", sessionID, HealthPackGenerationType).
 		Find(&result).Error
 
 	w.mu.RUnlock()
@@ -283,7 +334,7 @@ func createGenerationsRepository() GenerationsRepository {
 
 // AssociationsRepository represents associations entity repository.
 type AssociationsRepository interface {
-	InsertOrUpdate(request dto.AssociationsRepositoryInsertOrUpdateRequest) error
+	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.AssociationsRepositoryInsertOrUpdateRequest) error
 	GetByGenerationID(generationID int64) ([]*entity.AssociationsEntity, error)
 }
 
@@ -293,13 +344,12 @@ type associationsRepositoryImpl struct {
 	mu sync.RWMutex
 }
 
-// InsertOrUpdate inserts new associations entity to the storage or updates existing ones.
-func (w *associationsRepositoryImpl) InsertOrUpdate(request dto.AssociationsRepositoryInsertOrUpdateRequest) error {
+// InsertOrUpdateWithTransaction inserts new associations entity to the storage or updates existing ones.
+func (w *associationsRepositoryImpl) InsertOrUpdateWithTransaction(
+	transaction *gorm.DB, request dto.AssociationsRepositoryInsertOrUpdateRequest) error {
 	w.mu.Lock()
 
-	instance := db.GetInstance()
-
-	err := instance.Create(&entity.AssociationsEntity{
+	err := transaction.Create(&entity.AssociationsEntity{
 		ID:           request.ID,
 		SessionID:    request.SessionID,
 		GenerationID: request.GenerationID,

@@ -53,20 +53,17 @@ operation:
   # Be aware that amount of chests influences the amount of allocated memory.
   max-chests-amount: 20
 
+  # Represents min chests amount, which is used for caching and object generation configuration. 
+  # Be aware that amount of chests influences the amount of allocated memory.
+  min-chests-amount: 10
+
   # Represents max sessions amount, which is used for caching and object generation configuration. 
   # Be aware that amount of health packs influences the amount of allocated memory.
   max-health-packs-amount: 15
 
-  # Represents sector used for generation properties.
-  generation:
-    # Represents item generation area width value. Should be equal to the map width value.
-    area-width: 1000
-
-    # Represents item generation area height value. Should be equal to the map height value.
-    area-height: 1000
-
-    # Represents item generation max radius value. Limits distance between generated items.
-    max-radius: 90
+  # Represents min sessions amount, which is used for caching and object generation configuration. 
+  # Be aware that amount of health packs influences the amount of allocated memory.
+  min-health-packs-amount: 5
 
   # Represents database properties description.
   database:

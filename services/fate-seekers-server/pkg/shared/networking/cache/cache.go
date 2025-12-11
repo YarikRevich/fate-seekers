@@ -62,6 +62,12 @@ type NetworkingCache struct {
 
 	// Represents mutex used for generations related transactions.
 	generationsMutex sync.Mutex
+
+	// Represents associations cache instance.
+	associations *lru.Cache[string, []*dto.CacheAssociationsEntity]
+
+	// Represents mutex used for associations related transactions.
+	associationsMutex sync.Mutex
 }
 
 // BeginSessionsTransaction begins sessions cache instance transaction.
@@ -298,7 +304,14 @@ func newNetworkingCache() *NetworkingCache {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
-	generations, err := lru.New[string, []*dto.CacheGenerationsEntity](config.GetOperationMaxSessionsAmount())
+	generations, err := lru.New[string, []*dto.CacheGenerationsEntity](
+		config.GetOperationMaxSessionsAmount() * config.GetOperationMaxChestsAmount())
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
+	associations, err := lru.New[string, []*dto.CacheAssociationsEntity](
+		config.GetOperationMaxSessionsAmount() * config.GetOperationMaxHealthPacksAmount())
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
 	}
@@ -312,5 +325,6 @@ func newNetworkingCache() *NetworkingCache {
 		messages:     messages,
 		users:        users,
 		generations:  generations,
+		associations: associations,
 	}
 }

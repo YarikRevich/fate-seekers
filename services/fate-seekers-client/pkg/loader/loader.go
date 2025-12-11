@@ -62,10 +62,12 @@ const (
 
 // Describes available tilemap properties
 const (
-	TilemapCollidableProperty = "collidable"
-	TilemapSoundProperty      = "sound"
-	TilemapSpawnableProperty  = "spawnable"
-	TilemapSelectableProperty = "selectable"
+	TilemapCollidableProperty         = "collidable"
+	TilemapSoundProperty              = "sound"
+	TilemapSpawnableProperty          = "spawnable"
+	TilemapSelectableProperty         = "selectable"
+	TilemapChestLocationProperty      = "chest_location"
+	TilemapHealthPackLocationProperty = "health_pack_location"
 )
 
 // Describes all the available statics to be loaded.
@@ -239,12 +241,16 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) (
 	*btree.Map[float64, []*dto.ProcessedTile],
 	[]dto.Position,
+	[]dto.Position,
+	[]dto.Position,
 	[]*dto.CollidableTile,
 	[]*dto.SoundableTile,
 	[]*dto.SelectableTile) {
 	var (
 		result      = btree.NewMap[float64, []*dto.ProcessedTile](32)
 		spawnables  []dto.Position
+		chests      []dto.Position
+		healthPacks []dto.Position
 		collidables []*dto.CollidableTile
 		soundables  []*dto.SoundableTile
 		selected    []*dto.SelectableTile
@@ -318,6 +324,16 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 							TileHeight: tileHeight,
 						})
 					}
+
+					chestProperty := tile.Properties.GetBool(TilemapChestLocationProperty)
+					if chestProperty {
+						chests = append(chests, position)
+					}
+
+					healthPackProperty := tile.Properties.GetBool(TilemapHealthPackLocationProperty)
+					if healthPackProperty {
+						healthPacks = append(healthPacks, position)
+					}
 				}
 			}
 
@@ -336,7 +352,7 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 		}
 	}
 
-	return result, spawnables, collidables, soundables, selected
+	return result, spawnables, chests, healthPacks, collidables, soundables, selected
 }
 
 // getMapTileImage reads cropped tile from the provided tilemap and the provided tile dimension.

@@ -56,9 +56,12 @@ func (s *SessionEntity) BeforeCreate(tx *gorm.DB) error {
 type GenerationsEntity struct {
 	ID            int64         `gorm:"column:id;primaryKey;auto_increment;not null"`
 	SessionID     int64         `gorm:"column:session_id;not null"`
+	Instance      string        `gorm:"column:instance;not null"`
 	Name          string        `gorm:"column:name;not null"`
 	Type          string        `gorm:"column:type;not null"`
 	Active        bool          `gorm:"column:active;not null"`
+	PositionX     float64       `gorm:"column:position_x;not null"`
+	PositionY     float64       `gorm:"column:position_y;not null"`
 	CreatedAt     time.Time     `gorm:"column:created_at;autoCreateTime"`
 	SessionEntity SessionEntity `gorm:"foreignKey:SessionID;references:ID"`
 }
@@ -78,6 +81,7 @@ type AssociationsEntity struct {
 	ID                int64             `gorm:"column:id;primaryKey;auto_increment;not null"`
 	SessionID         int64             `gorm:"column:session_id;not null"`
 	GenerationID      int64             `gorm:"column:generation_id;not null"`
+	Instance          string            `gorm:"column:instance;not null"`
 	Name              string            `gorm:"column:name;not null"`
 	CreatedAt         time.Time         `gorm:"column:created_at;autoCreateTime"`
 	SessionEntity     SessionEntity     `gorm:"foreignKey:SessionID;references:ID"`

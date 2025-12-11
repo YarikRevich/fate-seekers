@@ -249,10 +249,35 @@ message GetUsersMetadataResponse {
     repeated UserMetadata user_metadata = 1;
 };
 
+// Position represents common position message.
+message Position {
+    double x = 1;
+    double y = 2;
+};
+
 // GetChestsRequest represents chests retrieval request message.
 message GetChestsRequest {
     int64 session_id = 1;
     string issuer = 2 [(buf.validate.field).string.uuid = true];
+};
+
+// ChestItem represents chest item message.
+message ChestItem {
+    int64 chest_item_id = 1;
+    string name = 2;
+};
+
+// Chest represents chest message.
+message Chest {
+    int64 chest_id = 1;
+    Position position = 2;
+    bool active = 3;
+    repeated ChestItem chest_items = 4;
+};
+
+// GetChestsResponse represents chests retrieval response streaming message.
+message GetChestsResponse {
+    repeated Chest chests = 1;
 };
 
 // GetHealthPacksRequest represents health packs retrieval request message.
@@ -261,26 +286,16 @@ message GetHealthPacksRequest {
     string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
 
-// Position represents common position message.
-message Position {
-    double x = 1;
-    double y = 2;
-};
-
-// GetChestsResponse represents chests retrieval response streaming message.
-message GetChestsResponse {
-    repeated Position positions = 1;
-};
-
 // HealthPack represents health pack message.
 message HealthPack {
-    Position position = 1;
-    int64 type = 2;
+    int64 health_pack_id = 1;
+    Position position = 2;
+    bool active = 3;
 };
 
 // GetHealthPacksResponse represents health packs retrieval response streaming message.
 message GetHealthPacksResponse {
-    repeated HealthPack packs = 1;
+    repeated HealthPack healthPacks = 1;
 };
 
 // GetEventsRequest represents event retrieval request message.
