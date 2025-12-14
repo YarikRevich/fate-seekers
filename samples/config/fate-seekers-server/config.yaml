@@ -22,6 +22,9 @@ settings:
   
   # Represents sector used for monitoring settings description.
   monitoring:
+    # Rerpesents a toggle button to enable server monitoring.
+    enabled: true
+
     # Represents sector used for Grafana properties.
     grafana:
       # Represents a name property used for Grafana container creation.

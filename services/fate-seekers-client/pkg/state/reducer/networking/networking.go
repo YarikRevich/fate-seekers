@@ -23,6 +23,7 @@ const (
 	UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_STATE = "update_user_metadata_positions_started_networking_state"
 	EVENT_RETRIEVAL_STARTED_NETWORKING_STATE                = "event_retrieval_started"
 	USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE       = "users_metadata_retrieval_started"
+	USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_STATE       = "user_inventory_retrieval_started"
 	CHESTS_RETRIEVAL_STARTED_NETWORKING_STATE               = "chests_retrieval_started"
 	HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_STATE         = "health_packs_retrieval_started"
 )
@@ -64,6 +65,9 @@ func (nsr *NetworkingStateReducer) Init() {
 	nsr.store.SetState(
 		USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE,
 		value.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE)
+	nsr.store.SetState(
+		USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_STATE,
+		value.USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE)
 	nsr.store.SetState(
 		CHESTS_RETRIEVAL_STARTED_NETWORKING_STATE,
 		value.CHESTS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE)
@@ -139,6 +143,11 @@ func (nsr *NetworkingStateReducer) GetProcessor() func(value godux.Action) inter
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{
 					Key: USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE, Value: value.Value})
+
+		case action.SET_USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_STATE, Value: value.Value})
 
 		case action.SET_CHESTS_RETRIEVAL_STARTED_NETWORKING_ACTION:
 			return dto.ComposeReducerResult(

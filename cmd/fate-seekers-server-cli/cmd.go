@@ -14,5 +14,3 @@ func init() {
 func main() {
 	command.Init()
 }
-
-// TODO: make monitoring start based on config properties and during a laucn

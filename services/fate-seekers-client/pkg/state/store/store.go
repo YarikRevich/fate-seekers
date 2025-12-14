@@ -189,6 +189,13 @@ func GetUsersMetadataRetrievalStartedNetworking() string {
 	return instance.GetState(networking.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
 }
 
+// GetUserInventoryRetrievalStartedNetworking retrieves user inventory retrieval started networking state value.
+func GetUserInventoryRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
 // GetChestsRetrievalStartedNetworking retrieves chests retrieval started networking state value.
 func GetChestsRetrievalStartedNetworking() string {
 	instance := GetInstance()

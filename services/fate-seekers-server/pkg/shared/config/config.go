@@ -31,6 +31,7 @@ var (
 
 	settingsParsedNetworkingEncryptionKey []byte
 
+	settingsMonitoringEnabled                                       bool
 	settingsMonitoringGrafanaName, settingsMonitoringPrometheusName string
 
 	settingsSoundFX  int
@@ -124,6 +125,7 @@ func SetupDefaultConfig() {
 	viper.SetDefault("settings.window.height", 1080)
 	viper.SetDefault("settings.networking.server.port", "8090")
 	viper.SetDefault("settings.networking.encryption.key", "")
+	viper.SetDefault("settings.monitoring.enabled", true)
 	viper.SetDefault("settings.monitoring.grafana.name", "fate-seekers-server-grafana")
 	viper.SetDefault("settings.monitoring.prometheus.name", "fate-seekers-server-prometheus")
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
@@ -181,6 +183,7 @@ func Init() {
 			zap.String("settingsNetworkingEncryptionKey", settingsNetworkingEncryptionKey))
 	}
 
+	settingsMonitoringEnabled = viper.GetBool("settings.monitoring.enabled")
 	settingsMonitoringGrafanaName = viper.GetString("settings.monitoring.grafana.name")
 	settingsMonitoringPrometheusName = viper.GetString("settings.monitoring.prometheus.name")
 	settingsSoundFX = viper.GetInt("settings.sound.fx")
@@ -267,6 +270,10 @@ func GetSettingsNetworkingEncryptionKey() string {
 
 func GetSettingsParsedNetworkingEncryptionKey() []byte {
 	return settingsParsedNetworkingEncryptionKey
+}
+
+func GetSettingsMonitoringEnabled() bool {
+	return settingsMonitoringEnabled
 }
 
 func GetSettingsMonitoringGrafanaName() string {

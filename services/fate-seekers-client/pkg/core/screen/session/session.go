@@ -394,6 +394,21 @@ func (ss *SessionScreen) HandleInput() error {
 		})
 	}
 
+	if store.GetUserInventoryRetrievalStartedNetworking() == value.USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE {
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetUserInventoryRetrievalStartedNetworking(
+				value.USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE))
+
+		metadatastream.GetGetUserInventorySubmitter().Clean(func() {
+			metadatastream.GetGetUserInventorySubmitter().Submit(
+				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetUserInventoryResponse, err error) bool {
+					fmt.Println(response.GetUserInventoryItems(), err, "INVENTORY ITEMS")
+
+					return false
+				})
+		})
+	}
+
 	if store.GetChestsRetrievalStartedNetworking() == value.CHESTS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetChestsRetrievalStartedNetworking(

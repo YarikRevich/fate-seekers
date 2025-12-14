@@ -35,6 +35,10 @@ func Init(root *cobra.Command) {
 
 			events.Run()
 
+			if config.GetSettingsMonitoringEnabled() {
+
+			}
+
 			if !encryptionkey.Validate(config.GetSettingsNetworkingEncryptionKey()) {
 				logging.GetInstance().Fatal(ErrEncryptionKeyValidationFailed.Error())
 

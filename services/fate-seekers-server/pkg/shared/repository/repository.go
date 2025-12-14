@@ -16,6 +16,7 @@ var (
 	ErrPersistingGenerations  = errors.New("err happened during the process of generation creation response data save.")
 	ErrPersistingAssociations = errors.New("err happened during the process of associations creation response data save.")
 	ErrPersistingLobbies      = errors.New("err happened during the process of lobby creation response data save.")
+	ErrPersistingInventory    = errors.New("err happened during the process of inventory creation response data save.")
 	ErrPersistingMessages     = errors.New("err happened during the process of message creation response data save.")
 	ErrPersistingUsers        = errors.New("err happened during the process of user creation response data save.")
 )
@@ -33,8 +34,8 @@ var (
 	// GetLobbiesRepository retrieves instance of the lobbies repository, performing initial creation if needed.
 	GetLobbiesRepository = sync.OnceValue[LobbiesRepository](createLobbiesRepository)
 
-	// GetIntentoryRepository retrieves instance of the inventory repository, performing initial creation if needed.
-	GetLobbiesRepository = sync.OnceValue[LobbiesRepository](createLobbiesRepository)
+	// GetInventoryRepository retrieves instance of the inventory repository, performing initial creation if needed.
+	GetInventoryRepository = sync.OnceValue[InventoryRepository](createInventoryRepository)
 
 	// GetMessagesRepository retrieves instance of the messages repository, performing initial creation if needed.
 	GetMessagesRepository = sync.OnceValue[MessagesRepository](createMessagesRepository)
@@ -646,7 +647,7 @@ type inventoryRepositoryImpl struct {
 }
 
 // createInventoryRepository initializes inventoryRepositoryImpl.
-func createIntentoryRepository() InventoryRepository {
+func createInventoryRepository() InventoryRepository {
 	return new(inventoryRepositoryImpl)
 }
 
