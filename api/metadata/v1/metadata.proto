@@ -52,8 +52,20 @@ service MetadataService {
     // GetUsersMetadata performs users metadata retrieval request by the configured user.
     rpc GetUsersMetadata(GetUsersMetadataRequest) returns (stream GetUsersMetadataResponse) {};
 
+    // GetUserInventory performs user inventory retrieval request by the configured user.
+    rpc GetUserInventory(GetUserInventoryRequest) returns (stream GetUserInventoryResponse) {};
+
+    // TakeChestItem performs chest item take operaiton for the selected chest by the configured user.
+    rpc TakeChestItem(TakeChestItemRequest) returns (TakeChestItemResponse) {};
+
+    // OpenChest performs chest open operation for the selected chest by the configured user.
+    rpc OpenChest(OpenChestRequest) returns (OpenChestResponse) {};
+
     // GetChests performs chests retrieval for the selected session by the configured user.
     rpc GetChests(GetChestsRequest) returns (stream GetChestsResponse) {};
+
+    // OpenHealthPack performs health pack open operation for the selected health pack by the configured user.
+    rpc OpenHealthPack(OpenHealthPackRequest) returns (OpenHealthPackResponse) {};
 
     // GetHealthPacks performs health packs retrieval for the selected session by the configured user.
     rpc GetHealthPacks(GetHealthPacksRequest) returns (stream GetHealthPacksResponse) {};
@@ -225,13 +237,13 @@ message LeaveLobbyRequest {
 message LeaveLobbyResponse {
 };
 
-// Represents users metadata retrieval request message.
+// GetUsersMetadataRequest represents users metadata retrieval request message.
 message GetUsersMetadataRequest {
     int64 session_id = 1;
     string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
 
-// Represents common user metadata message.
+// UserMetadata represents common user metadata message.
 message UserMetadata {
     string issuer = 1 [(buf.validate.field).string.uuid = true];
     uint64 health = 2;
@@ -244,15 +256,55 @@ message UserMetadata {
     bool static = 7;
 };
 
-// Represents users metadata retrieval response message.
+// GetUsersMetadataResponse represents users metadata retrieval response message.
 message GetUsersMetadataResponse {
     repeated UserMetadata user_metadata = 1;
 };
+
+// GetUserInventoryRequest represents user inventory retrieval response message.
+message GetUserInventoryRequest {
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
+    int64 session_id = 2;
+};
+
+// UserInventoryItem represents user inventory item message.
+message UserInventoryItem {
+    string name = 1;
+};
+
+// GetUserInventoryResponse represents user inventory response message
+message GetUserInventoryResponse {
+    repeated UserInventoryItem user_inventory_items = 1;
+};  
 
 // Position represents common position message.
 message Position {
     double x = 1;
     double y = 2;
+};
+
+// TakeChestItemRequest represents take chest item operation request.
+message TakeChestItemRequest {
+    int64 session_id = 1;
+    int64 generation_id = 2;
+    int64 association_id = 3;
+    string issuer = 4 [(buf.validate.field).string.uuid = true];
+};
+
+// TakeChestItemResponse represents take chest item opereation response.
+message TakeChestItemResponse {
+
+};
+
+// OpenChestRequest represents chest open request.
+message OpenChestRequest {
+    int64 session_id = 1;
+    int64 generation_id = 2;
+    string issuer = 3 [(buf.validate.field).string.uuid = true];
+};
+
+// OpenChestResponse represents chest open response.
+message OpenChestResponse {
 };
 
 // GetChestsRequest represents chests retrieval request message.
@@ -278,6 +330,17 @@ message Chest {
 // GetChestsResponse represents chests retrieval response streaming message.
 message GetChestsResponse {
     repeated Chest chests = 1;
+};
+
+// OpenHealthPackRequest represents health pack open request.
+message OpenHealthPackRequest {
+    int64 session_id = 1;
+    int64 generation_id = 2;
+    string issuer = 3 [(buf.validate.field).string.uuid = true];
+};
+
+// OpenHealthPackResponse represents health pack open response.
+message OpenHealthPackResponse {
 };
 
 // GetHealthPacksRequest represents health packs retrieval request message.

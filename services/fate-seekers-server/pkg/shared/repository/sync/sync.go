@@ -118,6 +118,8 @@ func Run() {
 				}
 			}
 
+			// TODO: update objects in inventory tables.
+
 			for sessionID := range affectedSessions {
 				lobbies, exists, err := repository.
 					GetLobbiesRepository().

@@ -103,9 +103,6 @@ const (
 	// Max amount of users per session.
 	MAX_SESSION_USERS = 8
 
-	// Max types of session health packs.
-	MAX_SESSION_HEALTH_PACK_TYPES = 3
-
 	// Max chest items to be generated per chest.
 	MAX_CHEST_ITEMS_PER_CHEST = 6
 )

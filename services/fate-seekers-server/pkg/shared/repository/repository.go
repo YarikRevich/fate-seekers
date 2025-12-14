@@ -33,17 +33,14 @@ var (
 	// GetLobbiesRepository retrieves instance of the lobbies repository, performing initial creation if needed.
 	GetLobbiesRepository = sync.OnceValue[LobbiesRepository](createLobbiesRepository)
 
+	// GetIntentoryRepository retrieves instance of the inventory repository, performing initial creation if needed.
+	GetLobbiesRepository = sync.OnceValue[LobbiesRepository](createLobbiesRepository)
+
 	// GetMessagesRepository retrieves instance of the messages repository, performing initial creation if needed.
 	GetMessagesRepository = sync.OnceValue[MessagesRepository](createMessagesRepository)
 
 	// GetUsersRepository retrieves instance of the users repository, performing initial creation if needed.
 	GetUsersRepository = sync.OnceValue[UsersRepository](createUsersRepository)
-)
-
-// Describes all the available generation types.
-const (
-	ChestGenerationType      = "chest"
-	HealthPackGenerationType = "health_pack"
 )
 
 // SessionsRepository represents sessions entity repository.
@@ -232,6 +229,7 @@ func createSessionsRepository() SessionsRepository {
 
 // GenerationsRepository represents generations entity repository.
 type GenerationsRepository interface {
+	InsertOrUpdate(request dto.GenerationsRepositoryInsertOrUpdateRequest) error
 	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.GenerationsRepositoryInsertOrUpdateRequest) error
 	GetChestTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error)
 	GetChestTypeByInstanceAndSessionIDWithTransaction(
@@ -245,12 +243,11 @@ type generationsRepositoryImpl struct {
 	mu sync.RWMutex
 }
 
-// InsertOrUpdateWithTransaction inserts new generations entity to the storage or updates existing ones with transaction.
-func (w *generationsRepositoryImpl) InsertOrUpdateWithTransaction(
-	transaction *gorm.DB, request dto.GenerationsRepositoryInsertOrUpdateRequest) error {
+// InsertOrUpdate inserts new generations entity to the storage or updates existing ones.
+func (w *generationsRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.GenerationsRepositoryInsertOrUpdateRequest) error {
 	w.mu.Lock()
 
-	err := transaction.Clauses(clause.OnConflict{
+	err := instance.Clauses(clause.OnConflict{
 		Columns: []clause.Column{
 			{Name: "id"},
 		},
@@ -276,6 +273,17 @@ func (w *generationsRepositoryImpl) InsertOrUpdateWithTransaction(
 	return nil
 }
 
+// InsertOrUpdate inserts new generations entity to the storage or updates existing ones.
+func (w *generationsRepositoryImpl) InsertOrUpdate(request dto.GenerationsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(db.GetInstance(), request)
+}
+
+// InsertOrUpdateWithTransaction inserts new generations entity to the storage or updates existing ones with transaction.
+func (w *generationsRepositoryImpl) InsertOrUpdateWithTransaction(
+	transaction *gorm.DB, request dto.GenerationsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(transaction, request)
+}
+
 // GetChestTypeBySessionID retrieves all available generations of chest type for the provided session id.
 func (w *generationsRepositoryImpl) GetChestTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error) {
 	w.mu.RLock()
@@ -285,7 +293,7 @@ func (w *generationsRepositoryImpl) GetChestTypeBySessionID(sessionID int64) ([]
 	var result []*entity.GenerationsEntity
 
 	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
-		Where("session_id = ? AND type = ?", sessionID, ChestGenerationType).
+		Where("session_id = ? AND type = ?", sessionID, dto.ChestGenerationType).
 		Find(&result).Error
 
 	w.mu.RUnlock()
@@ -302,7 +310,7 @@ func (w *generationsRepositoryImpl) GetChestTypeByInstanceAndSessionIDWithTransa
 	var result *entity.GenerationsEntity
 
 	err := transaction.Table((&entity.GenerationsEntity{}).TableName()).
-		Where("instance ? AND session_id = ? AND type = ?", instance, sessionID, ChestGenerationType).
+		Where("instance ? AND session_id = ? AND type = ?", instance, sessionID, dto.ChestGenerationType).
 		Find(&result).Error
 
 	w.mu.RUnlock()
@@ -319,7 +327,7 @@ func (w *generationsRepositoryImpl) GetHealthPackTypeBySessionID(sessionID int64
 	var result []*entity.GenerationsEntity
 
 	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
-		Where("session_id = ? AND type = ?", sessionID, HealthPackGenerationType).
+		Where("session_id = ? AND type = ?", sessionID, dto.HealthPackGenerationType).
 		Find(&result).Error
 
 	w.mu.RUnlock()
@@ -334,7 +342,9 @@ func createGenerationsRepository() GenerationsRepository {
 
 // AssociationsRepository represents associations entity repository.
 type AssociationsRepository interface {
+	InsertOrUpdate(request dto.AssociationsRepositoryInsertOrUpdateRequest) error
 	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.AssociationsRepositoryInsertOrUpdateRequest) error
+	GetByID(id int64) (*entity.AssociationsEntity, bool, error)
 	GetByGenerationID(generationID int64) ([]*entity.AssociationsEntity, error)
 }
 
@@ -344,16 +354,23 @@ type associationsRepositoryImpl struct {
 	mu sync.RWMutex
 }
 
-// InsertOrUpdateWithTransaction inserts new associations entity to the storage or updates existing ones.
-func (w *associationsRepositoryImpl) InsertOrUpdateWithTransaction(
-	transaction *gorm.DB, request dto.AssociationsRepositoryInsertOrUpdateRequest) error {
+// insertOrUpdate inserts new associations entity to the storage or updates existing ones.
+func (w *associationsRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.AssociationsRepositoryInsertOrUpdateRequest) error {
 	w.mu.Lock()
 
-	err := transaction.Create(&entity.AssociationsEntity{
+	err := instance.Clauses(clause.OnConflict{
+		Columns: []clause.Column{
+			{Name: "id"},
+		},
+		DoUpdates: clause.AssignmentColumns([]string{
+			"active",
+		}),
+	}).Create(&entity.AssociationsEntity{
 		ID:           request.ID,
 		SessionID:    request.SessionID,
 		GenerationID: request.GenerationID,
 		Name:         request.Name,
+		Active:       request.Active,
 	}).Error
 
 	if err != nil {
@@ -365,6 +382,46 @@ func (w *associationsRepositoryImpl) InsertOrUpdateWithTransaction(
 	w.mu.Unlock()
 
 	return nil
+}
+
+// InsertOrUpdate inserts new associations entity to the storage or updates existing ones.
+func (w *associationsRepositoryImpl) InsertOrUpdate(request dto.AssociationsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(db.GetInstance(), request)
+}
+
+// InsertOrUpdateWithTransaction inserts new associations entity to the storage or updates existing ones with transaction.
+func (w *associationsRepositoryImpl) InsertOrUpdateWithTransaction(
+	transaction *gorm.DB, request dto.AssociationsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(transaction, request)
+}
+
+// GetByID retrieves an association for the provided id.
+func (w *associationsRepositoryImpl) GetByID(id int64) (*entity.AssociationsEntity, bool, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var result *entity.AssociationsEntity
+
+	err := instance.Table((&entity.AssociationsEntity{}).TableName()).
+		Where("id = ?", id).
+		First(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			w.mu.RUnlock()
+
+			return result, false, nil
+		}
+
+		w.mu.RUnlock()
+
+		return result, false, err
+	}
+
+	w.mu.RUnlock()
+
+	return result, true, nil
 }
 
 // GetByGenerationID retrieves all available associations for the provided generation id.
@@ -572,6 +629,25 @@ func (w *lobbiesRepositoryImpl) Unlock() {
 // createLobbiesRepository initializes lobbiesRepositoryImpl.
 func createLobbiesRepository() LobbiesRepository {
 	return new(lobbiesRepositoryImpl)
+}
+
+// InventoryRepository represents intentory entity repository.
+type InventoryRepository interface {
+	InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error
+	DeleteByUserIDAndSessionID(userID, sessionID int64) error
+	DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error
+	GetBySessionIDAndUserID(sessionID, userID int64) ([]*entity.LobbyEntity, bool, error)
+}
+
+// inventoryRepositoryImpl represents implementation of InventoryRepository.
+type inventoryRepositoryImpl struct {
+	// Represents internal mutex used for database inventory repository related operations.
+	mu sync.RWMutex
+}
+
+// createInventoryRepository initializes inventoryRepositoryImpl.
+func createIntentoryRepository() InventoryRepository {
+	return new(inventoryRepositoryImpl)
 }
 
 // MessagesRepository represents messages entity repository.

@@ -40,6 +40,7 @@ var (
 	ErrSessionHealthPacksLocationsNotEnough = errors.New("err happened session health packs locations don't fulfil min health packs per session amount")
 	ErrFilteredSessionDoesNotExists         = errors.New("err happened filtered session does not exist")
 	ErrUserIsNotLobbyHost                   = errors.New("err happened user is not a host of a lobby")
+	ErrUserIsNotInLobby                     = errors.New("err happened user is not in a lobby")
 	ErrUserDoesNotOwnSession                = errors.New("err happened user does not own session")
 	ErrSessionHasMaxAmountOfLobbies         = errors.New("err happened session has max amount of lobbies")
 	ErrSessionHasLobbies                    = errors.New("err happened session has lobbies")
@@ -51,6 +52,7 @@ const (
 	getSessionMetadataFrequency = time.Second * 2
 	getLobbySetFrequency        = time.Second * 1
 	getUserMetadataFrequency    = time.Millisecond * 25
+	getUserInventoryFrequency   = time.Millisecond * 25
 	getChestsFrequency          = time.Second
 	getHealthPacksFrequency     = time.Second
 	getEventsFrequency          = time.Millisecond * 100
@@ -796,7 +798,7 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 					SessionID: request.GetSessionId(),
 					Instance:  chest.Instance,
 					Name:      chest.Name,
-					Type:      repository.ChestGenerationType,
+					Type:      dto.ChestGenerationType,
 					Active:    true,
 				})
 			if err != nil {
@@ -836,7 +838,7 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 					SessionID: request.GetSessionId(),
 					Instance:  healthPack.Instance,
 					Name:      healthPack.Name,
-					Type:      repository.HealthPackGenerationType,
+					Type:      dto.HealthPackGenerationType,
 					Active:    true,
 				})
 			if err != nil {
@@ -1983,6 +1985,361 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 	}
 }
 
+func (h *Handler) GetUserInventory(request *metadatav1.GetUserInventoryRequest, stream grpc.ServerStreamingServer[metadatav1.GetUserInventoryResponse]) error {
+	response := new(metadatav1.GetUserInventoryResponse)
+
+	ticker := time.NewTicker(getUserInventoryFrequency)
+
+	for {
+		select {
+		case <-ticker.C:
+			ticker.Stop()
+
+			response.UserInventoryItems = response.UserInventoryItems[:0]
+
+			cache.
+				GetInstance().
+				BeginMetadataTransaction()
+
+			fmt.Println("BEFORE 9")
+
+			cache.
+				GetInstance().
+				BeginLobbySetTransaction()
+
+			cachedLobbySet, ok := cache.
+				GetInstance().
+				GetLobbySet(request.GetSessionId())
+			if !ok {
+				lobbies, exists, err := repository.
+					GetLobbiesRepository().
+					GetBySessionID(request.GetSessionId())
+				if err != nil {
+					cache.
+						GetInstance().
+						CommitLobbySetTransaction()
+
+					cache.
+						GetInstance().
+						CommitMetadataTransaction()
+
+					return err
+				}
+
+				if !exists {
+					cache.
+						GetInstance().
+						CommitLobbySetTransaction()
+
+					cache.
+						GetInstance().
+						CommitMetadataTransaction()
+
+					return ErrLobbySetDoesNotExist
+				}
+
+				var lobbySet []dto.CacheLobbySetEntity
+
+				for _, lobby := range lobbies {
+					lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
+						ID:     lobby.ID,
+						Issuer: lobby.UserEntity.Name,
+						Skin:   uint64(lobby.Skin),
+						Host:   lobby.Host,
+					})
+				}
+
+				cachedLobbySet = lobbySet
+
+				cache.
+					GetInstance().
+					AddLobbySet(request.GetSessionId(), lobbySet)
+			}
+
+			for _, lobbySet := range cachedLobbySet {
+				cachedMetadata, ok := cache.
+					GetInstance().
+					GetMetadata(lobbySet.Issuer)
+				if !ok {
+					var userID int64
+
+					cachedUserID, ok := cache.
+						GetInstance().
+						GetUsers(lobbySet.Issuer)
+					if ok {
+						userID = cachedUserID
+					} else {
+						user, exists, err := repository.
+							GetUsersRepository().
+							GetByName(lobbySet.Issuer)
+						if err != nil {
+							cache.
+								GetInstance().
+								CommitLobbySetTransaction()
+
+							cache.
+								GetInstance().
+								CommitMetadataTransaction()
+
+							return err
+						}
+
+						if !exists {
+							cache.
+								GetInstance().
+								CommitLobbySetTransaction()
+
+							cache.
+								GetInstance().
+								CommitMetadataTransaction()
+
+							return ErrUserDoesNotExist
+						}
+
+						userID = user.ID
+					}
+
+					lobbies, exists, err := repository.
+						GetLobbiesRepository().
+						GetByUserID(userID)
+					if err != nil {
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						return err
+					}
+
+					if !exists {
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						return ErrLobbyDoesNotExist
+					}
+
+					metadata := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies)
+
+					cachedMetadata = metadata
+
+					cache.
+						GetInstance().
+						AddMetadata(lobbySet.Issuer, metadata)
+				}
+
+				for _, metadata := range cachedMetadata {
+					if metadata.SessionID == request.GetSessionId() {
+						response.UserMetadata = append(response.UserMetadata, &metadatav1.UserMetadata{
+							Issuer:     lobbySet.Issuer,
+							Health:     metadata.Health,
+							Skin:       metadata.Skin,
+							Active:     metadata.Active,
+							Eliminated: metadata.Eliminated,
+							Position: &metadatav1.Position{
+								X: metadata.PositionX,
+								Y: metadata.PositionY,
+							},
+							Static: metadata.PositionStatic,
+						})
+					}
+				}
+			}
+
+			cache.
+				GetInstance().
+				CommitLobbySetTransaction()
+
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			err := stream.Send(response)
+			if err != nil {
+				return err
+			}
+
+			ticker.Reset(getUserMetadataFrequency)
+		case <-stream.Context().Done():
+			return nil
+		}
+	}
+}
+
+// rpc GetUserInventory(GetUserInventoryRequest) returns (stream GetUserInventoryResponse) {};
+
+func (h *Handler) TakeChestItem(context context.Context, request *metadatav1.TakeChestItemRequest) (*metadatav1.TakeChestItemResponse, error) {
+	response := new(metadatav1.TakeChestItemResponse)
+
+	association, _, err := repository.
+		GetAssociationsRepository().
+		GetByID(request.GetAssociationId())
+	if err != nil {
+		return nil, err
+	}
+
+	// association.
+
+	err = repository.
+		GetAssociationsRepository().
+		InsertOrUpdate(dto.AssociationsRepositoryInsertOrUpdateRequest{
+			ID:     request.GetAssociationId(),
+			Active: false,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
+func (h *Handler) OpenChest(context context.Context, request *metadatav1.OpenChestRequest) (*metadatav1.OpenChestResponse, error) {
+	response := new(metadatav1.OpenChestResponse)
+
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
+
+	cachedSession, ok := cache.
+		GetInstance().
+		GetSessions(request.GetSessionId())
+
+	if !ok {
+		session, exists, err := repository.
+			GetSessionsRepository().
+			GetByID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, err
+		}
+
+		if !exists {
+			return nil, ErrSessionDoesNotExists
+		}
+
+		if !session.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, ErrSessionNotStarted
+		}
+
+		cache.
+			GetInstance().
+			AddSessions(
+				request.GetSessionId(),
+				converter.ConvertSessionEntityToCacheSessionEntity(session))
+	} else {
+		if !cachedSession.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, ErrSessionNotStarted
+		}
+	}
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
+	cache.
+		GetInstance().
+		BeginLobbySetTransaction()
+
+	cachedLobbySet, ok := cache.
+		GetInstance().
+		GetLobbySet(request.GetSessionId())
+	if !ok {
+		lobbies, exists, err := repository.
+			GetLobbiesRepository().
+			GetBySessionID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitLobbySetTransaction()
+
+			return nil, err
+		}
+
+		if !exists {
+			cache.
+				GetInstance().
+				CommitLobbySetTransaction()
+
+			return nil, ErrLobbySetDoesNotExist
+		}
+
+		var lobbySet []dto.CacheLobbySetEntity
+
+		for _, lobby := range lobbies {
+			lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
+				ID:     lobby.ID,
+				Issuer: lobby.UserEntity.Name,
+				Skin:   uint64(lobby.Skin),
+				Host:   lobby.Host,
+			})
+		}
+
+		cachedLobbySet = lobbySet
+
+		cache.
+			GetInstance().
+			AddLobbySet(request.GetSessionId(), lobbySet)
+	}
+
+	var found bool
+
+	for _, value := range cachedLobbySet {
+		if value.Issuer == request.GetIssuer() {
+			found = true
+		}
+	}
+
+	if !found {
+		return nil, ErrUserIsNotInLobby
+	}
+
+	cache.
+		GetInstance().
+		CommitLobbySetTransaction()
+
+	cache.
+		GetInstance().
+		BeginGeneratedChestsTransaction()
+
+	err := repository.
+		GetGenerationRepository().
+		InsertOrUpdate(dto.GenerationsRepositoryInsertOrUpdateRequest{
+			ID:     request.GetGenerationId(),
+			Active: false,
+		})
+	if err != nil {
+		cache.
+			GetInstance().
+			CommitGeneratedChestsTransaction()
+
+		return nil, err
+	}
+
+	cache.
+		GetInstance().
+		CommitGeneratedChestsTransaction()
+
+	return response, nil
+}
+
 func (h *Handler) GetChests(request *metadatav1.GetChestsRequest, stream grpc.ServerStreamingServer[metadatav1.GetChestsResponse]) error {
 	response := new(metadatav1.GetChestsResponse)
 
@@ -2087,6 +2444,146 @@ func (h *Handler) GetChests(request *metadatav1.GetChestsRequest, stream grpc.Se
 			return nil
 		}
 	}
+}
+
+func (h *Handler) OpenHealthPack(context context.Context, request *metadatav1.OpenHealthPackRequest) (*metadatav1.OpenHealthPackResponse, error) {
+	response := new(metadatav1.OpenHealthPackResponse)
+
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
+
+	cachedSession, ok := cache.
+		GetInstance().
+		GetSessions(request.GetSessionId())
+
+	if !ok {
+		session, exists, err := repository.
+			GetSessionsRepository().
+			GetByID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, err
+		}
+
+		if !exists {
+			return nil, ErrSessionDoesNotExists
+		}
+
+		if !session.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, ErrSessionNotStarted
+		}
+
+		cache.
+			GetInstance().
+			AddSessions(
+				request.GetSessionId(),
+				converter.ConvertSessionEntityToCacheSessionEntity(session))
+	} else {
+		if !cachedSession.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, ErrSessionNotStarted
+		}
+	}
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
+	cache.
+		GetInstance().
+		BeginLobbySetTransaction()
+
+	cachedLobbySet, ok := cache.
+		GetInstance().
+		GetLobbySet(request.GetSessionId())
+	if !ok {
+		lobbies, exists, err := repository.
+			GetLobbiesRepository().
+			GetBySessionID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitLobbySetTransaction()
+
+			return nil, err
+		}
+
+		if !exists {
+			cache.
+				GetInstance().
+				CommitLobbySetTransaction()
+
+			return nil, ErrLobbySetDoesNotExist
+		}
+
+		var lobbySet []dto.CacheLobbySetEntity
+
+		for _, lobby := range lobbies {
+			lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
+				ID:     lobby.ID,
+				Issuer: lobby.UserEntity.Name,
+				Skin:   uint64(lobby.Skin),
+				Host:   lobby.Host,
+			})
+		}
+
+		cachedLobbySet = lobbySet
+
+		cache.
+			GetInstance().
+			AddLobbySet(request.GetSessionId(), lobbySet)
+	}
+
+	var found bool
+
+	for _, value := range cachedLobbySet {
+		if value.Issuer == request.GetIssuer() {
+			found = true
+		}
+	}
+
+	if !found {
+		return nil, ErrUserIsNotInLobby
+	}
+
+	cache.
+		GetInstance().
+		CommitLobbySetTransaction()
+
+	cache.
+		GetInstance().
+		BeginGeneratedHealthPacksTransaction()
+
+	err := repository.
+		GetGenerationRepository().
+		InsertOrUpdate(dto.GenerationsRepositoryInsertOrUpdateRequest{
+			ID:     request.GetGenerationId(),
+			Active: false,
+		})
+	if err != nil {
+		cache.
+			GetInstance().
+			CommitGeneratedHealthPacksTransaction()
+
+		return nil, err
+	}
+
+	cache.
+		GetInstance().
+		CommitGeneratedHealthPacksTransaction()
+
+	return response, nil
 }
 
 func (h *Handler) GetHealthPacks(request *metadatav1.GetHealthPacksRequest, stream grpc.ServerStreamingServer[metadatav1.GetHealthPacksResponse]) error {

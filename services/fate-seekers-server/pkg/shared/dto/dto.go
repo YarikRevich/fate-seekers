@@ -192,6 +192,7 @@ type AssociationsRepositoryInsertOrUpdateRequest struct {
 	GenerationID int64
 	Instance     string
 	Name         string
+	Active       bool
 }
 
 // LobbiesRepositoryInsertOrUpdateRequest represents lobbies repository entity update request.
@@ -228,6 +229,12 @@ type CacheMetadataEntity struct {
 	Active         bool
 	Eliminated     bool
 	Host           bool
+	Ammo           int
+}
+
+// CacheInventoryEntity represents cache inventory entity used by global networking cache.
+type CacheInventoryEntity struct {
+	Name string
 }
 
 // CacheLobbySetEntity represent cache lobby set entity used by global networking cache.
@@ -248,19 +255,29 @@ type SessionEvent struct {
 	Name string
 }
 
-// CacheGenerationsEntity represent generations entity used by global networking cache.
-type CacheGenerationsEntity struct {
+// CacheGeneratedChestEntity represent generated chest entity used by global networking cache.
+type CacheGeneratedChestEntity struct {
+	ID         int64
+	SessionID  int64
+	Name       string
+	Active     bool
+	Position   Position
+	ChestItems []CacheGeneratedChestItemEntity
+}
+
+// CacheGeneratedChestItemEntity represents generated chest item entity used by global networking cache.
+type CacheGeneratedChestItemEntity struct {
+	ID   int64
+	Name string
+}
+
+// CacheGeneratedChestEntity represent generated chest entity used by global networking cache.
+type CacheGeneratedHealthPacksEntity struct {
 	ID        int64
 	SessionID int64
 	Name      string
-	Type      string
 	Active    bool
-}
-
-// CacheAssociationsEntity represent associations entity used by global networking cache.
-type CacheAssociationsEntity struct {
-	ID   int64
-	Name string
+	Position  Position
 }
 
 // Position represents a set of coordinates.
@@ -288,3 +305,9 @@ type GeneratedHealthPack struct {
 	Position Position
 	Name     string
 }
+
+// Describes all the available generation types.
+const (
+	ChestGenerationType      = "chest"
+	HealthPackGenerationType = "health_pack"
+)
