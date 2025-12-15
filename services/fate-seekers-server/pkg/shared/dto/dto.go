@@ -209,6 +209,13 @@ type LobbiesRepositoryInsertOrUpdateRequest struct {
 	PositionStatic bool
 }
 
+// InventoryRepositoryInsertOrUpdateRequest represents inventory repository entity update request.
+type InventoryRepositoryInsertOrUpdateRequest struct {
+	UserID    int64
+	SessionID int64
+	Name      string
+}
+
 // CacheSessionEntity represent cache session entity used by global networking cache.
 type CacheSessionEntity struct {
 	ID      int64

@@ -634,16 +634,107 @@ func createLobbiesRepository() LobbiesRepository {
 
 // InventoryRepository represents intentory entity repository.
 type InventoryRepository interface {
-	InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error
+	InsertOrUpdate(request dto.InventoryRepositoryInsertOrUpdateRequest) error
 	DeleteByUserIDAndSessionID(userID, sessionID int64) error
 	DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error
-	GetBySessionIDAndUserID(sessionID, userID int64) ([]*entity.LobbyEntity, bool, error)
+	GetBySessionIDAndUserID(sessionID, userID int64) ([]*entity.InventoryEntity, bool, error)
 }
 
 // inventoryRepositoryImpl represents implementation of InventoryRepository.
 type inventoryRepositoryImpl struct {
 	// Represents internal mutex used for database inventory repository related operations.
 	mu sync.RWMutex
+}
+
+// insertOrUpdate inserts new inventory entity to the storage or updates existing ones with the provided db instance.
+func (w *inventoryRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.InventoryRepositoryInsertOrUpdateRequest) error {
+	w.mu.Lock()
+
+	err := instance.Create(&entity.InventoryEntity{
+		UserID:    request.UserID,
+		SessionID: request.SessionID,
+		Name:      request.Name,
+	}).Error
+
+	if err != nil {
+		w.mu.Unlock()
+
+		return errors.Wrap(err, ErrPersistingInventory.Error())
+	}
+
+	w.mu.Unlock()
+
+	return nil
+}
+
+// InsertOrUpdate inserts new inventory entity to the storage or updates existing ones.
+func (w *inventoryRepositoryImpl) InsertOrUpdate(request dto.InventoryRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(db.GetInstance(), request)
+}
+
+// InsertOrUpdateWithTransaction inserts new inventory entity to the storage or updates existing ones with provided transaction.
+func (w *inventoryRepositoryImpl) InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.InventoryRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(transaction, request)
+}
+
+// deleteByUserIDAndSessionID deletes inventory by the provided user id with provided db instance.
+func (w *inventoryRepositoryImpl) deleteByUserIDAndSessionID(instance *gorm.DB, userID, sessionID int64) error {
+	w.mu.Lock()
+
+	err := instance.Table((&entity.InventoryEntity{}).TableName()).
+		Where("user_id = ? AND session_id = ?", userID, sessionID).
+		Delete(&entity.InventoryEntity{}).Error
+
+	w.mu.Unlock()
+
+	return err
+}
+
+// DeleteByUserIDAndSessionID deletes lobby by the provided user id.
+func (w *inventoryRepositoryImpl) DeleteByUserIDAndSessionID(userID, sessionID int64) error {
+	return w.deleteByUserIDAndSessionID(db.GetInstance(), userID, sessionID)
+}
+
+// DeleteByUserIDAndSessionIDWithTransaction deletes lobby by the provided user id with provided transaction.
+func (w *inventoryRepositoryImpl) DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error {
+	return w.deleteByUserIDAndSessionID(transaction, userID, sessionID)
+}
+
+// GetBySessionIDAndUserID retrieves inventory by the provided session id and user id.
+func (w *inventoryRepositoryImpl) GetBySessionIDAndUserID(sessionID, userID int64) ([]*entity.InventoryEntity, bool, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var result []*entity.InventoryEntity
+
+	err := instance.Table((&entity.InventoryEntity{}).TableName()).
+		Preload((&entity.UserEntity{}).TableView()).
+		Preload((&entity.SessionEntity{}).TableView()).
+		Where("session_id = ? AND user_id = ?", sessionID, userID).
+		Find(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			w.mu.RUnlock()
+
+			return nil, false, nil
+		}
+
+		w.mu.RUnlock()
+
+		return nil, false, err
+	}
+
+	if len(result) == 0 {
+		w.mu.RUnlock()
+
+		return nil, false, nil
+	}
+
+	w.mu.RUnlock()
+
+	return result, true, nil
 }
 
 // createInventoryRepository initializes inventoryRepositoryImpl.

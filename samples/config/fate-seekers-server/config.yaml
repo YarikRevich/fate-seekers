@@ -35,6 +35,9 @@ settings:
       # Represents a name property used for Prometheus container creation.
       name: "fate-seekers-server-prometheus"
 
+      # Represents server host value used for metrics provision.
+      port: "8091"
+
   # Represents language selected for the interface.
   language: "en"
 

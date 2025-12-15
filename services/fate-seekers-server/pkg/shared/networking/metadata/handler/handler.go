@@ -1997,169 +1997,169 @@ func (h *Handler) GetUserInventory(request *metadatav1.GetUserInventoryRequest, 
 
 			response.UserInventoryItems = response.UserInventoryItems[:0]
 
-			cache.
-				GetInstance().
-				BeginMetadataTransaction()
+			// cache.
+			// 	GetInstance().
+			// 	BeginMetadataTransaction()
 
-			fmt.Println("BEFORE 9")
+			// fmt.Println("BEFORE 9")
 
-			cache.
-				GetInstance().
-				BeginLobbySetTransaction()
+			// cache.
+			// 	GetInstance().
+			// 	BeginLobbySetTransaction()
 
-			cachedLobbySet, ok := cache.
-				GetInstance().
-				GetLobbySet(request.GetSessionId())
-			if !ok {
-				lobbies, exists, err := repository.
-					GetLobbiesRepository().
-					GetBySessionID(request.GetSessionId())
-				if err != nil {
-					cache.
-						GetInstance().
-						CommitLobbySetTransaction()
+			// cachedLobbySet, ok := cache.
+			// 	GetInstance().
+			// 	GetLobbySet(request.GetSessionId())
+			// if !ok {
+			// 	lobbies, exists, err := repository.
+			// 		GetLobbiesRepository().
+			// 		GetBySessionID(request.GetSessionId())
+			// 	if err != nil {
+			// 		cache.
+			// 			GetInstance().
+			// 			CommitLobbySetTransaction()
 
-					cache.
-						GetInstance().
-						CommitMetadataTransaction()
+			// 		cache.
+			// 			GetInstance().
+			// 			CommitMetadataTransaction()
 
-					return err
-				}
+			// 		return err
+			// 	}
 
-				if !exists {
-					cache.
-						GetInstance().
-						CommitLobbySetTransaction()
+			// 	if !exists {
+			// 		cache.
+			// 			GetInstance().
+			// 			CommitLobbySetTransaction()
 
-					cache.
-						GetInstance().
-						CommitMetadataTransaction()
+			// 		cache.
+			// 			GetInstance().
+			// 			CommitMetadataTransaction()
 
-					return ErrLobbySetDoesNotExist
-				}
+			// 		return ErrLobbySetDoesNotExist
+			// 	}
 
-				var lobbySet []dto.CacheLobbySetEntity
+			// 	var lobbySet []dto.CacheLobbySetEntity
 
-				for _, lobby := range lobbies {
-					lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
-						ID:     lobby.ID,
-						Issuer: lobby.UserEntity.Name,
-						Skin:   uint64(lobby.Skin),
-						Host:   lobby.Host,
-					})
-				}
+			// 	for _, lobby := range lobbies {
+			// 		lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
+			// 			ID:     lobby.ID,
+			// 			Issuer: lobby.UserEntity.Name,
+			// 			Skin:   uint64(lobby.Skin),
+			// 			Host:   lobby.Host,
+			// 		})
+			// 	}
 
-				cachedLobbySet = lobbySet
+			// 	cachedLobbySet = lobbySet
 
-				cache.
-					GetInstance().
-					AddLobbySet(request.GetSessionId(), lobbySet)
-			}
+			// 	cache.
+			// 		GetInstance().
+			// 		AddLobbySet(request.GetSessionId(), lobbySet)
+			// }
 
-			for _, lobbySet := range cachedLobbySet {
-				cachedMetadata, ok := cache.
-					GetInstance().
-					GetMetadata(lobbySet.Issuer)
-				if !ok {
-					var userID int64
+			// for _, lobbySet := range cachedLobbySet {
+			// 	cachedMetadata, ok := cache.
+			// 		GetInstance().
+			// 		GetMetadata(lobbySet.Issuer)
+			// 	if !ok {
+			// 		var userID int64
 
-					cachedUserID, ok := cache.
-						GetInstance().
-						GetUsers(lobbySet.Issuer)
-					if ok {
-						userID = cachedUserID
-					} else {
-						user, exists, err := repository.
-							GetUsersRepository().
-							GetByName(lobbySet.Issuer)
-						if err != nil {
-							cache.
-								GetInstance().
-								CommitLobbySetTransaction()
+			// 		cachedUserID, ok := cache.
+			// 			GetInstance().
+			// 			GetUsers(lobbySet.Issuer)
+			// 		if ok {
+			// 			userID = cachedUserID
+			// 		} else {
+			// 			user, exists, err := repository.
+			// 				GetUsersRepository().
+			// 				GetByName(lobbySet.Issuer)
+			// 			if err != nil {
+			// 				cache.
+			// 					GetInstance().
+			// 					CommitLobbySetTransaction()
 
-							cache.
-								GetInstance().
-								CommitMetadataTransaction()
+			// 				cache.
+			// 					GetInstance().
+			// 					CommitMetadataTransaction()
 
-							return err
-						}
+			// 				return err
+			// 			}
 
-						if !exists {
-							cache.
-								GetInstance().
-								CommitLobbySetTransaction()
+			// 			if !exists {
+			// 				cache.
+			// 					GetInstance().
+			// 					CommitLobbySetTransaction()
 
-							cache.
-								GetInstance().
-								CommitMetadataTransaction()
+			// 				cache.
+			// 					GetInstance().
+			// 					CommitMetadataTransaction()
 
-							return ErrUserDoesNotExist
-						}
+			// 				return ErrUserDoesNotExist
+			// 			}
 
-						userID = user.ID
-					}
+			// 			userID = user.ID
+			// 		}
 
-					lobbies, exists, err := repository.
-						GetLobbiesRepository().
-						GetByUserID(userID)
-					if err != nil {
-						cache.
-							GetInstance().
-							CommitLobbySetTransaction()
+			// 		lobbies, exists, err := repository.
+			// 			GetLobbiesRepository().
+			// 			GetByUserID(userID)
+			// 		if err != nil {
+			// 			cache.
+			// 				GetInstance().
+			// 				CommitLobbySetTransaction()
 
-						cache.
-							GetInstance().
-							CommitMetadataTransaction()
+			// 			cache.
+			// 				GetInstance().
+			// 				CommitMetadataTransaction()
 
-						return err
-					}
+			// 			return err
+			// 		}
 
-					if !exists {
-						cache.
-							GetInstance().
-							CommitLobbySetTransaction()
+			// 		if !exists {
+			// 			cache.
+			// 				GetInstance().
+			// 				CommitLobbySetTransaction()
 
-						cache.
-							GetInstance().
-							CommitMetadataTransaction()
+			// 			cache.
+			// 				GetInstance().
+			// 				CommitMetadataTransaction()
 
-						return ErrLobbyDoesNotExist
-					}
+			// 			return ErrLobbyDoesNotExist
+			// 		}
 
-					metadata := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies)
+			// 		metadata := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies)
 
-					cachedMetadata = metadata
+			// 		cachedMetadata = metadata
 
-					cache.
-						GetInstance().
-						AddMetadata(lobbySet.Issuer, metadata)
-				}
+			// 		cache.
+			// 			GetInstance().
+			// 			AddMetadata(lobbySet.Issuer, metadata)
+			// 	}
 
-				for _, metadata := range cachedMetadata {
-					if metadata.SessionID == request.GetSessionId() {
-						response.UserMetadata = append(response.UserMetadata, &metadatav1.UserMetadata{
-							Issuer:     lobbySet.Issuer,
-							Health:     metadata.Health,
-							Skin:       metadata.Skin,
-							Active:     metadata.Active,
-							Eliminated: metadata.Eliminated,
-							Position: &metadatav1.Position{
-								X: metadata.PositionX,
-								Y: metadata.PositionY,
-							},
-							Static: metadata.PositionStatic,
-						})
-					}
-				}
-			}
+			// 	for _, metadata := range cachedMetadata {
+			// 		if metadata.SessionID == request.GetSessionId() {
+			// 			response.UserMetadata = append(response.UserMetadata, &metadatav1.UserMetadata{
+			// 				Issuer:     lobbySet.Issuer,
+			// 				Health:     metadata.Health,
+			// 				Skin:       metadata.Skin,
+			// 				Active:     metadata.Active,
+			// 				Eliminated: metadata.Eliminated,
+			// 				Position: &metadatav1.Position{
+			// 					X: metadata.PositionX,
+			// 					Y: metadata.PositionY,
+			// 				},
+			// 				Static: metadata.PositionStatic,
+			// 			})
+			// 		}
+			// 	}
+			// }
 
-			cache.
-				GetInstance().
-				CommitLobbySetTransaction()
+			// cache.
+			// 	GetInstance().
+			// 	CommitLobbySetTransaction()
 
-			cache.
-				GetInstance().
-				CommitMetadataTransaction()
+			// cache.
+			// 	GetInstance().
+			// 	CommitMetadataTransaction()
 
 			err := stream.Send(response)
 			if err != nil {
@@ -2185,7 +2185,9 @@ func (h *Handler) TakeChestItem(context context.Context, request *metadatav1.Tak
 		return nil, err
 	}
 
-	// association.
+	fmt.Println(association)
+
+	// TODO: create inventory item here.
 
 	err = repository.
 		GetAssociationsRepository().

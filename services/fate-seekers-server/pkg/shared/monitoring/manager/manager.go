@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"context"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
@@ -22,6 +23,9 @@ var (
 
 // MonitoringManager represents monitoring manager.
 type MonitoringManager struct {
+	// Represents Docker SDK client used infrastructure management.
+	dockerClient *client.Client
+
 	// Represents Grafana monitoring component manager.
 	grafanaComponent monitoring.MonitoringComponent
 
@@ -32,6 +36,13 @@ type MonitoringManager struct {
 // Deploy performs a deployment of monitoring infrastructure.
 func (mm *MonitoringManager) Deploy(callback func(err error)) {
 	go func() {
+		_, err := mm.dockerClient.Ping(context.Background())
+		if err != nil {
+			callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
+
+			return
+		}
+
 		if mm.grafanaComponent.IsDeployed() {
 			if err := mm.grafanaComponent.Remove(); err != nil {
 				callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
@@ -48,15 +59,25 @@ func (mm *MonitoringManager) Deploy(callback func(err error)) {
 			}
 		}
 
-		mm.grafanaComponent.Deploy()
-		// f, err := dockerClient.ContainerList(context.Background(), container.ListOptions{})
-		// fmt.Println(f, err)
+		err = mm.grafanaComponent.Deploy()
+		if err != nil {
+			callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
 
-		// f[0].Names
+			return
+		}
 
-		// if mm.grafanaComponent.Deploy() {
+		err = mm.prometheusComponent.Deploy()
+		if err != nil {
+			if err := mm.grafanaComponent.Remove(); err != nil {
+				callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
 
-		// }
+				return
+			}
+
+			callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
+
+			return
+		}
 
 		callback(nil)
 	}()
@@ -77,6 +98,7 @@ func newMonitoringManager() *MonitoringManager {
 	}
 
 	return &MonitoringManager{
+		dockerClient:        dockerClient,
 		grafanaComponent:    grafana.NewGrafanaComponent(dockerClient),
 		prometheusComponent: prometheus.NewPrometheusComponent(dockerClient),
 	}

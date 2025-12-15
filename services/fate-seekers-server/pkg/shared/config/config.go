@@ -31,8 +31,9 @@ var (
 
 	settingsParsedNetworkingEncryptionKey []byte
 
-	settingsMonitoringEnabled                                       bool
-	settingsMonitoringGrafanaName, settingsMonitoringPrometheusName string
+	settingsMonitoringEnabled bool
+	settingsMonitoringGrafanaName,
+	settingsMonitoringPrometheusName, settingsMonitoringPrometheusPort string
 
 	settingsSoundFX  int
 	settingsLanguage string
@@ -106,6 +107,9 @@ const (
 
 	// Max chest items to be generated per chest.
 	MAX_CHEST_ITEMS_PER_CHEST = 6
+
+	// Max items in the player inventory.
+	MAX_INVENTORY_ITEMS = 8
 )
 
 const (
@@ -128,6 +132,7 @@ func SetupDefaultConfig() {
 	viper.SetDefault("settings.monitoring.enabled", true)
 	viper.SetDefault("settings.monitoring.grafana.name", "fate-seekers-server-grafana")
 	viper.SetDefault("settings.monitoring.prometheus.name", "fate-seekers-server-prometheus")
+	viper.SetDefault("settings.monitoring.prometheus.port", "8091")
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
 	viper.SetDefault("operation.debug", false)
 	viper.SetDefault("operation.max-sessions-amount", maxSessionsAmount)
@@ -186,6 +191,7 @@ func Init() {
 	settingsMonitoringEnabled = viper.GetBool("settings.monitoring.enabled")
 	settingsMonitoringGrafanaName = viper.GetString("settings.monitoring.grafana.name")
 	settingsMonitoringPrometheusName = viper.GetString("settings.monitoring.prometheus.name")
+	settingsMonitoringPrometheusPort = viper.GetString("settings.monitoring.prometheus.port")
 	settingsSoundFX = viper.GetInt("settings.sound.fx")
 	settingsLanguage = viper.GetString("settings.language")
 
@@ -282,6 +288,10 @@ func GetSettingsMonitoringGrafanaName() string {
 
 func GetSettingsMonitoringPrometheusName() string {
 	return settingsMonitoringPrometheusName
+}
+
+func GetSettingsMonitoringPrometheusPort() string {
+	return settingsMonitoringPrometheusPort
 }
 
 func SetSettingsLanguage(value string) {
