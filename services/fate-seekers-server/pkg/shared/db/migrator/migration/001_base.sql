@@ -71,6 +71,13 @@ CREATE TABLE lobbies (
 );
 
 --
+-- Name: idx_lobbies_user_id_session_id; Type: INDEX; Schema: public; 
+--
+
+CREATE UNIQUE INDEX idx_lobbies_user_id_session_id
+ON lobbies (user_id, session_id);
+
+--
 -- Name: idx_lobbies_user_id_session_id_skin; Type: INDEX; Schema: public; 
 --
 
@@ -83,13 +90,22 @@ ON lobbies (user_id, session_id, skin);
 
 CREATE TABLE inventory (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lobby_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     session_id INTEGER NOT NULL,
     name TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
     FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+    FOREIGN KEY (lobby_id) REFERENCES lobbies(id) ON DELETE CASCADE
 );
+
+-- --
+-- -- Name: idx_inventory_lobby_id; Type: INDEX; Schema: public; 
+-- --
+
+-- CREATE INDEX idx_inventory_lobby_id
+-- ON inventory (lobby_id);
 
 --
 -- Name: idx_inventory_user_id_session_id; Type: INDEX; Schema: public; 

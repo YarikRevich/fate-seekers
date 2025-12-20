@@ -234,7 +234,7 @@ type GenerationsRepository interface {
 	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.GenerationsRepositoryInsertOrUpdateRequest) error
 	GetChestTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error)
 	GetChestTypeByInstanceAndSessionIDWithTransaction(
-		transaction *gorm.DB, instance string, sessionID int64) (*entity.GenerationsEntity, error)
+		transaction *gorm.DB, instance string, sessionID int64) (*entity.GenerationsEntity, bool, error)
 	GetHealthPackTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error)
 }
 
@@ -260,7 +260,10 @@ func (w *generationsRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dt
 		SessionID: request.SessionID,
 		Name:      request.Name,
 		Type:      request.Type,
+		Instance:  request.Instance,
 		Active:    request.Active,
+		PositionX: request.PositionX,
+		PositionY: request.PositionY,
 	}).Error
 
 	if err != nil {
@@ -305,18 +308,30 @@ func (w *generationsRepositoryImpl) GetChestTypeBySessionID(sessionID int64) ([]
 // GetChestTypeByInstanceAndSessionIDWithTransaction retrieves all available generations of chest
 // type for the provided instance and session id.
 func (w *generationsRepositoryImpl) GetChestTypeByInstanceAndSessionIDWithTransaction(
-	transaction *gorm.DB, instance string, sessionID int64) (*entity.GenerationsEntity, error) {
+	transaction *gorm.DB, instance string, sessionID int64) (*entity.GenerationsEntity, bool, error) {
 	w.mu.RLock()
 
 	var result *entity.GenerationsEntity
 
 	err := transaction.Table((&entity.GenerationsEntity{}).TableName()).
-		Where("instance ? AND session_id = ? AND type = ?", instance, sessionID, dto.ChestGenerationType).
+		Where("instance = ? AND session_id = ? AND type = ?", instance, sessionID, dto.ChestGenerationType).
 		Find(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			w.mu.RUnlock()
+
+			return result, false, nil
+		}
+
+		w.mu.RUnlock()
+
+		return result, false, err
+	}
 
 	w.mu.RUnlock()
 
-	return result, err
+	return result, true, nil
 }
 
 // GetHealthPackTypeBySessionID retrieves all available generations of health pack type for the provided session id.
@@ -346,7 +361,7 @@ type AssociationsRepository interface {
 	InsertOrUpdate(request dto.AssociationsRepositoryInsertOrUpdateRequest) error
 	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.AssociationsRepositoryInsertOrUpdateRequest) error
 	GetByID(id int64) (*entity.AssociationsEntity, bool, error)
-	GetByGenerationID(generationID int64) ([]*entity.AssociationsEntity, error)
+	GetByGenerationID(generationID int64) ([]*entity.AssociationsEntity, bool, error)
 }
 
 // associationsRepositoryImpl represents implementation of AssociationsRepository.
@@ -426,7 +441,7 @@ func (w *associationsRepositoryImpl) GetByID(id int64) (*entity.AssociationsEnti
 }
 
 // GetByGenerationID retrieves all available associations for the provided generation id.
-func (w *associationsRepositoryImpl) GetByGenerationID(generationID int64) ([]*entity.AssociationsEntity, error) {
+func (w *associationsRepositoryImpl) GetByGenerationID(generationID int64) ([]*entity.AssociationsEntity, bool, error) {
 	w.mu.RLock()
 
 	instance := db.GetInstance()
@@ -437,9 +452,21 @@ func (w *associationsRepositoryImpl) GetByGenerationID(generationID int64) ([]*e
 		Where("generation_id = ?", generationID).
 		Find(&result).Error
 
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			w.mu.RUnlock()
+
+			return result, false, nil
+		}
+
+		w.mu.RUnlock()
+
+		return result, false, err
+	}
+
 	w.mu.RUnlock()
 
-	return result, err
+	return result, true, nil
 }
 
 // createAssociations initializes associationsRepositoryImpl.
@@ -554,6 +581,7 @@ func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) ([]*entity.LobbyEntity
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
 		Preload((&entity.UserEntity{}).TableView()).
 		Preload((&entity.SessionEntity{}).TableView()).
+		// Preload((&entity.InventoryEntity{}).TableView()).
 		Where("user_id = ?", userID).
 		Find(&result).Error
 

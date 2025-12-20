@@ -800,6 +800,8 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 					Name:      chest.Name,
 					Type:      dto.ChestGenerationType,
 					Active:    true,
+					PositionX: float64(chest.Position.X),
+					PositionY: float64(chest.Position.Y),
 				})
 			if err != nil {
 				return err
@@ -807,12 +809,14 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 
 			var generation *entity.GenerationsEntity
 
-			generation, err = repository.
+			generation, _, err = repository.
 				GetGenerationRepository().
 				GetChestTypeByInstanceAndSessionIDWithTransaction(tx, chest.Instance, request.GetSessionId())
 			if err != nil {
 				return err
 			}
+
+			fmt.Println(generation.ID, chest.ChestItems, "INGENERATION")
 
 			for _, chestItem := range chest.ChestItems {
 				err = repository.
@@ -822,6 +826,7 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 						GenerationID: generation.ID,
 						Instance:     chestItem.Instance,
 						Name:         chestItem.Name,
+						Active:       true,
 					})
 				if err != nil {
 					return err
@@ -840,6 +845,8 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 					Name:      healthPack.Name,
 					Type:      dto.HealthPackGenerationType,
 					Active:    true,
+					PositionX: float64(healthPack.Position.X),
+					PositionY: float64(healthPack.Position.Y),
 				})
 			if err != nil {
 				return err
@@ -848,8 +855,6 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 
 		for i, lobby := range lobbies {
 			spawnable := request.GetSpawnables()[randomSpawnables[i]]
-
-			fmt.Println(spawnable, "SPAWNABLE")
 
 			err = repository.
 				GetLobbiesRepository().
@@ -2411,7 +2416,7 @@ func (h *Handler) GetChests(request *metadatav1.GetChestsRequest, stream grpc.Se
 			for _, chest := range chests {
 				var chestItems []*metadatav1.ChestItem
 
-				associations, err := repository.
+				associations, _, err := repository.
 					GetAssociationsRepository().
 					GetByGenerationID(chest.ID)
 				if err != nil {

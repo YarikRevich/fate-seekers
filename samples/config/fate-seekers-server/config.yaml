@@ -61,7 +61,7 @@ operation:
 
   # Represents min chests amount, which is used for caching and object generation configuration. 
   # Be aware that amount of chests influences the amount of allocated memory.
-  min-chests-amount: 10
+  min-chests-amount: 2
 
   # Represents max sessions amount, which is used for caching and object generation configuration. 
   # Be aware that amount of health packs influences the amount of allocated memory.
@@ -69,7 +69,7 @@ operation:
 
   # Represents min sessions amount, which is used for caching and object generation configuration. 
   # Be aware that amount of health packs influences the amount of allocated memory.
-  min-health-packs-amount: 5
+  min-health-packs-amount: 1
 
   # Represents database properties description.
   database:

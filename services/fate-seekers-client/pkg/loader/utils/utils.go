@@ -32,8 +32,8 @@ func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables, chestLocations
 				layer, tilemap.Height, tilemap.Width, tilemap.TileHeight, tilemap.TileWidth)
 
 			spawnables = append(spawnables, spawnableTiles...)
-			chestLocations = append(spawnables, chestTiles...)
-			healthPackLocations = append(spawnables, healthPackTiles...)
+			chestLocations = append(chestLocations, chestTiles...)
+			healthPackLocations = append(healthPackLocations, healthPackTiles...)
 
 			for _, soundableTile := range soundableTiles {
 				sounder.GetInstance().AddSoundableTileObject(soundableTile)

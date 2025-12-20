@@ -52,13 +52,13 @@ func (ts *TravelScreen) HandleInput() error {
 		ts.loadingStarsParticleEffect.HoldProgression()
 
 		if store.GetStartSessionTravel() == value.START_SESSION_TRAVEL_TRUE_VALUE {
-			utils.PerformLoadMap(loader.GetInstance().GetMap(loader.FirstMap), func(spawnables []dto.Position) {
+			utils.PerformLoadMap(loader.GetInstance().GetMap(loader.FirstMap), func(spawnables, chestLocations, healthPackLocations []dto.Position) {
 				handler.PerformStartSession(
 					store.GetSelectedSessionMetadata().ID,
 					store.GetSelectedLobbySetUnitMetadata().ID,
 					converter.ConvertPositionsToStartSessionSpawnables(spawnables),
-					converter.ConvertPositionsToStartSessionChestLocations(spawnables),
-					converter.ConvertPositionsToStartSessionHealthPackLocations(spawnables),
+					converter.ConvertPositionsToStartSessionChestLocations(chestLocations),
+					converter.ConvertPositionsToStartSessionHealthPackLocations(healthPackLocations),
 					func(err error) {
 						if err != nil {
 							notification.GetInstance().Push(
@@ -125,7 +125,7 @@ func (ts *TravelScreen) HandleInput() error {
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetStartSessionTravel(value.START_SESSION_TRAVEL_FALSE_VALUE))
 		} else {
-			utils.PerformLoadMap(loader.GetInstance().GetMap(loader.FirstMap), func(_ []dto.Position) {
+			utils.PerformLoadMap(loader.GetInstance().GetMap(loader.FirstMap), func(_, _, _ []dto.Position) {
 				ts.loadingStarsParticleEffect.ResumeProgression()
 			})
 		}

@@ -42,4 +42,14 @@
    <property name="selectable" type="bool" value="true"/>
   </properties>
  </tile>
+ <tile id="140">
+  <properties>
+   <property name="chest_location" type="bool" value="true"/>
+  </properties>
+ </tile>
+ <tile id="318">
+  <properties>
+   <property name="health_pack_location" type="bool" value="true"/>
+  </properties>
+ </tile>
 </tileset>

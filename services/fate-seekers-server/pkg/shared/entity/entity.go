@@ -141,23 +141,22 @@ func (a *AssociationsEntity) BeforeCreate(tx *gorm.DB) error {
 
 // LobbyEntity represents lobbies entity.
 type LobbyEntity struct {
-	ID              int64             `gorm:"column:id;primaryKey;auto_increment;not null"`
-	UserID          int64             `gorm:"column:user_id;not null"`
-	SessionID       int64             `gorm:"column:session_id;not null"`
-	InventoryID     int64             `gorm:"column:inventory_id;not null"`
-	Skin            int64             `gorm:"column:skin;not null"`
-	Health          int64             `gorm:"column:health;not null;default:100"`
-	Active          bool              `gorm:"column:active;not null"`
-	Host            bool              `gorm:"column:host;not null"`
-	Eliminated      bool              `gorm:"column:eliminated;not null"`
-	PositionX       float64           `gorm:"column:position_x;not null"`
-	PositionY       float64           `gorm:"column:position_y;not null"`
-	PositionStatic  bool              `gorm:"column:position_static;not null"`
-	Ammo            int64             `gorm:"column:position_static;not null"`
-	CreatedAt       time.Time         `gorm:"column:created_at;autoCreateTime"`
-	UserEntity      UserEntity        `gorm:"foreignKey:UserID;references:ID"`
-	SessionEntity   SessionEntity     `gorm:"foreignKey:SessionID;references:ID"`
-	InventoryEntity []InventoryEntity `gorm:"foreignKey:InventoryID;references:UserID"`
+	ID             int64             `gorm:"column:id;primaryKey;auto_increment;not null"`
+	UserID         int64             `gorm:"column:user_id;not null"`
+	SessionID      int64             `gorm:"column:session_id;not null"`
+	Skin           int64             `gorm:"column:skin;not null"`
+	Health         int64             `gorm:"column:health;not null;default:100"`
+	Active         bool              `gorm:"column:active;not null"`
+	Host           bool              `gorm:"column:host;not null"`
+	Eliminated     bool              `gorm:"column:eliminated;not null"`
+	PositionX      float64           `gorm:"column:position_x;not null"`
+	PositionY      float64           `gorm:"column:position_y;not null"`
+	PositionStatic bool              `gorm:"column:position_static;not null"`
+	Ammo           int64             `gorm:"column:ammo;not null"`
+	CreatedAt      time.Time         `gorm:"column:created_at;autoCreateTime"`
+	UserEntity     UserEntity        `gorm:"foreignKey:UserID;references:ID"`
+	SessionEntity  SessionEntity     `gorm:"foreignKey:SessionID;references:ID"`
+	Inventory      []InventoryEntity `gorm:"foreignKey:LobbyID"`
 }
 
 // TableName retrieves name of database table.
@@ -182,12 +181,14 @@ func (l *LobbyEntity) BeforeCreate(tx *gorm.DB) error {
 // InventoryEntity represents inventory entity.
 type InventoryEntity struct {
 	ID            int64         `gorm:"column:id;primaryKey;auto_increment;not null"`
+	LobbyID       int64         `gorm:"column:lobby_id;not null"`
 	UserID        int64         `gorm:"column:user_id;not null"`
 	SessionID     int64         `gorm:"column:session_id;not null"`
 	Name          string        `gorm:"column:name;not null"`
 	CreatedAt     time.Time     `gorm:"column:created_at;autoCreateTime"`
 	UserEntity    UserEntity    `gorm:"foreignKey:UserID;references:ID"`
 	SessionEntity SessionEntity `gorm:"foreignKey:SessionID;references:ID"`
+	LobbyEntity   *LobbyEntity  `gorm:"foreignKey:LobbyID;references:ID"`
 }
 
 // TableName retrieves name of database table.

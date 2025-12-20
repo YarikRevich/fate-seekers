@@ -3,6 +3,7 @@ package loader
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"image"
 	"io/fs"
 	"path/filepath"
@@ -327,6 +328,8 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 
 					chestProperty := tile.Properties.GetBool(TilemapChestLocationProperty)
 					if chestProperty {
+						fmt.Println(chestProperty, position)
+
 						chests = append(chests, position)
 					}
 

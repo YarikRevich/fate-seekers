@@ -183,6 +183,8 @@ type GenerationsRepositoryInsertOrUpdateRequest struct {
 	Name      string
 	Type      string
 	Active    bool
+	PositionX float64
+	PositionY float64
 }
 
 // AssociationsRepositoryInsertOrUpdateRequest represents associations repository entity update request.

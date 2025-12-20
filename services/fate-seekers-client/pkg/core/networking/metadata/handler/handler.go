@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/common"
@@ -295,6 +296,8 @@ func PerformStartSession(
 	chestLocations,
 	healthPackLocations []*metadatav1.Position,
 	callback func(err error)) {
+	fmt.Println(chestLocations, "CHEST LOCATIONS")
+
 	go func() {
 		_, err := connector.
 			GetInstance().
