@@ -543,6 +543,10 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 		GetInstance().
 		CommitUserSessionsTransaction()
 
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
 	return new(metadatav1.RemoveSessionResponse), nil
 }
 
@@ -2315,6 +2319,10 @@ func (h *Handler) OpenChest(context context.Context, request *metadatav1.OpenChe
 	}
 
 	if !found {
+		cache.
+			GetInstance().
+			CommitLobbySetTransaction()
+
 		return nil, ErrUserIsNotInLobby
 	}
 
@@ -2399,6 +2407,10 @@ func (h *Handler) GetChests(request *metadatav1.GetChestsRequest, stream grpc.Se
 		}
 	}
 
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
 	for {
 		select {
 		case <-ticker.C:
@@ -2412,6 +2424,8 @@ func (h *Handler) GetChests(request *metadatav1.GetChestsRequest, stream grpc.Se
 			if err != nil {
 				return err
 			}
+
+			fmt.Println("CHEST", chests)
 
 			for _, chest := range chests {
 				var chestItems []*metadatav1.ChestItem
@@ -2561,6 +2575,10 @@ func (h *Handler) OpenHealthPack(context context.Context, request *metadatav1.Op
 	}
 
 	if !found {
+		cache.
+			GetInstance().
+			CommitLobbySetTransaction()
+
 		return nil, ErrUserIsNotInLobby
 	}
 

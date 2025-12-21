@@ -26,6 +26,9 @@ type SoundManager struct {
 	// Represents instance of sound sounder main FX manager.
 	soundSounderMainFxManager *fx.SoundFXManager
 
+	// Represents instance of sound sounder external FX manager.
+	soundSounderExternalFxManager *fx.SoundFXManager
+
 	// Represents instance of sound music manager.
 	soundMusicManager *music.SoundMusicManager
 }
@@ -42,7 +45,12 @@ func (sm *SoundManager) GetSoundEventsFxManager() *fx.SoundFXManager {
 
 // GetSoundSounderMainFxManager retrieves instance of sound sounder main FX manager.
 func (sm *SoundManager) GetSoundSounderMainFxManager() *fx.SoundFXManager {
-	return sm.soundEventsFxManager
+	return sm.soundSounderMainFxManager
+}
+
+// GetSoundSounderExternalFxManager retrieves instance of sound sounder external FX manager.
+func (sm *SoundManager) GetSoundSounderExternalFxManager() *fx.SoundFXManager {
+	return sm.soundSounderExternalFxManager
 }
 
 // GetSoundMusicManager retrieves instance of sound music manager.
@@ -68,14 +76,18 @@ func newSoundManager() *SoundManager {
 	soundSounderMainFxManager := fx.NewSoundFxManager(audioContext)
 	soundSounderMainFxManager.Init()
 
+	soundSounderExternalFxManager := fx.NewSoundFxManager(audioContext)
+	soundSounderExternalFxManager.Init()
+
 	soundMusicManager := music.NewSoundMusicManager(audioContext)
 	soundMusicManager.Init()
 
 	result := &SoundManager{
-		soundUIFxManager:          soundUIFxManager,
-		soundEventsFxManager:      soundEventsFxManager,
-		soundSounderMainFxManager: soundSounderMainFxManager,
-		soundMusicManager:         soundMusicManager,
+		soundUIFxManager:              soundUIFxManager,
+		soundEventsFxManager:          soundEventsFxManager,
+		soundSounderMainFxManager:     soundSounderMainFxManager,
+		soundSounderExternalFxManager: soundSounderExternalFxManager,
+		soundMusicManager:             soundMusicManager,
 	}
 
 	return result

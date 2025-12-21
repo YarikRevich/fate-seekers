@@ -37,18 +37,19 @@ func Run() {
 		for range ticker.C {
 			ticker.Stop()
 
-			cache.
-				GetInstance().
-				BeginMetadataTransaction()
 			fmt.Println("BEFORE 2")
 
 			cache.
 				GetInstance().
-				BeginLobbySetTransaction()
+				BeginSessionsTransaction()
 
 			cache.
 				GetInstance().
-				BeginSessionsTransaction()
+				BeginMetadataTransaction()
+
+			cache.
+				GetInstance().
+				BeginLobbySetTransaction()
 
 			for key, value := range cache.
 				GetInstance().
@@ -144,15 +145,15 @@ func Run() {
 
 			cache.
 				GetInstance().
-				CommitSessionsTransaction()
-
-			cache.
-				GetInstance().
 				CommitLobbySetTransaction()
 
 			cache.
 				GetInstance().
 				CommitMetadataTransaction()
+
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
 
 			ticker.Reset(eventsTickerDuration)
 		}

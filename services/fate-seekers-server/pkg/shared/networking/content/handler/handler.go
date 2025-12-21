@@ -90,6 +90,10 @@ func (h *Handler) Process(key string, value []byte) error {
 			for _, newLobby := range newLobbies {
 				if newLobby.LobbyID == message.GetLobbyId() {
 					if newLobby.Eliminated {
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
 						return ErrUserIsEliminated
 					}
 
@@ -185,6 +189,10 @@ func (h *Handler) Process(key string, value []byte) error {
 			for _, newLobby := range newLobbies {
 				if newLobby.LobbyID == message.GetLobbyId() {
 					if newLobby.Eliminated {
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
 						return ErrUserIsEliminated
 					}
 

@@ -15,6 +15,7 @@ const (
 	ACTIVE_SCREEN_ENTRY_VALUE = "entry"
 
 	ACTIVE_SCREEN_MENU_VALUE         = "menu"
+	ACTIVE_SCREEN_CREDITS_VALUE      = "credits"
 	ACTIVE_SCREEN_SETTINGS_VALUE     = "settings"
 	ACTIVE_SCREEN_SELECTOR_VALUE     = "selector"
 	ACTIVE_SCREEN_CREATOR_VALUE      = "creator"

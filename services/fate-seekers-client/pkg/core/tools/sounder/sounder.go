@@ -78,9 +78,13 @@ func (s *Sounder) Update() {
 
 	s.mainTrackableObjectMutex.Lock()
 
+	// TODO: do main objects tracking.
+
 	s.mainTrackableObjectMutex.Unlock()
 
 	s.externalTrackableObjectMutex.RLock()
+
+	// TODO: do external objects tracking.
 
 	s.externalTrackableObjectMutex.RUnlock()
 

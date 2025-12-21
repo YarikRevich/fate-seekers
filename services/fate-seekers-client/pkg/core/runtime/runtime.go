@@ -11,6 +11,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/creator"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/credits"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/death"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/intro"
@@ -284,6 +285,9 @@ func (r *Runtime) Update() error {
 
 	case value.ACTIVE_SCREEN_MENU_VALUE:
 		r.activeScreen = menu.GetInstance()
+
+	case value.ACTIVE_SCREEN_CREDITS_VALUE:
+		r.activeScreen = credits.GetInstance()
 
 	case value.ACTIVE_SCREEN_SETTINGS_VALUE:
 		r.activeScreen = settings.GetInstance()

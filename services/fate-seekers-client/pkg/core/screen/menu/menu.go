@@ -252,6 +252,8 @@ func newMenuScreen() screen.Screen {
 										dispatcher.GetInstance().Dispatch(
 											action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
 
+										transparentTransitionEffect.Reset()
+
 										dispatcher.GetInstance().Dispatch(
 											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 									})
@@ -292,7 +294,10 @@ func newMenuScreen() screen.Screen {
 					}
 				},
 				func() {
-					dispatcher.GetInstance().Dispatch(action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_DEATH_VALUE))
+					transparentTransitionEffect.Reset()
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_CREDITS_VALUE))
 				},
 				func() {
 
