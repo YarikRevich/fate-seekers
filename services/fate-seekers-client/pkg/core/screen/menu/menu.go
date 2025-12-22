@@ -300,7 +300,10 @@ func newMenuScreen() screen.Screen {
 						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_CREDITS_VALUE))
 				},
 				func() {
+					transparentTransitionEffect.Reset()
 
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_COLLECTIONS_VALUE))
 				},
 				func() {
 					transparentTransitionEffect.Reset()

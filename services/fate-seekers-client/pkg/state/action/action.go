@@ -118,6 +118,11 @@ const (
 	DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION = "DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION"
 )
 
+// Describes all the available state actions for collections reducer.
+const (
+	SET_RESET_COLLECTIONS_ACTION = "SET_RESET_COLLECTIONS_ACTION"
+)
+
 // Describes all the available state actions for travel reducer.
 const (
 	SET_RESET_TRAVEL_ACTION         = "SET_RESET_TRAVEL_ACTION"
@@ -627,6 +632,14 @@ func NewDiagonalDownLeftPositionSession() godux.Action {
 func NewDiagonalDownRightPositionSession() godux.Action {
 	return godux.Action{
 		Type: DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION,
+	}
+}
+
+// NewSetResetCollections creates new set reset collections action.
+func NewSetResetCollections(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_RESET_COLLECTIONS_ACTION,
+		Value: value,
 	}
 }
 

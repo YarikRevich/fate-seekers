@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
@@ -47,7 +48,8 @@ func NewCreditsComponent(closeCallback func()) *widget.Container {
 	}
 
 	result.AddChild(widget.NewText(
-		widget.TextOpts.Text("Credits", titleFont, color.White),
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("client.credits.title"), titleFont, color.White),
 		widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionCenter),
 		widget.TextOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
@@ -85,7 +87,7 @@ func NewCreditsComponent(closeCallback func()) *widget.Container {
 		Name string
 	}{
 		{"Lead Developer: ", "Yaroslav Svitlytskyi"},
-		{"Special Thanks: ", "Sonya"},
+		{translation.GetInstance().GetTranslation("client.credits.special-thanks"), "Sonya"},
 		{"                                     ", "Nikita"},
 	}
 
@@ -94,9 +96,12 @@ func NewCreditsComponent(closeCallback func()) *widget.Container {
 		Size:   20,
 	}
 
-	for _, c := range credits {
+	for _, credit := range credits {
 		label := widget.NewText(
-			widget.TextOpts.Text(fmt.Sprintf("%s %s", c.Role, c.Name), generalFont, color.RGBA{R: 200, G: 200, B: 200, A: 255}),
+			widget.TextOpts.Text(
+				fmt.Sprintf("%s %s", credit.Role, credit.Name),
+				generalFont,
+				color.White),
 			widget.TextOpts.Position(widget.TextPositionStart, widget.TextPositionStart),
 			widget.TextOpts.WidgetOpts(
 				widget.WidgetOpts.LayoutData(widget.RowLayoutData{
@@ -152,7 +157,7 @@ func NewCreditsComponent(closeCallback func()) *widget.Container {
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("shared.settings.close"),
+			translation.GetInstance().GetTranslation("client.credits.close"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(
@@ -166,6 +171,8 @@ func NewCreditsComponent(closeCallback func()) *widget.Container {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			closeCallback()
 		}),
 	))

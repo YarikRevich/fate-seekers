@@ -10,6 +10,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/answerinput"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/collections"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/creator"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/credits"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/death"
@@ -289,6 +290,9 @@ func (r *Runtime) Update() error {
 	case value.ACTIVE_SCREEN_CREDITS_VALUE:
 		r.activeScreen = credits.GetInstance()
 
+	case value.ACTIVE_SCREEN_COLLECTIONS_VALUE:
+		r.activeScreen = collections.GetInstance()
+
 	case value.ACTIVE_SCREEN_SETTINGS_VALUE:
 		r.activeScreen = settings.GetInstance()
 
@@ -327,8 +331,7 @@ func (r *Runtime) Update() error {
 
 			letter.GetInstance().SetText(loadedLetter.Text)
 
-			// TODO: take attachement
-			// letter.GetInstance().SetAttachment(loadedLetter.Attachment.Location)
+			letter.GetInstance().SetAttachment(loadedLetter.Attachment.Location)
 
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetLetterUpdatedAction(value.LETTER_UPDATED_TRUE_VALUE))

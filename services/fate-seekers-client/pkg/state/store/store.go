@@ -7,6 +7,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/collections"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/creator"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/death"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/event"
@@ -381,6 +382,13 @@ func GetRetrievedUsersMetadataSession() dto.RetrievedUsersMetadataSessionSet {
 	return instance.GetState(session.RETRIEVED_USERS_METADATA_SESSION_STATE).(dto.RetrievedUsersMetadataSessionSet)
 }
 
+// GetResetCollections retrieves reset collections state value.
+func GetResetCollections() string {
+	instance := GetInstance()
+
+	return instance.GetState(collections.RESET_COLLECTIONS_STATE).(string)
+}
+
 // GetResetTravel retrieves reset travel state value.
 func GetResetTravel() string {
 	instance := GetInstance()
@@ -444,6 +452,9 @@ func newStore() *godux.Store {
 
 	sessionReducer := session.NewSessionStateReducer(store)
 	sessionReducer.Init()
+
+	collectionsReducer := collections.NewCollectionsStateReducer(store)
+	collectionsReducer.Init()
 
 	travelReducer := travel.NewTravelStateReducer(store)
 	travelReducer.Init()
@@ -513,6 +524,11 @@ func newStore() *godux.Store {
 		}
 
 		result = sessionReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = collectionsReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

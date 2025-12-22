@@ -249,6 +249,18 @@ func (ss *SessionScreen) HandleInput() error {
 									value.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
 
 							dispatcher.GetInstance().Dispatch(
+								action.NewSetChestsRetrievalStartedNetworking(
+									value.CHESTS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetHealthPacksRetrievalStartedNetworking(
+									value.HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
+
+							// dispatcher.GetInstance().Dispatch(
+							// 	action.NewSetUserInventoryRetrievalStartedNetworking(
+							// 		value.USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
+
+							dispatcher.GetInstance().Dispatch(
 								action.NewSetResetDeath(value.RESET_DEATH_TRUE_VALUE))
 
 							dispatcher.GetInstance().Dispatch(
@@ -414,10 +426,18 @@ func (ss *SessionScreen) HandleInput() error {
 			action.NewSetChestsRetrievalStartedNetworking(
 				value.CHESTS_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE))
 
+		fmt.Println("STARTING CHESTS RETRIEVAL")
+
 		metadatastream.GetGetChestsSubmitter().Clean(func() {
 			metadatastream.GetGetChestsSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetChestsResponse, err error) bool {
 					fmt.Println(response.GetChests(), err, "CHESTS")
+
+					for _, chest := range response.GetChests() {
+						for _, chestItem := range chest.GetChestItems() {
+							fmt.Println(chestItem.GetName())
+						}
+					}
 
 					return false
 				})

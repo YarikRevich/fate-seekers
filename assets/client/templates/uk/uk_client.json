@@ -19,6 +19,30 @@
         "one": "Вийти",
         "other": "Вийти"
     },
+    "client.credits.title": {
+        "one": "Титри",
+        "other": "Титри"
+    },
+    "client.credits.special-thanks": {
+        "one": "Special Thanks: ",
+        "other": "Special Thanks: "
+    },
+    "client.credits.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
+    "client.collections.title": {
+        "one": "Колекції",
+        "other": "Колекції"
+    },
+    "client.collections.available-collections": {
+        "one": "Доступні колекції",
+        "other": "Доступні колекції"
+    },
+    "client.collections.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
     "client.settings.sound.music": {
         "one": "Гучність музики",
         "other": "Гучність музики"
@@ -250,6 +274,10 @@
     "client.networking.event-finished": {
         "one": "Погодна подія закінчилася",
         "other": "Погодна подія закінчилася"
+    },
+    "client.repository.collections-retrieval-failure": {
+        "one": "Неможливо отримати данні колекцій користувача",
+        "other": "Неможливо отримати данні колекцій користувача"
     },
     "client.gamepad.connected": {
         "one": "Контроллер був підʼєднаний",

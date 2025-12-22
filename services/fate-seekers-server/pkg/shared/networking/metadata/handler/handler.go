@@ -2182,8 +2182,6 @@ func (h *Handler) GetUserInventory(request *metadatav1.GetUserInventoryRequest, 
 	}
 }
 
-// rpc GetUserInventory(GetUserInventoryRequest) returns (stream GetUserInventoryResponse) {};
-
 func (h *Handler) TakeChestItem(context context.Context, request *metadatav1.TakeChestItemRequest) (*metadatav1.TakeChestItemResponse, error) {
 	response := new(metadatav1.TakeChestItemResponse)
 

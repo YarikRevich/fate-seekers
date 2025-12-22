@@ -136,8 +136,6 @@ func newSelectorScreen() screen.Screen {
 					func(value dto.RetrievedSessionMetadata) bool {
 						return value.Name == sessionName
 					}) {
-					fmt.Println("does not exist in cache")
-
 					var sessionID int64
 
 					for _, session := range store.GetRetrievedSessionsMetadata() {

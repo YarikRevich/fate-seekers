@@ -16,6 +16,8 @@ const (
 	CHEST_ITEM_WEAPON_TYPE      = "weapon"
 	CHEST_ITEM_WEAPON_AMMO_TYPE = "weapon_ammo"
 	CHEST_ITEM_HEALTH_PACK_TYPE = "standard_health_pack"
+
+	CHEST_ITEM_LETTER_TYPE = "letter"
 )
 
 // Describes all the available health pack configurations.
@@ -33,6 +35,7 @@ var (
 		CHEST_ITEM_WEAPON_TYPE,
 		CHEST_ITEM_WEAPON_AMMO_TYPE,
 		CHEST_ITEM_HEALTH_PACK_TYPE,
+		CHEST_ITEM_LETTER_TYPE,
 	}
 
 	HEALTH_PACK_TYPES = []string{

@@ -16,6 +16,7 @@ const (
 
 	ACTIVE_SCREEN_MENU_VALUE         = "menu"
 	ACTIVE_SCREEN_CREDITS_VALUE      = "credits"
+	ACTIVE_SCREEN_COLLECTIONS_VALUE  = "collections"
 	ACTIVE_SCREEN_SETTINGS_VALUE     = "settings"
 	ACTIVE_SCREEN_SELECTOR_VALUE     = "selector"
 	ACTIVE_SCREEN_CREATOR_VALUE      = "creator"
@@ -182,6 +183,12 @@ var (
 	STAGE_POSITION_SESSION_EMPTY_VALUE    dto.Position
 	PREVIOUS_POSITION_SESSION_EMPTY_VALUE dto.Position
 	RETRIEVED_USERS_METADATA_EMPTY_VALUE  dto.RetrievedUsersMetadataSessionSet = make(dto.RetrievedUsersMetadataSessionSet)
+)
+
+// Describes available collections reducer store values.
+const (
+	RESET_COLLECTIONS_FALSE_VALUE = "false"
+	RESET_COLLECTIONS_TRUE_VALUE  = "true"
 )
 
 // Describes available travel reducer store values.

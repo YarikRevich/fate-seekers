@@ -19,6 +19,30 @@
         "one": "Exit",
         "other": "Exit"
     },
+    "client.credits.title": {
+        "one": "Credits",
+        "other": "Credits"
+    },
+    "client.credits.special-thanks": {
+        "one": "Special Thanks: ",
+        "other": "Special Thanks: "
+    },
+    "client.credits.close": {
+        "one": "Close",
+        "other": "Close"
+    },
+    "client.collections.title": {
+        "one": "Collections",
+        "other": "Collections"
+    },
+    "client.collections.available-collections": {
+        "one": "Available collections",
+        "other": "Available collections"
+    },
+    "client.collections.close": {
+        "one": "Close",
+        "other": "Close"
+    },
     "client.settings.sound.music": {
         "one": "Music",
         "other": "Music"
@@ -250,6 +274,10 @@
     "client.networking.event-finished": {
         "one": "Event has finished",
         "other": "Event has finished"
+    },
+    "client.repository.collections-retrieval-failure": {
+        "one": "Unable to perform user collections retrieval",
+        "other": "Unable to perform user collections retrieval"
     },
     "client.gamepad.connected": {
         "one": "Controller has been connected",
