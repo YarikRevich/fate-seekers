@@ -3,7 +3,10 @@ package sounder
 import (
 	"sync"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
+	"github.com/solarlune/resolv"
 )
 
 var (
@@ -13,11 +16,17 @@ var (
 
 // Sounder represents active map sound manager.
 type Sounder struct {
+	// Represents collision polygons mutex.
+	collisionPolygonsMutex sync.Mutex
+
+	// Represents collision polygons.
+	collisionPolygons []*resolv.ConvexPolygon
+
 	// Represents soundable objects mutex.
-	soundableTileObjectMutex sync.Mutex
+	soundableTileObjectMutex sync.RWMutex
 
 	// Represents soundable tile objects.
-	soundableTileObjects []*dto.SoundableTile
+	soundableTileObjects map[uint32]*dto.SoundableTile
 
 	// Represents external trackable objects mutex.
 	externalTrackableObjectMutex sync.RWMutex
@@ -29,7 +38,10 @@ type Sounder struct {
 	mainTrackableObjectMutex sync.Mutex
 
 	// Represents main trackable soundable object.
-	mainTrackableObject dto.Position
+	mainTrackableObject *resolv.ConvexPolygon
+
+	//
+	mainTrackableObjectUpdated bool
 }
 
 // PruneExternalTrackableObjects performs clean operation for abondoned external trackable objects.
@@ -55,28 +67,75 @@ func (s *Sounder) SetExternalTrackableObject(key string, value dto.Position) {
 }
 
 // SetMainTrackableObject sets main trackable object with the provided value.
-func (s *Sounder) SetMainTrackableObject(value dto.Position) {
+func (s *Sounder) SetMainTrackableObject(value dto.Position, shiftWidth, shiftHeight float64) {
 	s.mainTrackableObjectMutex.Lock()
 
-	s.mainTrackableObject = value
+	if s.mainTrackableObject == nil ||
+		(s.mainTrackableObject.Position().X != value.X ||
+			s.mainTrackableObject.Position().Y != value.Y) {
+		s.mainTrackableObjectUpdated = true
+	}
+
+	s.mainTrackableObject = resolv.NewRectangle(
+		value.X, value.Y, shiftWidth/2, shiftHeight/2)
 
 	s.mainTrackableObjectMutex.Unlock()
 }
 
 // AddSoundables adds new soundable tile object with the provided value.
 func (s *Sounder) AddSoundableTileObject(value *dto.SoundableTile) {
+	s.collisionPolygonsMutex.Lock()
+
+	collider := resolv.NewConvexPolygon(
+		value.Position.X-(float64(value.TileWidth)/2), value.Position.Y-(float64(value.TileHeight)/2),
+		[]float64{
+			float64(value.TileWidth) / 2.0, 0,
+			float64(value.TileWidth), float64(value.TileHeight) / 2.0,
+			float64(value.TileWidth) / 2.0, float64(value.TileHeight),
+			0, float64(value.TileHeight) / 2.0,
+		},
+	)
+
 	s.soundableTileObjectMutex.Lock()
 
-	s.soundableTileObjects = append(s.soundableTileObjects, value)
+	s.soundableTileObjects[collider.ID()] = value
 
 	s.soundableTileObjectMutex.Unlock()
+
+	s.collisionPolygons = append(s.collisionPolygons, collider)
+
+	s.collisionPolygonsMutex.Unlock()
+}
+
+// InterruptMainTrackableObject performs sound interruption for main trackable object.
+func (s *Sounder) InterruptMainTrackableObject() {
+	sound.GetInstance().GetSoundSounderMainFxManager().Stop()
 }
 
 // Update performs update operation for all the soundable objects.
 func (s *Sounder) Update() {
-	s.soundableTileObjectMutex.Lock()
+	s.collisionPolygonsMutex.Lock()
+
+	s.soundableTileObjectMutex.RLock()
 
 	s.mainTrackableObjectMutex.Lock()
+
+	if s.mainTrackableObjectUpdated {
+		s.mainTrackableObjectUpdated = false
+
+		for _, polygon := range s.collisionPolygons {
+			if polygon.IsIntersecting(s.mainTrackableObject) {
+				if !sound.GetInstance().GetSoundSounderMainFxManager().IsFXPlaying() {
+					switch s.soundableTileObjects[polygon.ID()].Name {
+					case loader.TilemapSoundRockValue:
+						sound.GetInstance().GetSoundSounderMainFxManager().PushWithHandbrake(loader.RockFXSound)
+					}
+				}
+
+				break
+			}
+		}
+	}
 
 	// TODO: do main objects tracking.
 
@@ -88,16 +147,26 @@ func (s *Sounder) Update() {
 
 	s.externalTrackableObjectMutex.RUnlock()
 
-	s.soundableTileObjectMutex.Unlock()
+	s.soundableTileObjectMutex.RUnlock()
+
+	s.collisionPolygonsMutex.Unlock()
 }
 
 // Clean performs clean operation for the configured soundable holders.
 func (s *Sounder) Clean() {
 	s.soundableTileObjectMutex.Lock()
 
-	s.soundableTileObjects = s.soundableTileObjects[:0]
+	clear(s.soundableTileObjects)
 
 	s.soundableTileObjectMutex.Unlock()
+
+	s.mainTrackableObjectMutex.Lock()
+
+	s.mainTrackableObject = nil
+
+	s.mainTrackableObjectUpdated = false
+
+	s.mainTrackableObjectMutex.Unlock()
 
 	s.externalTrackableObjectMutex.Lock()
 
@@ -109,6 +178,7 @@ func (s *Sounder) Clean() {
 // newSounder initializes Sounder.
 func newSounder() *Sounder {
 	return &Sounder{
+		soundableTileObjects:     make(map[uint32]*dto.SoundableTile),
 		externalTrackableObjects: make(map[string]dto.Position),
 	}
 }

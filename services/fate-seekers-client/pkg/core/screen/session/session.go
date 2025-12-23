@@ -573,16 +573,19 @@ func (ss *SessionScreen) HandleInput() error {
 						dispatcher.GetInstance().Dispatch(action.NewSyncStagePositionYSession())
 					}
 				}
+
+				sounder.GetInstance().SetMainTrackableObject(
+					store.GetPositionSession(), shiftWidth, shiftHeight)
 			} else {
 				dispatcher.GetInstance().Dispatch(action.NewSyncStagePositionXSession())
 				dispatcher.GetInstance().Dispatch(action.NewSyncStagePositionYSession())
 			}
+		} else {
+			sounder.GetInstance().InterruptMainTrackableObject()
 		}
 	}
 
 	store.RetrievedUsersMetadataSessionSyncHelper.Unlock()
-
-	sounder.GetInstance().SetMainTrackableObject(store.GetPositionSession())
 
 	var movableUnit *movable.Movable
 
@@ -714,6 +717,10 @@ func (ss *SessionScreen) HandleInput() error {
 			}
 		}
 	}
+
+	// fmt.Println(
+	// 	math.Round(ss.camera.X*math.Pow(10, 2))/math.Pow(10, 2),
+	// 	math.Round(ss.camera.Y*math.Pow(10, 2))/math.Pow(10, 2))
 
 	// TODO: click on the letter.
 

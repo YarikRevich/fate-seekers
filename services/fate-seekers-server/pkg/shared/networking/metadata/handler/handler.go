@@ -294,6 +294,8 @@ func (h *Handler) CreateSession(ctx context.Context, request *metadatav1.CreateS
 		return nil, ErrSessionAlreadyExists
 	}
 
+	fmt.Println("BEFORE SESSION LOCK")
+
 	cache.
 		GetInstance().
 		BeginSessionsTransaction()
@@ -1277,6 +1279,10 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 			}
 
 			if !exists {
+				cache.
+					GetInstance().
+					CommitSessionsTransaction()
+
 				return nil, ErrSessionDoesNotExists
 			}
 
@@ -1332,6 +1338,10 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 		}
 
 		if !exists {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
 			return nil, ErrSessionDoesNotExists
 		}
 
@@ -2233,6 +2243,10 @@ func (h *Handler) OpenChest(context context.Context, request *metadatav1.OpenChe
 		}
 
 		if !exists {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
 			return nil, ErrSessionDoesNotExists
 		}
 
@@ -2379,6 +2393,10 @@ func (h *Handler) GetChests(request *metadatav1.GetChestsRequest, stream grpc.Se
 		}
 
 		if !exists {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
 			return ErrSessionDoesNotExists
 		}
 
@@ -2489,6 +2507,10 @@ func (h *Handler) OpenHealthPack(context context.Context, request *metadatav1.Op
 		}
 
 		if !exists {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
 			return nil, ErrSessionDoesNotExists
 		}
 
@@ -2635,6 +2657,10 @@ func (h *Handler) GetHealthPacks(request *metadatav1.GetHealthPacksRequest, stre
 		}
 
 		if !exists {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
 			return ErrSessionDoesNotExists
 		}
 
@@ -2660,6 +2686,10 @@ func (h *Handler) GetHealthPacks(request *metadatav1.GetHealthPacksRequest, stre
 			return ErrSessionNotStarted
 		}
 	}
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
 
 	for {
 		select {
@@ -2726,6 +2756,10 @@ func (h *Handler) GetEvents(request *metadatav1.GetEventsRequest, stream grpc.Se
 		}
 
 		if !exists {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
 			return ErrSessionDoesNotExists
 		}
 

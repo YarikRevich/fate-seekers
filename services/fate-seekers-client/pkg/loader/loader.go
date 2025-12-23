@@ -71,6 +71,11 @@ const (
 	TilemapHealthPackLocationProperty = "health_pack_location"
 )
 
+// Describes available tilemap sound values.
+const (
+	TilemapSoundRockValue = "rock"
+)
+
 // Describes all the available statics to be loaded.
 const (
 	ButtonIdleButton  = "ui/button-idle.png"
@@ -171,7 +176,7 @@ const (
 
 	ButtonFXSound    = "fx/button/button.ogg"
 	ToxicRainFXSound = "fx/toxicrain/toxicrain.ogg"
-	RockFootFXSound  = "fx/rock_foot/rock_foot.ogg"
+	RockFXSound      = "fx/rock/rock.ogg"
 )
 
 // Decsribes all the embedded files specific paths.
