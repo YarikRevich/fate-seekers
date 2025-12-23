@@ -2,7 +2,6 @@ package events
 
 import (
 	"errors"
-	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -24,8 +23,8 @@ const (
 )
 
 // GetSessionEvents retrieves instance of the session events map, performing initilization if needed.
-var GetSessionEvents = sync.OnceValue[map[string]*dto.SessionEvent](func() map[string]*dto.SessionEvent {
-	return make(map[string]*dto.SessionEvent)
+var GetSessionEvents = sync.OnceValue[*sync.Map](func() *sync.Map {
+	return new(sync.Map)
 })
 
 // Run starts the repository sync worker, which takes latest updates
@@ -36,8 +35,6 @@ func Run() {
 
 		for range ticker.C {
 			ticker.Stop()
-
-			fmt.Println("BEFORE 2")
 
 			cache.
 				GetInstance().
@@ -70,11 +67,13 @@ func Run() {
 
 				var sessionEvent *dto.SessionEvent
 
-				sessionEvent, ok = GetSessionEvents()[cachedSession.Name]
-				if !ok {
+				raw, ok := GetSessionEvents().Load(cachedSession.Name)
+				if ok {
+					sessionEvent = raw.(*dto.SessionEvent)
+				} else {
 					sessionEvent = new(dto.SessionEvent)
 
-					GetSessionEvents()[cachedSession.Name] = sessionEvent
+					GetSessionEvents().Store(cachedSession.Name, sessionEvent)
 				}
 
 				if sessionEvent.EndRate.Before(time.Now()) {
@@ -117,18 +116,20 @@ func Run() {
 							GetMetadata(lobby.Issuer)
 						if ok {
 							for _, metadata := range metadataSet {
-								if !metadata.Eliminated {
-									switch sessionEvent.Name {
-									case dto.EVENT_NAME_TOXIC_RAIN:
-										if metadata.Health-dto.EVENT_HIT_RATE_TOXIC_RAIN >= 0 {
-											metadata.Health -= dto.EVENT_HIT_RATE_TOXIC_RAIN
+								if metadata.SessionID == key {
+									if !metadata.Eliminated {
+										switch sessionEvent.Name {
+										case dto.EVENT_NAME_TOXIC_RAIN:
+											if metadata.Health-dto.EVENT_HIT_RATE_TOXIC_RAIN >= 0 {
+												metadata.Health -= dto.EVENT_HIT_RATE_TOXIC_RAIN
 
-											if metadata.Health == 0 {
+												if metadata.Health == 0 {
+													metadata.Eliminated = true
+												}
+											} else {
+												metadata.Health = 0
 												metadata.Eliminated = true
 											}
-										} else {
-											metadata.Health = 0
-											metadata.Eliminated = true
 										}
 									}
 								}

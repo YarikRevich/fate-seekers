@@ -109,7 +109,9 @@ func (s *Sounder) AddSoundableTileObject(value *dto.SoundableTile) {
 
 // InterruptMainTrackableObject performs sound interruption for main trackable object.
 func (s *Sounder) InterruptMainTrackableObject() {
-	sound.GetInstance().GetSoundSounderMainFxManager().Stop()
+	if sound.GetInstance().GetSoundSounderMainFxManager().IsFXPlaying() {
+		sound.GetInstance().GetSoundSounderMainFxManager().StopFXPlaying()
+	}
 }
 
 // Update performs update operation for all the soundable objects.

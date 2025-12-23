@@ -2801,8 +2801,10 @@ func (h *Handler) GetEvents(request *metadatav1.GetEventsRequest, stream grpc.Se
 
 			response.Name = ""
 
-			sessionEvent, ok := events.GetSessionEvents()[sessionName]
+			value, ok := events.GetSessionEvents().Load(sessionName)
 			if ok {
+				sessionEvent := value.(*dto.SessionEvent)
+
 				response.Name = sessionEvent.Name
 			}
 

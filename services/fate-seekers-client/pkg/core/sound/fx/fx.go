@@ -154,11 +154,9 @@ func (svm *SoundFXManager) IsFXPlaying() bool {
 	return svm.currentPlayer.Load() != nil
 }
 
-// Stop makes fx player stop playing active sound.
-func (svm *SoundFXManager) Stop() {
-	if svm.currentPlayer.Load() != nil {
-		svm.handbrake <- true
-	}
+// StopFXPlaying makes fx player stop playing active sound.
+func (svm *SoundFXManager) StopFXPlaying() {
+	svm.handbrake <- true
 }
 
 // PushWithHandbrake pushes a new track immediately to the queue at the highest priority
