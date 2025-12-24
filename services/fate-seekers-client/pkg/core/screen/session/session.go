@@ -369,10 +369,16 @@ func (ss *SessionScreen) HandleInput() error {
 							if !retrievedUsersMetadata.AnimationStatic {
 								shiftWidth, shiftHeight := movableUnit.GetShiftBounds()
 
-								// TODO: make it look as selected worker.
+								if !sounder.GetInstance().ExternalTrackableObjectExists(issuer) {
+									sounder.GetInstance().AddExternalTrackableObject(
+										issuer, retrievedUsersMetadata.Position, shiftWidth, shiftHeight)
+								} else {
+									sounderUnit := sounder.GetInstance().GetExternalTrackableObject(issuer)
 
-								sounder.GetInstance().SetExternalTrackableObject(
-									issuer, retrievedUsersMetadata.Position, shiftWidth, shiftHeight)
+									sounderUnit.Updated = true
+									sounderUnit.Polygon.SetPosition(
+										retrievedUsersMetadata.Position.X, retrievedUsersMetadata.Position.Y)
+								}
 							} else {
 								sounder.GetInstance().InterruptExternalTrackableObject(issuer)
 							}

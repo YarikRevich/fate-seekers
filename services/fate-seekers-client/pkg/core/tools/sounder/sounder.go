@@ -1,11 +1,13 @@
 package sounder
 
 import (
+	"math"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/setanarut/kamera/v2"
 	"github.com/solarlune/resolv"
 )
@@ -13,6 +15,11 @@ import (
 var (
 	// GetInstance retrieves instance of the sounder, performing initial creation if needed.
 	GetInstance = sync.OnceValue[*Sounder](newSounder)
+)
+
+// Represents static sound options.
+const (
+	CAMERA_SOUND_OFFSET = 60
 )
 
 // Sounder represents active map sound manager.
@@ -41,7 +48,7 @@ type Sounder struct {
 	// Represents main trackable soundable object.
 	mainTrackableObject *resolv.ConvexPolygon
 
-	//
+	// Represents if main trackable object is updated and should be processed again.
 	mainTrackableObjectUpdated bool
 }
 
@@ -62,34 +69,34 @@ func (s *Sounder) PruneExternalTrackableObjects(names map[string]bool) {
 	s.externalTrackableObjectMutex.Unlock()
 }
 
-// SetExternalTrackableObject sets external trackable object with the provided key and value.
-func (s *Sounder) SetExternalTrackableObject(key string, value dto.Position, shiftWidth, shiftHeight float64) {
+// ExternalTrackableObjectExists checks if trackable object with provided key exists.
+func (s *Sounder) ExternalTrackableObjectExists(key string) bool {
+	_, ok := s.externalTrackableObjects[key]
+
+	return ok
+}
+
+// AddExternalTrackableObject adds external trackable object with the provided key and value.
+func (s *Sounder) AddExternalTrackableObject(key string, value dto.Position, shiftWidth, shiftHeight float64) {
 	s.externalTrackableObjectMutex.Lock()
 
-	if externalTrackableObject, ok := s.externalTrackableObjects[key]; ok {
-		externalTrackableObject.Updated = true
-		externalTrackableObject.Polygon = resolv.NewRectangle(
-			value.X, value.Y, shiftWidth/2, shiftHeight/2)
-	} else {
-		s.externalTrackableObjects[key] = &dto.ExternalSounderObject{
-			Updated: true,
-			Polygon: resolv.NewRectangle(
-				value.X, value.Y, shiftWidth/2, shiftHeight/2),
-		}
+	s.externalTrackableObjects[key] = &dto.ExternalSounderObject{
+		Updated: true,
+		Polygon: resolv.NewRectangle(
+			value.X, value.Y, shiftWidth/2, shiftHeight/2),
 	}
 
 	s.externalTrackableObjectMutex.Unlock()
 }
 
+// GetExternalTrackableObject retrieves external trackable object with the provided key.
+func (s *Sounder) GetExternalTrackableObject(key string) *dto.ExternalSounderObject {
+	return s.externalTrackableObjects[key]
+}
+
 // SetMainTrackableObject sets main trackable object with the provided value.
 func (s *Sounder) SetMainTrackableObject(value dto.Position, shiftWidth, shiftHeight float64) {
 	s.mainTrackableObjectMutex.Lock()
-
-	// if s.mainTrackableObject == nil ||
-	// 	(s.mainTrackableObject.Position().X != value.X ||
-	// 		s.mainTrackableObject.Position().Y != value.Y) {
-
-	// }
 
 	s.mainTrackableObjectUpdated = true
 
@@ -173,30 +180,41 @@ func (s *Sounder) Update(camera *kamera.Camera) {
 
 	wg.Add(len(s.externalTrackableObjects))
 
+	minCameraViewportWidth := store.GetPositionSession().X - (math.Abs(camera.CenterOffsetX) + CAMERA_SOUND_OFFSET)
+	maxCameraViewportWidth := store.GetPositionSession().X + (math.Abs(camera.CenterOffsetX) + CAMERA_SOUND_OFFSET)
+
+	minCameraViewportHeight := store.GetPositionSession().Y - (math.Abs(camera.CenterOffsetY) + CAMERA_SOUND_OFFSET)
+	maxCameraViewportHeight := store.GetPositionSession().Y + (math.Abs(camera.CenterOffsetY) + CAMERA_SOUND_OFFSET)
+
 	for key, externalTrackableObject := range s.externalTrackableObjects {
 		if externalTrackableObject.Updated {
 			externalTrackableObject.Updated = false
 
-			go func(wg *sync.WaitGroup) {
-				for _, polygon := range s.collisionPolygons {
-					if polygon.IsIntersecting(externalTrackableObject.Polygon) {
-						if !sound.GetInstance().SoundSounderExternalFxManagerExists(key) {
-							sound.GetInstance().AddSoundSounderExternalFxManager(key)
-						}
-
-						if !sound.GetInstance().GetSoundSounderExternalFxManager(key).IsFXPlaying() {
-							switch s.soundableTileObjects[polygon.ID()].Name {
-							case loader.TilemapSoundRockValue:
-								sound.GetInstance().GetSoundSounderExternalFxManager(key).PushWithHandbrake(loader.RockFXSound)
+			if (externalTrackableObject.Polygon.Position().X >= minCameraViewportWidth && externalTrackableObject.Polygon.Position().X <= maxCameraViewportWidth) &&
+				(externalTrackableObject.Polygon.Position().Y >= minCameraViewportHeight && externalTrackableObject.Polygon.Position().Y <= maxCameraViewportHeight) {
+				go func(wg *sync.WaitGroup) {
+					for _, polygon := range s.collisionPolygons {
+						if polygon.IsIntersecting(externalTrackableObject.Polygon) {
+							if !sound.GetInstance().SoundSounderExternalFxManagerExists(key) {
+								sound.GetInstance().AddSoundSounderExternalFxManager(key)
 							}
+
+							if !sound.GetInstance().GetSoundSounderExternalFxManager(key).IsFXPlaying() {
+								switch s.soundableTileObjects[polygon.ID()].Name {
+								case loader.TilemapSoundRockValue:
+									sound.GetInstance().GetSoundSounderExternalFxManager(key).PushWithHandbrake(loader.RockFXSound)
+								}
+							}
+
+							break
 						}
-
-						break
 					}
-				}
 
+					wg.Done()
+				}(&wg)
+			} else {
 				wg.Done()
-			}(&wg)
+			}
 		} else {
 			wg.Done()
 		}
