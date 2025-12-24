@@ -346,8 +346,6 @@ func (ss *SessionScreen) HandleInput() error {
 					for issuer := range sharedUsersMetadataIssuers {
 						retrievedUsersMetadata := store.GetRetrievedUsersMetadataSession()[issuer]
 
-						sounder.GetInstance().SetExternalTrackableObject(issuer, retrievedUsersMetadata.Position)
-
 						var movableUnit *movable.Movable
 
 						if !renderer.GetInstance().SecondaryExternalMovableObjectExists(issuer) {
@@ -365,6 +363,19 @@ func (ss *SessionScreen) HandleInput() error {
 							movableUnit.SetDirection(retrievedUsersMetadata.AnimationDirection)
 							movableUnit.SetStatic(retrievedUsersMetadata.AnimationStatic)
 							movableUnit.AddPosition(retrievedUsersMetadata.Position)
+						}
+
+						if retrievedUsersMetadata.Active {
+							if !retrievedUsersMetadata.AnimationStatic {
+								shiftWidth, shiftHeight := movableUnit.GetShiftBounds()
+
+								// TODO: make it look as selected worker.
+
+								sounder.GetInstance().SetExternalTrackableObject(
+									issuer, retrievedUsersMetadata.Position, shiftWidth, shiftHeight)
+							} else {
+								sounder.GetInstance().InterruptExternalTrackableObject(issuer)
+							}
 						}
 
 						if !selected.GetInstance().ExternalMovableObjectExists(issuer) {
@@ -664,7 +675,7 @@ func (ss *SessionScreen) HandleInput() error {
 
 	renderer.GetInstance().Update(ss.camera)
 
-	sounder.GetInstance().Update()
+	sounder.GetInstance().Update(ss.camera)
 
 	if !ss.transparentTransitionEffect.Done() {
 		if !ss.transparentTransitionEffect.OnEnd() {

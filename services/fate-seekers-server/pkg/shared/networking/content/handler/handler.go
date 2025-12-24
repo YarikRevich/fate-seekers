@@ -97,6 +97,8 @@ func (h *Handler) Process(key string, value []byte) error {
 						return ErrUserIsEliminated
 					}
 
+					newLobby.Active = true
+
 					newLobby.PositionX = message.GetPosition().X
 					newLobby.PositionY = message.GetPosition().Y
 				}
@@ -111,6 +113,8 @@ func (h *Handler) Process(key string, value []byte) error {
 					if lobby.Eliminated {
 						return ErrUserIsEliminated
 					}
+
+					lobby.Active = true
 
 					lobby.PositionX = message.GetPosition().X
 					lobby.PositionY = message.GetPosition().Y

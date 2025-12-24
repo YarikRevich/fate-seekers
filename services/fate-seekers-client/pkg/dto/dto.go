@@ -6,6 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/solarlune/resolv"
 )
 
 // Describes all the available letter attachment types.
@@ -246,6 +247,15 @@ type SoundableTile struct {
 	Position              Position
 	Name                  string
 	TileWidth, TileHeight int
+}
+
+// ExternalSounderObject represents external sounder object.
+type ExternalSounderObject struct {
+	// Represents if the position has been updated since the last update.
+	Updated bool
+
+	// Represents convex polygon value.
+	Polygon *resolv.ConvexPolygon
 }
 
 // RendererPositionItem represents renderer position item.
