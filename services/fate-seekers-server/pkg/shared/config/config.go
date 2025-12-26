@@ -117,7 +117,7 @@ const (
 	GRAFANA_IMAGE = "grafana/grafana:latest"
 	GRAFANA_PORT  = "3000"
 
-	PROMETHEUS_IMAGE = "grafana/grafana:latest"
+	PROMETHEUS_IMAGE = "prom/prometheus:v2.36.2"
 	PROMETHEUS_PORT  = "8090"
 )
 
@@ -153,6 +153,9 @@ const (
 
 	// Represents directory where all diagnostics prometheus config files are located.
 	internalDiagnosticsPrometheusConfigDirectory = "/diagnostics/prometheus/config"
+
+	// Represents directory where all diagnostics prometheus internal files are located.
+	internalDiagnosticsPrometheusInternalDirectory = "/diagnostics/prometheus/internal"
 
 	// Represents database directory where all the database files is located.
 	internalDatabaseDirectory = "/internal/database"
@@ -469,4 +472,13 @@ func GetDiagnosticsPrometheusConfigDirectory() string {
 	}
 
 	return filepath.Join(homeDirectory, internalGlobalDirectory, internalDiagnosticsPrometheusConfigDirectory)
+}
+
+func GetDiagnosticsPrometheusInternalDirectory() string {
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return filepath.Join(homeDirectory, internalGlobalDirectory, internalDiagnosticsPrometheusInternalDirectory)
 }

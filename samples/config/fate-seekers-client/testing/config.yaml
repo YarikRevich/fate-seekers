@@ -13,12 +13,12 @@ settings:
     # Represents sector used for networking receiver properties.
     receiver:
       # Represents a local port used for receive operations.
-      port: 8092
+      port: 8093
 
     # Represents sector used for external server properties.
     server:
       # Represents server host value used for networking.
-      host: "localhost:8090"
+      host: "localhost:8092"
 
     # Represents sector used for networking encryption properties.
     encryption:

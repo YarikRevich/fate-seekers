@@ -13,7 +13,7 @@ settings:
     # Represents sector used for external server properties.
     server:
       # Represents server host value used for networking.
-      port: "8090"
+      port: "8092"
 
     # Represents sector used for networking encryption properties.
     encryption:
