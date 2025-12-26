@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "ObjectStorage API Server: {{.Info.Version}}",
+  "description": "FateSeekers API Server",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -32,7 +32,7 @@
       },
       "id": 29,
       "panels": [],
-      "title": "ObjectStorage API Server",
+      "title": "FateSeekers API Server",
       "type": "row"
     },
     {
@@ -135,7 +135,7 @@
           "useBackend": false
         }
       ],
-      "title": "ObjectStorage API Server Temporate Storage current files amount",
+      "title": "FateSeekers API Server Temporate Storage current files amount",
       "type": "timeseries"
     },
     {
@@ -238,7 +238,7 @@
           "useBackend": false
         }
       ],
-      "title": "ObjectStorage API Server current cloud service uploads amount",
+      "title": "FateSeekers API Server current cloud service uploads amount",
       "type": "timeseries"
     },
     {
@@ -341,7 +341,7 @@
           "useBackend": false
         }
       ],
-      "title": "ObjectStorage API Server cloud service upload retries",
+      "title": "FateSeekers API Server cloud service upload retries",
       "type": "timeseries"
     },
     {
@@ -445,7 +445,7 @@
           "useBackend": false
         }
       ],
-      "title": "ObjectStorage API Server average upload file size",
+      "title": "FateSeekers API Server average upload file size",
       "type": "timeseries"
     },
     {
@@ -549,7 +549,7 @@
           "useBackend": false
         }
       ],
-      "title": "ObjectStorage API Server current backups amount",
+      "title": "FateSeekers API Server current backups amount",
       "type": "timeseries"
     },
     {
@@ -619,7 +619,7 @@
           "useBackend": false
         }
       ],
-      "title": "ObjectStorage API Server Temporate Storage configured await time(milliseconds)",
+      "title": "FateSeekers API Server Temporate Storage configured await time(milliseconds)",
       "type": "stat"
     },
     {
@@ -1106,7 +1106,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "ObjectStorage Diagnostics",
+  "title": "FateSeekers Diagnostics",
   "uid": "64nrElFmk",
   "version": 2,
   "weekStart": ""

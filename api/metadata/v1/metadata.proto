@@ -324,7 +324,8 @@ message Chest {
     int64 chest_id = 1;
     Position position = 2;
     bool active = 3;
-    repeated ChestItem chest_items = 4;
+    string instance = 4;
+    repeated ChestItem chest_items = 5;
 };
 
 // GetChestsResponse represents chests retrieval response streaming message.
@@ -354,6 +355,7 @@ message HealthPack {
     int64 health_pack_id = 1;
     Position position = 2;
     bool active = 3;
+    string instance = 4;
 };
 
 // GetHealthPacksResponse represents health packs retrieval response streaming message.

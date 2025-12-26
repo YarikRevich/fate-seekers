@@ -24,6 +24,12 @@ type Selected struct {
 	// Represents selectable tile objects.
 	selectableTileObjects []*resolv.ConvexPolygon
 
+	// Represents local static movable objects mutex.
+	localStaticObjectsMutex sync.RWMutex
+
+	// Represents local static selectable objects.
+	localStaticObjects map[string]*resolv.ConvexPolygon
+
 	// Represents external movable objects mutex.
 	externalMovableObjectsMutex sync.RWMutex
 
@@ -33,6 +39,8 @@ type Selected struct {
 	// Represents cursor trackable object.
 	cursorTrackableObject *resolv.ConvexPolygon
 }
+
+// TODO: implement local static object addition logic(with kind provision)
 
 // PruneExternalMovableObjects performs clean operation for abondoned external movables.
 func (s *Selected) PruneExternalMovableObjects(names map[string]bool) {
@@ -98,8 +106,46 @@ func (s *Selected) AddSelectableTileObject(value *dto.SelectableTile) {
 	s.selectableTileObjectsMutex.Unlock()
 }
 
+// AddSelectableStaticObject adds new selectable static object with the provided value.
+func (s *Selected) AddSelectableStaticObject(value *dto.SelectableTile) {
+	s.selectableTileObjectsMutex.Lock()
+
+	selected := resolv.NewConvexPolygon(
+		value.Position.X, value.Position.Y,
+		[]float64{
+			float64(value.TileWidth/2) / 2.0, 0,
+			float64(value.TileWidth / 2), float64(value.TileHeight/2) / 2.0,
+			float64(value.TileWidth/2) / 2.0, float64(value.TileHeight / 2),
+			0, float64(value.TileHeight/2) / 2.0,
+		},
+	)
+
+	s.selectableTileObjects = append(s.selectableTileObjects, selected)
+
+	s.selectableTileObjectsMutex.Unlock()
+}
+
+// AddSelectableStaticObject adds new selectable static object with the provided value.
+func (s *Selected) RemoveSelectableStaticObject(key string) {
+	s.selectableTileObjectsMutex.Lock()
+
+	selected := resolv.NewConvexPolygon(
+		value.Position.X, value.Position.Y,
+		[]float64{
+			float64(value.TileWidth/2) / 2.0, 0,
+			float64(value.TileWidth / 2), float64(value.TileHeight/2) / 2.0,
+			float64(value.TileWidth/2) / 2.0, float64(value.TileHeight / 2),
+			0, float64(value.TileHeight/2) / 2.0,
+		},
+	)
+
+	s.selectableTileObjects = append(s.selectableTileObjects, selected)
+
+	s.selectableTileObjectsMutex.Unlock()
+}
+
 // Scan performs scan operation with the provided camera.
-func (s *Selected) Scan(camera *kamera.Camera) (dto.Position, bool) {
+func (s *Selected) Scan(camera *kamera.Camera) (dto.SelectedObjectDetails, bool) {
 	var cursorPositionX, cursorPositionY int
 
 	if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE && ebiten.IsFocused() {
@@ -125,9 +171,12 @@ func (s *Selected) Scan(camera *kamera.Camera) (dto.Position, bool) {
 		if s.cursorTrackableObject.IsIntersecting(object) {
 			s.externalMovableObjectsMutex.Unlock()
 
-			return dto.Position{
-				X: object.Position().X,
-				Y: object.Position().Y,
+			return dto.SelectedObjectDetails{
+				Position: dto.Position{
+					X: object.Position().X,
+					Y: object.Position().Y,
+				},
+				Kind: dto.SelectedMovableObject,
 			}, true
 		}
 	}
@@ -145,16 +194,19 @@ func (s *Selected) Scan(camera *kamera.Camera) (dto.Position, bool) {
 		if s.cursorTrackableObject.IsIntersecting(object) {
 			s.selectableTileObjectsMutex.Unlock()
 
-			return dto.Position{
-				X: object.Position().X,
-				Y: object.Position().Y,
+			return dto.SelectedObjectDetails{
+				Position: dto.Position{
+					X: object.Position().X,
+					Y: object.Position().Y,
+				},
+				Kind: dto.SelectedTileObject,
 			}, true
 		}
 	}
 
 	s.selectableTileObjectsMutex.Unlock()
 
-	return dto.Position{}, false
+	return dto.SelectedObjectDetails{}, false
 }
 
 // Clean performs clean operation for the configured collision holders.

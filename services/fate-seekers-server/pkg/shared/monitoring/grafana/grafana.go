@@ -2,19 +2,20 @@ package grafana
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring"
-	"github.com/docker/cli/cli/command/image"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring/template"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	"github.com/pkg/errors"
 )
 
-const (
-	grafanaContainerName = "fate-seekers-grafana"
-	grafanaImage         = "grafana/grafana:latest"
-	grafanaPort          = "3000"
+var (
+	ErrGrafanaDeployment = errors.New("err happened during grafana deployment")
 )
 
 // GrafanaComponent represents a Grafana monitoring component.
@@ -23,61 +24,87 @@ type GrafanaComponent struct {
 	dockerClient *client.Client
 }
 
+func (gc *GrafanaComponent) Init() error {
+	return template.Process(
+		config.GetDiagnosticsGrafanaConfigDatasourcesDirectory(),
+		config.GRAFANA_CONFIG_DATASOURCES_DIAGNOSTICS_TEMPLATE,
+		config.GRAFANA_CONFIG_DATASOURCES_DIAGNOSTICS_OUTPUT,
+		map[string]interface{}{
+			"prometheus": map[string]interface{}{
+				"host": config.GetSettingsMonitoringPrometheusName(),
+				"port": config.GRAFANA_PORT,
+			},
+		})
+}
+
 func (gc *GrafanaComponent) Deploy() error {
 	ctx := context.Background()
 
-	// 1. Pull the image
-	_, err := gc.dockerClient.ImagePull(ctx, grafanaImage, image.PullOptions{})
+	_, err := gc.dockerClient.ImagePull(ctx, config.GRAFANA_IMAGE, image.PullOptions{})
 	if err != nil {
-		return fmt.Errorf("failed to pull grafana image: %w", err)
+		return errors.Wrap(err, ErrGrafanaDeployment.Error())
 	}
 
-	config := &container.Config{
-		Image: grafanaImage,
+	c := &container.Config{
+		Image: config.GRAFANA_IMAGE,
 		ExposedPorts: nat.PortSet{
-			nat.Port(grafanaPort): struct{}{},
+			nat.Port(config.GRAFANA_PORT): struct{}{},
+		},
+		Env: []string{
+			"GF_SECURITY_ADMIN_USER=fateseekers",
+			"GF_SECURITY_ADMIN_PASSWORD=fateseekers",
+			"GF_USERS_ALLOW_SIGN_UP=false",
 		},
 	}
 
 	hostConfig := &container.HostConfig{
 		PortBindings: nat.PortMap{
-			nat.Port(grafanaPort): []nat.PortBinding{
+			nat.Port(config.GRAFANA_PORT): []nat.PortBinding{
 				{
 					HostIP:   "0.0.0.0",
-					HostPort: grafanaPort,
+					HostPort: config.GRAFANA_PORT,
 				},
 			},
 		},
-		AutoRemove: true,
+		Mounts: []mount.Mount{
+			{
+				Type:     mount.TypeBind,
+				Source:   config.GetDiagnosticsGrafanaConfigDirectory(),
+				Target:   "/etc/grafana/provisioning/",
+				ReadOnly: true,
+			},
+			{
+				Type:   mount.TypeBind,
+				Source: config.GetDiagnosticsGrafanaInternalDirectory(),
+				Target: "/var/lib/grafana",
+			},
+		},
 	}
 
-	resp, err := gc.dockerClient.ContainerCreate(ctx, config, hostConfig, nil, nil, grafanaContainerName)
+	resp, err := gc.dockerClient.ContainerCreate(ctx, c, hostConfig, nil, nil, config.GetSettingsMonitoringGrafanaName())
 	if err != nil {
-		return fmt.Errorf("failed to create grafana container: %w", err)
+		return errors.Wrap(err, ErrGrafanaDeployment.Error())
 	}
 
 	if err := gc.dockerClient.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
-		return fmt.Errorf("failed to start grafana container: %w", err)
+		return errors.Wrap(err, ErrGrafanaDeployment.Error())
 	}
 
 	return nil
 }
 
 func (gc *GrafanaComponent) IsDeployed() bool {
-	_, err := gc.dockerClient.ContainerInspect(context.Background(), grafanaContainerName)
+	_, err := gc.dockerClient.ContainerInspect(context.Background(), config.GetSettingsMonitoringGrafanaName())
 
 	return err == nil
 }
 
 func (gc *GrafanaComponent) Remove() error {
-	ctx := context.Background()
+	err := gc.dockerClient.ContainerRemove(
+		context.Background(), config.GetSettingsMonitoringGrafanaName(), container.RemoveOptions{
+			Force: true,
+		})
 
-	// Force remove the container (stops it if running)
-	err := gc.dockerClient.ContainerRemove(ctx, grafanaContainerName, container.RemoveOptions{
-		Force: true,
-	})
-
-	// If the error is simply that the container doesn't exist, we can ignore it
 	if client.IsErrNotFound(err) {
 		return nil
 	}

@@ -178,6 +178,20 @@ type Position struct {
 	Y float64
 }
 
+const (
+	SelectedMovableObject = iota
+	SelectedLocalStaticObject
+	SelectedTileObject
+)
+
+// SelectedObjectDetails represents selected object details.
+type SelectedObjectDetails struct {
+	Position Position
+
+	// Represents a kind of a selectable tile used for selected worker.
+	Kind int
+}
+
 // RetrievedUsersMetadataSessionUnit represents retrieved users metadata session content unit.
 type RetrievedUsersMetadataSessionUnit struct {
 	Health             uint64
@@ -233,11 +247,26 @@ type CollidableTile struct {
 	TileWidth, TileHeight int
 }
 
+// CollidableStatic represents collidable static.
+type CollidableStatic struct {
+	Position              Position
+	TileWidth, TileHeight int
+}
+
 // SelectableTile represents selectable tile.
 type SelectableTile struct {
 	Position Position
 
 	// Represents a kind of a selectable tile used for selected worker.
+	Kind                  string
+	TileWidth, TileHeight int
+}
+
+// SelectableStatic represents selectable static.
+type SelectableStatic struct {
+	Position Position
+
+	// Represents a kind of a selectable static used for selected worker.
 	Kind                  string
 	TileWidth, TileHeight int
 }
@@ -269,6 +298,7 @@ const (
 	RendererPositionItemMainCenteredMovable = iota
 	RendererPositionItemSecondaryExternalMovable
 	RendererPositionItemSecondaryTile
+	RendererPositionItemSecondaryStatic
 )
 
 // Represents direction type used for gamepad stick direction processing.

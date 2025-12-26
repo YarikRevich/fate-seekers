@@ -2441,8 +2441,6 @@ func (h *Handler) GetChests(request *metadatav1.GetChestsRequest, stream grpc.Se
 				return err
 			}
 
-			fmt.Println("CHEST", chests)
-
 			for _, chest := range chests {
 				var chestItems []*metadatav1.ChestItem
 
@@ -2467,6 +2465,7 @@ func (h *Handler) GetChests(request *metadatav1.GetChestsRequest, stream grpc.Se
 						X: chest.PositionX,
 						Y: chest.PositionY,
 					},
+					Instance:   chest.Instance,
 					ChestItems: chestItems,
 				})
 			}
@@ -2713,6 +2712,7 @@ func (h *Handler) GetHealthPacks(request *metadatav1.GetHealthPacksRequest, stre
 						X: healthPack.PositionX,
 						Y: healthPack.PositionY,
 					},
+					Instance: healthPack.Instance,
 				})
 			}
 

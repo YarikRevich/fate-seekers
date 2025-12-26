@@ -2,6 +2,9 @@ package monitoring
 
 // MonitoringComponent represents monitoring component interface.
 type MonitoringComponent interface {
+	// Init performs component templates initialization.
+	Init() error
+
 	// Deploy performs monitoring
 	Deploy() error
 

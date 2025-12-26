@@ -112,12 +112,47 @@ const (
 	MAX_INVENTORY_ITEMS = 8
 )
 
+// Represents monitoring containers configuration properties.
+const (
+	GRAFANA_IMAGE = "grafana/grafana:latest"
+	GRAFANA_PORT  = "3000"
+
+	PROMETHEUS_IMAGE = "grafana/grafana:latest"
+	PROMETHEUS_PORT  = "8090"
+)
+
+const (
+	// Represents grafana config datasources diagnostics template file.
+	GRAFANA_CONFIG_DATASOURCES_DIAGNOSTICS_TEMPLATE = "datasource.tpl"
+
+	// Represents grafana config datasources diagnostics output file.
+	GRAFANA_CONFIG_DATASOURCES_DIAGNOSTICS_OUTPUT = "datasource.yml"
+
+	// Represents prometheus config diagnostics template file.
+	PROMETHEUS_CONFIG_DIAGNOSTICS_TEMPLATE = "prometheus.tpl"
+
+	// Represents prometheus config diagnostics output file.
+	PROMETHEUS_CONFIG_DIAGNOSTICS_OUTPUT = "prometheus.yml"
+)
+
 const (
 	// Represents home directory where all application related data is located.
 	internalGlobalDirectory = "/.fate-seekers-server"
 
 	// Represents directory where all application configuration files are located.
 	internalConfigDirectory = "/config"
+
+	// Represents directory where all diagnostics grafana configuration files are located.
+	internalDiagnosticsGrafanaConfigDirectory = "/diagnostics/grafana/config"
+
+	// Represents directory where all diagnostics grafana internal files are located.
+	internalDiagnosticsGrafanaInternalDirectory = "/diagnostics/grafana/internal"
+
+	// Represents directory where all diagnostics grafana config datasources files are located.
+	internalDiagnosticsGrafanaConfigDatasourcesDirectory = "/diagnostics/grafana/config/datasources"
+
+	// Represents directory where all diagnostics prometheus config files are located.
+	internalDiagnosticsPrometheusConfigDirectory = "/diagnostics/prometheus/config"
 
 	// Represents database directory where all the database files is located.
 	internalDatabaseDirectory = "/internal/database"
@@ -398,4 +433,40 @@ func getDefaultConfigDirectory() string {
 	}
 
 	return filepath.Join(homeDirectory, internalGlobalDirectory, internalConfigDirectory)
+}
+
+func GetDiagnosticsGrafanaConfigDirectory() string {
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return filepath.Join(homeDirectory, internalGlobalDirectory, internalDiagnosticsGrafanaConfigDirectory)
+}
+
+func GetDiagnosticsGrafanaInternalDirectory() string {
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return filepath.Join(homeDirectory, internalGlobalDirectory, internalDiagnosticsGrafanaInternalDirectory)
+}
+
+func GetDiagnosticsGrafanaConfigDatasourcesDirectory() string {
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return filepath.Join(homeDirectory, internalGlobalDirectory, internalDiagnosticsGrafanaConfigDatasourcesDirectory)
+}
+
+func GetDiagnosticsPrometheusConfigDirectory() string {
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return filepath.Join(homeDirectory, internalGlobalDirectory, internalDiagnosticsPrometheusConfigDirectory)
 }

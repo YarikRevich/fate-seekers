@@ -40,7 +40,7 @@ func PerformLoadMap(tilemap *tiled.Map, callback func(spawnables, chestLocations
 			}
 
 			for _, collidableTile := range collidableTiles {
-				collision.GetInstance().AddCollidableTileObject(collidableTile)
+				collision.GetInstance().AddCollidableTileObject(uuid.NewString(), collidableTile)
 			}
 
 			for _, selectableTile := range selectableTiles {

@@ -20,6 +20,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/movable"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/static"
 	selected "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/selecter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/sounder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
@@ -443,17 +444,39 @@ func (ss *SessionScreen) HandleInput() error {
 			action.NewSetChestsRetrievalStartedNetworking(
 				value.CHESTS_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE))
 
-		fmt.Println("STARTING CHESTS RETRIEVAL")
-
 		metadatastream.GetGetChestsSubmitter().Clean(func() {
 			metadatastream.GetGetChestsSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetChestsResponse, err error) bool {
-					fmt.Println(response.GetChests(), err, "CHESTS")
-
 					for _, chest := range response.GetChests() {
-						for _, chestItem := range chest.GetChestItems() {
-							fmt.Println(chestItem.GetName())
+
+						if !renderer.GetInstance().SecondaryLocalStaticObjectExists(chest.GetInstance()) {
+							staticUnit := static.NewStatic(
+								loader.GetInstance().GetStatic(loader.OpenedStandardChest),
+								dto.Position{
+									X: chest.GetPosition().X,
+									Y: chest.GetPosition().Y,
+								})
+
+							shiftWidth, shiftHeight := staticUnit.GetShiftBounds()
+
+							collision.GetInstance().AddCollidableStaticObject(chest.GetInstance(), &dto.CollidableStatic{
+								Position: dto.Position{
+									X: chest.GetPosition().X,
+									Y: chest.GetPosition().Y,
+								},
+								TileWidth:  int(shiftWidth),
+								TileHeight: int(shiftHeight),
+							})
+
+							renderer.GetInstance().AddSecondaryLocalStaticObject(
+								chest.GetInstance(), staticUnit)
+						} else {
+
 						}
+
+						// for _, chestItem := range chest.GetChestItems() {
+						// 	fmt.Println(chestItem.GetName())
+						// }
 					}
 
 					return false
@@ -665,6 +688,7 @@ func (ss *SessionScreen) HandleInput() error {
 		}
 
 		if pressed {
+			fmt.Println(selectedPosition)
 			// TODO: check for saved location associations in memory.
 		}
 	} else {
@@ -734,10 +758,6 @@ func (ss *SessionScreen) HandleInput() error {
 			}
 		}
 	}
-
-	// fmt.Println(
-	// 	math.Round(ss.camera.X*math.Pow(10, 2))/math.Pow(10, 2),
-	// 	math.Round(ss.camera.Y*math.Pow(10, 2))/math.Pow(10, 2))
 
 	// TODO: click on the letter.
 

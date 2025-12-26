@@ -9,6 +9,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/db"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring/manager"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/connector"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/events"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository/sync"
@@ -35,36 +36,25 @@ func Init(root *cobra.Command) {
 
 			events.Run()
 
-			if config.GetSettingsMonitoringEnabled() {
-
-			}
-
 			if !encryptionkey.Validate(config.GetSettingsNetworkingEncryptionKey()) {
 				logging.GetInstance().Fatal(ErrEncryptionKeyValidationFailed.Error())
 
 				return
 			}
 
-			connector.GetInstance().Connect(func(err error) {
-				if err != nil {
-					logging.GetInstance().Fatal(
-						common.ComposeMessage(
-							translation.GetInstance().GetTranslation("server.networking.start-failure"),
-							err.Error()))
-
-					return
-				}
-
-				logging.GetInstance().Info("FateSeekers gaming server has been started!")
-			})
-
-			interruption := make(chan os.Signal, 1)
-			done := make(chan struct{})
+			var (
+				interruption     = make(chan os.Signal, 1)
+				gracefulShutdown = make(chan bool, 1)
+				done             = make(chan struct{})
+			)
 
 			signal.Notify(interruption, os.Interrupt, syscall.SIGTERM)
 
 			go func() {
-				<-interruption
+				select {
+				case <-interruption:
+				case <-gracefulShutdown:
+				}
 
 				connector.GetInstance().Close(func(err error) {
 					if err != nil {
@@ -72,15 +62,60 @@ func Init(root *cobra.Command) {
 							common.ComposeMessage(
 								translation.GetInstance().GetTranslation("shared.networking.close-failure"),
 								err.Error()))
-
-						return
 					}
 
-					logging.GetInstance().Info("FateSeekers gaming server has been stoped!")
+					if config.GetSettingsMonitoringEnabled() {
+						manager.GetInstance().Remove(func(err error) {
+							if err != nil {
+								logging.GetInstance().Fatal(
+									common.ComposeMessage(
+										translation.GetInstance().GetTranslation("server.networking.start-failure"),
+										err.Error()))
+							} else {
+								logging.GetInstance().Info("FateSeekers gaming server has been stoped(including monitoring)!")
+							}
 
-					close(done)
+							close(done)
+						})
+					} else {
+						logging.GetInstance().Info("FateSeekers gaming server has been stoped!")
+
+						close(done)
+					}
 				})
 			}()
+
+			connector.GetInstance().Connect(func(err error) {
+				if err != nil {
+					logging.GetInstance().Error(
+						common.ComposeMessage(
+							translation.GetInstance().GetTranslation("server.networking.start-failure"),
+							err.Error()))
+
+					gracefulShutdown <- true
+
+					return
+				}
+
+				if config.GetSettingsMonitoringEnabled() {
+					manager.GetInstance().Deploy(func(err error) {
+						if err != nil {
+							logging.GetInstance().Error(
+								common.ComposeMessage(
+									translation.GetInstance().GetTranslation("server.networking.start-failure"),
+									err.Error()))
+
+							gracefulShutdown <- true
+
+							return
+						}
+
+						logging.GetInstance().Info("FateSeekers gaming server has been started(including monitoring)!")
+					})
+				} else {
+					logging.GetInstance().Info("FateSeekers gaming server has been started!")
+				}
+			})
 
 			<-done
 		},

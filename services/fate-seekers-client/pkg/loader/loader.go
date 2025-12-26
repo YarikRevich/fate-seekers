@@ -104,6 +104,8 @@ const (
 	DefaultLaserGun = "default_laser_gun/default_laser_gun.png"
 
 	Pointer = "pointer/pointer.png"
+
+	OpenedStandardChest = "session/opened_standard_chest.png"
 )
 
 // Describes all the available shaders to be loaded.

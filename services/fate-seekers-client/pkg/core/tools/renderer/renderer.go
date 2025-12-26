@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/movable"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/static"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer/tile"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -41,11 +42,17 @@ type Renderer struct {
 	// Represents secondary objects to be rendered in the background.
 	secondaryTileObjects *orderedmap.OrderedMap[string, *tile.Tile]
 
-	// Represents secondary objects mutex.
+	// Represents secondary movable objects mutex.
 	secondaryLocalMovableObjectsMutex sync.RWMutex
 
-	// Represents secondary objects to be rendered in the background.
+	// Represents secondary movable objects to be rendered in the background.
 	secondaryLocalMovableObjects map[string]*movable.Movable
+
+	// Represents secondary static objects mutex.
+	secondaryLocalStaticObjectsMutex sync.RWMutex
+
+	// Represents secondary sttaic objects to be rendered in the background.
+	secondaryLocalStaticObjects map[string]*static.Static
 
 	// Represents secondary objects mutex.
 	secondaryExternalMovableObjectsMutex sync.RWMutex
@@ -165,6 +172,46 @@ func (r *Renderer) GetSecondaryExternalMovableObject(name string) *movable.Movab
 	r.secondaryExternalMovableObjectsMutex.RUnlock()
 
 	return result
+}
+
+// SecondaryLocalStaticObjectExists checks if secondary local static object with the provided name exists.
+func (r *Renderer) SecondaryLocalStaticObjectExists(name string) bool {
+	r.secondaryLocalStaticObjectsMutex.RLock()
+
+	_, ok := r.secondaryLocalStaticObjects[name]
+
+	r.secondaryLocalStaticObjectsMutex.RUnlock()
+
+	return ok
+}
+
+// AddSecondaryLocalStaticObject adds new secondary local static object with the provided name and value.
+func (r *Renderer) AddSecondaryLocalStaticObject(name string, value *static.Static) {
+	r.secondaryLocalStaticObjectsMutex.Lock()
+
+	r.secondaryLocalStaticObjects[name] = value
+
+	r.secondaryLocalStaticObjectsMutex.Unlock()
+}
+
+// GetSecondaryLocalStaticObject retrieves secondary local static object with the provided name.
+func (r *Renderer) GetSecondaryLocalStaticObject(name string) *static.Static {
+	r.secondaryLocalStaticObjectsMutex.RLock()
+
+	result, _ := r.secondaryLocalStaticObjects[name]
+
+	r.secondaryLocalStaticObjectsMutex.RUnlock()
+
+	return result
+}
+
+// RemoveSecondaryLocalStaticObject removes secondary local static object with the provided name and value.
+func (r *Renderer) RemoveSecondaryLocalStaticObject(name string) {
+	r.secondaryLocalStaticObjectsMutex.Lock()
+
+	delete(r.secondaryLocalStaticObjects, name)
+
+	r.secondaryLocalStaticObjectsMutex.Unlock()
 }
 
 // MainCenteredMovableObjectExists checks if main centered movable object with the provided name exists.
@@ -312,6 +359,49 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 		r.objectPositionMutex.Unlock()
 	}
 
+	r.secondaryExternalMovableObjectsMutex.RUnlock()
+
+	r.secondaryLocalStaticObjectsMutex.Lock()
+
+	for name, static := range r.secondaryLocalStaticObjects {
+		if (static.GetPosition().X < minCameraViewportWidth || static.GetPosition().X > maxCameraViewportWidth) ||
+			(static.GetPosition().Y < minCameraViewportHeight || static.GetPosition().Y > maxCameraViewportHeight) {
+			continue
+		}
+
+		r.objectPositionMutex.RLock()
+
+		position := static.GetPosition()
+
+		shiftWidth, shiftHeight := static.GetShiftBounds()
+
+		presentObjectPositions, ok = r.objectPosition.Get((position.X + (shiftWidth / 2)) + (position.Y + (shiftHeight)))
+		if ok {
+			presentObjectPositions = append(
+				presentObjectPositions,
+				dto.RendererPositionItem{
+					Name: name,
+					Type: dto.RendererPositionItemSecondaryStatic})
+		} else {
+			presentObjectPositions = []dto.RendererPositionItem{
+				dto.RendererPositionItem{
+					Name: name,
+					Type: dto.RendererPositionItemSecondaryStatic}}
+		}
+
+		r.objectPositionMutex.RUnlock()
+
+		r.objectPositionMutex.Lock()
+
+		r.objectPosition.Set((position.X+(shiftWidth/2))+(position.Y+(shiftHeight)), presentObjectPositions)
+
+		r.objectPositionMutex.Unlock()
+	}
+
+	r.secondaryLocalStaticObjectsMutex.Unlock()
+
+	r.secondaryTileObjectMutex.RLock()
+
 	for iter := r.secondaryTileObjects.Front(); iter != nil; iter = iter.Next() {
 		if (iter.Value.GetPosition().X < minCameraViewportWidth || iter.Value.GetPosition().X > maxCameraViewportWidth) ||
 			(iter.Value.GetPosition().Y < minCameraViewportHeight || iter.Value.GetPosition().Y > maxCameraViewportHeight) {
@@ -320,12 +410,7 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 
 		r.objectPositionMutex.RLock()
 
-		// x, y := camera.ScreenToWorld(int(iter.Value.GetPosition().X), int(iter.Value.GetPosition().Y))
 		position := iter.Value.GetPosition()
-
-		// _, shiftHeight := iter.Value.GetShiftBounds()
-
-		// presentObjectPositions, ok = r.objectPosition.Get((position.X) + (position.Y - (shiftHeight / 2)))
 
 		shiftWidth, shiftHeight := iter.Value.GetShiftBounds()
 
@@ -347,15 +432,12 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 
 		r.objectPositionMutex.Lock()
 
-		// _, shiftHeight := iter.Value.GetShiftBounds()
-
 		r.objectPosition.Set((position.X+(shiftWidth/2))+(position.Y+(shiftHeight)), presentObjectPositions)
-		// r.objectPosition.Set((position.X)+(position.Y-(shiftHeight/2)), presentObjectPositions)
 
 		r.objectPositionMutex.Unlock()
 	}
 
-	r.secondaryExternalMovableObjectsMutex.RUnlock()
+	r.secondaryTileObjectMutex.RUnlock()
 
 	r.mainCenteredMovableObjectsMutex.RLock()
 
@@ -365,13 +447,6 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 		r.objectPositionMutex.RLock()
 
 		shiftWidth, shiftHeight := movable.GetShiftBounds()
-
-		// x := (float64(config.GetWorldWidth()) / 2) - (shiftWidth / 2)
-		// y := (float64(config.GetWorldHeight()) / 2) - (shiftHeight / 2)
-
-		// position := movable.GetPosition()
-
-		// presentObjectPositions, ok = r.objectPosition.Get((position.X - (shiftWidth / 2)) + (position.Y - (shiftHeight / 2)))
 
 		position := movable.GetPosition()
 
@@ -394,7 +469,6 @@ func (r *Renderer) Update(camera *kamera.Camera) {
 		r.objectPositionMutex.Lock()
 
 		r.objectPosition.Set((position.X+(shiftWidth/2))+(position.Y+(shiftHeight)), presentObjectPositions)
-		// r.objectPosition.Set((position.X-(shiftWidth/2))+(position.Y-(shiftHeight/2)), presentObjectPositions)
 
 		r.objectPositionMutex.Unlock()
 	}
@@ -435,6 +509,15 @@ func (r *Renderer) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 				}
 
 				value.Draw(screen, selected, camera)
+
+			case dto.RendererPositionItemSecondaryStatic:
+				static := r.secondaryLocalStaticObjects[item.Name]
+
+				if r.selectedObjectEnabled && static.GetPosition() == r.selectedObjectPosition {
+					selected = true
+				}
+
+				static.Draw(screen, selected, camera)
 
 			case dto.RendererPositionItemSecondaryExternalMovable:
 				movable := r.secondaryExternalMovableObjects[item.Name]
@@ -478,6 +561,7 @@ func newRenderer() *Renderer {
 		tertiaryTileObjects:             orderedmap.NewOrderedMap[string, *tile.Tile](),
 		secondaryTileObjects:            orderedmap.NewOrderedMap[string, *tile.Tile](),
 		secondaryLocalMovableObjects:    make(map[string]*movable.Movable),
+		secondaryLocalStaticObjects:     make(map[string]*static.Static),
 		secondaryExternalMovableObjects: make(map[string]*movable.Movable),
 		mainCenteredMovableObjects:      make(map[string]*movable.Movable),
 		objectPosition:                  btree.NewMap[float64, []dto.RendererPositionItem](32),

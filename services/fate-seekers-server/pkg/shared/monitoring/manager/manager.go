@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"os"
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
@@ -59,7 +60,21 @@ func (mm *MonitoringManager) Deploy(callback func(err error)) {
 			}
 		}
 
+		err = mm.grafanaComponent.Init()
+		if err != nil {
+			callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
+
+			return
+		}
+
 		err = mm.grafanaComponent.Deploy()
+		if err != nil {
+			callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
+
+			return
+		}
+
+		err = mm.prometheusComponent.Init()
 		if err != nil {
 			callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
 
@@ -86,13 +101,41 @@ func (mm *MonitoringManager) Deploy(callback func(err error)) {
 // Remove performs a removal of monitoring infrastructure.
 func (mm *MonitoringManager) Remove(callback func(err error)) {
 	go func() {
+		if mm.grafanaComponent.IsDeployed() {
+			if err := mm.grafanaComponent.Remove(); err != nil {
+				callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
+
+				return
+			}
+		}
+
+		if mm.prometheusComponent.IsDeployed() {
+			if err := mm.prometheusComponent.Remove(); err != nil {
+				callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
+
+				return
+			}
+		}
+
 		callback(nil)
 	}()
 }
 
 // newMonitoringManager initializes MonitoringManager.
 func newMonitoringManager() *MonitoringManager {
-	dockerClient, err := client.NewClientWithOpts(client.FromEnv)
+	opts := []client.Opt{
+		client.WithAPIVersionNegotiation(),
+	}
+
+	if os.Getenv("DOCKER_HOST") != "" {
+		opts = append(opts, client.FromEnv)
+	} else {
+		opts = append(opts,
+			client.WithHost("unix://"+os.Getenv("HOME")+"/.docker/run/docker.sock"),
+		)
+	}
+
+	dockerClient, err := client.NewClientWithOpts(opts...)
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
 	}
