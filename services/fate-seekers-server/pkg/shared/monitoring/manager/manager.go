@@ -8,7 +8,9 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring/grafana"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring/network"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring/prometheus"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring/server"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 )
@@ -26,6 +28,12 @@ var (
 type MonitoringManager struct {
 	// Represents Docker SDK client used infrastructure management.
 	dockerClient *client.Client
+
+	// Represents metrics monitoring server.
+	server *server.MonitoringServer
+
+	// Represents network monitoring component manager.
+	networkComponent monitoring.MonitoringComponent
 
 	// Represents Grafana monitoring component manager.
 	grafanaComponent monitoring.MonitoringComponent
@@ -54,6 +62,14 @@ func (mm *MonitoringManager) Deploy(callback func(err error)) {
 
 		if mm.prometheusComponent.IsDeployed() {
 			if err := mm.prometheusComponent.Remove(); err != nil {
+				callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
+
+				return
+			}
+		}
+
+		if !mm.networkComponent.IsDeployed() {
+			if err := mm.networkComponent.Deploy(); err != nil {
 				callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
 
 				return
@@ -89,10 +105,41 @@ func (mm *MonitoringManager) Deploy(callback func(err error)) {
 				return
 			}
 
+			if err := mm.networkComponent.Remove(); err != nil {
+				callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
+
+				return
+			}
+
 			callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
 
 			return
 		}
+
+		mm.server.Start(func() {
+			if err := mm.grafanaComponent.Remove(); err != nil {
+				logging.GetInstance().Fatal(
+					errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()).Error())
+
+				return
+			}
+
+			if err := mm.prometheusComponent.Remove(); err != nil {
+				logging.GetInstance().Fatal(
+					errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()).Error())
+
+				return
+			}
+
+			if err := mm.networkComponent.Remove(); err != nil {
+				logging.GetInstance().Fatal(
+					errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()).Error())
+
+				return
+			}
+
+			logging.GetInstance().Fatal(ErrMonitoringDeploymentFailed.Error())
+		})
 
 		callback(nil)
 	}()
@@ -111,6 +158,14 @@ func (mm *MonitoringManager) Remove(callback func(err error)) {
 
 		if mm.prometheusComponent.IsDeployed() {
 			if err := mm.prometheusComponent.Remove(); err != nil {
+				callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
+
+				return
+			}
+		}
+
+		if mm.networkComponent.IsDeployed() {
+			if err := mm.networkComponent.Remove(); err != nil {
 				callback(errors.Wrap(err, ErrMonitoringDeploymentFailed.Error()))
 
 				return
@@ -142,6 +197,8 @@ func newMonitoringManager() *MonitoringManager {
 
 	return &MonitoringManager{
 		dockerClient:        dockerClient,
+		server:              server.NewMonitoringServer(),
+		networkComponent:    network.NewNetworkComponent(dockerClient),
 		grafanaComponent:    grafana.NewGrafanaComponent(dockerClient),
 		prometheusComponent: prometheus.NewPrometheusComponent(dockerClient),
 	}

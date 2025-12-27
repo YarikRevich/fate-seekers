@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
@@ -59,6 +60,7 @@ func (pc *PrometheusComponent) Deploy() error {
 			fmt.Sprintf("--web.listen-address=0.0.0.0:%s", config.PROMETHEUS_PORT),
 			"--web.enable-lifecycle",
 			"--web.enable-admin-api",
+			"--log.level=debug",
 		},
 	}
 
@@ -76,10 +78,9 @@ func (pc *PrometheusComponent) Deploy() error {
 		},
 		Mounts: []mount.Mount{
 			{
-				Type:     mount.TypeBind,
-				Source:   config.GetDiagnosticsPrometheusConfigDirectory(),
-				Target:   "/etc/prometheus/",
-				ReadOnly: true,
+				Type:   mount.TypeBind,
+				Source: config.GetDiagnosticsPrometheusConfigDirectory(),
+				Target: "/etc/prometheus/",
 			},
 			{
 				Type:   mount.TypeBind,
@@ -89,7 +90,13 @@ func (pc *PrometheusComponent) Deploy() error {
 		},
 	}
 
-	resp, err := pc.dockerClient.ContainerCreate(ctx, c, hostConfig, nil, nil, config.GetSettingsMonitoringPrometheusName())
+	networkingConfig := &network.NetworkingConfig{
+		EndpointsConfig: map[string]*network.EndpointSettings{
+			config.GetSettingsMonitoringNetworkName(): {},
+		},
+	}
+
+	resp, err := pc.dockerClient.ContainerCreate(ctx, c, hostConfig, networkingConfig, nil, config.GetSettingsMonitoringPrometheusName())
 	if err != nil {
 		return errors.Wrap(err, ErrPrometheusDeployment.Error())
 	}

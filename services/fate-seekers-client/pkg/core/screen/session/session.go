@@ -669,7 +669,7 @@ func (ss *SessionScreen) HandleInput() error {
 	if ok {
 		ss.pressTransparentTransitionEffect.Reset()
 
-		renderer.GetInstance().SetSelectedObject(selectedPosition)
+		// renderer.GetInstance().SetSelectedObject(selectedPosition)
 
 		var pressed bool
 

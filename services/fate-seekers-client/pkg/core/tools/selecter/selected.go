@@ -129,17 +129,17 @@ func (s *Selected) AddSelectableStaticObject(value *dto.SelectableTile) {
 func (s *Selected) RemoveSelectableStaticObject(key string) {
 	s.selectableTileObjectsMutex.Lock()
 
-	selected := resolv.NewConvexPolygon(
-		value.Position.X, value.Position.Y,
-		[]float64{
-			float64(value.TileWidth/2) / 2.0, 0,
-			float64(value.TileWidth / 2), float64(value.TileHeight/2) / 2.0,
-			float64(value.TileWidth/2) / 2.0, float64(value.TileHeight / 2),
-			0, float64(value.TileHeight/2) / 2.0,
-		},
-	)
+	// selected := resolv.NewConvexPolygon(
+	// 	value.Position.X, value.Position.Y,
+	// 	[]float64{
+	// 		float64(value.TileWidth/2) / 2.0, 0,
+	// 		float64(value.TileWidth / 2), float64(value.TileHeight/2) / 2.0,
+	// 		float64(value.TileWidth/2) / 2.0, float64(value.TileHeight / 2),
+	// 		0, float64(value.TileHeight/2) / 2.0,
+	// 	},
+	// )
 
-	s.selectableTileObjects = append(s.selectableTileObjects, selected)
+	// s.selectableTileObjects = append(s.selectableTileObjects, selected)
 
 	s.selectableTileObjectsMutex.Unlock()
 }

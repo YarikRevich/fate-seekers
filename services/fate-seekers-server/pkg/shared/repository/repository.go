@@ -53,6 +53,7 @@ type SessionsRepository interface {
 	GetByIssuer(issuer int64) ([]*entity.SessionEntity, error)
 	GetByName(name string) (*entity.SessionEntity, bool, error)
 	ExistsByName(name string) (bool, error)
+	Count() (int64, error)
 }
 
 // sessionsRepositoryImpl represents implementation of SessionsRepository.
@@ -221,6 +222,27 @@ func (w *sessionsRepositoryImpl) ExistsByName(name string) (bool, error) {
 	w.mu.RUnlock()
 
 	return true, nil
+}
+
+// Count retrieves general sessions count.
+func (w *sessionsRepositoryImpl) Count() (int64, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var count int64
+
+	err := instance.Table((&entity.SessionEntity{}).TableName()).
+		Count(&count).Error
+
+	if err != nil {
+		w.mu.RUnlock()
+		return 0, err
+	}
+
+	w.mu.RUnlock()
+
+	return count, nil
 }
 
 // createSessionsRepository initializes sessionsRepositoryImpl.
@@ -482,6 +504,7 @@ type LobbiesRepository interface {
 	DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error
 	GetByUserID(userID int64) ([]*entity.LobbyEntity, bool, error)
 	GetBySessionID(sessionID int64) ([]*entity.LobbyEntity, bool, error)
+	Count() (int64, error)
 	Lock()
 	Unlock()
 }
@@ -643,6 +666,27 @@ func (w *lobbiesRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.Lobby
 	w.mu.RUnlock()
 
 	return result, true, nil
+}
+
+// Count retrieves general lobbies count.
+func (w *lobbiesRepositoryImpl) Count() (int64, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var count int64
+
+	err := instance.Table((&entity.LobbyEntity{}).TableName()).
+		Count(&count).Error
+
+	if err != nil {
+		w.mu.RUnlock()
+		return 0, err
+	}
+
+	w.mu.RUnlock()
+
+	return count, nil
 }
 
 // Lock locks external lock mutex

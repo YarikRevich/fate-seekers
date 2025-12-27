@@ -8,8 +8,11 @@ require (
 	github.com/Frabjous-Studios/asebiten v0.6.4
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/balacode/udpt v0.0.2-0.20210610152742-49cb13767f65
+	github.com/disintegration/imaging v1.6.2
 	github.com/docker/docker v28.1.1+incompatible
+	github.com/docker/go-connections v0.6.0
 	github.com/ebitenui/ebitenui v0.6.0
+	github.com/elliotchance/orderedmap/v3 v3.1.0
 	github.com/gabstv/cimgui-go v0.0.0-20231031174417-f6c70bbc133c
 	github.com/gabstv/ebiten-imgui/v3 v3.0.1-0.20231031222543-cc91fc85039e
 	github.com/google/uuid v1.6.0
@@ -20,7 +23,9 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.5.1
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.23.1
+	github.com/prometheus/client_golang v1.23.2
 	github.com/setanarut/kamera/v2 v2.97.2
+	github.com/solarlune/resolv v0.8.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.11.1
@@ -39,32 +44,23 @@ require (
 
 require (
 	cel.dev/expr v0.24.0 // indirect
-	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
+	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
+	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/clipperhouse/uax29/v2 v2.2.0 // indirect
-	github.com/containerd/errdefs v1.0.0 // indirect
-	github.com/containerd/errdefs/pkg v0.3.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
-	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/docker/cli v29.1.3+incompatible // indirect
-	github.com/docker/cli-docs-tool v0.11.0 // indirect
-	github.com/docker/docker-credential-helpers v0.9.4 // indirect
-	github.com/docker/go-connections v0.6.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/ebitengine/gomobile v0.0.0-20250329061421-6d0a8e981e4c // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/oto/v3 v3.3.3 // indirect
 	github.com/ebitengine/purego v0.8.4 // indirect
-	github.com/elliotchance/orderedmap/v3 v3.1.0 // indirect
+	github.com/fasthttp/router v1.5.4 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/fvbommel/sortorder v1.1.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-text/typesetting v0.3.0 // indirect
@@ -79,46 +75,40 @@ require (
 	github.com/jfreymuth/vorbis v1.0.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.1 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
-	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
-	github.com/moby/go-archive v0.1.0 // indirect
-	github.com/moby/moby/api v1.52.0 // indirect
-	github.com/moby/moby/client v0.2.1 // indirect
-	github.com/moby/patternmatcher v0.6.0 // indirect
 	github.com/moby/sys/atomicwriter v0.1.0 // indirect
-	github.com/moby/sys/sequential v0.6.0 // indirect
-	github.com/moby/sys/symlink v0.3.0 // indirect
-	github.com/moby/sys/user v0.4.0 // indirect
-	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/moby/term v0.5.2 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
+	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
+	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+	github.com/prometheus/client_model v0.6.2 // indirect
+	github.com/prometheus/common v0.66.1 // indirect
+	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
+	github.com/savsgio/gotils v0.0.0-20240704082632-aef3928b8a38 // indirect
 	github.com/setanarut/fastnoise v1.1.1 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
-	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/solarlune/resolv v0.8.1 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasthttp v1.68.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.60.0 // indirect
 	go.opentelemetry.io/otel v1.39.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.39.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.39.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.39.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.36.0 // indirect
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.39.0 // indirect
@@ -126,6 +116,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
+	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect

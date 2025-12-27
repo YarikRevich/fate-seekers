@@ -4,8 +4,6 @@ global:
 
 scrape_configs:
   - job_name: 'prometheus'
-
-    scrape_interval: 800ms
-
+    metrics_path: "/metrics"
     static_configs:
       - targets: ['{{.metrics.host}}:{{.metrics.port}}']

@@ -2,6 +2,7 @@ package grafana
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring"
@@ -9,6 +10,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
@@ -32,7 +34,7 @@ func (gc *GrafanaComponent) Init() error {
 		map[string]interface{}{
 			"prometheus": map[string]interface{}{
 				"host": config.GetSettingsMonitoringPrometheusName(),
-				"port": config.GRAFANA_PORT,
+				"port": config.PROMETHEUS_PORT,
 			},
 		})
 }
@@ -51,8 +53,8 @@ func (gc *GrafanaComponent) Deploy() error {
 			nat.Port(config.GRAFANA_PORT): struct{}{},
 		},
 		Env: []string{
-			"GF_SECURITY_ADMIN_USER=fateseekers",
-			"GF_SECURITY_ADMIN_PASSWORD=fateseekers",
+			fmt.Sprintf("GF_SECURITY_ADMIN_USER=%s", config.GetSettingsMonitoringGrafanaAdminLogin()),
+			fmt.Sprintf("GF_SECURITY_ADMIN_PASSWORD=%s", config.GetSettingsMonitoringGrafanaAdminPassword()),
 			"GF_USERS_ALLOW_SIGN_UP=false",
 		},
 	}
@@ -81,7 +83,13 @@ func (gc *GrafanaComponent) Deploy() error {
 		},
 	}
 
-	resp, err := gc.dockerClient.ContainerCreate(ctx, c, hostConfig, nil, nil, config.GetSettingsMonitoringGrafanaName())
+	networkingConfig := &network.NetworkingConfig{
+		EndpointsConfig: map[string]*network.EndpointSettings{
+			config.GetSettingsMonitoringNetworkName(): {},
+		},
+	}
+
+	resp, err := gc.dockerClient.ContainerCreate(ctx, c, hostConfig, networkingConfig, nil, config.GetSettingsMonitoringGrafanaName())
 	if err != nil {
 		return errors.Wrap(err, ErrGrafanaDeployment.Error())
 	}

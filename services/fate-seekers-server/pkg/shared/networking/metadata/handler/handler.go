@@ -12,6 +12,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/db"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/entity"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring/services"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/cache"
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/events"
@@ -345,6 +346,8 @@ func (h *Handler) CreateSession(ctx context.Context, request *metadatav1.CreateS
 		GetInstance().
 		CommitUserSessionsTransaction()
 
+	services.IncAvailableSession()
+
 	return new(metadatav1.CreateSessionResponse), nil
 }
 
@@ -548,6 +551,8 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 	cache.
 		GetInstance().
 		CommitSessionsTransaction()
+
+	services.DecAvailableSession()
 
 	return new(metadatav1.RemoveSessionResponse), nil
 }
@@ -1518,6 +1523,8 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 		GetInstance().
 		CommitMetadataTransaction()
 
+	services.IncAvailableLobby()
+
 	return new(metadatav1.CreateLobbyResponse), nil
 }
 
@@ -1700,6 +1707,8 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 	cache.
 		GetInstance().
 		CommitLobbySetTransaction()
+
+	services.DecAvailableLobby()
 
 	return new(metadatav1.RemoveLobbyResponse), nil
 }

@@ -33,7 +33,9 @@ var (
 
 	settingsMonitoringEnabled bool
 	settingsMonitoringGrafanaName,
-	settingsMonitoringPrometheusName, settingsMonitoringPrometheusPort string
+	settingsMonitoringGrafanaAdminLogin, settingsMonitoringGrafanaAdminPassword,
+	settingsMonitoringPrometheusName, settingsMonitoringPrometheusPort,
+	settingsMonitoringNetworkName string
 
 	settingsSoundFX  int
 	settingsLanguage string
@@ -169,8 +171,11 @@ func SetupDefaultConfig() {
 	viper.SetDefault("settings.networking.encryption.key", "")
 	viper.SetDefault("settings.monitoring.enabled", true)
 	viper.SetDefault("settings.monitoring.grafana.name", "fate-seekers-server-grafana")
+	viper.SetDefault("settings.monitoring.grafana.admin.login", "fateseekers")
+	viper.SetDefault("settings.monitoring.grafana.admin.password", "fateseekers")
 	viper.SetDefault("settings.monitoring.prometheus.name", "fate-seekers-server-prometheus")
 	viper.SetDefault("settings.monitoring.prometheus.port", "8091")
+	viper.SetDefault("settings.monitoring.network.name", "fate-seekers-server-network")
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
 	viper.SetDefault("operation.debug", false)
 	viper.SetDefault("operation.max-sessions-amount", maxSessionsAmount)
@@ -228,8 +233,11 @@ func Init() {
 
 	settingsMonitoringEnabled = viper.GetBool("settings.monitoring.enabled")
 	settingsMonitoringGrafanaName = viper.GetString("settings.monitoring.grafana.name")
+	settingsMonitoringGrafanaAdminLogin = viper.GetString("settings.monitoring.grafana.admin.login")
+	settingsMonitoringGrafanaAdminPassword = viper.GetString("settings.monitoring.grafana.admin.password")
 	settingsMonitoringPrometheusName = viper.GetString("settings.monitoring.prometheus.name")
 	settingsMonitoringPrometheusPort = viper.GetString("settings.monitoring.prometheus.port")
+	settingsMonitoringNetworkName = viper.GetString("settings.monitoring.network.name")
 	settingsSoundFX = viper.GetInt("settings.sound.fx")
 	settingsLanguage = viper.GetString("settings.language")
 
@@ -324,12 +332,24 @@ func GetSettingsMonitoringGrafanaName() string {
 	return settingsMonitoringGrafanaName
 }
 
+func GetSettingsMonitoringGrafanaAdminLogin() string {
+	return settingsMonitoringGrafanaAdminLogin
+}
+
+func GetSettingsMonitoringGrafanaAdminPassword() string {
+	return settingsMonitoringGrafanaAdminPassword
+}
+
 func GetSettingsMonitoringPrometheusName() string {
 	return settingsMonitoringPrometheusName
 }
 
 func GetSettingsMonitoringPrometheusPort() string {
 	return settingsMonitoringPrometheusPort
+}
+
+func GetSettingsMonitoringNetworkName() string {
+	return settingsMonitoringNetworkName
 }
 
 func SetSettingsLanguage(value string) {

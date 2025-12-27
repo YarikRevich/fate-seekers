@@ -12,6 +12,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring/manager"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/connector"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/metadata/events"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository/dashboards"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/repository/sync"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/validator/encryptionkey"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/common"
@@ -33,6 +34,8 @@ func Init(root *cobra.Command) {
 			db.Init()
 
 			sync.Run()
+
+			dashboards.Run()
 
 			events.Run()
 
@@ -56,6 +59,23 @@ func Init(root *cobra.Command) {
 				case <-gracefulShutdown:
 				}
 
+				// 			"server.monitoring.start.title": {
+				//     "one": "FateSeekers gaming server has been started!",
+				//     "other": "FateSeekers gaming server has been started!"
+				// },
+				// "server.monitoring.start.monitoring.title": {
+				//     "one": "FateSeekers gaming server has been started(including monitoring)!",
+				//     "other": "FateSeekers gaming server has been started(including monitoring)!"
+				// },
+				// "server.monitoring.stop.title": {
+				//     "one": "FateSeekers gaming server has been stoped!",
+				//     "other": "FateSeekers gaming server has been stoped!"
+				// },
+				// "server.monitoring.stop.monitoring.title": {
+				//     "one": "FateSeekers gaming server has been stoped(including monitoring)!",
+				//     "other": "FateSeekers gaming server has been stoped(including monitoring)!"
+				// }
+
 				connector.GetInstance().Close(func(err error) {
 					if err != nil {
 						logging.GetInstance().Error(
@@ -72,13 +92,15 @@ func Init(root *cobra.Command) {
 										translation.GetInstance().GetTranslation("server.networking.start-failure"),
 										err.Error()))
 							} else {
-								logging.GetInstance().Info("FateSeekers gaming server has been stoped(including monitoring)!")
+								logging.GetInstance().Info(
+									translation.GetInstance().GetTranslation("server.monitoring.stop.monitoring.title"))
 							}
 
 							close(done)
 						})
 					} else {
-						logging.GetInstance().Info("FateSeekers gaming server has been stoped!")
+						logging.GetInstance().Info(
+							translation.GetInstance().GetTranslation("server.monitoring.stop.title"))
 
 						close(done)
 					}
@@ -110,10 +132,12 @@ func Init(root *cobra.Command) {
 							return
 						}
 
-						logging.GetInstance().Info("FateSeekers gaming server has been started(including monitoring)!")
+						logging.GetInstance().Info(
+							translation.GetInstance().GetTranslation("server.monitoring.start.monitoring.title"))
 					})
 				} else {
-					logging.GetInstance().Info("FateSeekers gaming server has been started!")
+					logging.GetInstance().Info(
+						translation.GetInstance().GetTranslation("server.monitoring.start.title"))
 				}
 			})
 

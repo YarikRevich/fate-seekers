@@ -30,13 +30,26 @@ settings:
       # Represents a name property used for Grafana container creation.
       name: "fate-seekers-server-grafana"
 
+      # Represents sector used for admin properties.
+      admin:
+        # Represents admin login property.
+        login: "fateseekers"
+
+        # Represents admin password property.
+        password: "fateseekers"
+
     # Represents sector used for Prometheus properties.
     prometheus:
       # Represents a name property used for Prometheus container creation.
       name: "fate-seekers-server-prometheus"
 
       # Represents server host value used for metrics provision.
-      port: "8091"
+      port: "8102"
+
+    # Represents sector used for network properties.
+    network:
+      # Represents server network name value.
+      name: "fate-seekers-server-network"
 
   # Represents language selected for the interface.
   language: "en"
