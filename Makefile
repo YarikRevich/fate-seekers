@@ -36,10 +36,18 @@ clone-client-config-testing: create-local-client-testing ## Clones fate-seekers-
 .PHONY: create-local-server
 create-local-server: ## Creates fate-seekers-server local directory for API Server
 	@mkdir -p $(HOME)/.fate-seekers-server/config
+	@mkdir -p $(HOME)/.fate-seekers-server/diagnostics/prometheus/internal
+	@mkdir -p $(HOME)/.fate-seekers-server/diagnostics/prometheus/config
+	@mkdir -p $(HOME)/.fate-seekers-server/diagnostics/grafana/internal
+	@mkdir -p $(HOME)/.fate-seekers-server/diagnostics/grafana/config/dashboards
+	@mkdir -p $(HOME)/.fate-seekers-server/diagnostics/grafana/config/datasources
 	@mkdir -p $(HOME)/.fate-seekers-server/internal/database
 
 .PHONY: clone-server-config
 clone-server-config: create-local-server ## Clones fate-seekers-server configuration files to local directory
+	@cp -r ./config/grafana/dashboards/dashboard.yml $(HOME)/.fate-seekers-server/diagnostics/grafana/config/dashboards
+	@cp -r ./config/grafana/datasources/datasource.tpl $(HOME)/.fate-seekers-server/diagnostics/grafana/config/datasources
+	@cp -r ./config/prometheus/prometheus.tpl $(HOME)/.fate-seekers-server/diagnostics/prometheus/config
 	@cp -r ./samples/config/fate-seekers-server/config.yaml $(HOME)/.fate-seekers-server/config
 
 .PHONY: build-server-ui

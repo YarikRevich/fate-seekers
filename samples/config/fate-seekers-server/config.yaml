@@ -13,7 +13,7 @@ settings:
     # Represents sector used for external server properties.
     server:
       # Represents server host value used for networking.
-      port: "8090"
+      port: "8092"
 
     # Represents sector used for networking encryption properties.
     encryption:
@@ -22,15 +22,34 @@ settings:
   
   # Represents sector used for monitoring settings description.
   monitoring:
+    # Rerpesents a toggle button to enable server monitoring.
+    enabled: true
+
     # Represents sector used for Grafana properties.
     grafana:
       # Represents a name property used for Grafana container creation.
       name: "fate-seekers-server-grafana"
 
+      # Represents sector used for admin properties.
+      admin:
+        # Represents admin login property.
+        login: "fateseekers"
+
+        # Represents admin password property.
+        password: "fateseekers"
+
     # Represents sector used for Prometheus properties.
     prometheus:
       # Represents a name property used for Prometheus container creation.
       name: "fate-seekers-server-prometheus"
+
+      # Represents server host value used for metrics provision.
+      port: "8102"
+
+    # Represents sector used for network properties.
+    network:
+      # Represents server network name value.
+      name: "fate-seekers-server-network"
 
   # Represents language selected for the interface.
   language: "en"
@@ -48,6 +67,22 @@ operation:
   # Represents max sessions amount, which is used for caching configuration. Be aware
   # that amount of sessions influences the amount of allocated memory.
   max-sessions-amount: 128
+
+  # Represents max chests amount, which is used for caching and object generation configuration. 
+  # Be aware that amount of chests influences the amount of allocated memory.
+  max-chests-amount: 20
+
+  # Represents min chests amount, which is used for caching and object generation configuration. 
+  # Be aware that amount of chests influences the amount of allocated memory.
+  min-chests-amount: 2
+
+  # Represents max sessions amount, which is used for caching and object generation configuration. 
+  # Be aware that amount of health packs influences the amount of allocated memory.
+  max-health-packs-amount: 15
+
+  # Represents min sessions amount, which is used for caching and object generation configuration. 
+  # Be aware that amount of health packs influences the amount of allocated memory.
+  min-health-packs-amount: 1
 
   # Represents database properties description.
   database:

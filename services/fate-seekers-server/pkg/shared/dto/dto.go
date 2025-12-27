@@ -14,6 +14,33 @@ const (
 	ATTACHMENT_AUDIO_TYPE     = "audio"
 )
 
+// Describes all the available event duration time.
+const (
+	EVENT_DURATION_TIME_TOXIC_RAIN = time.Second * 20
+)
+
+// Describes all the available event hit rates.
+const (
+	EVENT_HIT_RATE_TOXIC_RAIN = 2
+)
+
+// Describes all the available event frequency rates.
+const (
+	EVENT_FREQUENCY_RATE_TOXIC_RAIN = time.Second * 5
+)
+
+// Describes all the available event names.
+const (
+	EVENT_NAME_TOXIC_RAIN = "toxic_rain"
+	EVENT_NAME_EMPTY      = ""
+)
+
+// Describes map, which contains all the available event names.
+var EVENTS_NAME_MAP = []string{
+	EVENT_NAME_TOXIC_RAIN,
+	EVENT_NAME_EMPTY,
+}
+
 // GeneratedQuestionUnit represents a generated question unit.
 type GeneratedQuestionUnit struct {
 	// Represents generated question body.
@@ -148,38 +175,75 @@ type SessionsRepositoryGetByFiltersRequest struct {
 	Name string
 }
 
+// GenerationsRepositoryInsertOrUpdateRequest represents generations repository entity update request.
+type GenerationsRepositoryInsertOrUpdateRequest struct {
+	ID        int64
+	SessionID int64
+	Instance  string
+	Name      string
+	Type      string
+	Active    bool
+	PositionX float64
+	PositionY float64
+}
+
+// AssociationsRepositoryInsertOrUpdateRequest represents associations repository entity update request.
+type AssociationsRepositoryInsertOrUpdateRequest struct {
+	ID           int64
+	SessionID    int64
+	GenerationID int64
+	Instance     string
+	Name         string
+	Active       bool
+}
+
 // LobbiesRepositoryInsertOrUpdateRequest represents lobbies repository entity update request.
 type LobbiesRepositoryInsertOrUpdateRequest struct {
-	UserID     int64
-	SessionID  int64
-	Skin       uint64
-	Health     uint64
-	Active     bool
-	Host       bool
-	Eliminated bool
-	PositionX  float64
-	PositionY  float64
+	UserID         int64
+	SessionID      int64
+	Skin           uint64
+	Health         uint64
+	Active         bool
+	Host           bool
+	Eliminated     bool
+	PositionX      float64
+	PositionY      float64
+	PositionStatic bool
+}
+
+// InventoryRepositoryInsertOrUpdateRequest represents inventory repository entity update request.
+type InventoryRepositoryInsertOrUpdateRequest struct {
+	UserID    int64
+	SessionID int64
+	Name      string
 }
 
 // CacheSessionEntity represent cache session entity used by global networking cache.
 type CacheSessionEntity struct {
 	ID      int64
-	Seed    uint64
+	Seed    int64
 	Name    string
 	Started bool
 }
 
 // CacheMetadataEntity represent cache metadata entity used by global networking cache.
 type CacheMetadataEntity struct {
-	LobbyID    int64
-	SessionID  int64
-	PositionX  float64
-	PositionY  float64
-	Skin       uint64
-	Health     uint64
-	Active     bool
-	Eliminated bool
-	Host       bool
+	LobbyID        int64
+	SessionID      int64
+	PositionX      float64
+	PositionY      float64
+	PositionStatic bool
+	Skin           uint64
+	Health         uint64
+	Active         bool
+	Eliminated     bool
+	Host           bool
+	Ammo           int
+}
+
+// CacheInventoryEntity represents cache inventory entity used by global networking cache.
+type CacheInventoryEntity struct {
+	Name string
 }
 
 // CacheLobbySetEntity represent cache lobby set entity used by global networking cache.
@@ -189,3 +253,70 @@ type CacheLobbySetEntity struct {
 	Skin   uint64
 	Host   bool
 }
+
+// SessionEvent represents session event description.
+type SessionEvent struct {
+	EndRate       time.Time
+	FrequencyRate time.Time
+	PauseRate     time.Time
+	// If name is empty, but other fields are not, it means that event
+	// has ended and awaits for the pause to end to start another event shuffle.
+	Name string
+}
+
+// CacheGeneratedChestEntity represent generated chest entity used by global networking cache.
+type CacheGeneratedChestEntity struct {
+	ID         int64
+	SessionID  int64
+	Name       string
+	Active     bool
+	Position   Position
+	ChestItems []CacheGeneratedChestItemEntity
+}
+
+// CacheGeneratedChestItemEntity represents generated chest item entity used by global networking cache.
+type CacheGeneratedChestItemEntity struct {
+	ID   int64
+	Name string
+}
+
+// CacheGeneratedChestEntity represent generated chest entity used by global networking cache.
+type CacheGeneratedHealthPacksEntity struct {
+	ID        int64
+	SessionID int64
+	Name      string
+	Active    bool
+	Position  Position
+}
+
+// Position represents a set of coordinates.
+type Position struct {
+	X, Y int
+}
+
+// ChestItem represents chest item.
+type ChestItem struct {
+	Instance string
+	Name     string
+}
+
+// GeneratedChest represents generated chest.
+type GeneratedChest struct {
+	Instance   string
+	Position   Position
+	Name       string
+	ChestItems []ChestItem
+}
+
+// GeneratedHealthPack represents generated health pack.
+type GeneratedHealthPack struct {
+	Instance string
+	Position Position
+	Name     string
+}
+
+// Describes all the available generation types.
+const (
+	ChestGenerationType      = "chest"
+	HealthPackGenerationType = "health_pack"
+)

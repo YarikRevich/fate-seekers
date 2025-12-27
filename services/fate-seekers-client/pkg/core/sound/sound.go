@@ -17,16 +17,65 @@ var (
 
 // SoundManager represents global sound manager.
 type SoundManager struct {
-	// Represents instance of sound FX manager.
-	soundFxManager *fx.SoundFXManager
+	// Represents audio context.
+	audioContext *audio.Context
+
+	// Represents instance of sound UI FX manager.
+	soundUIFxManager *fx.SoundFXManager
+
+	// Represents instance of sound events FX manager.
+	soundEventsFxManager *fx.SoundFXManager
+
+	// Represents instance of sound sounder main FX manager.
+	soundSounderMainFxManager *fx.SoundFXManager
+
+	// Represents map of sound sounder external FX manager instances.
+	soundSounderExternalFxManagers map[string]*fx.SoundFXManager
 
 	// Represents instance of sound music manager.
 	soundMusicManager *music.SoundMusicManager
 }
 
-// GetSoundFxManager retrieves instance of sound FX manager.
-func (sm *SoundManager) GetSoundFxManager() *fx.SoundFXManager {
-	return sm.soundFxManager
+// GetSoundUIFxManager retrieves instance of sound UI FX manager.
+func (sm *SoundManager) GetSoundUIFxManager() *fx.SoundFXManager {
+	return sm.soundUIFxManager
+}
+
+// GetSoundEventsFxManager retrieves instance of sound events FX manager.
+func (sm *SoundManager) GetSoundEventsFxManager() *fx.SoundFXManager {
+	return sm.soundEventsFxManager
+}
+
+// GetSoundSounderMainFxManager retrieves instance of sound sounder main FX manager.
+func (sm *SoundManager) GetSoundSounderMainFxManager() *fx.SoundFXManager {
+	return sm.soundSounderMainFxManager
+}
+
+// AddSoundSounderExternalFxManager adds an instance of sound sounder external FX manager.
+func (sm *SoundManager) AddSoundSounderExternalFxManager(issuer string) {
+	soundSounderExternalFxManager := fx.NewSoundFxManager(sm.audioContext)
+	soundSounderExternalFxManager.Init()
+
+	sm.soundSounderExternalFxManagers[issuer] = soundSounderExternalFxManager
+}
+
+// SoundSounderExternalFxManagerExists checks if instance of sound sounder external FX manager
+// exists for the provided issuer.
+func (sm *SoundManager) SoundSounderExternalFxManagerExists(issuer string) bool {
+	_, ok := sm.soundSounderExternalFxManagers[issuer]
+
+	return ok
+}
+
+// GetSoundSounderExternalFxManager retrieves instance of sound sounder external FX manager.
+func (sm *SoundManager) GetSoundSounderExternalFxManager(issuer string) *fx.SoundFXManager {
+	return sm.soundSounderExternalFxManagers[issuer]
+}
+
+// RemoveSoundSounderExternalFxManager performs a removal of the instance of sound sounder external FX manager
+// for the provided issuer.
+func (sm *SoundManager) RemoveSoundSounderExternalFxManager(issuer string) {
+	delete(sm.soundSounderExternalFxManagers, issuer)
 }
 
 // GetSoundMusicManager retrieves instance of sound music manager.
@@ -43,15 +92,25 @@ func (sm *SoundManager) InitSoundAmbientBatch() {
 func newSoundManager() *SoundManager {
 	audioContext := audio.NewContext(common.SampleRate)
 
-	soundFxManager := fx.NewSoundFxManager(audioContext)
-	soundFxManager.Init()
+	soundUIFxManager := fx.NewSoundFxManager(audioContext)
+	soundUIFxManager.Init()
+
+	soundEventsFxManager := fx.NewSoundFxManager(audioContext)
+	soundEventsFxManager.Init()
+
+	soundSounderMainFxManager := fx.NewSoundFxManager(audioContext)
+	soundSounderMainFxManager.Init()
 
 	soundMusicManager := music.NewSoundMusicManager(audioContext)
 	soundMusicManager.Init()
 
 	result := &SoundManager{
-		soundFxManager:    soundFxManager,
-		soundMusicManager: soundMusicManager,
+		audioContext:                   audioContext,
+		soundUIFxManager:               soundUIFxManager,
+		soundEventsFxManager:           soundEventsFxManager,
+		soundSounderMainFxManager:      soundSounderMainFxManager,
+		soundMusicManager:              soundMusicManager,
+		soundSounderExternalFxManagers: make(map[string]*fx.SoundFXManager),
 	}
 
 	return result

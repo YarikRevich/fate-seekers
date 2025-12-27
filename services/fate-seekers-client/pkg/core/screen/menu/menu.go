@@ -16,6 +16,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/prompt"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/validator/encryptionkey"
@@ -61,7 +62,23 @@ func (ms *MenuScreen) HandleInput() error {
 			action.NewSetRetrievedLobbySetMetadata([]dto.RetrievedLobbySetMetadata{}))
 
 		dispatcher.GetInstance().Dispatch(
+			action.NewSetSelectedLobbySetUnitMetadata(nil))
+
+		dispatcher.GetInstance().Dispatch(
 			action.NewSetSelectedSessionMetadata(nil))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSessionAlreadyStartedMetadata(
+				value.SESSION_ALREADY_STARTED_METADATA_STATE_FALSE_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetLobbySetRetrievalCycleFinishedNetworkingAction(
+				value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_FALSE_VALUE))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetStartSessionTravel(value.START_SESSION_TRAVEL_FALSE_VALUE))
+
+		prompt.GetInstance().ShowSubmitButton()
 	}
 
 	if !ms.transparentTransitionEffect.Done() {
@@ -224,7 +241,7 @@ func newMenuScreen() screen.Screen {
 									connector.GetInstance().Close(func(err1 error) {
 										if err1 != nil {
 											notification.GetInstance().Push(
-												translation.GetInstance().GetTranslation("client.networking.close-failure"),
+												translation.GetInstance().GetTranslation("shared.networking.close-failure"),
 												time.Second*2,
 												common.NotificationErrorTextColor)
 										}
@@ -234,6 +251,8 @@ func newMenuScreen() screen.Screen {
 
 										dispatcher.GetInstance().Dispatch(
 											action.NewSetEntryHandshakeStartedNetworkingAction(value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE))
+
+										transparentTransitionEffect.Reset()
 
 										dispatcher.GetInstance().Dispatch(
 											action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
@@ -275,10 +294,16 @@ func newMenuScreen() screen.Screen {
 					}
 				},
 				func() {
+					transparentTransitionEffect.Reset()
 
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_CREDITS_VALUE))
 				},
 				func() {
+					transparentTransitionEffect.Reset()
 
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_COLLECTIONS_VALUE))
 				},
 				func() {
 					transparentTransitionEffect.Reset()

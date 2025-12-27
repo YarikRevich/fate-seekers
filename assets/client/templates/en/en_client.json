@@ -19,6 +19,30 @@
         "one": "Exit",
         "other": "Exit"
     },
+    "client.credits.title": {
+        "one": "Credits",
+        "other": "Credits"
+    },
+    "client.credits.special-thanks": {
+        "one": "Special Thanks: ",
+        "other": "Special Thanks: "
+    },
+    "client.credits.close": {
+        "one": "Close",
+        "other": "Close"
+    },
+    "client.collections.title": {
+        "one": "Collections",
+        "other": "Collections"
+    },
+    "client.collections.available-collections": {
+        "one": "Available collections",
+        "other": "Available collections"
+    },
+    "client.collections.close": {
+        "one": "Close",
+        "other": "Close"
+    },
     "client.settings.sound.music": {
         "one": "Music",
         "other": "Music"
@@ -111,6 +135,10 @@
         "one": "Server key is not set or is not valid. \nProceed with its configuration?",
         "other": "Server key is not set or is not valid. \nProceed with its configuration?"
     },
+    "client.prompt.death": {
+        "one": "You are dead!",
+        "other": "You are dead!"
+    },
     "client.answerinput.solvetext": {
         "one": "Please solve",
         "other": "Please solve"
@@ -134,6 +162,14 @@
     "client.answerinput.failure": {
         "one": "Answer is incorrect!",
         "other": "Answer is incorrect!"
+    },
+    "client.press.gamepad": {
+        "one": "Please press square button",
+        "other": "Please press square button"
+    },
+    "client.press.keyboard": {
+        "one": "Please press button E",
+        "other": "Please press button E"
     },
     "client.selectormanager.invalid-session-name": {
         "one": "Provided session name is invalid",
@@ -191,6 +227,10 @@
         "one": "Unable to remove lobby for selected session",
         "other": "Unable to remove lobby for selected session"
     },
+    "client.networking.leave-lobby-failure": {
+        "one": "Unable to leave lobby for selected session",
+        "other": "Unable to leave lobby for selected session"
+    },
     "client.networking.joining-existing-lobby": {
         "one": "Joining existing lobby for selected session",
         "other": "Joining existing lobby for selected session"
@@ -207,13 +247,45 @@
         "one": "Unable to perform session start",
         "other": "Unable to perform session start"
     },
+    "client.networking.start-session-processing": {
+        "one": "Session is starting...",
+        "other": "Session is starting..."
+    },
     "client.networking.connection-failure": {
         "one": "Connector connect operation failed",
         "other": "Connector connect operation failed"
     },
-    "client.networking.close-failure": {
-        "one": "Connector close operation failed",
-        "other": "Connector close operation failed"
+    "client.networking.update-user-metadata-positions-failure": {
+        "one": "Unable to perform user metadata positions update",
+        "other": "Unable to perform user metadata positions update"
+    },
+    "client.networking.event-retrieval-failure": {
+        "one": "Unable to perform events retrieval",
+        "other": "Unable to perform events retrieval"
+    },
+    "client.networking.users-metadata-retrieval-failure": {
+        "one": "Unable to perform users metadata retrieval",
+        "other": "Unable to perform users metadata retrieval"
+    },
+    "client.networking.event-toxic-rain-starated": {
+        "one": "Toxic rain event has started",
+        "other": "Toxic rain event has started"
+    },
+    "client.networking.event-finished": {
+        "one": "Event has finished",
+        "other": "Event has finished"
+    },
+    "client.repository.collections-retrieval-failure": {
+        "one": "Unable to perform user collections retrieval",
+        "other": "Unable to perform user collections retrieval"
+    },
+    "client.gamepad.connected": {
+        "one": "Controller has been connected",
+        "other": "Controller has been connected"
+    },
+    "client.gamepad.disconnected": {
+        "one": "Controller has been disconnected",
+        "other": "Controller has been disconnected"
     },
     "client.skin.0.name": {
         "one": "Ariyan",

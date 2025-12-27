@@ -9,6 +9,9 @@ import (
 )
 
 const (
+	// Repreesnts effect update ticker frequency.
+	updateTickerFrequency = time.Millisecond * 300
+
 	// Represents max and default amount of elements being used by the particle effect.
 	defaultCount = 256
 
@@ -58,13 +61,21 @@ func (spe *StarsParticleEffect) Clean() {
 func (spe *StarsParticleEffect) Reset() {
 	spe.particles = make([]star.StarParticleElement, defaultCount)
 
-	spe.ticker = time.NewTicker(time.Millisecond * 800)
+	spe.ticker = time.NewTicker(updateTickerFrequency)
 
 	spe.count = defaultCount
 
 	spe.divider = defaultDivider
 
 	spe.finished = false
+}
+
+func (spe *StarsParticleEffect) HoldProgression() {
+	spe.ticker.Stop()
+}
+
+func (spe *StarsParticleEffect) ResumeProgression() {
+	spe.ticker.Reset(updateTickerFrequency)
 }
 
 func (spe *StarsParticleEffect) Update() {
@@ -80,7 +91,7 @@ func (spe *StarsParticleEffect) Update() {
 			spe.divider--
 		}
 
-		spe.ticker.Reset(time.Millisecond * 800)
+		spe.ticker.Reset(updateTickerFrequency)
 	default:
 	}
 
@@ -105,6 +116,6 @@ func NewStarsParticleEffect() particle.ParticleEffect {
 		count:     defaultCount,
 		divider:   defaultDivider,
 		particles: make([]star.StarParticleElement, defaultCount),
-		ticker:    time.NewTicker(time.Millisecond * 800),
+		ticker:    time.NewTicker(updateTickerFrequency),
 	}
 }

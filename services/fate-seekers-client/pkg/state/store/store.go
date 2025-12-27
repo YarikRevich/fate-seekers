@@ -2,11 +2,14 @@ package store
 
 import (
 	"sync"
+	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/application"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/collections"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/creator"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/death"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/event"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/metadata"
@@ -14,8 +17,10 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/prompt"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/session"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/statistics"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/reducer/travel"
 	"github.com/luisvinicius167/godux"
 )
 
@@ -52,11 +57,32 @@ func GetApplicationLoading() int {
 	return instance.GetState(application.LOADING_APPLICATION_STATE).(int)
 }
 
+// GetApplicationStateReset retrieves state reset application state value.
 func GetApplicationStateReset() string {
-	// GetApplicationStateReset retrieves state reset application state value.
 	instance := GetInstance()
 
 	return instance.GetState(application.STATE_RESET_APPLICATION_STATE).(string)
+}
+
+// GetApplicationStateGamepadEnabled retrieves state gamepad enabled application state value.
+func GetApplicationStateGamepadEnabled() string {
+	instance := GetInstance()
+
+	return instance.GetState(application.GAMEPAD_ENABLED_APPLICATION_STATE).(string)
+}
+
+// GetApplicationStateGamepadPointerPosition retrieves gamepad pointer position application action.
+func GetApplicationStateGamepadPointerPosition() dto.Position {
+	instance := GetInstance()
+
+	return instance.GetState(application.GAMEPAD_POINTER_POSITION_APPLICATION_STATE).(dto.Position)
+}
+
+// GetApplicationStateGamepadPointerUsage retrieves gamepad pointer usage application action.
+func GetApplicationStateGamepadPointerUsage() time.Time {
+	instance := GetInstance()
+
+	return instance.GetState(application.GAMEPAD_POINTER_USAGE_APPLICATION_STATE).(time.Time)
 }
 
 // GetRepositoryUUID retrieves uuid repository state value.
@@ -115,6 +141,13 @@ func GetLobbySetRetrievalStartedNetworking() string {
 	return instance.GetState(networking.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
 }
 
+// GetLobbySetRetrievalCycleFinishedNetworking retrieves lobby set retrieval cycle finished networking state value.
+func GetLobbySetRetrievalCycleFinishedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_STATE).(string)
+}
+
 // GetLobbyCreationStartedNetworking retrieves lobby creation started networking state value.
 func GetLobbyCreationStartedNetworking() string {
 	instance := GetInstance()
@@ -134,6 +167,48 @@ func GetSessionMetadataRetrievalStartedNetworking() string {
 	instance := GetInstance()
 
 	return instance.GetState(networking.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetUpdateUserMetadataPositionsStartedNetworking retrieves session metadata retrieval started networking state value.
+func GetUpdateUserMetadataPositionsStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetEventRetrievalStartedNetworking retrieves event retrieval started networking state value.
+func GetEventRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.EVENT_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetUsersMetadataRetrievalStartedNetworking retrieves users metadata retrieval started networking state value.
+func GetUsersMetadataRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetUserInventoryRetrievalStartedNetworking retrieves user inventory retrieval started networking state value.
+func GetUserInventoryRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetChestsRetrievalStartedNetworking retrieves chests retrieval started networking state value.
+func GetChestsRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.CHESTS_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
+}
+
+// GetHealthPacksRetrievalStartedNetworking retrieves health packs retrieval started networking state value.
+func GetHealthPacksRetrievalStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
 }
 
 // GetLetterUpdated retrieves letter updated state value.
@@ -213,13 +288,6 @@ func GetEventEnding() string {
 	return instance.GetState(event.ENDING_EVENT_STATE).(string)
 }
 
-// GetSoundFXUpdated retrieves sound fx updated state value.
-func GetSoundFXUpdated() string {
-	instance := GetInstance()
-
-	return instance.GetState(sound.FX_UPDATED_SOUND_STATE).(string)
-}
-
 // GetSoundMusicUpdated retrieves sound music updated state value.
 func GetSoundMusicUpdated() string {
 	instance := GetInstance()
@@ -269,6 +337,79 @@ func GetSelectedLobbySetUnitMetadata() *dto.SelectedLobbySetUnitMetadata {
 	return instance.GetState(metadata.SELECTED_LOBBY_SET_UNIT_METADATA_STATE).(*dto.SelectedLobbySetUnitMetadata)
 }
 
+// GetSessionAlreadyStartedMetadata retrieves session already started metadata state value.
+func GetSessionAlreadyStartedMetadata() string {
+	instance := GetInstance()
+
+	return instance.GetState(metadata.SESSION_ALREADY_STARTED_METADATA_STATE).(string)
+}
+
+// GetResetSession retrieves reset session state value.
+func GetResetSession() string {
+	instance := GetInstance()
+
+	return instance.GetState(session.RESET_SESSION_STATE).(string)
+}
+
+// GetPositionSession retrieves position session state value.
+func GetPositionSession() dto.Position {
+	instance := GetInstance()
+
+	return instance.GetState(session.POSITION_SESSION_STATE).(dto.Position)
+}
+
+// GetStagePositionSession retrieves stage position session state value.
+func GetStagePositionSession() dto.Position {
+	instance := GetInstance()
+
+	return instance.GetState(session.STAGE_POSITION_SESSION_STATE).(dto.Position)
+}
+
+// GetPreviousPositionSession retrieves previous position session state value.
+func GetPreviousPositionSession() dto.Position {
+	instance := GetInstance()
+
+	return instance.GetState(session.PREVIOUS_POSITION_SESSION_STATE).(dto.Position)
+}
+
+// RetrievedUsersMetadataSessionSyncHelper represents retrieved users metadata session sync helper.
+var RetrievedUsersMetadataSessionSyncHelper sync.Mutex
+
+// GetRetrievedUsersMetadataSession retrieves retrieved users metadata session state value.
+func GetRetrievedUsersMetadataSession() dto.RetrievedUsersMetadataSessionSet {
+	instance := GetInstance()
+
+	return instance.GetState(session.RETRIEVED_USERS_METADATA_SESSION_STATE).(dto.RetrievedUsersMetadataSessionSet)
+}
+
+// GetResetCollections retrieves reset collections state value.
+func GetResetCollections() string {
+	instance := GetInstance()
+
+	return instance.GetState(collections.RESET_COLLECTIONS_STATE).(string)
+}
+
+// GetResetTravel retrieves reset travel state value.
+func GetResetTravel() string {
+	instance := GetInstance()
+
+	return instance.GetState(travel.RESET_TRAVEL_STATE).(string)
+}
+
+// GetStartSessionTravel retrieves start session travel state value.
+func GetStartSessionTravel() string {
+	instance := GetInstance()
+
+	return instance.GetState(travel.START_SESSION_TRAVEL_STATE).(string)
+}
+
+// GetResetDeath retrieves reset death state value.
+func GetResetDeath() string {
+	instance := GetInstance()
+
+	return instance.GetState(death.RESET_DEATH_STATE).(string)
+}
+
 // newStore creates new instance of application store.
 func newStore() *godux.Store {
 	store := godux.NewStore()
@@ -308,6 +449,18 @@ func newStore() *godux.Store {
 
 	metadataReducer := metadata.NewMetadataStateReducer(store)
 	metadataReducer.Init()
+
+	sessionReducer := session.NewSessionStateReducer(store)
+	sessionReducer.Init()
+
+	collectionsReducer := collections.NewCollectionsStateReducer(store)
+	collectionsReducer.Init()
+
+	travelReducer := travel.NewTravelStateReducer(store)
+	travelReducer.Init()
+
+	deathReducer := death.NewDeathStateReducer(store)
+	deathReducer.Init()
 
 	store.Reducer(func(action godux.Action) interface{} {
 		result := screenStateReducer.GetProcessor()(action)
@@ -366,6 +519,26 @@ func newStore() *godux.Store {
 		}
 
 		result = metadataReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = sessionReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = collectionsReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = travelReducer.GetProcessor()(action)
+		if result != nil {
+			return result
+		}
+
+		result = deathReducer.GetProcessor()(action)
 		if result != nil {
 			return result
 		}

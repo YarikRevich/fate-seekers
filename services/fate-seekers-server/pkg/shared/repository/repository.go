@@ -12,18 +12,30 @@ import (
 )
 
 var (
-	ErrPersistingSessions = errors.New("err happened during the process of session creation response data save.")
-	ErrPersistingLobbies  = errors.New("err happened during the process of lobby creation response data save.")
-	ErrPersistingMessages = errors.New("err happened during the process of message creation response data save.")
-	ErrPersistingUsers    = errors.New("err happened during the process of user creation response data save.")
+	ErrPersistingSessions     = errors.New("err happened during the process of session creation response data save.")
+	ErrPersistingGenerations  = errors.New("err happened during the process of generation creation response data save.")
+	ErrPersistingAssociations = errors.New("err happened during the process of associations creation response data save.")
+	ErrPersistingLobbies      = errors.New("err happened during the process of lobby creation response data save.")
+	ErrPersistingInventory    = errors.New("err happened during the process of inventory creation response data save.")
+	ErrPersistingMessages     = errors.New("err happened during the process of message creation response data save.")
+	ErrPersistingUsers        = errors.New("err happened during the process of user creation response data save.")
 )
 
 var (
 	// GetSessionsRepository retrieves instance of the sessions repository, performing initial creation if needed.
 	GetSessionsRepository = sync.OnceValue[SessionsRepository](createSessionsRepository)
 
+	// GetGenerationRepository retrieves instance of the generations repository, performing initial creation if needed.
+	GetGenerationRepository = sync.OnceValue[GenerationsRepository](createGenerationsRepository)
+
+	// GetAssociationsRepository retrieves instance of the associations repository, performing initial creation if needed.
+	GetAssociationsRepository = sync.OnceValue[AssociationsRepository](createAssociationsRepository)
+
 	// GetLobbiesRepository retrieves instance of the lobbies repository, performing initial creation if needed.
 	GetLobbiesRepository = sync.OnceValue[LobbiesRepository](createLobbiesRepository)
+
+	// GetInventoryRepository retrieves instance of the inventory repository, performing initial creation if needed.
+	GetInventoryRepository = sync.OnceValue[InventoryRepository](createInventoryRepository)
 
 	// GetMessagesRepository retrieves instance of the messages repository, performing initial creation if needed.
 	GetMessagesRepository = sync.OnceValue[MessagesRepository](createMessagesRepository)
@@ -35,11 +47,13 @@ var (
 // SessionsRepository represents sessions entity repository.
 type SessionsRepository interface {
 	InsertOrUpdate(request dto.SessionsRepositoryInsertOrUpdateRequest) error
+	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.SessionsRepositoryInsertOrUpdateRequest) error
 	DeleteByID(id int64) error
 	GetByID(id int64) (*entity.SessionEntity, bool, error)
 	GetByIssuer(issuer int64) ([]*entity.SessionEntity, error)
 	GetByName(name string) (*entity.SessionEntity, bool, error)
 	ExistsByName(name string) (bool, error)
+	Count() (int64, error)
 }
 
 // sessionsRepositoryImpl represents implementation of SessionsRepository.
@@ -48,11 +62,9 @@ type sessionsRepositoryImpl struct {
 	mu sync.RWMutex
 }
 
-// Insert inserts new sessions entity to the storage or updates existing ones.
-func (w *sessionsRepositoryImpl) InsertOrUpdate(request dto.SessionsRepositoryInsertOrUpdateRequest) error {
+// InsertOrUpdate inserts or updates new sessions entity to the storage or updates existing ones.
+func (w *sessionsRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.SessionsRepositoryInsertOrUpdateRequest) error {
 	w.mu.Lock()
-
-	instance := db.GetInstance()
 
 	err := instance.Clauses(clause.OnConflict{
 		Columns: []clause.Column{
@@ -77,6 +89,16 @@ func (w *sessionsRepositoryImpl) InsertOrUpdate(request dto.SessionsRepositoryIn
 	w.mu.Unlock()
 
 	return nil
+}
+
+// InsertOrUpdate inserts new session entity to the storage or updates existing ones.
+func (w *sessionsRepositoryImpl) InsertOrUpdate(request dto.SessionsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(db.GetInstance(), request)
+}
+
+// InsertOrUpdateWithTransaction inserts new session entity to the storage or updates existing ones with provided transaction.
+func (w *sessionsRepositoryImpl) InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.SessionsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(transaction, request)
 }
 
 // DeleteByID deletes session by the provided id.
@@ -202,17 +224,287 @@ func (w *sessionsRepositoryImpl) ExistsByName(name string) (bool, error) {
 	return true, nil
 }
 
+// Count retrieves general sessions count.
+func (w *sessionsRepositoryImpl) Count() (int64, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var count int64
+
+	err := instance.Table((&entity.SessionEntity{}).TableName()).
+		Count(&count).Error
+
+	if err != nil {
+		w.mu.RUnlock()
+		return 0, err
+	}
+
+	w.mu.RUnlock()
+
+	return count, nil
+}
+
 // createSessionsRepository initializes sessionsRepositoryImpl.
 func createSessionsRepository() SessionsRepository {
 	return new(sessionsRepositoryImpl)
 }
 
+// GenerationsRepository represents generations entity repository.
+type GenerationsRepository interface {
+	InsertOrUpdate(request dto.GenerationsRepositoryInsertOrUpdateRequest) error
+	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.GenerationsRepositoryInsertOrUpdateRequest) error
+	GetChestTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error)
+	GetChestTypeByInstanceAndSessionIDWithTransaction(
+		transaction *gorm.DB, instance string, sessionID int64) (*entity.GenerationsEntity, bool, error)
+	GetHealthPackTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error)
+}
+
+// generationsRepositoryImpl represents implementation of GenerationsRepository.
+type generationsRepositoryImpl struct {
+	// Represents mutex used for database generation repository related operations.
+	mu sync.RWMutex
+}
+
+// InsertOrUpdate inserts new generations entity to the storage or updates existing ones.
+func (w *generationsRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.GenerationsRepositoryInsertOrUpdateRequest) error {
+	w.mu.Lock()
+
+	err := instance.Clauses(clause.OnConflict{
+		Columns: []clause.Column{
+			{Name: "id"},
+		},
+		DoUpdates: clause.AssignmentColumns([]string{
+			"active",
+		}),
+	}).Create(&entity.GenerationsEntity{
+		ID:        request.ID,
+		SessionID: request.SessionID,
+		Name:      request.Name,
+		Type:      request.Type,
+		Instance:  request.Instance,
+		Active:    request.Active,
+		PositionX: request.PositionX,
+		PositionY: request.PositionY,
+	}).Error
+
+	if err != nil {
+		w.mu.Unlock()
+
+		return errors.Wrap(err, ErrPersistingGenerations.Error())
+	}
+
+	w.mu.Unlock()
+
+	return nil
+}
+
+// InsertOrUpdate inserts new generations entity to the storage or updates existing ones.
+func (w *generationsRepositoryImpl) InsertOrUpdate(request dto.GenerationsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(db.GetInstance(), request)
+}
+
+// InsertOrUpdateWithTransaction inserts new generations entity to the storage or updates existing ones with transaction.
+func (w *generationsRepositoryImpl) InsertOrUpdateWithTransaction(
+	transaction *gorm.DB, request dto.GenerationsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(transaction, request)
+}
+
+// GetChestTypeBySessionID retrieves all available generations of chest type for the provided session id.
+func (w *generationsRepositoryImpl) GetChestTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var result []*entity.GenerationsEntity
+
+	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
+		Where("session_id = ? AND type = ?", sessionID, dto.ChestGenerationType).
+		Find(&result).Error
+
+	w.mu.RUnlock()
+
+	return result, err
+}
+
+// GetChestTypeByInstanceAndSessionIDWithTransaction retrieves all available generations of chest
+// type for the provided instance and session id.
+func (w *generationsRepositoryImpl) GetChestTypeByInstanceAndSessionIDWithTransaction(
+	transaction *gorm.DB, instance string, sessionID int64) (*entity.GenerationsEntity, bool, error) {
+	w.mu.RLock()
+
+	var result *entity.GenerationsEntity
+
+	err := transaction.Table((&entity.GenerationsEntity{}).TableName()).
+		Where("instance = ? AND session_id = ? AND type = ?", instance, sessionID, dto.ChestGenerationType).
+		Find(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			w.mu.RUnlock()
+
+			return result, false, nil
+		}
+
+		w.mu.RUnlock()
+
+		return result, false, err
+	}
+
+	w.mu.RUnlock()
+
+	return result, true, nil
+}
+
+// GetHealthPackTypeBySessionID retrieves all available generations of health pack type for the provided session id.
+func (w *generationsRepositoryImpl) GetHealthPackTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var result []*entity.GenerationsEntity
+
+	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
+		Where("session_id = ? AND type = ?", sessionID, dto.HealthPackGenerationType).
+		Find(&result).Error
+
+	w.mu.RUnlock()
+
+	return result, err
+}
+
+// createGenerationsRepository initializes generationsRepositoryImpl.
+func createGenerationsRepository() GenerationsRepository {
+	return new(generationsRepositoryImpl)
+}
+
+// AssociationsRepository represents associations entity repository.
+type AssociationsRepository interface {
+	InsertOrUpdate(request dto.AssociationsRepositoryInsertOrUpdateRequest) error
+	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.AssociationsRepositoryInsertOrUpdateRequest) error
+	GetByID(id int64) (*entity.AssociationsEntity, bool, error)
+	GetByGenerationID(generationID int64) ([]*entity.AssociationsEntity, bool, error)
+}
+
+// associationsRepositoryImpl represents implementation of AssociationsRepository.
+type associationsRepositoryImpl struct {
+	// Represents mutex used for database association repository related operations.
+	mu sync.RWMutex
+}
+
+// insertOrUpdate inserts new associations entity to the storage or updates existing ones.
+func (w *associationsRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.AssociationsRepositoryInsertOrUpdateRequest) error {
+	w.mu.Lock()
+
+	err := instance.Clauses(clause.OnConflict{
+		Columns: []clause.Column{
+			{Name: "id"},
+		},
+		DoUpdates: clause.AssignmentColumns([]string{
+			"active",
+		}),
+	}).Create(&entity.AssociationsEntity{
+		ID:           request.ID,
+		SessionID:    request.SessionID,
+		GenerationID: request.GenerationID,
+		Name:         request.Name,
+		Active:       request.Active,
+	}).Error
+
+	if err != nil {
+		w.mu.Unlock()
+
+		return errors.Wrap(err, ErrPersistingAssociations.Error())
+	}
+
+	w.mu.Unlock()
+
+	return nil
+}
+
+// InsertOrUpdate inserts new associations entity to the storage or updates existing ones.
+func (w *associationsRepositoryImpl) InsertOrUpdate(request dto.AssociationsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(db.GetInstance(), request)
+}
+
+// InsertOrUpdateWithTransaction inserts new associations entity to the storage or updates existing ones with transaction.
+func (w *associationsRepositoryImpl) InsertOrUpdateWithTransaction(
+	transaction *gorm.DB, request dto.AssociationsRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(transaction, request)
+}
+
+// GetByID retrieves an association for the provided id.
+func (w *associationsRepositoryImpl) GetByID(id int64) (*entity.AssociationsEntity, bool, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var result *entity.AssociationsEntity
+
+	err := instance.Table((&entity.AssociationsEntity{}).TableName()).
+		Where("id = ?", id).
+		First(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			w.mu.RUnlock()
+
+			return result, false, nil
+		}
+
+		w.mu.RUnlock()
+
+		return result, false, err
+	}
+
+	w.mu.RUnlock()
+
+	return result, true, nil
+}
+
+// GetByGenerationID retrieves all available associations for the provided generation id.
+func (w *associationsRepositoryImpl) GetByGenerationID(generationID int64) ([]*entity.AssociationsEntity, bool, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var result []*entity.AssociationsEntity
+
+	err := instance.Table((&entity.AssociationsEntity{}).TableName()).
+		Where("generation_id = ?", generationID).
+		Find(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			w.mu.RUnlock()
+
+			return result, false, nil
+		}
+
+		w.mu.RUnlock()
+
+		return result, false, err
+	}
+
+	w.mu.RUnlock()
+
+	return result, true, nil
+}
+
+// createAssociations initializes associationsRepositoryImpl.
+func createAssociationsRepository() AssociationsRepository {
+	return new(associationsRepositoryImpl)
+}
+
 // LobbiesRepository represents lobbies entity repository.
 type LobbiesRepository interface {
 	InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error
+	InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.LobbiesRepositoryInsertOrUpdateRequest) error
 	DeleteByUserIDAndSessionID(userID, sessionID int64) error
+	DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error
 	GetByUserID(userID int64) ([]*entity.LobbyEntity, bool, error)
 	GetBySessionID(sessionID int64) ([]*entity.LobbyEntity, bool, error)
+	Count() (int64, error)
 	Lock()
 	Unlock()
 }
@@ -222,15 +514,13 @@ type lobbiesRepositoryImpl struct {
 	// Represents internal mutex used for database lobbies repository related operations.
 	mu sync.RWMutex
 
-	// Represents exposed mutex to be used for database lobbies repository access restriction.
-	lock sync.Mutex
+	// Represents external mutex used for database management.
+	externalLock sync.Mutex
 }
 
-// InsertOrUpdate inserts new lobbies entity to the storage or updates existing ones.
-func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
+// insertOrUpdate inserts new lobbies entity to the storage or updates existing ones with the provided db instance.
+func (w *lobbiesRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
 	w.mu.Lock()
-
-	instance := db.GetInstance()
 
 	err := instance.Clauses(clause.OnConflict{
 		Columns: []clause.Column{
@@ -247,15 +537,16 @@ func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInse
 			"host",
 		}),
 	}).Create(&entity.LobbyEntity{
-		UserID:     request.UserID,
-		SessionID:  request.SessionID,
-		Skin:       int64(request.Skin),
-		Health:     int64(request.Health),
-		Active:     request.Active,
-		Host:       request.Host,
-		Eliminated: request.Eliminated,
-		PositionX:  request.PositionX,
-		PositionY:  request.PositionY,
+		UserID:         request.UserID,
+		SessionID:      request.SessionID,
+		Skin:           int64(request.Skin),
+		Health:         int64(request.Health),
+		Active:         request.Active,
+		Host:           request.Host,
+		Eliminated:     request.Eliminated,
+		PositionX:      request.PositionX,
+		PositionY:      request.PositionY,
+		PositionStatic: request.PositionStatic,
 	}).Error
 
 	if err != nil {
@@ -269,11 +560,19 @@ func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInse
 	return nil
 }
 
-// DeleteByUserID deletes lobby by the provided user id.
-func (w *lobbiesRepositoryImpl) DeleteByUserIDAndSessionID(userID, sessionID int64) error {
-	w.mu.Lock()
+// InsertOrUpdate inserts new lobbies entity to the storage or updates existing ones.
+func (w *lobbiesRepositoryImpl) InsertOrUpdate(request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(db.GetInstance(), request)
+}
 
-	instance := db.GetInstance()
+// InsertOrUpdateWithTransaction inserts new lobbies entity to the storage or updates existing ones with provided transaction.
+func (w *lobbiesRepositoryImpl) InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.LobbiesRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(transaction, request)
+}
+
+// deleteByUserIDAndSessionID deletes lobby by the provided user id with provided db instance.
+func (w *lobbiesRepositoryImpl) deleteByUserIDAndSessionID(instance *gorm.DB, userID, sessionID int64) error {
+	w.mu.Lock()
 
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
 		Where("user_id = ? AND session_id = ?", userID, sessionID).
@@ -282,6 +581,16 @@ func (w *lobbiesRepositoryImpl) DeleteByUserIDAndSessionID(userID, sessionID int
 	w.mu.Unlock()
 
 	return err
+}
+
+// DeleteByUserIDAndSessionID deletes lobby by the provided user id.
+func (w *lobbiesRepositoryImpl) DeleteByUserIDAndSessionID(userID, sessionID int64) error {
+	return w.deleteByUserIDAndSessionID(db.GetInstance(), userID, sessionID)
+}
+
+// DeleteByUserIDAndSessionIDWithTransaction deletes lobby by the provided user id with provided transaction.
+func (w *lobbiesRepositoryImpl) DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error {
+	return w.deleteByUserIDAndSessionID(transaction, userID, sessionID)
 }
 
 // GetByUserID retrieves lobby by the provided user id.
@@ -295,6 +604,7 @@ func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) ([]*entity.LobbyEntity
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
 		Preload((&entity.UserEntity{}).TableView()).
 		Preload((&entity.SessionEntity{}).TableView()).
+		// Preload((&entity.InventoryEntity{}).TableView()).
 		Where("user_id = ?", userID).
 		Find(&result).Error
 
@@ -358,19 +668,150 @@ func (w *lobbiesRepositoryImpl) GetBySessionID(sessionID int64) ([]*entity.Lobby
 	return result, true, nil
 }
 
-// Lock locks access to lobbies repository.
-func (w *lobbiesRepositoryImpl) Lock() {
-	w.lock.Lock()
+// Count retrieves general lobbies count.
+func (w *lobbiesRepositoryImpl) Count() (int64, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var count int64
+
+	err := instance.Table((&entity.LobbyEntity{}).TableName()).
+		Count(&count).Error
+
+	if err != nil {
+		w.mu.RUnlock()
+		return 0, err
+	}
+
+	w.mu.RUnlock()
+
+	return count, nil
 }
 
-// Unlock unlocks access to lobbies repository.
+// Lock locks external lock mutex
+func (w *lobbiesRepositoryImpl) Lock() {
+	w.externalLock.Lock()
+}
+
+// Unlock unlocks external lock mutex
 func (w *lobbiesRepositoryImpl) Unlock() {
-	w.lock.Unlock()
+	w.externalLock.Unlock()
 }
 
 // createLobbiesRepository initializes lobbiesRepositoryImpl.
 func createLobbiesRepository() LobbiesRepository {
 	return new(lobbiesRepositoryImpl)
+}
+
+// InventoryRepository represents intentory entity repository.
+type InventoryRepository interface {
+	InsertOrUpdate(request dto.InventoryRepositoryInsertOrUpdateRequest) error
+	DeleteByUserIDAndSessionID(userID, sessionID int64) error
+	DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error
+	GetBySessionIDAndUserID(sessionID, userID int64) ([]*entity.InventoryEntity, bool, error)
+}
+
+// inventoryRepositoryImpl represents implementation of InventoryRepository.
+type inventoryRepositoryImpl struct {
+	// Represents internal mutex used for database inventory repository related operations.
+	mu sync.RWMutex
+}
+
+// insertOrUpdate inserts new inventory entity to the storage or updates existing ones with the provided db instance.
+func (w *inventoryRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.InventoryRepositoryInsertOrUpdateRequest) error {
+	w.mu.Lock()
+
+	err := instance.Create(&entity.InventoryEntity{
+		UserID:    request.UserID,
+		SessionID: request.SessionID,
+		Name:      request.Name,
+	}).Error
+
+	if err != nil {
+		w.mu.Unlock()
+
+		return errors.Wrap(err, ErrPersistingInventory.Error())
+	}
+
+	w.mu.Unlock()
+
+	return nil
+}
+
+// InsertOrUpdate inserts new inventory entity to the storage or updates existing ones.
+func (w *inventoryRepositoryImpl) InsertOrUpdate(request dto.InventoryRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(db.GetInstance(), request)
+}
+
+// InsertOrUpdateWithTransaction inserts new inventory entity to the storage or updates existing ones with provided transaction.
+func (w *inventoryRepositoryImpl) InsertOrUpdateWithTransaction(transaction *gorm.DB, request dto.InventoryRepositoryInsertOrUpdateRequest) error {
+	return w.insertOrUpdate(transaction, request)
+}
+
+// deleteByUserIDAndSessionID deletes inventory by the provided user id with provided db instance.
+func (w *inventoryRepositoryImpl) deleteByUserIDAndSessionID(instance *gorm.DB, userID, sessionID int64) error {
+	w.mu.Lock()
+
+	err := instance.Table((&entity.InventoryEntity{}).TableName()).
+		Where("user_id = ? AND session_id = ?", userID, sessionID).
+		Delete(&entity.InventoryEntity{}).Error
+
+	w.mu.Unlock()
+
+	return err
+}
+
+// DeleteByUserIDAndSessionID deletes lobby by the provided user id.
+func (w *inventoryRepositoryImpl) DeleteByUserIDAndSessionID(userID, sessionID int64) error {
+	return w.deleteByUserIDAndSessionID(db.GetInstance(), userID, sessionID)
+}
+
+// DeleteByUserIDAndSessionIDWithTransaction deletes lobby by the provided user id with provided transaction.
+func (w *inventoryRepositoryImpl) DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error {
+	return w.deleteByUserIDAndSessionID(transaction, userID, sessionID)
+}
+
+// GetBySessionIDAndUserID retrieves inventory by the provided session id and user id.
+func (w *inventoryRepositoryImpl) GetBySessionIDAndUserID(sessionID, userID int64) ([]*entity.InventoryEntity, bool, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var result []*entity.InventoryEntity
+
+	err := instance.Table((&entity.InventoryEntity{}).TableName()).
+		Preload((&entity.UserEntity{}).TableView()).
+		Preload((&entity.SessionEntity{}).TableView()).
+		Where("session_id = ? AND user_id = ?", sessionID, userID).
+		Find(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			w.mu.RUnlock()
+
+			return nil, false, nil
+		}
+
+		w.mu.RUnlock()
+
+		return nil, false, err
+	}
+
+	if len(result) == 0 {
+		w.mu.RUnlock()
+
+		return nil, false, nil
+	}
+
+	w.mu.RUnlock()
+
+	return result, true, nil
+}
+
+// createInventoryRepository initializes inventoryRepositoryImpl.
+func createInventoryRepository() InventoryRepository {
+	return new(inventoryRepositoryImpl)
 }
 
 // MessagesRepository represents messages entity repository.

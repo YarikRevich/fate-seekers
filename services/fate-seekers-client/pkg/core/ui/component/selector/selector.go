@@ -403,7 +403,7 @@ func newSelectorComponent() *SelectorComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			result.backCallback()
 		}),
@@ -456,7 +456,7 @@ func newSelectorComponent() *SelectorComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			result.deleteCallback(result.sessionNameEntry)
 		}),
@@ -490,7 +490,7 @@ func newSelectorComponent() *SelectorComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			result.createCallback()
 		}),
@@ -520,7 +520,7 @@ func newSelectorComponent() *SelectorComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			result.submitCallback(sessionNameInput.GetText())
 		}),

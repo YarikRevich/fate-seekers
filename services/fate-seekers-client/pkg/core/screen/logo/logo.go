@@ -52,7 +52,7 @@ func (ls *LogoScreen) HandleInput() error {
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetUUIDRepositoryAction(flag.Value))
 		} else {
-			uuidRaw := uuid.New().String()
+			uuidRaw := uuid.NewString()
 
 			err = repository.GetFlagsRepository().InsertOrUpdate(common.UUID_FLAG_NAME, uuidRaw)
 			if err != nil {

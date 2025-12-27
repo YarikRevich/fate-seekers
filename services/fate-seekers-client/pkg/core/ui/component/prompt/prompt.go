@@ -25,6 +25,9 @@ type PromptComponent struct {
 	// Represents text widget.
 	text *widget.Text
 
+	// Represents submit button.
+	submitButton *widget.Button
+
 	// Represents submit callback.
 	submitCallback func()
 
@@ -38,6 +41,16 @@ type PromptComponent struct {
 // SetText modifies text component in the container.
 func (pc *PromptComponent) SetText(value string) {
 	pc.text.Label = value
+}
+
+// HideSubmitButton hides submit button.
+func (pc *PromptComponent) HideSubmitButton() {
+	pc.submitButton.GetWidget().Visibility = widget.Visibility_Hide_Blocking
+}
+
+// ShowSubmitButton shows submit button.
+func (pc *PromptComponent) ShowSubmitButton() {
+	pc.submitButton.GetWidget().Visibility = widget.Visibility_Show
 }
 
 // SetSubmitCallback modified submit callback in the container.
@@ -138,7 +151,7 @@ func newPromptComponent() *PromptComponent {
 			}),
 		)))
 
-	buttonsContainer.AddChild(widget.NewButton(
+	submitButton := widget.NewButton(
 		widget.ButtonOpts.Image(&widget.ButtonImage{
 			Idle:         buttonIdleIcon,
 			Hover:        buttonHoverIcon,
@@ -161,11 +174,13 @@ func newPromptComponent() *PromptComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			result.submitCallback()
 		}),
-	))
+	)
+
+	buttonsContainer.AddChild(submitButton)
 
 	buttonsContainer.AddChild(widget.NewButton(
 		widget.ButtonOpts.Image(&widget.ButtonImage{
@@ -190,7 +205,7 @@ func newPromptComponent() *PromptComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			result.closeCallback()
 		}),
@@ -199,8 +214,9 @@ func newPromptComponent() *PromptComponent {
 	container.AddChild(buttonsContainer)
 
 	result = &PromptComponent{
-		text:      textWidget,
-		container: container,
+		text:         textWidget,
+		submitButton: submitButton,
+		container:    container,
 	}
 
 	return result

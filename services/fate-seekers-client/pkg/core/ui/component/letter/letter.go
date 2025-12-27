@@ -239,7 +239,7 @@ func newLetterComponent() *LetterComponent {
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			result.attachmentCallback(*result.attachmentValue)
 		}),
@@ -274,7 +274,7 @@ func newLetterComponent() *LetterComponent {
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			result.closeCallback()
 		}),

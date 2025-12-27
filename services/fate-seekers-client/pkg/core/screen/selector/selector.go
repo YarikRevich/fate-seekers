@@ -2,6 +2,7 @@ package selector
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -152,11 +153,22 @@ func newSelectorScreen() screen.Screen {
 						}))
 
 					handler.PerformCreateLobby(sessionID, func(err error) {
-						if errors.Is(err, handler.ErrLobbyAlreadyExists) {
+						if errors.Is(err, handler.ErrLobbyAlreadyStarted) {
 							notification.GetInstance().Push(
 								translation.GetInstance().GetTranslation("client.networking.joining-existing-lobby"),
 								time.Second*3,
 								common.NotificationInfoTextColor)
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetSessionAlreadyStartedMetadata(
+									value.SESSION_ALREADY_STARTED_METADATA_STATE_TRUE_VALUE))
+
+						} else if errors.Is(err, handler.ErrLobbyAlreadyExists) {
+							notification.GetInstance().Push(
+								translation.GetInstance().GetTranslation("client.networking.joining-existing-lobby"),
+								time.Second*3,
+								common.NotificationInfoTextColor)
+
 						} else if err != nil {
 							notification.GetInstance().Push(
 								common.ComposeMessage(
@@ -190,6 +202,8 @@ func newSelectorScreen() screen.Screen {
 					})
 				} else {
 					handler.PerformGetUserSessions(func(response *metadatav1.GetUserSessionsResponse, err error) {
+						fmt.Println("retrieved user sessions", response.GetSessions(), err)
+
 						if err != nil {
 							notification.GetInstance().Push(
 								common.ComposeMessage(
@@ -239,11 +253,22 @@ func newSelectorScreen() screen.Screen {
 								}))
 
 							handler.PerformCreateLobby(sessionID, func(err error) {
-								if errors.Is(err, handler.ErrLobbyAlreadyExists) {
+								if errors.Is(err, handler.ErrLobbyAlreadyStarted) {
 									notification.GetInstance().Push(
 										translation.GetInstance().GetTranslation("client.networking.joining-existing-lobby"),
 										time.Second*3,
 										common.NotificationInfoTextColor)
+
+									dispatcher.GetInstance().Dispatch(
+										action.NewSetSessionAlreadyStartedMetadata(
+											value.SESSION_ALREADY_STARTED_METADATA_STATE_TRUE_VALUE))
+
+								} else if errors.Is(err, handler.ErrLobbyAlreadyExists) {
+									notification.GetInstance().Push(
+										translation.GetInstance().GetTranslation("client.networking.joining-existing-lobby"),
+										time.Second*3,
+										common.NotificationInfoTextColor)
+
 								} else if err != nil {
 									notification.GetInstance().Push(
 										common.ComposeMessage(
@@ -312,11 +337,22 @@ func newSelectorScreen() screen.Screen {
 									}))
 
 								handler.PerformCreateLobby(response.GetSession().GetSessionId(), func(err error) {
-									if errors.Is(err, handler.ErrLobbyAlreadyExists) {
+									if errors.Is(err, handler.ErrLobbyAlreadyStarted) {
 										notification.GetInstance().Push(
 											translation.GetInstance().GetTranslation("client.networking.joining-existing-lobby"),
 											time.Second*3,
 											common.NotificationInfoTextColor)
+
+										dispatcher.GetInstance().Dispatch(
+											action.NewSetSessionAlreadyStartedMetadata(
+												value.SESSION_ALREADY_STARTED_METADATA_STATE_TRUE_VALUE))
+
+									} else if errors.Is(err, handler.ErrLobbyAlreadyExists) {
+										notification.GetInstance().Push(
+											translation.GetInstance().GetTranslation("client.networking.joining-existing-lobby"),
+											time.Second*3,
+											common.NotificationInfoTextColor)
+
 									} else if err != nil {
 										notification.GetInstance().Push(
 											common.ComposeMessage(

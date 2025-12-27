@@ -67,3 +67,7 @@ func CheckAuthenticationMiddleware(
 
 	return handler(ctx, req)
 }
+
+// TODO: check if user is in the cache map. If no, then block. Check if map size is max during creation. if so, then block creation.
+// when user is inactive, then remove it from the cache map.
+// WHERE TO TRACK USER ACTIVITY?

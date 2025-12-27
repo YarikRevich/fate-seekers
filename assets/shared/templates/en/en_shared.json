@@ -70,5 +70,9 @@
     "shared.settingsmanager.invalid-networking-encryption-key": {
         "one": "Provided encryption key is invalid",
         "other": "Provided encryption key is invalid"
+    },
+    "shared.networking.close-failure": {
+        "one": "Connector close operation failed",
+        "other": "Connector close operation failed"
     }
 }

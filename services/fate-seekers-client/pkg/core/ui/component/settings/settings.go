@@ -507,7 +507,7 @@ func NewSettingsComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			closeCallback(
 				soundMusicSlider.Current,
@@ -542,7 +542,7 @@ func NewSettingsComponent(
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			submitCallback(
 				soundMusicSlider.Current,

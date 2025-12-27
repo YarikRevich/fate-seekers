@@ -13,3 +13,5 @@ FROM golang:1.22.10-alpine
 
 COPY --from=build /app/fate-seekers-server/build/fate-seekers-server ./build/fate-seekers-server
 
+CMD ./build/fate-seekers-server start
+

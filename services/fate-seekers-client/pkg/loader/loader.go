@@ -3,18 +3,24 @@ package loader
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"image"
+	"io/fs"
 	"path/filepath"
 	"sync"
 
+	"github.com/YarikRevich/fate-seekers/assets"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
+	"github.com/disintegration/imaging"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/lafriks/go-tiled"
 	"github.com/pkg/errors"
+	"github.com/tidwall/btree"
 	"go.uber.org/zap"
 
 	_ "image/jpeg"
@@ -24,16 +30,50 @@ import (
 )
 
 var (
-	ErrReadingFile      = errors.New("err happened during file read operation")
-	ErrLoadingShader    = errors.New("err happened during shader loading operation")
-	ErrLoadingFont      = errors.New("err happened during font loading operation")
-	ErrLoadingStatic    = errors.New("err happened during image loading operation")
-	ErrLoadingAnimation = errors.New("err happened during animation loading operation")
+	ErrReadingFile                       = errors.New("err happened during file read operation")
+	ErrLoadingShader                     = errors.New("err happened during shader loading operation")
+	ErrLoadingFont                       = errors.New("err happened during font loading operation")
+	ErrLoadingStatic                     = errors.New("err happened during image loading operation")
+	ErrLoadingAnimation                  = errors.New("err happened during animation loading operation")
+	ErrLoadingMovable                    = errors.New("err happened during movable loading operation")
+	ErrIncorrectMovableSkinIdentificator = errors.New("err happened incorrect movable skin identificator has been provided")
+	ErrParsingMovable                    = errors.New("err happened during movable parsing operation")
 )
 
 var (
 	// GetInstance retrieves instance of the asset loader manager, performing initial creation if needed.
 	GetInstance = sync.OnceValue[*Loader](newLoader)
+)
+
+// Describes all the available maps to be loaded.
+const (
+	FirstMap = "1"
+)
+
+// Describes all the available map layers to be loaded.
+const (
+	FirstMapThirdLayer  = "third"
+	FirstMapSecondLayer = "second"
+)
+
+// Describes tilemap configuration source file.
+const (
+	MapTilemap = "tilemap/tilemap.tmx"
+)
+
+// Describes available tilemap properties
+const (
+	TilemapCollidableProperty         = "collidable"
+	TilemapSoundProperty              = "sound"
+	TilemapSpawnableProperty          = "spawnable"
+	TilemapSelectableProperty         = "selectable"
+	TilemapChestLocationProperty      = "chest_location"
+	TilemapHealthPackLocationProperty = "health_pack_location"
+)
+
+// Describes available tilemap sound values.
+const (
+	TilemapSoundRockValue = "rock"
 )
 
 // Describes all the available statics to be loaded.
@@ -58,6 +98,14 @@ const (
 	ComboIdleButton      = "ui/combo-button-idle.png"
 
 	TextInputIdle = "ui/text-input-idle.png"
+
+	Heart = "heart/heart.png"
+
+	DefaultLaserGun = "default_laser_gun/default_laser_gun.png"
+
+	Pointer = "pointer/pointer.png"
+
+	OpenedStandardChest = "session/opened_standard_chest.png"
 )
 
 // Describes all the available shaders to be loaded.
@@ -87,6 +135,23 @@ const (
 	UkrainianSharedTemplate = "uk/uk_shared.json"
 )
 
+// Describes all the available movables to be loaded.
+const (
+	Skins0Movable = "skins/0"
+	Skins1Movable = "skins/0"
+	Skins2Movable = "skins/0"
+	Skins3Movable = "skins/0"
+	Skins4Movable = "skins/0"
+	Skins5Movable = "skins/0"
+	Skins6Movable = "skins/0"
+	Skins7Movable = "skins/0"
+)
+
+// Describes movable metadata file.
+const (
+	MovableMetadataFile = "metadata.json"
+)
+
 // Describes all the available animations to be loaded.
 const (
 	SkullAnimation  = "skull/skull.json"
@@ -111,23 +176,29 @@ const (
 	AmbientMusicSound   = "music/ambient/ambient.mp3"
 	EnergetykMusicSound = "music/energetyk/energetyk.mp3"
 
-	TestFXSound   = "fx/test/test.ogg"
-	ButtonFXSound = "fx/button/button.ogg"
+	ButtonFXSound    = "fx/button/button.ogg"
+	ToxicRainFXSound = "fx/toxicrain/toxicrain.ogg"
+	RockFXSound      = "fx/rock/rock.ogg"
 )
 
 // Decsribes all the embedded files specific paths.
 const (
+	MapsPath       = "maps"
 	ShadersPath    = "shaders"
 	FontsPath      = "fonts"
 	StaticsPath    = "statics"
 	LettersPath    = "letters"
 	TemplatesPath  = "templates"
 	AnimationsPath = "animations"
+	MovablePath    = "movable"
 	SoundsPath     = "sounds"
 )
 
 // Loader represents low level asset loading manager, which operates in a lazy mode manner.
 type Loader struct {
+	// Represents cache map of embedded maps.
+	maps sync.Map
+
 	// Represents cache map of embedded statics.
 	statics sync.Map
 
@@ -143,11 +214,178 @@ type Loader struct {
 	// Represents cache map of embedded templates.
 	templates sync.Map
 
+	// Represents cache map of embedded movables.
+	movable sync.Map
+
 	// Represents cache map of embedded animations.
 	animations sync.Map
 
 	// Represents cache map of embedded sounds.
 	sounds sync.Map
+}
+
+// GetMap retrieves map content with the given name.
+func (l *Loader) GetMap(name string) *tiled.Map {
+	result, ok := l.maps.Load(name)
+	if ok {
+		return result.(*tiled.Map)
+	}
+
+	file, err := tiled.LoadFile(
+		filepath.Join(common.ClientBasePath, MapsPath, name, MapTilemap),
+		tiled.WithFileSystem(assets.AssetsClient))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	l.maps.Store(name, file)
+
+	logging.GetInstance().Debug("Map has been loaded", zap.String("name", name))
+
+	return file
+}
+
+// GetMapLayerTiles retrieves map layer tiles for the provided layer.
+func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) (
+	*btree.Map[float64, []*dto.ProcessedTile],
+	[]dto.Position,
+	[]dto.Position,
+	[]dto.Position,
+	[]*dto.CollidableTile,
+	[]*dto.SoundableTile,
+	[]*dto.SelectableTile) {
+	var (
+		result      = btree.NewMap[float64, []*dto.ProcessedTile](32)
+		spawnables  []dto.Position
+		chests      []dto.Position
+		healthPacks []dto.Position
+		collidables []*dto.CollidableTile
+		soundables  []*dto.SoundableTile
+		selected    []*dto.SelectableTile
+	)
+
+	var tiles sync.Map
+
+	i := 0
+
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			if layer.Tiles[i].IsNil() {
+				i++
+
+				continue
+			}
+
+			tileImage, ok := tiles.Load(layer.Tiles[i].Tileset.FirstGID + layer.Tiles[i].ID)
+			if !ok {
+				for k := uint32(0); k < uint32(layer.Tiles[i].Tileset.TileCount); k++ {
+					tiles.Store(k+layer.Tiles[i].Tileset.FirstGID, getMapTileImage(
+						layer.Tiles[i].Tileset.GetFileFullPath(layer.Tiles[i].Tileset.Image.Source),
+						layer.Tiles[i].Tileset.GetTileRect(uint32(k))))
+
+					if layer.Tiles[i].ID == k {
+						tileImage, _ = tiles.Load(layer.Tiles[i].Tileset.FirstGID + layer.Tiles[i].ID)
+					}
+				}
+			}
+
+			position := getMapTilePosition(x, y, tileWidth, tileHeight)
+
+			processedTile := &dto.ProcessedTile{
+				Position:   position,
+				TileWidth:  tileWidth,
+				TileHeight: tileHeight,
+				Image:      tileImage.(*ebiten.Image),
+			}
+
+			for _, tile := range layer.Tiles[i].Tileset.Tiles {
+				if layer.Tiles[i].Tileset.FirstGID+layer.Tiles[i].ID == tile.ID+layer.Tiles[i].Tileset.FirstGID {
+					collidableProperty := tile.Properties.GetBool(TilemapCollidableProperty)
+					if collidableProperty {
+						collidables = append(collidables, &dto.CollidableTile{
+							Position:   position,
+							TileWidth:  tileWidth,
+							TileHeight: tileHeight,
+						})
+					}
+
+					soundableProperty := tile.Properties.GetString(TilemapSoundProperty)
+					if soundableProperty != "" {
+						soundables = append(soundables, &dto.SoundableTile{
+							Position:   position,
+							Name:       soundableProperty,
+							TileWidth:  tileWidth,
+							TileHeight: tileHeight,
+						})
+					}
+
+					spawnableProperty := tile.Properties.GetBool(TilemapSpawnableProperty)
+					if spawnableProperty {
+						spawnables = append(spawnables, position)
+					}
+
+					selectableProperty := tile.Properties.GetBool(TilemapSelectableProperty)
+					if selectableProperty {
+						selected = append(selected, &dto.SelectableTile{
+							Position:   position,
+							TileWidth:  tileWidth,
+							TileHeight: tileHeight,
+						})
+					}
+
+					chestProperty := tile.Properties.GetBool(TilemapChestLocationProperty)
+					if chestProperty {
+						fmt.Println(chestProperty, position)
+
+						chests = append(chests, position)
+					}
+
+					healthPackProperty := tile.Properties.GetBool(TilemapHealthPackLocationProperty)
+					if healthPackProperty {
+						healthPacks = append(healthPacks, position)
+					}
+				}
+			}
+
+			var values []*dto.ProcessedTile
+
+			values, ok = result.Get(position.Y)
+			if ok {
+				values = append(values, processedTile)
+			} else {
+				values = []*dto.ProcessedTile{processedTile}
+			}
+
+			result.Set(position.Y, values)
+
+			i++
+		}
+	}
+
+	return result, spawnables, chests, healthPacks, collidables, soundables, selected
+}
+
+// getMapTileImage reads cropped tile from the provided tilemap and the provided tile dimension.
+func getMapTileImage(path string, rect image.Rectangle) *ebiten.Image {
+	file, err := fs.ReadFile(assets.AssetsClient, path)
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	image, _, err := image.Decode(bytes.NewReader(file))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	return ebiten.NewImageFromImage(imaging.Crop(image, rect))
+}
+
+// getMapTilePosition retrieves map tile position by the provided dimension.
+func getMapTilePosition(x, y, tileWidth, tileHeight int) dto.Position {
+	return dto.Position{
+		X: float64((x - y) * (tileWidth / 2)),
+		Y: float64((x + y) * (tileHeight / 2)),
+	}
 }
 
 // GetStatic retrieves static content with the given name.
@@ -325,6 +563,106 @@ func (l *Loader) GetSoundFX(name string) *vorbis.Stream {
 	logging.GetInstance().Debug("FX sound has been loaded", zap.String("name", name))
 
 	return stream
+}
+
+// GetMovableSkinsPath retrieves movable skins path according to the provided
+// skin identificator.
+func GetMovableSkinsPath(skin uint64) string {
+	switch skin {
+	case 0:
+		return Skins0Movable
+	case 1:
+		return Skins1Movable
+	case 2:
+		return Skins2Movable
+	case 3:
+		return Skins3Movable
+	case 4:
+		return Skins4Movable
+	case 5:
+		return Skins5Movable
+	case 6:
+		return Skins6Movable
+	case 7:
+		return Skins7Movable
+	default:
+		logging.GetInstance().Fatal(ErrIncorrectMovableSkinIdentificator.Error())
+
+		return ""
+	}
+}
+
+// GetMovable retrieves movable content with the given name.
+func (l *Loader) GetMovable(name string) dto.ProcessedMovableMetadataSet {
+	result, ok := l.movable.Load(name)
+	if ok {
+		return result.(dto.ProcessedMovableMetadataSet)
+	}
+
+	file, err := common.ReadFile(filepath.Join(MovablePath, name, MovableMetadataFile))
+	if err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+	}
+
+	var raw dto.RawMovableMetadata
+	if err := json.Unmarshal(file, &raw); err != nil {
+		logging.GetInstance().Fatal(errors.Wrap(err, ErrParsingMovable.Error()).Error())
+	}
+
+	set := make(dto.ProcessedMovableMetadataSet)
+
+	var (
+		rotationFile   []byte
+		rotationSource image.Image
+		rotationImage  *ebiten.Image
+
+		frameFile   []byte
+		frameSource image.Image
+		frameImage  *ebiten.Image
+	)
+
+	for direction, frames := range raw.Animations {
+		rotationFile, err = common.ReadFile(filepath.Join(MovablePath, name, raw.Rotations[direction]))
+		if err != nil {
+			logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+		}
+
+		rotationSource, _, err = image.Decode(bytes.NewReader(rotationFile))
+		if err != nil {
+			logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingMovable.Error()).Error())
+		}
+
+		rotationImage = ebiten.NewImageFromImage(rotationSource)
+
+		var frameImages []*ebiten.Image
+
+		for _, frame := range frames {
+			frameFile, err = common.ReadFile(filepath.Join(MovablePath, name, frame))
+			if err != nil {
+				logging.GetInstance().Fatal(errors.Wrap(err, ErrReadingFile.Error()).Error())
+			}
+
+			frameSource, _, err = image.Decode(bytes.NewReader(frameFile))
+			if err != nil {
+				logging.GetInstance().Fatal(errors.Wrap(err, ErrLoadingMovable.Error()).Error())
+			}
+
+			frameImage = ebiten.NewImageFromImage(frameSource)
+
+			frameImages = append(frameImages, frameImage)
+		}
+
+		set[direction] = dto.ProcessedMovableMetadataUnit{
+			Rotation: rotationImage,
+			Frames:   frameImages,
+		}
+	}
+
+	l.movable.Store(name, set)
+
+	logging.GetInstance().Debug("Movable has been loaded", zap.String("name", name))
+
+	return set
 }
 
 // GetAnimation retrieves animation content with the given name. Allows to load new instance everytime.

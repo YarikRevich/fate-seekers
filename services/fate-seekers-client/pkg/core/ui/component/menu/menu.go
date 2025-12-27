@@ -79,7 +79,7 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			startCallback()
 		}),
@@ -107,7 +107,7 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			creditsCallback()
 		}),
@@ -135,7 +135,7 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			collectionsCallback()
 		}),
@@ -163,7 +163,7 @@ func NewMenuComponent(startCallback, creditsCallback, collectionsCallback, setti
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			settingsCallback()
 		}),

@@ -31,7 +31,11 @@ var (
 
 	settingsParsedNetworkingEncryptionKey []byte
 
-	settingsMonitoringGrafanaName, settingsMonitoringPrometheusName string
+	settingsMonitoringEnabled bool
+	settingsMonitoringGrafanaName,
+	settingsMonitoringGrafanaAdminLogin, settingsMonitoringGrafanaAdminPassword,
+	settingsMonitoringPrometheusName, settingsMonitoringPrometheusPort,
+	settingsMonitoringNetworkName string
 
 	settingsSoundFX  int
 	settingsLanguage string
@@ -40,7 +44,11 @@ var (
 
 	operationDebug bool
 
-	operationMaxSessionsAmount int
+	operationMaxSessionsAmount,
+	operationMaxChestsAmount,
+	operationMinChestsAmount,
+	operationMaxHealthPacksAmount,
+	operationMinHealthPacksAmount int
 
 	databaseName                 string
 	databaseConnectionRetryDelay time.Duration
@@ -77,12 +85,56 @@ const (
 const (
 	// One session contains max 8 players.
 	maxSessionsAmount = 128
+
+	// Max chests amount per session.
+	maxChestsAmount = 20
+
+	// Max health packs amount per session.
+	maxHealthPacksAmount = 15
+
+	// Item generation area width value.
+	generationAreaWidth = 1000
+
+	// Item generation area height value.
+	generationAreaHeight = 1000
+
+	// Item generation max radius value.
+	generationMaxRadius = 100
 )
 
 // Represents session related static values.
 const (
 	// Max amount of users per session.
 	MAX_SESSION_USERS = 8
+
+	// Max chest items to be generated per chest.
+	MAX_CHEST_ITEMS_PER_CHEST = 6
+
+	// Max items in the player inventory.
+	MAX_INVENTORY_ITEMS = 8
+)
+
+// Represents monitoring containers configuration properties.
+const (
+	GRAFANA_IMAGE = "grafana/grafana:latest"
+	GRAFANA_PORT  = "3000"
+
+	PROMETHEUS_IMAGE = "prom/prometheus:v2.36.2"
+	PROMETHEUS_PORT  = "8090"
+)
+
+const (
+	// Represents grafana config datasources diagnostics template file.
+	GRAFANA_CONFIG_DATASOURCES_DIAGNOSTICS_TEMPLATE = "datasource.tpl"
+
+	// Represents grafana config datasources diagnostics output file.
+	GRAFANA_CONFIG_DATASOURCES_DIAGNOSTICS_OUTPUT = "datasource.yml"
+
+	// Represents prometheus config diagnostics template file.
+	PROMETHEUS_CONFIG_DIAGNOSTICS_TEMPLATE = "prometheus.tpl"
+
+	// Represents prometheus config diagnostics output file.
+	PROMETHEUS_CONFIG_DIAGNOSTICS_OUTPUT = "prometheus.yml"
 )
 
 const (
@@ -91,6 +143,21 @@ const (
 
 	// Represents directory where all application configuration files are located.
 	internalConfigDirectory = "/config"
+
+	// Represents directory where all diagnostics grafana configuration files are located.
+	internalDiagnosticsGrafanaConfigDirectory = "/diagnostics/grafana/config"
+
+	// Represents directory where all diagnostics grafana internal files are located.
+	internalDiagnosticsGrafanaInternalDirectory = "/diagnostics/grafana/internal"
+
+	// Represents directory where all diagnostics grafana config datasources files are located.
+	internalDiagnosticsGrafanaConfigDatasourcesDirectory = "/diagnostics/grafana/config/datasources"
+
+	// Represents directory where all diagnostics prometheus config files are located.
+	internalDiagnosticsPrometheusConfigDirectory = "/diagnostics/prometheus/config"
+
+	// Represents directory where all diagnostics prometheus internal files are located.
+	internalDiagnosticsPrometheusInternalDirectory = "/diagnostics/prometheus/internal"
 
 	// Represents database directory where all the database files is located.
 	internalDatabaseDirectory = "/internal/database"
@@ -102,11 +169,21 @@ func SetupDefaultConfig() {
 	viper.SetDefault("settings.window.height", 1080)
 	viper.SetDefault("settings.networking.server.port", "8090")
 	viper.SetDefault("settings.networking.encryption.key", "")
+	viper.SetDefault("settings.monitoring.enabled", true)
 	viper.SetDefault("settings.monitoring.grafana.name", "fate-seekers-server-grafana")
+	viper.SetDefault("settings.monitoring.grafana.admin.login", "fateseekers")
+	viper.SetDefault("settings.monitoring.grafana.admin.password", "fateseekers")
 	viper.SetDefault("settings.monitoring.prometheus.name", "fate-seekers-server-prometheus")
+	viper.SetDefault("settings.monitoring.prometheus.port", "8091")
+	viper.SetDefault("settings.monitoring.network.name", "fate-seekers-server-network")
 	viper.SetDefault("settings.language", SETTINGS_LANGUAGE_ENGLISH)
 	viper.SetDefault("operation.debug", false)
 	viper.SetDefault("operation.max-sessions-amount", maxSessionsAmount)
+	viper.SetDefault("operation.generation.area-width", generationAreaWidth)
+	viper.SetDefault("operation.generation.area-height", generationAreaHeight)
+	viper.SetDefault("operation.generation.max-radius", generationMaxRadius)
+	viper.SetDefault("operation.max-chests-amount", maxChestsAmount)
+	viper.SetDefault("operation.max-health-packs-amount", maxHealthPacksAmount)
 	viper.SetDefault("database.name", "fate_seekers.db")
 	viper.SetDefault("database.connection-retry-delay", time.Second*3)
 	viper.SetDefault("logging.level", "info")
@@ -154,8 +231,13 @@ func Init() {
 			zap.String("settingsNetworkingEncryptionKey", settingsNetworkingEncryptionKey))
 	}
 
+	settingsMonitoringEnabled = viper.GetBool("settings.monitoring.enabled")
 	settingsMonitoringGrafanaName = viper.GetString("settings.monitoring.grafana.name")
+	settingsMonitoringGrafanaAdminLogin = viper.GetString("settings.monitoring.grafana.admin.login")
+	settingsMonitoringGrafanaAdminPassword = viper.GetString("settings.monitoring.grafana.admin.password")
 	settingsMonitoringPrometheusName = viper.GetString("settings.monitoring.prometheus.name")
+	settingsMonitoringPrometheusPort = viper.GetString("settings.monitoring.prometheus.port")
+	settingsMonitoringNetworkName = viper.GetString("settings.monitoring.network.name")
 	settingsSoundFX = viper.GetInt("settings.sound.fx")
 	settingsLanguage = viper.GetString("settings.language")
 
@@ -171,6 +253,10 @@ func Init() {
 
 	operationDebug = viper.GetBool("operation.debug")
 	operationMaxSessionsAmount = viper.GetInt("operation.max-sessions-amount")
+	operationMaxChestsAmount = viper.GetInt("operation.max-chests-amount")
+	operationMinChestsAmount = viper.GetInt("operation.min-chests-amount")
+	operationMaxHealthPacksAmount = viper.GetInt("operation.max-health-packs-amount")
+	operationMinHealthPacksAmount = viper.GetInt("operation.min-health-packs-amount")
 	databaseName = viper.GetString("database.name")
 	databaseConnectionRetryDelay = viper.GetDuration("database.connection-retry-delay")
 	loggingLevel = viper.GetString("logging.level")
@@ -238,12 +324,32 @@ func GetSettingsParsedNetworkingEncryptionKey() []byte {
 	return settingsParsedNetworkingEncryptionKey
 }
 
+func GetSettingsMonitoringEnabled() bool {
+	return settingsMonitoringEnabled
+}
+
 func GetSettingsMonitoringGrafanaName() string {
 	return settingsMonitoringGrafanaName
 }
 
+func GetSettingsMonitoringGrafanaAdminLogin() string {
+	return settingsMonitoringGrafanaAdminLogin
+}
+
+func GetSettingsMonitoringGrafanaAdminPassword() string {
+	return settingsMonitoringGrafanaAdminPassword
+}
+
 func GetSettingsMonitoringPrometheusName() string {
 	return settingsMonitoringPrometheusName
+}
+
+func GetSettingsMonitoringPrometheusPort() string {
+	return settingsMonitoringPrometheusPort
+}
+
+func GetSettingsMonitoringNetworkName() string {
+	return settingsMonitoringNetworkName
 }
 
 func SetSettingsLanguage(value string) {
@@ -280,6 +386,22 @@ func GetOperationDebug() bool {
 
 func GetOperationMaxSessionsAmount() int {
 	return operationMaxSessionsAmount
+}
+
+func GetOperationMaxChestsAmount() int {
+	return operationMaxChestsAmount
+}
+
+func GetOperationMinChestsAmount() int {
+	return operationMinChestsAmount
+}
+
+func GetOperationMaxHealthPacksAmount() int {
+	return operationMaxHealthPacksAmount
+}
+
+func GetOperationMinHealthPacksAmount() int {
+	return operationMinHealthPacksAmount
 }
 
 func GetDatabaseName() string {
@@ -334,4 +456,49 @@ func getDefaultConfigDirectory() string {
 	}
 
 	return filepath.Join(homeDirectory, internalGlobalDirectory, internalConfigDirectory)
+}
+
+func GetDiagnosticsGrafanaConfigDirectory() string {
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return filepath.Join(homeDirectory, internalGlobalDirectory, internalDiagnosticsGrafanaConfigDirectory)
+}
+
+func GetDiagnosticsGrafanaInternalDirectory() string {
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return filepath.Join(homeDirectory, internalGlobalDirectory, internalDiagnosticsGrafanaInternalDirectory)
+}
+
+func GetDiagnosticsGrafanaConfigDatasourcesDirectory() string {
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return filepath.Join(homeDirectory, internalGlobalDirectory, internalDiagnosticsGrafanaConfigDatasourcesDirectory)
+}
+
+func GetDiagnosticsPrometheusConfigDirectory() string {
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return filepath.Join(homeDirectory, internalGlobalDirectory, internalDiagnosticsPrometheusConfigDirectory)
+}
+
+func GetDiagnosticsPrometheusInternalDirectory() string {
+	homeDirectory, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return filepath.Join(homeDirectory, internalGlobalDirectory, internalDiagnosticsPrometheusInternalDirectory)
 }

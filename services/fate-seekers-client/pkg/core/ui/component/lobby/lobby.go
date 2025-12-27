@@ -31,6 +31,7 @@ var (
 
 // LobbyComponent represents component, which contains lobby menu.
 type LobbyComponent struct {
+	// Represents selection text.
 	selection *widget.Text
 
 	// Represents sessions list widget.
@@ -55,6 +56,16 @@ func (lc *LobbyComponent) SetSelectionBySkin(value uint64) {
 		GetInstance().
 		GetTranslation(
 			fmt.Sprintf("client.skin.%d.name", value))
+}
+
+// CleanSelection cleans selection text widget.
+func (lc *LobbyComponent) CleanSelection() {
+	lc.selection.Label = ""
+}
+
+// CleanListsEntries cleans lists entries to the list widget.
+func (lc *LobbyComponent) CleanListsEntries() {
+	lc.list.SetEntries([]interface{}{})
 }
 
 // SetListsEntries sets lists entries to the list widget.
@@ -337,7 +348,7 @@ func newLobbyComponent() *LobbyComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			result.backCallback()
 		}),
@@ -390,7 +401,7 @@ func newLobbyComponent() *LobbyComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
 
 			result.startCallback()
 		}),

@@ -4,7 +4,9 @@ import (
 	"image/color"
 	"time"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/solarlune/resolv"
 )
 
 // Describes all the available letter attachment types.
@@ -169,3 +171,148 @@ type SelectedLobbySetUnitMetadata struct {
 	Skin   uint64
 	Host   bool
 }
+
+// Position represents lobby user position.
+type Position struct {
+	X float64
+	Y float64
+}
+
+const (
+	SelectedMovableObject = iota
+	SelectedLocalStaticObject
+	SelectedTileObject
+)
+
+// SelectedObjectDetails represents selected object details.
+type SelectedObjectDetails struct {
+	Position Position
+
+	// Represents a kind of a selectable tile used for selected worker.
+	Kind int
+}
+
+// RetrievedUsersMetadataSessionUnit represents retrieved users metadata session content unit.
+type RetrievedUsersMetadataSessionUnit struct {
+	Health             uint64
+	Skin               uint64
+	Active             bool
+	Eliminated         bool
+	AnimationDirection string
+	AnimationStatic    bool
+	Position           Position
+	Change             time.Time
+}
+
+// RetrievedUsersMetadataSessionSet represents retrieved users metadata seession content set of units
+type RetrievedUsersMetadataSessionSet map[string]RetrievedUsersMetadataSessionUnit
+
+// RawMovableMetadata represents provided raw movable metadata
+type RawMovableMetadata struct {
+	Rotations  map[string]string   `json:"rotations"`
+	Animations map[string][]string `json:"animations"`
+}
+
+// ProcessedMovableMetadata represents processed movable metadata unit.
+type ProcessedMovableMetadataUnit struct {
+	Rotation *ebiten.Image
+	Frames   []*ebiten.Image
+}
+
+// ProcessedMovableMetadataSet represents movable metadata set.
+type ProcessedMovableMetadataSet map[string]ProcessedMovableMetadataUnit
+
+// Describes all the available moveable rotation directions
+const (
+	LeftMovableRotation      = "left"
+	RightMovableRotation     = "right"
+	UpMovableRotation        = "up"
+	UpLeftMovableRotation    = "up-left"
+	UpRightMovableRotation   = "up-right"
+	DownMovableRotation      = "down"
+	DownLeftMovableRotation  = "down-left"
+	DownRightMovableRotation = "down-right"
+)
+
+// ProcessedTile represents processed tile.
+type ProcessedTile struct {
+	Position              Position
+	TileWidth, TileHeight int
+	Image                 *ebiten.Image
+}
+
+// CollidableTile represents collidable tile.
+type CollidableTile struct {
+	Position              Position
+	TileWidth, TileHeight int
+}
+
+// CollidableStatic represents collidable static.
+type CollidableStatic struct {
+	Position              Position
+	TileWidth, TileHeight int
+}
+
+// SelectableTile represents selectable tile.
+type SelectableTile struct {
+	Position Position
+
+	// Represents a kind of a selectable tile used for selected worker.
+	Kind                  string
+	TileWidth, TileHeight int
+}
+
+// SelectableStatic represents selectable static.
+type SelectableStatic struct {
+	Position Position
+
+	// Represents a kind of a selectable static used for selected worker.
+	Kind                  string
+	TileWidth, TileHeight int
+}
+
+// SoundableTile represents soundable tile.
+type SoundableTile struct {
+	Position              Position
+	Name                  string
+	TileWidth, TileHeight int
+}
+
+// ExternalSounderObject represents external sounder object.
+type ExternalSounderObject struct {
+	// Represents if the position has been updated since the last update.
+	Updated bool
+
+	// Represents convex polygon value.
+	Polygon *resolv.ConvexPolygon
+}
+
+// RendererPositionItem represents renderer position item.
+type RendererPositionItem struct {
+	Name string
+	Type int
+}
+
+// Describes all the available animator movable object position item type.
+const (
+	RendererPositionItemMainCenteredMovable = iota
+	RendererPositionItemSecondaryExternalMovable
+	RendererPositionItemSecondaryTile
+	RendererPositionItemSecondaryStatic
+)
+
+// Represents direction type used for gamepad stick direction processing.
+type Direction int
+
+// Represents available stick directions.
+const (
+	DirNone Direction = iota
+	DirUp
+	DirDown
+	DirLeft
+	DirRight
+	DirUpLeft
+	DirUpRight
+	DirDownLeft
+	DirDownRight
+)

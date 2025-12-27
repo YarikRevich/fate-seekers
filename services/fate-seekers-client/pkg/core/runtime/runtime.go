@@ -10,7 +10,10 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/answerinput"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/collections"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/creator"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/credits"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/death"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/intro"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/lobby"
@@ -21,11 +24,13 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/session"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/settings"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen/travel"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/gamepad"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/imgui"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/mask"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/letterimage"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/notification"
@@ -33,13 +38,22 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/subtitles"
 	notificationmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	subtitlesmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/subtitles"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/ebitenui/ebitenui"
+	"github.com/ebitenui/ebitenui/external"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
+)
+
+// Represents static values used for gamepad usage management.
+const (
+	GAMEPAD_USAGE_DEADLINE = time.Second * 3
 )
 
 // Runtime represents main runtime flow implementation.
@@ -101,12 +115,113 @@ type Runtime struct {
 
 // Update performs logic update operations.
 func (r *Runtime) Update() error {
+	if len(ebiten.GamepadIDs()) != 0 {
+		if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_FALSE_VALUE {
+			ebiten.SetCursorMode(ebiten.CursorModeHidden)
+
+			external.SetExternalCursorPositionSource(func() (int, int) {
+				position := store.GetApplicationStateGamepadPointerPosition()
+
+				return int(position.X), int(position.Y)
+			})
+
+			external.SetExternalLeftMouseClick(func() bool {
+				return inpututil.IsStandardGamepadButtonJustPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonRightBottom)
+			})
+
+			external.SetExternalMiddleMouseClick(func() bool {
+				return ebiten.IsStandardGamepadButtonPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonLeftStick)
+			})
+
+			external.SetExternalWheelMouse(func() (float64, float64) {
+				var x, y float64
+
+				if ebiten.IsStandardGamepadButtonPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonLeftTop) {
+					y += 0.3
+				}
+
+				if ebiten.IsStandardGamepadButtonPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonLeftLeft) {
+					x -= 0.3
+				}
+
+				if ebiten.IsStandardGamepadButtonPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonLeftRight) {
+					x += 0.3
+				}
+
+				if ebiten.IsStandardGamepadButtonPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonLeftBottom) {
+					y -= 0.3
+				}
+
+				return x, y
+			})
+
+			notificationmanager.GetInstance().Push(
+				translation.GetInstance().GetTranslation("client.gamepad.connected"),
+				time.Second*3,
+				common.NotificationInfoTextColor)
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetGamepadEnabledApplicationAction(
+					value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE))
+		}
+	} else {
+		if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE {
+			ebiten.SetCursorMode(ebiten.CursorModeVisible)
+
+			external.SetExternalCursorPositionSource(nil)
+
+			external.SetExternalLeftMouseClick(nil)
+
+			external.SetExternalMiddleMouseClick(nil)
+
+			external.SetExternalWheelMouse(nil)
+
+			notificationmanager.GetInstance().Push(
+				translation.GetInstance().GetTranslation("client.gamepad.disconnected"),
+				time.Second*3,
+				common.NotificationInfoTextColor)
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetGamepadEnabledApplicationAction(
+					value.GAMEPAD_ENABLED_APPLICATION_FALSE_VALUE))
+		}
+	}
+
 	if store.GetApplicationExit() == value.EXIT_APPLICATION_TRUE_VALUE {
 		return ebiten.Termination
 	}
 
 	if store.GetApplicationLoading() != value.LOADING_APPLICATION_EMPTY_VALUE {
 		r.loaderAnimation.Update()
+	}
+
+	if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE && ebiten.IsFocused() {
+		gamepadID := ebiten.GamepadIDs()[0]
+
+		direction := gamepad.GetGamepadRightStickDirection(gamepadID)
+
+		switch direction {
+		case dto.DirUp:
+			dispatcher.GetInstance().Dispatch(action.NewIncrementYGamepadPointerPositionApplication())
+		case dto.DirDown:
+			dispatcher.GetInstance().Dispatch(action.NewDecrementYGamepadPointerPositionApplication())
+		case dto.DirLeft:
+			dispatcher.GetInstance().Dispatch(action.NewDecrementXGamepadPointerPositionApplication())
+		case dto.DirRight:
+			dispatcher.GetInstance().Dispatch(action.NewIncrementXGamepadPointerPositionApplication())
+		case dto.DirUpLeft:
+			dispatcher.GetInstance().Dispatch(action.NewIncrementYGamepadPointerPositionApplication())
+			dispatcher.GetInstance().Dispatch(action.NewDecrementXGamepadPointerPositionApplication())
+		case dto.DirUpRight:
+			dispatcher.GetInstance().Dispatch(action.NewIncrementYGamepadPointerPositionApplication())
+			dispatcher.GetInstance().Dispatch(action.NewIncrementXGamepadPointerPositionApplication())
+		case dto.DirDownLeft:
+			dispatcher.GetInstance().Dispatch(action.NewDecrementYGamepadPointerPositionApplication())
+			dispatcher.GetInstance().Dispatch(action.NewDecrementXGamepadPointerPositionApplication())
+		case dto.DirDownRight:
+			dispatcher.GetInstance().Dispatch(action.NewDecrementYGamepadPointerPositionApplication())
+			dispatcher.GetInstance().Dispatch(action.NewIncrementXGamepadPointerPositionApplication())
+		}
 	}
 
 	subtitlesmanager.GetInstance().Update()
@@ -172,6 +287,12 @@ func (r *Runtime) Update() error {
 	case value.ACTIVE_SCREEN_MENU_VALUE:
 		r.activeScreen = menu.GetInstance()
 
+	case value.ACTIVE_SCREEN_CREDITS_VALUE:
+		r.activeScreen = credits.GetInstance()
+
+	case value.ACTIVE_SCREEN_COLLECTIONS_VALUE:
+		r.activeScreen = collections.GetInstance()
+
 	case value.ACTIVE_SCREEN_SETTINGS_VALUE:
 		r.activeScreen = settings.GetInstance()
 
@@ -195,6 +316,9 @@ func (r *Runtime) Update() error {
 
 	case value.ACTIVE_SCREEN_RESUME_VALUE:
 		r.activeScreen = resume.GetInstance()
+
+	case value.ACTIVE_SCREEN_DEATH_VALUE:
+		r.activeScreen = death.GetInstance()
 	}
 
 	if store.GetLetterImage() != value.LETTER_IMAGE_EMPTY_VALUE {
@@ -207,8 +331,7 @@ func (r *Runtime) Update() error {
 
 			letter.GetInstance().SetText(loadedLetter.Text)
 
-			// TODO: take attachement
-			// letter.GetInstance().SetAttachment(loadedLetter.Attachment.Location)
+			letter.GetInstance().SetAttachment(loadedLetter.Attachment.Location)
 
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetLetterUpdatedAction(value.LETTER_UPDATED_TRUE_VALUE))
@@ -342,6 +465,18 @@ func (r *Runtime) Draw(screen *ebiten.Image) {
 
 	if config.GetOperationDebug() {
 		imgui.GetInstance().Draw(screen)
+	}
+
+	if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE {
+		if time.Since(store.GetApplicationStateGamepadPointerUsage()) < GAMEPAD_USAGE_DEADLINE {
+			var opts ebiten.DrawImageOptions
+
+			position := store.GetApplicationStateGamepadPointerPosition()
+
+			opts.GeoM.Translate(position.X, position.Y)
+
+			screen.DrawImage(loader.GetInstance().GetStatic(loader.Pointer), &opts)
+		}
 	}
 }
 

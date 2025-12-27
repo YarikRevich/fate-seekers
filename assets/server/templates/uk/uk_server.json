@@ -50,5 +50,21 @@
     "server.networking.stop-success": {
         "one": "Сервер був успішно зупинений",
         "other": "Сервер був успішно зупинений"
+    },
+    "server.monitoring.start.title": {
+        "one": "Ігровий сервер FateSeekers був запущений!",
+        "other": "Ігровий сервер FateSeekers був запущений!"
+    },
+    "server.monitoring.start.monitoring.title": {
+        "one": "Ігровий сервер FateSeekers був запущений(включно з моніторингом)!",
+        "other": "Ігровий сервер FateSeekers був запущений(включно з моніторингом)!"
+    },
+    "server.monitoring.stop.title": {
+        "one": "Ігровий сервер FateSeekers був зупинений!",
+        "other": "Ігровий сервер FateSeekers був зупинений!"
+    },
+    "server.monitoring.stop.monitoring.title": {
+        "one": "Ігровий сервер FateSeekers був зупинений(включно з моніторингом)!",
+        "other": "Ігровий сервер FateSeekers був зупинений(включно з моніторингом)!"
     }
 }

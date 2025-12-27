@@ -2,6 +2,7 @@ package activity
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
@@ -28,6 +29,16 @@ func Run() {
 		for range ticker.C {
 			ticker.Stop()
 
+			fmt.Println("BEFORE 1")
+
+			cache.
+				GetInstance().
+				BeginLobbySetTransaction()
+
+			cache.
+				GetInstance().
+				BeginMetadataTransaction()
+
 			for key, value := range cache.
 				GetInstance().
 				GetMetadataMappings() {
@@ -43,10 +54,26 @@ func Run() {
 						GetUsersRepository().
 						GetByName(key)
 					if err != nil {
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
 						logging.GetInstance().Fatal(err.Error())
 					}
 
 					if !exists {
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
 						logging.GetInstance().Fatal(ErrUserDoesNotExist.Error())
 					}
 
@@ -58,19 +85,36 @@ func Run() {
 						GetLobbiesRepository().
 						InsertOrUpdate(
 							dto.LobbiesRepositoryInsertOrUpdateRequest{
-								UserID:     userID,
-								SessionID:  lobby.SessionID,
-								Skin:       lobby.Skin,
-								Health:     lobby.Health,
-								Eliminated: lobby.Eliminated,
-								PositionX:  lobby.PositionX,
-								PositionY:  lobby.PositionY,
+								UserID:         userID,
+								SessionID:      lobby.SessionID,
+								Skin:           lobby.Skin,
+								Health:         lobby.Health,
+								Eliminated:     lobby.Eliminated,
+								PositionX:      lobby.PositionX,
+								PositionY:      lobby.PositionY,
+								PositionStatic: lobby.PositionStatic,
 							})
 					if err != nil {
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
 						logging.GetInstance().Fatal(err.Error())
 					}
 				}
 			}
+
+			cache.
+				GetInstance().
+				CommitLobbySetTransaction()
+
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
 
 			ticker.Reset(metadataTickerDuration)
 		}

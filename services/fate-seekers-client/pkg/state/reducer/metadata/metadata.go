@@ -14,6 +14,7 @@ const (
 	SELECTED_SESSION_METADATA_STATE        = "selected_session"
 	RETRIEVED_LOBBY_SET_METADATA_STATE     = "retrieved_lobby_set"
 	SELECTED_LOBBY_SET_UNIT_METADATA_STATE = "selected_lobby_set_unit"
+	SESSION_ALREADY_STARTED_METADATA_STATE = "session_already_started"
 )
 
 // MetadataStateReducer represents reducer used for metadata state management.
@@ -31,6 +32,8 @@ func (msr *MetadataStateReducer) Init() {
 		RETRIEVED_LOBBY_SET_METADATA_STATE, value.RETRIEVED_LOBBY_SET_METADATA_EMPTY_VALUE)
 	msr.store.SetState(
 		SELECTED_LOBBY_SET_UNIT_METADATA_STATE, value.SELECTED_LOBBY_SET_UNIT_METADATA_EMPTY_VALUE)
+	msr.store.SetState(
+		SESSION_ALREADY_STARTED_METADATA_STATE, value.SESSION_ALREADY_STARTED_METADATA_STATE_FALSE_VALUE)
 }
 
 func (msr *MetadataStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -55,6 +58,11 @@ func (msr *MetadataStateReducer) GetProcessor() func(value godux.Action) interfa
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{
 					Key: SELECTED_LOBBY_SET_UNIT_METADATA_STATE, Value: value.Value})
+
+		case action.SET_SESSION_ALREADY_STARTED_METADATA_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: SESSION_ALREADY_STARTED_METADATA_STATE, Value: value.Value})
 
 		default:
 			return nil

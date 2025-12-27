@@ -31,8 +31,15 @@ const (
 	MetadataService_GetLobbySet_FullMethodName           = "/metadata.v1.MetadataService/GetLobbySet"
 	MetadataService_CreateLobby_FullMethodName           = "/metadata.v1.MetadataService/CreateLobby"
 	MetadataService_RemoveLobby_FullMethodName           = "/metadata.v1.MetadataService/RemoveLobby"
+	MetadataService_LeaveLobby_FullMethodName            = "/metadata.v1.MetadataService/LeaveLobby"
 	MetadataService_GetUsersMetadata_FullMethodName      = "/metadata.v1.MetadataService/GetUsersMetadata"
+	MetadataService_GetUserInventory_FullMethodName      = "/metadata.v1.MetadataService/GetUserInventory"
+	MetadataService_TakeChestItem_FullMethodName         = "/metadata.v1.MetadataService/TakeChestItem"
+	MetadataService_OpenChest_FullMethodName             = "/metadata.v1.MetadataService/OpenChest"
 	MetadataService_GetChests_FullMethodName             = "/metadata.v1.MetadataService/GetChests"
+	MetadataService_OpenHealthPack_FullMethodName        = "/metadata.v1.MetadataService/OpenHealthPack"
+	MetadataService_GetHealthPacks_FullMethodName        = "/metadata.v1.MetadataService/GetHealthPacks"
+	MetadataService_GetEvents_FullMethodName             = "/metadata.v1.MetadataService/GetEvents"
 	MetadataService_GetMap_FullMethodName                = "/metadata.v1.MetadataService/GetMap"
 	MetadataService_GetChatMessages_FullMethodName       = "/metadata.v1.MetadataService/GetChatMessages"
 	MetadataService_CreateChatMessage_FullMethodName     = "/metadata.v1.MetadataService/CreateChatMessage"
@@ -70,10 +77,24 @@ type MetadataServiceClient interface {
 	CreateLobby(ctx context.Context, in *CreateLobbyRequest, opts ...grpc.CallOption) (*CreateLobbyResponse, error)
 	// RemoveLobby performs lobby removal operation by the configured user. Allowed for lobby owner only.
 	RemoveLobby(ctx context.Context, in *RemoveLobbyRequest, opts ...grpc.CallOption) (*RemoveLobbyResponse, error)
+	// LeaveLobby performs lobby leave operation by the configured user.
+	LeaveLobby(ctx context.Context, in *LeaveLobbyRequest, opts ...grpc.CallOption) (*LeaveLobbyResponse, error)
 	// GetUsersMetadata performs users metadata retrieval request by the configured user.
 	GetUsersMetadata(ctx context.Context, in *GetUsersMetadataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetUsersMetadataResponse], error)
+	// GetUserInventory performs user inventory retrieval request by the configured user.
+	GetUserInventory(ctx context.Context, in *GetUserInventoryRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetUserInventoryResponse], error)
+	// TakeChestItem performs chest item take operaiton for the selected chest by the configured user.
+	TakeChestItem(ctx context.Context, in *TakeChestItemRequest, opts ...grpc.CallOption) (*TakeChestItemResponse, error)
+	// OpenChest performs chest open operation for the selected chest by the configured user.
+	OpenChest(ctx context.Context, in *OpenChestRequest, opts ...grpc.CallOption) (*OpenChestResponse, error)
 	// GetChests performs chests retrieval for the selected session by the configured user.
-	GetChests(ctx context.Context, in *GetChestsRequest, opts ...grpc.CallOption) (*GetChestsResponse, error)
+	GetChests(ctx context.Context, in *GetChestsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetChestsResponse], error)
+	// OpenHealthPack performs health pack open operation for the selected health pack by the configured user.
+	OpenHealthPack(ctx context.Context, in *OpenHealthPackRequest, opts ...grpc.CallOption) (*OpenHealthPackResponse, error)
+	// GetHealthPacks performs health packs retrieval for the selected session by the configured user.
+	GetHealthPacks(ctx context.Context, in *GetHealthPacksRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetHealthPacksResponse], error)
+	// GetEvents performs weather events retrieval for the selected session by the configured user.
+	GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetEventsResponse], error)
 	// GetMap performs map retrieval for the selected session by the configured user.
 	GetMap(ctx context.Context, in *GetMapRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetMapResponse], error)
 	// GetChatMessages performs chat messages retrieval for the selected session by the configured user.
@@ -231,6 +252,16 @@ func (c *metadataServiceClient) RemoveLobby(ctx context.Context, in *RemoveLobby
 	return out, nil
 }
 
+func (c *metadataServiceClient) LeaveLobby(ctx context.Context, in *LeaveLobbyRequest, opts ...grpc.CallOption) (*LeaveLobbyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LeaveLobbyResponse)
+	err := c.cc.Invoke(ctx, MetadataService_LeaveLobby_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *metadataServiceClient) GetUsersMetadata(ctx context.Context, in *GetUsersMetadataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetUsersMetadataResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[3], MetadataService_GetUsersMetadata_FullMethodName, cOpts...)
@@ -250,19 +281,115 @@ func (c *metadataServiceClient) GetUsersMetadata(ctx context.Context, in *GetUse
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type MetadataService_GetUsersMetadataClient = grpc.ServerStreamingClient[GetUsersMetadataResponse]
 
-func (c *metadataServiceClient) GetChests(ctx context.Context, in *GetChestsRequest, opts ...grpc.CallOption) (*GetChestsResponse, error) {
+func (c *metadataServiceClient) GetUserInventory(ctx context.Context, in *GetUserInventoryRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetUserInventoryResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetChestsResponse)
-	err := c.cc.Invoke(ctx, MetadataService_GetChests_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[4], MetadataService_GetUserInventory_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[GetUserInventoryRequest, GetUserInventoryResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetUserInventoryClient = grpc.ServerStreamingClient[GetUserInventoryResponse]
+
+func (c *metadataServiceClient) TakeChestItem(ctx context.Context, in *TakeChestItemRequest, opts ...grpc.CallOption) (*TakeChestItemResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TakeChestItemResponse)
+	err := c.cc.Invoke(ctx, MetadataService_TakeChestItem_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
+func (c *metadataServiceClient) OpenChest(ctx context.Context, in *OpenChestRequest, opts ...grpc.CallOption) (*OpenChestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OpenChestResponse)
+	err := c.cc.Invoke(ctx, MetadataService_OpenChest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metadataServiceClient) GetChests(ctx context.Context, in *GetChestsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetChestsResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[5], MetadataService_GetChests_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[GetChestsRequest, GetChestsResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetChestsClient = grpc.ServerStreamingClient[GetChestsResponse]
+
+func (c *metadataServiceClient) OpenHealthPack(ctx context.Context, in *OpenHealthPackRequest, opts ...grpc.CallOption) (*OpenHealthPackResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OpenHealthPackResponse)
+	err := c.cc.Invoke(ctx, MetadataService_OpenHealthPack_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *metadataServiceClient) GetHealthPacks(ctx context.Context, in *GetHealthPacksRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetHealthPacksResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[6], MetadataService_GetHealthPacks_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[GetHealthPacksRequest, GetHealthPacksResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetHealthPacksClient = grpc.ServerStreamingClient[GetHealthPacksResponse]
+
+func (c *metadataServiceClient) GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetEventsResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[7], MetadataService_GetEvents_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[GetEventsRequest, GetEventsResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetEventsClient = grpc.ServerStreamingClient[GetEventsResponse]
+
 func (c *metadataServiceClient) GetMap(ctx context.Context, in *GetMapRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetMapResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[4], MetadataService_GetMap_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[8], MetadataService_GetMap_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +408,7 @@ type MetadataService_GetMapClient = grpc.ServerStreamingClient[GetMapResponse]
 
 func (c *metadataServiceClient) GetChatMessages(ctx context.Context, in *GetChatMessagesRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetChatMessagesResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[5], MetadataService_GetChatMessages_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &MetadataService_ServiceDesc.Streams[9], MetadataService_GetChatMessages_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -340,10 +467,24 @@ type MetadataServiceServer interface {
 	CreateLobby(context.Context, *CreateLobbyRequest) (*CreateLobbyResponse, error)
 	// RemoveLobby performs lobby removal operation by the configured user. Allowed for lobby owner only.
 	RemoveLobby(context.Context, *RemoveLobbyRequest) (*RemoveLobbyResponse, error)
+	// LeaveLobby performs lobby leave operation by the configured user.
+	LeaveLobby(context.Context, *LeaveLobbyRequest) (*LeaveLobbyResponse, error)
 	// GetUsersMetadata performs users metadata retrieval request by the configured user.
 	GetUsersMetadata(*GetUsersMetadataRequest, grpc.ServerStreamingServer[GetUsersMetadataResponse]) error
+	// GetUserInventory performs user inventory retrieval request by the configured user.
+	GetUserInventory(*GetUserInventoryRequest, grpc.ServerStreamingServer[GetUserInventoryResponse]) error
+	// TakeChestItem performs chest item take operaiton for the selected chest by the configured user.
+	TakeChestItem(context.Context, *TakeChestItemRequest) (*TakeChestItemResponse, error)
+	// OpenChest performs chest open operation for the selected chest by the configured user.
+	OpenChest(context.Context, *OpenChestRequest) (*OpenChestResponse, error)
 	// GetChests performs chests retrieval for the selected session by the configured user.
-	GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error)
+	GetChests(*GetChestsRequest, grpc.ServerStreamingServer[GetChestsResponse]) error
+	// OpenHealthPack performs health pack open operation for the selected health pack by the configured user.
+	OpenHealthPack(context.Context, *OpenHealthPackRequest) (*OpenHealthPackResponse, error)
+	// GetHealthPacks performs health packs retrieval for the selected session by the configured user.
+	GetHealthPacks(*GetHealthPacksRequest, grpc.ServerStreamingServer[GetHealthPacksResponse]) error
+	// GetEvents performs weather events retrieval for the selected session by the configured user.
+	GetEvents(*GetEventsRequest, grpc.ServerStreamingServer[GetEventsResponse]) error
 	// GetMap performs map retrieval for the selected session by the configured user.
 	GetMap(*GetMapRequest, grpc.ServerStreamingServer[GetMapResponse]) error
 	// GetChatMessages performs chat messages retrieval for the selected session by the configured user.
@@ -396,11 +537,32 @@ func (UnimplementedMetadataServiceServer) CreateLobby(context.Context, *CreateLo
 func (UnimplementedMetadataServiceServer) RemoveLobby(context.Context, *RemoveLobbyRequest) (*RemoveLobbyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveLobby not implemented")
 }
+func (UnimplementedMetadataServiceServer) LeaveLobby(context.Context, *LeaveLobbyRequest) (*LeaveLobbyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LeaveLobby not implemented")
+}
 func (UnimplementedMetadataServiceServer) GetUsersMetadata(*GetUsersMetadataRequest, grpc.ServerStreamingServer[GetUsersMetadataResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method GetUsersMetadata not implemented")
 }
-func (UnimplementedMetadataServiceServer) GetChests(context.Context, *GetChestsRequest) (*GetChestsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetChests not implemented")
+func (UnimplementedMetadataServiceServer) GetUserInventory(*GetUserInventoryRequest, grpc.ServerStreamingServer[GetUserInventoryResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method GetUserInventory not implemented")
+}
+func (UnimplementedMetadataServiceServer) TakeChestItem(context.Context, *TakeChestItemRequest) (*TakeChestItemResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TakeChestItem not implemented")
+}
+func (UnimplementedMetadataServiceServer) OpenChest(context.Context, *OpenChestRequest) (*OpenChestResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OpenChest not implemented")
+}
+func (UnimplementedMetadataServiceServer) GetChests(*GetChestsRequest, grpc.ServerStreamingServer[GetChestsResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method GetChests not implemented")
+}
+func (UnimplementedMetadataServiceServer) OpenHealthPack(context.Context, *OpenHealthPackRequest) (*OpenHealthPackResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OpenHealthPack not implemented")
+}
+func (UnimplementedMetadataServiceServer) GetHealthPacks(*GetHealthPacksRequest, grpc.ServerStreamingServer[GetHealthPacksResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method GetHealthPacks not implemented")
+}
+func (UnimplementedMetadataServiceServer) GetEvents(*GetEventsRequest, grpc.ServerStreamingServer[GetEventsResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method GetEvents not implemented")
 }
 func (UnimplementedMetadataServiceServer) GetMap(*GetMapRequest, grpc.ServerStreamingServer[GetMapResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method GetMap not implemented")
@@ -623,6 +785,24 @@ func _MetadataService_RemoveLobby_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MetadataService_LeaveLobby_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LeaveLobbyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServiceServer).LeaveLobby(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MetadataService_LeaveLobby_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServiceServer).LeaveLobby(ctx, req.(*LeaveLobbyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MetadataService_GetUsersMetadata_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(GetUsersMetadataRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -634,23 +814,103 @@ func _MetadataService_GetUsersMetadata_Handler(srv interface{}, stream grpc.Serv
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type MetadataService_GetUsersMetadataServer = grpc.ServerStreamingServer[GetUsersMetadataResponse]
 
-func _MetadataService_GetChests_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetChestsRequest)
+func _MetadataService_GetUserInventory_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetUserInventoryRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MetadataServiceServer).GetUserInventory(m, &grpc.GenericServerStream[GetUserInventoryRequest, GetUserInventoryResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetUserInventoryServer = grpc.ServerStreamingServer[GetUserInventoryResponse]
+
+func _MetadataService_TakeChestItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TakeChestItemRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MetadataServiceServer).GetChests(ctx, in)
+		return srv.(MetadataServiceServer).TakeChestItem(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MetadataService_GetChests_FullMethodName,
+		FullMethod: MetadataService_TakeChestItem_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MetadataServiceServer).GetChests(ctx, req.(*GetChestsRequest))
+		return srv.(MetadataServiceServer).TakeChestItem(ctx, req.(*TakeChestItemRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
+
+func _MetadataService_OpenChest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OpenChestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServiceServer).OpenChest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MetadataService_OpenChest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServiceServer).OpenChest(ctx, req.(*OpenChestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MetadataService_GetChests_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetChestsRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MetadataServiceServer).GetChests(m, &grpc.GenericServerStream[GetChestsRequest, GetChestsResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetChestsServer = grpc.ServerStreamingServer[GetChestsResponse]
+
+func _MetadataService_OpenHealthPack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OpenHealthPackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServiceServer).OpenHealthPack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MetadataService_OpenHealthPack_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServiceServer).OpenHealthPack(ctx, req.(*OpenHealthPackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MetadataService_GetHealthPacks_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetHealthPacksRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MetadataServiceServer).GetHealthPacks(m, &grpc.GenericServerStream[GetHealthPacksRequest, GetHealthPacksResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetHealthPacksServer = grpc.ServerStreamingServer[GetHealthPacksResponse]
+
+func _MetadataService_GetEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetEventsRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MetadataServiceServer).GetEvents(m, &grpc.GenericServerStream[GetEventsRequest, GetEventsResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type MetadataService_GetEventsServer = grpc.ServerStreamingServer[GetEventsResponse]
 
 func _MetadataService_GetMap_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(GetMapRequest)
@@ -736,8 +996,20 @@ var MetadataService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _MetadataService_RemoveLobby_Handler,
 		},
 		{
-			MethodName: "GetChests",
-			Handler:    _MetadataService_GetChests_Handler,
+			MethodName: "LeaveLobby",
+			Handler:    _MetadataService_LeaveLobby_Handler,
+		},
+		{
+			MethodName: "TakeChestItem",
+			Handler:    _MetadataService_TakeChestItem_Handler,
+		},
+		{
+			MethodName: "OpenChest",
+			Handler:    _MetadataService_OpenChest_Handler,
+		},
+		{
+			MethodName: "OpenHealthPack",
+			Handler:    _MetadataService_OpenHealthPack_Handler,
 		},
 		{
 			MethodName: "CreateChatMessage",
@@ -763,6 +1035,26 @@ var MetadataService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "GetUsersMetadata",
 			Handler:       _MetadataService_GetUsersMetadata_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetUserInventory",
+			Handler:       _MetadataService_GetUserInventory_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetChests",
+			Handler:       _MetadataService_GetChests_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetHealthPacks",
+			Handler:       _MetadataService_GetHealthPacks_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetEvents",
+			Handler:       _MetadataService_GetEvents_Handler,
 			ServerStreams: true,
 		},
 		{

@@ -1,12 +1,16 @@
 package cache
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
+
+	// LRU is utilized as a map with a limited size solution in this case.
+	// Should be replaced with a native solution without external library usage.
 	lru "github.com/hashicorp/golang-lru/v2"
 )
 
@@ -44,6 +48,12 @@ type NetworkingCache struct {
 	// Represents mutex used for metadata related transactions.
 	metadataMutex sync.Mutex
 
+	// Represents inventory cache instance.
+	inventory *lru.Cache[string, []dto.CacheInventoryEntity]
+
+	// Represents mutex used for inventory related transactions.
+	inventoryMutex sync.Mutex
+
 	// Represents expirable messages cache, which contains offset for the message table.
 	// If user stops request messages, all the messages would be retrieved.
 	messages *lru.Cache[string, int]
@@ -53,6 +63,18 @@ type NetworkingCache struct {
 
 	// Represents users cache instance.
 	users *lru.Cache[string, int64]
+
+	// Represents generated chests cache instance.
+	generatedChests *lru.Cache[string, []*dto.CacheGeneratedChestEntity]
+
+	// Represents mutex used for generated chests related transactions.
+	generatedChestsMutex sync.Mutex
+
+	// Represents generated health packs cache instance.
+	generatedHealthPacks *lru.Cache[string, []*dto.CacheGeneratedHealthPacksEntity]
+
+	// Represents mutex used for generated health packs related transactions.
+	generatedHealthPacksMutex sync.Mutex
 }
 
 // BeginSessionsTransaction begins sessions cache instance transaction.
@@ -149,6 +171,19 @@ func (nc *NetworkingCache) GetLobbySet(key int64) ([]dto.CacheLobbySetEntity, bo
 	return nc.lobbySets.Get(key)
 }
 
+// GetLobbySetMappings retrieves all lobby set mapping cache instances.
+func (nc *NetworkingCache) GetLobbySetMappings() map[int64][]dto.CacheLobbySetEntity {
+	result := make(map[int64][]dto.CacheLobbySetEntity)
+
+	for _, key := range nc.lobbySets.Keys() {
+		value, _ := nc.GetLobbySet(key)
+
+		result[key] = value
+	}
+
+	return result
+}
+
 // EvictLobbySet evicts lobby set cache for the provided key.
 func (nc *NetworkingCache) EvictLobbySet(key int64) {
 	nc.lobbySets.Remove(key)
@@ -202,6 +237,31 @@ func (nc *NetworkingCache) EvictMetadata(key string) {
 	nc.metadata.Remove(key)
 }
 
+// BeginInventoryTransaction begins inventory cache instance transaction.
+func (nc *NetworkingCache) BeginInventoryTransaction() {
+	nc.inventoryMutex.Lock()
+}
+
+// CommitInventoryTransaction commits inventory cache instance transaction.
+func (nc *NetworkingCache) CommitInventoryTransaction() {
+	nc.inventoryMutex.Unlock()
+}
+
+// AddGeneratedChests adds generated chests cache instance.
+func (nc *NetworkingCache) AddInventory(sessionName, userName string, value []dto.CacheInventoryEntity) {
+	nc.inventory.Add(fmt.Sprintf("%s:%s", sessionName, userName), value)
+}
+
+// GetInventory retrieves inventory cache instance by the provided key.
+func (nc *NetworkingCache) GetInventory(sessionName, userName string) ([]dto.CacheInventoryEntity, bool) {
+	return nc.inventory.Get(fmt.Sprintf("%s:%s", sessionName, userName))
+}
+
+// EvictGeneratedChests evicts generated chests cache for the provided key.
+func (nc *NetworkingCache) EvictInventory(sessionName, userName string) {
+	nc.inventory.Remove(fmt.Sprintf("%s:%s", sessionName, userName))
+}
+
 // BeginMessagesTransaction begins messages cache instance transaction.
 func (nc *NetworkingCache) BeginMessagesTransaction() {
 	nc.messagesMutex.Lock()
@@ -212,7 +272,7 @@ func (nc *NetworkingCache) CommitMessagesTransaction() {
 	nc.messagesMutex.Unlock()
 }
 
-// AddMessage retrieves messages cache instance.
+// AddMessage adds messages cache instance.
 func (nc *NetworkingCache) AddMessages(key string, value int) {
 	nc.messages.Add(key, value)
 }
@@ -235,6 +295,56 @@ func (nc *NetworkingCache) AddUser(key string, value int64) {
 // GetUsers retrieves users cache instance by the provided key.
 func (nc *NetworkingCache) GetUsers(key string) (int64, bool) {
 	return nc.users.Get(key)
+}
+
+// BeginGeneratedChestsTransaction begins generated chests cache instance transaction.
+func (nc *NetworkingCache) BeginGeneratedChestsTransaction() {
+	nc.generatedChestsMutex.Lock()
+}
+
+// CommitGeneratedChestsTransaction commits generated chests cache instance transaction.
+func (nc *NetworkingCache) CommitGeneratedChestsTransaction() {
+	nc.generatedChestsMutex.Unlock()
+}
+
+// AddGeneratedChests adds generated chests cache instance.
+func (nc *NetworkingCache) AddGeneratedChests(key string, value []*dto.CacheGeneratedChestEntity) {
+	nc.generatedChests.Add(key, value)
+}
+
+// GetGeneratedChests retrieves generated chests cache instance by the provided key.
+func (nc *NetworkingCache) GetGeneratedChests(key string) ([]*dto.CacheGeneratedChestEntity, bool) {
+	return nc.generatedChests.Get(key)
+}
+
+// EvictGeneratedChests evicts generated chests cache for the provided key.
+func (nc *NetworkingCache) EvictGeneratedChests(key string) {
+	nc.generatedChests.Remove(key)
+}
+
+// BeginGeneratedHealthPacksTransaction begins generated health packs cache instance transaction.
+func (nc *NetworkingCache) BeginGeneratedHealthPacksTransaction() {
+	nc.generatedHealthPacksMutex.Lock()
+}
+
+// CommitGeneratedHealthPacksTransaction commits generated health packs cache instance transaction.
+func (nc *NetworkingCache) CommitGeneratedHealthPacksTransaction() {
+	nc.generatedHealthPacksMutex.Unlock()
+}
+
+// AddGeneratedHealthPacks adds generated health packs cache instance.
+func (nc *NetworkingCache) AddGeneratedHealthPacks(key string, value []*dto.CacheGeneratedHealthPacksEntity) {
+	nc.generatedHealthPacks.Add(key, value)
+}
+
+// GetGeneratedHealthPacks retrieves generated health packs cache instance by the provided key.
+func (nc *NetworkingCache) GetGeneratedHealthPacks(key string) ([]*dto.CacheGeneratedHealthPacksEntity, bool) {
+	return nc.generatedHealthPacks.Get(key)
+}
+
+// EvictGeneratedHealthPacks evicts generated health packs cache for the provided key.
+func (nc *NetworkingCache) EvictGeneratedHealthPacks(key string) {
+	nc.generatedHealthPacks.Remove(key)
 }
 
 // newNetworkingCache initializes NetworkingCache.
@@ -266,6 +376,12 @@ func newNetworkingCache() *NetworkingCache {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
+	inventory, err := lru.New[string, []dto.CacheInventoryEntity](
+		config.GetOperationMaxSessionsAmount() * config.MAX_SESSION_USERS)
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
 	messages, err := lru.New[string, int](config.GetOperationMaxSessionsAmount())
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
@@ -276,13 +392,28 @@ func newNetworkingCache() *NetworkingCache {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
+	generatedChests, err := lru.New[string, []*dto.CacheGeneratedChestEntity](
+		config.GetOperationMaxSessionsAmount() * config.GetOperationMaxChestsAmount())
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
+	generatedHealthPacks, err := lru.New[string, []*dto.CacheGeneratedHealthPacksEntity](
+		config.GetOperationMaxSessionsAmount() * config.GetOperationMaxHealthPacksAmount())
+	if err != nil {
+		logging.GetInstance().Fatal(err.Error())
+	}
+
 	return &NetworkingCache{
-		sessions:     sessions,
-		userSessions: userSessions,
-		lobbySets:    lobbySets,
-		userActivity: userActivity,
-		metadata:     metadata,
-		messages:     messages,
-		users:        users,
+		sessions:             sessions,
+		userSessions:         userSessions,
+		lobbySets:            lobbySets,
+		userActivity:         userActivity,
+		metadata:             metadata,
+		inventory:            inventory,
+		messages:             messages,
+		users:                users,
+		generatedChests:      generatedChests,
+		generatedHealthPacks: generatedHealthPacks,
 	}
 }

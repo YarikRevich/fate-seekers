@@ -44,6 +44,9 @@ type LobbyScreen struct {
 
 	// Represents global world view.
 	world *ebiten.Image
+
+	// Represents internal state reset flag.
+	stateReset bool
 }
 
 func (ls *LobbyScreen) HandleInput() error {
@@ -54,13 +57,15 @@ func (ls *LobbyScreen) HandleInput() error {
 		stream.GetGetLobbySetSubmitter().Clean(func() {
 			stream.GetGetLobbySetSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetLobbySetResponse, err error) bool {
-					// TODO: add state management.
-
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_LOBBY_VALUE {
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLobbySetRetrievalStartedNetworkingAction(
+								value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
 						return true
 					}
 
-					if err != nil {
+					if response == nil || err != nil {
 						notification.GetInstance().Push(
 							common.ComposeMessage(
 								translation.GetInstance().GetTranslation("client.networking.get-lobby-set-failure"),
@@ -72,12 +77,23 @@ func (ls *LobbyScreen) HandleInput() error {
 							GetInstance().
 							Dispatch(
 								action.NewSetStateResetApplicationAction(
-									value.STATE_RESET_APPLICATION_TRUE_VALUE))
+									value.STATE_RESET_APPLICATION_FALSE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
+								value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
 						dispatcher.
 							GetInstance().
 							Dispatch(
 								action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLobbySetRetrievalStartedNetworkingAction(
+								value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
 						return true
 					}
@@ -94,7 +110,9 @@ func (ls *LobbyScreen) HandleInput() error {
 						}
 					}
 
-					if isLobbySetUpdated {
+					if isLobbySetUpdated || ls.stateReset {
+						ls.stateReset = false
+
 						for _, value := range response.GetLobbySet() {
 							if value.GetIssuer() == store.GetRepositoryUUID() {
 								dispatcher.
@@ -136,10 +154,18 @@ func (ls *LobbyScreen) HandleInput() error {
 						lobby.GetInstance().SetListsEntries(
 							converter.ConvertGetLobbySetResponseToListEntries(otherPlayers))
 
-						for _, value := range response.GetLobbySet() {
-							if value.GetIssuer() == store.GetRepositoryUUID() && value.GetHost() {
-								lobby.GetInstance().ShowStartButton()
+						if store.GetSessionAlreadyStartedMetadata() == value.SESSION_ALREADY_STARTED_METADATA_STATE_FALSE_VALUE {
+							for _, value := range response.GetLobbySet() {
+								if value.GetIssuer() == store.GetRepositoryUUID() && value.GetHost() {
+									lobby.GetInstance().ShowStartButton()
+								}
 							}
+						}
+
+						if store.GetLobbySetRetrievalCycleFinishedNetworking() == value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_FALSE_VALUE {
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetLobbySetRetrievalCycleFinishedNetworkingAction(
+									value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_TRUE_VALUE))
 						}
 					}
 
@@ -148,7 +174,8 @@ func (ls *LobbyScreen) HandleInput() error {
 		})
 	}
 
-	if store.GetSessionMetadataRetrievalStartedNetworking() == value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE {
+	if (store.GetSessionMetadataRetrievalStartedNetworking() == value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE) &&
+		(store.GetLobbySetRetrievalCycleFinishedNetworking() == value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_TRUE_VALUE) {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
 				value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE))
@@ -160,7 +187,7 @@ func (ls *LobbyScreen) HandleInput() error {
 						return true
 					}
 
-					if err != nil {
+					if response == nil || err != nil {
 						notification.GetInstance().Push(
 							common.ComposeMessage(
 								translation.GetInstance().GetTranslation("client.networking.get-session-metadata-failure"),
@@ -172,7 +199,14 @@ func (ls *LobbyScreen) HandleInput() error {
 							GetInstance().
 							Dispatch(
 								action.NewSetStateResetApplicationAction(
-									value.STATE_RESET_APPLICATION_TRUE_VALUE))
+									value.STATE_RESET_APPLICATION_FALSE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
+								value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
 						dispatcher.
 							GetInstance().
@@ -187,6 +221,31 @@ func (ls *LobbyScreen) HandleInput() error {
 							translation.GetInstance().GetTranslation("client.lobby.transfering-to-session"),
 							time.Second*4,
 							common.NotificationInfoTextColor)
+
+						if store.GetSessionAlreadyStartedMetadata() == value.SESSION_ALREADY_STARTED_METADATA_STATE_TRUE_VALUE {
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetSessionAlreadyStartedMetadata(
+									value.SESSION_ALREADY_STARTED_METADATA_STATE_FALSE_VALUE))
+						}
+
+						if store.GetLobbySetRetrievalCycleFinishedNetworking() == value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_TRUE_VALUE {
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetLobbySetRetrievalCycleFinishedNetworkingAction(
+									value.LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_FALSE_VALUE))
+						}
+
+						lobby.GetInstance().CleanSelection()
+
+						lobby.GetInstance().CleanListsEntries()
+
+						lobby.GetInstance().HideStartButton()
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetLobbySetRetrievalStartedNetworkingAction(value.LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetSessionMetadataRetrievalStartedNetworkingAction(
+								value.SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE))
 
 						dispatcher.
 							GetInstance().
@@ -239,47 +298,31 @@ func newLobbyScreen() screen.Screen {
 	transparentTransitionEffect := transparent.NewTransparentTransitionEffect(true, 255, 0, 5, time.Microsecond*10)
 
 	lobby.GetInstance().SetStartCallback(func() {
-		handler.PerformStartSession(
-			store.GetSelectedSessionMetadata().ID,
-			store.GetSelectedLobbySetUnitMetadata().ID,
-			func(err error) {
-				if err != nil {
-					notification.GetInstance().Push(
-						common.ComposeMessage(
-							translation.GetInstance().GetTranslation("client.networking.start-session-failure"),
-							err.Error()),
-						time.Second*3,
-						common.NotificationErrorTextColor)
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetStartSessionTravel(value.START_SESSION_TRAVEL_TRUE_VALUE))
 
-					dispatcher.
-						GetInstance().
-						Dispatch(
-							action.NewSetStateResetApplicationAction(
-								value.STATE_RESET_APPLICATION_TRUE_VALUE))
-
-					dispatcher.
-						GetInstance().
-						Dispatch(
-							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
-
-					return
-				}
-
-				notification.GetInstance().Push(
-					translation.GetInstance().GetTranslation("client.lobby.transfering-to-session"),
-					time.Second*4,
-					common.NotificationInfoTextColor)
-
-				dispatcher.
-					GetInstance().
-					Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_TRAVEL_VALUE))
-			})
+		dispatcher.
+			GetInstance().
+			Dispatch(
+				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_TRAVEL_VALUE))
 	})
+
+	instance := &LobbyScreen{
+		ui: builder.Build(
+			lobby.GetInstance().GetContainer()),
+		transparentTransitionEffect: transparentTransitionEffect,
+		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
+	}
 
 	lobby.GetInstance().SetBackCallback(func() {
 		handler.PerformRemoveLobby(store.GetSelectedSessionMetadata().ID, func(err error) {
 			transparentTransitionEffect.Reset()
+
+			instance.stateReset = true
+
+			lobby.GetInstance().CleanSelection()
+
+			lobby.GetInstance().CleanListsEntries()
 
 			lobby.GetInstance().HideStartButton()
 
@@ -304,12 +347,11 @@ func newLobbyScreen() screen.Screen {
 		})
 	})
 
+	lobby.GetInstance().CleanSelection()
+
+	lobby.GetInstance().CleanListsEntries()
+
 	lobby.GetInstance().HideStartButton()
 
-	return &LobbyScreen{
-		ui: builder.Build(
-			lobby.GetInstance().GetContainer()),
-		transparentTransitionEffect: transparentTransitionEffect,
-		world:                       ebiten.NewImage(config.GetWorldWidth(), config.GetWorldHeight()),
-	}
+	return instance
 }

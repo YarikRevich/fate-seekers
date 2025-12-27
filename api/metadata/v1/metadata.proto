@@ -46,11 +46,32 @@ service MetadataService {
     // RemoveLobby performs lobby removal operation by the configured user. Allowed for lobby owner only.
     rpc RemoveLobby(RemoveLobbyRequest) returns (RemoveLobbyResponse) {};
 
+    // LeaveLobby performs lobby leave operation by the configured user.
+    rpc LeaveLobby(LeaveLobbyRequest) returns (LeaveLobbyResponse) {};
+
     // GetUsersMetadata performs users metadata retrieval request by the configured user.
     rpc GetUsersMetadata(GetUsersMetadataRequest) returns (stream GetUsersMetadataResponse) {};
 
+    // GetUserInventory performs user inventory retrieval request by the configured user.
+    rpc GetUserInventory(GetUserInventoryRequest) returns (stream GetUserInventoryResponse) {};
+
+    // TakeChestItem performs chest item take operaiton for the selected chest by the configured user.
+    rpc TakeChestItem(TakeChestItemRequest) returns (TakeChestItemResponse) {};
+
+    // OpenChest performs chest open operation for the selected chest by the configured user.
+    rpc OpenChest(OpenChestRequest) returns (OpenChestResponse) {};
+
     // GetChests performs chests retrieval for the selected session by the configured user.
-    rpc GetChests(GetChestsRequest) returns (GetChestsResponse) {};
+    rpc GetChests(GetChestsRequest) returns (stream GetChestsResponse) {};
+
+    // OpenHealthPack performs health pack open operation for the selected health pack by the configured user.
+    rpc OpenHealthPack(OpenHealthPackRequest) returns (OpenHealthPackResponse) {};
+
+    // GetHealthPacks performs health packs retrieval for the selected session by the configured user.
+    rpc GetHealthPacks(GetHealthPacksRequest) returns (stream GetHealthPacksResponse) {};
+
+    // GetEvents performs weather events retrieval for the selected session by the configured user.
+    rpc GetEvents(GetEventsRequest) returns (stream GetEventsResponse) {};
 
     // GetMap performs map retrieval for the selected session by the configured user.
     rpc GetMap(GetMapRequest) returns (stream GetMapResponse) {};
@@ -146,7 +167,10 @@ message RemoveSessionResponse {
 message StartSessionRequest {
     int64 session_id = 1;
     int64 lobby_id = 2;
-    string issuer = 3 [(buf.validate.field).string.uuid = true];
+    repeated Position spawnables = 3;
+    repeated Position chest_locations = 4;
+    repeated Position health_pack_locations = 5;
+    string issuer = 6 [(buf.validate.field).string.uuid = true];
 };
 
 // StartSessionResponse represents start session response.
@@ -203,30 +227,55 @@ message RemoveLobbyRequest {
 message RemoveLobbyResponse {
 };
 
-// Represents users metadata retrieval request message.
+// LeaveLobbyRequest represents user leave lobby request.
+message LeaveLobbyRequest {
+    int64 session_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
+};
+
+// LeaveLobbyResponse represents user leave lobby response.
+message LeaveLobbyResponse {
+};
+
+// GetUsersMetadataRequest represents users metadata retrieval request message.
 message GetUsersMetadataRequest {
     int64 session_id = 1;
     string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
 
-// Represents common user metadata message.
+// UserMetadata represents common user metadata message.
 message UserMetadata {
-    uint64 health = 1;
-    uint64 skin = 2;
-    bool eliminated = 3;
-    bool active = 4;
-    Position position = 5;
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
+    uint64 health = 2;
+    uint64 skin = 3;
+    bool eliminated = 4;
+    bool active = 5;
+    Position position = 6;
+
+    // Represents current animation state.
+    bool static = 7;
 };
 
-// Represents users metadata retrieval response message.
+// GetUsersMetadataResponse represents users metadata retrieval response message.
 message GetUsersMetadataResponse {
     repeated UserMetadata user_metadata = 1;
 };
 
-// GetChestsRequest represents chests retrieval request message.
-message GetChestsRequest {
-    int64 session_id = 1;
+// GetUserInventoryRequest represents user inventory retrieval response message.
+message GetUserInventoryRequest {
+    string issuer = 1 [(buf.validate.field).string.uuid = true];
+    int64 session_id = 2;
 };
+
+// UserInventoryItem represents user inventory item message.
+message UserInventoryItem {
+    string name = 1;
+};
+
+// GetUserInventoryResponse represents user inventory response message
+message GetUserInventoryResponse {
+    repeated UserInventoryItem user_inventory_items = 1;
+};  
 
 // Position represents common position message.
 message Position {
@@ -234,9 +283,95 @@ message Position {
     double y = 2;
 };
 
+// TakeChestItemRequest represents take chest item operation request.
+message TakeChestItemRequest {
+    int64 session_id = 1;
+    int64 generation_id = 2;
+    int64 association_id = 3;
+    string issuer = 4 [(buf.validate.field).string.uuid = true];
+};
+
+// TakeChestItemResponse represents take chest item opereation response.
+message TakeChestItemResponse {
+
+};
+
+// OpenChestRequest represents chest open request.
+message OpenChestRequest {
+    int64 session_id = 1;
+    int64 generation_id = 2;
+    string issuer = 3 [(buf.validate.field).string.uuid = true];
+};
+
+// OpenChestResponse represents chest open response.
+message OpenChestResponse {
+};
+
+// GetChestsRequest represents chests retrieval request message.
+message GetChestsRequest {
+    int64 session_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
+};
+
+// ChestItem represents chest item message.
+message ChestItem {
+    int64 chest_item_id = 1;
+    string name = 2;
+};
+
+// Chest represents chest message.
+message Chest {
+    int64 chest_id = 1;
+    Position position = 2;
+    bool active = 3;
+    string instance = 4;
+    repeated ChestItem chest_items = 5;
+};
+
 // GetChestsResponse represents chests retrieval response streaming message.
 message GetChestsResponse {
-    repeated Position positions = 1;
+    repeated Chest chests = 1;
+};
+
+// OpenHealthPackRequest represents health pack open request.
+message OpenHealthPackRequest {
+    int64 session_id = 1;
+    int64 generation_id = 2;
+    string issuer = 3 [(buf.validate.field).string.uuid = true];
+};
+
+// OpenHealthPackResponse represents health pack open response.
+message OpenHealthPackResponse {
+};
+
+// GetHealthPacksRequest represents health packs retrieval request message.
+message GetHealthPacksRequest {
+    int64 session_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
+};
+
+// HealthPack represents health pack message.
+message HealthPack {
+    int64 health_pack_id = 1;
+    Position position = 2;
+    bool active = 3;
+    string instance = 4;
+};
+
+// GetHealthPacksResponse represents health packs retrieval response streaming message.
+message GetHealthPacksResponse {
+    repeated HealthPack healthPacks = 1;
+};
+
+// GetEventsRequest represents event retrieval request message.
+message GetEventsRequest {
+    int64 session_id = 1;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
+};
+
+// GetEventsResponse represents event retrieval response message.
+message GetEventsResponse {
+    string name = 1;
 };
 
 // GetMapRequest represents map retrieval request message.
@@ -258,7 +393,7 @@ message GetChatMessagesRequest {
 // ChatMessage represents common chat retrieval message.
 message ChatMessage {
     string content = 1;
-    string issuer = 2;
+    string issuer = 2 [(buf.validate.field).string.uuid = true];
     google.protobuf.Timestamp timestamp = 3;
 };
 

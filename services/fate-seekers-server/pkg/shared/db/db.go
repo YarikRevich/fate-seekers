@@ -87,3 +87,8 @@ func migrateDatabase(src *gorm.DB) error {
 
 	return src.AutoMigrate()
 }
+
+// BeginTransaction starts a transaction for the provided callback.
+func BeginTransaction(callback func(tx *gorm.DB) error) error {
+	return GetInstance().Transaction(callback)
+}

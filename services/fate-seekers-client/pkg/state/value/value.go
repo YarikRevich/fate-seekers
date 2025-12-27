@@ -1,5 +1,11 @@
 package value
 
+import (
+	"time"
+
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
+)
+
 // Describes all the available screen reducer store values.
 const (
 	ACTIVE_SCREEN_LOGO_VALUE  = "logo"
@@ -9,6 +15,8 @@ const (
 	ACTIVE_SCREEN_ENTRY_VALUE = "entry"
 
 	ACTIVE_SCREEN_MENU_VALUE         = "menu"
+	ACTIVE_SCREEN_CREDITS_VALUE      = "credits"
+	ACTIVE_SCREEN_COLLECTIONS_VALUE  = "collections"
 	ACTIVE_SCREEN_SETTINGS_VALUE     = "settings"
 	ACTIVE_SCREEN_SELECTOR_VALUE     = "selector"
 	ACTIVE_SCREEN_CREATOR_VALUE      = "creator"
@@ -17,6 +25,8 @@ const (
 	ACTIVE_SCREEN_TRAVEL_VALUE       = "travel"
 	ACTIVE_SCREEN_ANSWER_INPUT_VALUE = "answer_input"
 	ACTIVE_SCREEN_RESUME_VALUE       = "resume"
+	ACTIVE_SCREEN_DEATH_VALUE        = "death"
+	ACTIVE_SCREEN_GAMEOVER_VALUE     = "gameover"
 
 	PREVIOUS_SCREEN_MENU_VALUE   = "menu"
 	PREVIOUS_SCREEN_RESUME_VALUE = "resume"
@@ -31,6 +41,13 @@ const (
 
 	STATE_RESET_APPLICATION_TRUE_VALUE  = "true"
 	STATE_RESET_APPLICATION_FALSE_VALUE = "false"
+
+	GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE  = "true"
+	GAMEPAD_ENABLED_APPLICATION_FALSE_VALUE = "false"
+)
+
+var (
+	GAMEPAD_USAGE_APPLICATION_DEFAULT_VALUE time.Time
 )
 
 // Describes all the available repository reducer store values.
@@ -61,6 +78,9 @@ const (
 	LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE  = "true"
 	LOBBY_SET_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE = "false"
 
+	LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_TRUE_VALUE  = "true"
+	LOBBY_SET_RETRIEVAL_CYCLE_FINISHED_NETWORKING_FALSE_VALUE = "false"
+
 	LOBBY_CREATION_STARTED_NETWORKING_TRUE_VALUE  = "true"
 	LOBBY_CREATION_STARTED_NETWORKING_FALSE_VALUE = "false"
 
@@ -69,6 +89,24 @@ const (
 
 	SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_TRUE_VALUE  = "true"
 	SESSION_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_VALUE = "false"
+
+	UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_TRUE_VALUE  = "true"
+	UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_FALSE_VALUE = "false"
+
+	EVENT_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE  = "true"
+	EVENT_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE = "false"
+
+	USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE  = "true"
+	USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE = "false"
+
+	USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE  = "true"
+	USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE = "false"
+
+	CHESTS_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE  = "true"
+	CHESTS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE = "false"
+
+	HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE  = "true"
+	HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE = "false"
 )
 
 // Describes all the available letter reducer store values.
@@ -99,7 +137,7 @@ var (
 )
 
 // Describes available event reducer store values.
-var (
+const (
 	EVENT_NAME_EMPTY_VALUE      = ""
 	EVENT_NAME_TOXIC_RAIN_VALUE = "toxic_rain"
 	EVENT_STARTED_FALSE_VALUE   = "false"
@@ -109,9 +147,7 @@ var (
 )
 
 // Describes available sound reducer store values.
-var (
-	SOUND_FX_UPDATED_FALSE_VALUE    = "false"
-	SOUND_FX_UPDATED_TRUE_VALUE     = "true"
+const (
 	SOUND_MUSIC_UPDATED_FALSE_VALUE = "false"
 	SOUND_MUSIC_UPDATED_TRUE_VALUE  = "true"
 )
@@ -123,9 +159,49 @@ const (
 )
 
 // Describes available metadata reducer store values.
+const (
+	SELECTED_SESSION_METADATA_EMPTY_VALUE              = ""
+	SELECTED_LOBBY_SET_UNIT_METADATA_EMPTY_VALUE       = ""
+	SESSION_ALREADY_STARTED_METADATA_STATE_TRUE_VALUE  = "true"
+	SESSION_ALREADY_STARTED_METADATA_STATE_FALSE_VALUE = "false"
+)
+
 var (
-	RETRIEVED_SESSIONS_METADATA_EMPTY_VALUE      = []interface{}{}
-	SELECTED_SESSION_METADATA_EMPTY_VALUE        = ""
-	RETRIEVED_LOBBY_SET_METADATA_EMPTY_VALUE     = []interface{}{}
-	SELECTED_LOBBY_SET_UNIT_METADATA_EMPTY_VALUE = ""
+	RETRIEVED_SESSIONS_METADATA_EMPTY_VALUE  = []interface{}{}
+	RETRIEVED_LOBBY_SET_METADATA_EMPTY_VALUE = []interface{}{}
+)
+
+// Describes available session reducer store values.
+const (
+	RESET_SESSION_FALSE_VALUE  = "false"
+	RESET_SESSION_TRUE_VALUE   = "true"
+	STATIC_SESSION_EMPTY_VALUE = false
+)
+
+var (
+	POSITION_SESSION_EMPTY_VALUE          dto.Position
+	STAGE_POSITION_SESSION_EMPTY_VALUE    dto.Position
+	PREVIOUS_POSITION_SESSION_EMPTY_VALUE dto.Position
+	RETRIEVED_USERS_METADATA_EMPTY_VALUE  dto.RetrievedUsersMetadataSessionSet = make(dto.RetrievedUsersMetadataSessionSet)
+)
+
+// Describes available collections reducer store values.
+const (
+	RESET_COLLECTIONS_FALSE_VALUE = "false"
+	RESET_COLLECTIONS_TRUE_VALUE  = "true"
+)
+
+// Describes available travel reducer store values.
+const (
+	RESET_TRAVEL_FALSE_VALUE = "false"
+	RESET_TRAVEL_TRUE_VALUE  = "true"
+
+	START_SESSION_TRAVEL_FALSE_VALUE = "false"
+	START_SESSION_TRAVEL_TRUE_VALUE  = "true"
+)
+
+// Describes available death reducer store values.
+const (
+	RESET_DEATH_FALSE_VALUE = "false"
+	RESET_DEATH_TRUE_VALUE  = "true"
 )

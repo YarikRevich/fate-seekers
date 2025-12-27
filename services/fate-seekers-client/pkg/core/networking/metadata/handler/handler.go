@@ -17,6 +17,8 @@ import (
 )
 
 var (
+	ErrSessionAlreadyStarted       = errors.New("err happened session already started")
+	ErrLobbyAlreadyStarted         = errors.New("err happened lobby already started")
 	ErrLobbyAlreadyExists          = errors.New("err happened lobby already exists")
 	ErrFilteredSessionDoesNotExist = errors.New("err happened filtered session does not exist")
 )
@@ -74,7 +76,7 @@ func PerformCreateUserIfNotExists(callback func(err error)) {
 					GetInstance().
 					Dispatch(
 						action.NewSetStateResetApplicationAction(
-							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
@@ -118,7 +120,7 @@ func PerformGetUserSessions(callback func(response *metadatav1.GetUserSessionsRe
 					GetInstance().
 					Dispatch(
 						action.NewSetStateResetApplicationAction(
-							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
@@ -162,7 +164,7 @@ func PerformGetFilteredSessions(request dto.GetFilteredSessionsRequest, callback
 					GetInstance().
 					Dispatch(
 						action.NewSetStateResetApplicationAction(
-							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
@@ -214,7 +216,7 @@ func PerformCreateSession(name string, seed uint64, callback func(err error)) {
 					GetInstance().
 					Dispatch(
 						action.NewSetStateResetApplicationAction(
-							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
@@ -259,7 +261,7 @@ func PerformRemoveSession(sessionID int64, callback func(err error)) {
 					GetInstance().
 					Dispatch(
 						action.NewSetStateResetApplicationAction(
-							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
@@ -286,7 +288,13 @@ func PerformRemoveSession(sessionID int64, callback func(err error)) {
 }
 
 // PerformStartSession performs session start request.
-func PerformStartSession(sessionID, lobbyID int64, callback func(err error)) {
+func PerformStartSession(
+	sessionID,
+	lobbyID int64,
+	spawnables,
+	chestLocations,
+	healthPackLocations []*metadatav1.Position,
+	callback func(err error)) {
 	go func() {
 		_, err := connector.
 			GetInstance().
@@ -294,9 +302,12 @@ func PerformStartSession(sessionID, lobbyID int64, callback func(err error)) {
 			StartSession(
 				context.Background(),
 				&metadatav1.StartSessionRequest{
-					SessionId: sessionID,
-					LobbyId:   lobbyID,
-					Issuer:    store.GetRepositoryUUID(),
+					SessionId:           sessionID,
+					LobbyId:             lobbyID,
+					Issuer:              store.GetRepositoryUUID(),
+					Spawnables:          spawnables,
+					ChestLocations:      chestLocations,
+					HealthPackLocations: healthPackLocations,
 				})
 
 		if err != nil {
@@ -305,7 +316,7 @@ func PerformStartSession(sessionID, lobbyID int64, callback func(err error)) {
 					GetInstance().
 					Dispatch(
 						action.NewSetStateResetApplicationAction(
-							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
@@ -350,12 +361,18 @@ func PerformCreateLobby(sessionID int64, callback func(err error)) {
 					GetInstance().
 					Dispatch(
 						action.NewSetStateResetApplicationAction(
-							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 
 				callback(common.ErrConnectionLost)
+
+				return
+			}
+
+			if status.Code(err) == codes.Aborted {
+				callback(ErrLobbyAlreadyStarted)
 
 				return
 			}
@@ -401,7 +418,52 @@ func PerformRemoveLobby(sessionID int64, callback func(err error)) {
 					GetInstance().
 					Dispatch(
 						action.NewSetStateResetApplicationAction(
-							value.STATE_RESET_APPLICATION_TRUE_VALUE))
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
+
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+				callback(common.ErrConnectionLost)
+
+				return
+			}
+
+			errRaw, ok := status.FromError(err)
+			if !ok {
+				callback(err)
+
+				return
+			}
+
+			callback(errors.New(errRaw.Message()))
+
+			return
+		}
+
+		callback(nil)
+	}()
+}
+
+// PerformLeaveLobby performs lobby leave request.
+func PerformLeaveLobby(sessionID int64, callback func(err error)) {
+	go func() {
+		_, err := connector.
+			GetInstance().
+			GetClient().
+			LeaveLobby(
+				context.Background(),
+				&metadatav1.LeaveLobbyRequest{
+					SessionId: sessionID,
+					Issuer:    store.GetRepositoryUUID(),
+				})
+
+		if err != nil {
+			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))

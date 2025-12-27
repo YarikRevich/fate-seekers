@@ -4,15 +4,6 @@ global:
 
 scrape_configs:
   - job_name: 'prometheus'
-
-    scrape_interval: 800ms
-
+    metrics_path: "/metrics"
     static_configs:
-      - targets: ['{{.Metrics.Host)}:{{.Metrics.Port}}']
-
-  - job_name: 'node-exporter'
-
-    scrape_interval: 5s
-
-    static_configs:
-      - targets: ['{{.NodeExporter.Host}}:{{.NodeExporter.Port}}']
+      - targets: ['{{.metrics.host}}:{{.metrics.port}}']

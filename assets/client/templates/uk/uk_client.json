@@ -19,6 +19,30 @@
         "one": "Вийти",
         "other": "Вийти"
     },
+    "client.credits.title": {
+        "one": "Титри",
+        "other": "Титри"
+    },
+    "client.credits.special-thanks": {
+        "one": "Special Thanks: ",
+        "other": "Special Thanks: "
+    },
+    "client.credits.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
+    "client.collections.title": {
+        "one": "Колекції",
+        "other": "Колекції"
+    },
+    "client.collections.available-collections": {
+        "one": "Доступні колекції",
+        "other": "Доступні колекції"
+    },
+    "client.collections.close": {
+        "one": "Закрити",
+        "other": "Закрити"
+    },
     "client.settings.sound.music": {
         "one": "Гучність музики",
         "other": "Гучність музики"
@@ -111,6 +135,10 @@
         "one": "Ключ від сервера не вказаний або не є коректним. \nПерейти до його введення?",
         "other": "Ключ від сервера не вказаний або не є коректним. \nПерейти до його введення?"
     },
+    "client.prompt.death": {
+        "one": "Ви мертві!",
+        "other": "Ви мертві!"
+    },
     "client.answerinput.solvetext": {
         "one": "Надайте розвʼязок",
         "other": "Надайте розвʼязок"
@@ -126,6 +154,22 @@
     "client.answerinput.close": {
         "one": "Закрити",
         "other": "Закрити"
+    },
+    "client.answerinput.success": {
+        "one": "Відповідь правильна!",
+        "other": "Відповідь правильна!"
+    },
+    "client.answerinput.failure": {
+        "one": "Відповідь не правильна!",
+        "other": "Відповідь не правильна!"
+    },
+    "client.press.gamepad": {
+        "one": "Натисніть квадратну кнопку",
+        "other": "Натисніть квадратну кнопку"
+    },
+    "client.press.keyboard": {
+        "one": "Натисніть кнопку E",
+        "other": "Натисніть кнопку E"
     },
     "client.selectormanager.invalid-session-name": {
         "one": "Надано некоректну назву сесії",
@@ -183,6 +227,10 @@
         "one": "Неможливо видалити лобі для вибраної сесії",
         "other": "Неможливо видалити лобі для вибраної сесії"
     },
+    "client.networking.leave-lobby-failure": {
+        "one": "Неможливо вийти з лобі для вибраної сесії",
+        "other": "Неможливо вийти з лобі для вибраної сесії"
+    },
     "client.networking.joining-existing-lobby": {
         "one": "Доєднуюся до існуючого лобі для вибраної сесії",
         "other": "Доєднуюся до існуючого лобі для вибраної сесії"
@@ -199,13 +247,45 @@
         "one": "Неможливо розпочати старт сесії",
         "other": "Неможливо розпочати старт сесії"
     },
+    "client.networking.start-session-processing": {
+        "one": "Ігрова сесія розпочинається...",
+        "other": "Ігрова сесія розпочинається..."
+    },
     "client.networking.connection-failure": {
         "one": "Зʼєднання конектора не вдалося встановити",
         "other": "Зʼєднання конектора не вдалося встановити"
     },
-    "client.networking.close-failure": {
-        "one": "Зʼєднання конектора не вдалося перервати",
-        "other": "Зʼєднання конектора не вдалося перервати"
+    "client.networking.update-user-metadata-positions-failure": {
+        "one": "Неможливо оновити дані позиції користувача",
+        "other": "Неможливо оновити дані позиції користувача"
+    },
+    "client.networking.event-retrieval-failure": {
+        "one": "Неможливо отримати події сесії",
+        "other": "Неможливо отримати події сесії"
+    },
+    "client.networking.users-metadata-retrieval-failure": {
+        "one": "Неможливо отримати метадані користувачів сесії",
+        "other": "Неможливо отримати метадані користувачів сесії"
+    },
+    "client.networking.event-toxic-rain-starated": {
+        "one": "Почався токсичний дощ",
+        "other": "Почався токсичний дощ"
+    },
+    "client.networking.event-finished": {
+        "one": "Погодна подія закінчилася",
+        "other": "Погодна подія закінчилася"
+    },
+    "client.repository.collections-retrieval-failure": {
+        "one": "Неможливо отримати данні колекцій користувача",
+        "other": "Неможливо отримати данні колекцій користувача"
+    },
+    "client.gamepad.connected": {
+        "one": "Контроллер був підʼєднаний",
+        "other": "Контроллер був підʼєднаний"
+    },
+    "client.gamepad.disconnected": {
+        "one": "Контроллер був відʼєднаний",
+        "other": "Контроллер був відʼєднаний"
     },
     "client.skin.0.name": {
         "one": "Аріян",
