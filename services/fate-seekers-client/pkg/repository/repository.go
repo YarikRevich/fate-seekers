@@ -25,7 +25,7 @@ var (
 
 // CollectionsRepository represents collections entity repository.
 type CollectionsRepository interface {
-	Insert(name string) error
+	Insert(name, path string) error
 	Exists(name string) (bool, error)
 	IsEmpty() (bool, error)
 	GetAll() ([]entity.CollectionEntity, error)
@@ -35,10 +35,12 @@ type CollectionsRepository interface {
 type collectionsRepositoryImpl struct{}
 
 // Insert inserts new collection entity to the storage.
-func (w *collectionsRepositoryImpl) Insert(name string) error {
+func (w *collectionsRepositoryImpl) Insert(name, path string) error {
 	instance := db.GetInstance()
 
-	err := instance.Create(&entity.CollectionEntity{Name: name}).Error
+	err := instance.Create(&entity.CollectionEntity{
+		Name: name,
+		Path: path}).Error
 
 	return errors.Wrap(err, ErrPersistingCollection.Error())
 }

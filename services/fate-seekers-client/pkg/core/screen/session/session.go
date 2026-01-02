@@ -8,6 +8,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/shader/event/toxicrain"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/call"
 	contentstream "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/stream"
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/converter"
@@ -505,8 +506,16 @@ func (ss *SessionScreen) HandleInput() error {
 	retrievedUsersMetadataSession := store.GetRetrievedUsersMetadataSession()
 
 	if _, ok := retrievedUsersMetadataSession[store.GetRepositoryUUID()]; ok {
+		var (
+			spacePressed bool
+			iKeyPressed  bool
+		)
+
 		if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE && ebiten.IsFocused() {
 			gamepadID := ebiten.GamepadIDs()[0]
+
+			// TODO: check if space is pressed
+			// TODO: check if I button is pressed
 
 			direction := gamepad.GetGamepadLeftStickDirection(gamepadID)
 
@@ -542,103 +551,12 @@ func (ss *SessionScreen) HandleInput() error {
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
 			}
 
+			if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+				spacePressed = true
+			}
+
 			if inpututil.IsKeyJustPressed(ebiten.KeyI) {
-				if store.GetChestOpenedSession() == value.CHEST_OPENED_FALSE_VALUE {
-					if store.GetInventoryOpenedSession() == value.INVENTORY_OPENED_FALSE_VALUE {
-						retrievedUsersMetadata := store.GetRetrievedUsersMetadataSession()[store.GetRepositoryUUID()]
-
-						var elements []dto.InventoryElement
-
-						for _, item := range retrievedUsersMetadata.Inventory {
-							if item.Name == dto.CHEST_ITEM_LETTER_TYPE {
-								elements = append(elements, dto.InventoryElement{
-									Image: loader.GetInstance().GetStatic(loader.LetterScroll),
-									ApplyCallback: func() {
-										letter := loader.GetRandomLetter(uint64(item.ID))
-
-										dispatcher.GetInstance().Dispatch(
-											action.NewSetLetterNameAction(letter))
-									},
-									RemoveCallback: func(success func()) {
-										handler.PerformDropInventoryItem(item.ID, func(err error) {
-											if err != nil {
-												notification.GetInstance().Push(
-													common.ComposeMessage(
-														translation.GetInstance().GetTranslation("client.networking.drop-inventory-item-failure"),
-														err.Error()),
-													time.Second*3,
-													common.NotificationErrorTextColor)
-
-											} else {
-												success()
-											}
-										})
-									},
-								})
-							} else if item.Name == dto.CHEST_ITEM_HEALTH_PACK_TYPE {
-								elements = append(elements, dto.InventoryElement{
-									Image: loader.GetInstance().GetStatic(loader.StandardHealthPack),
-									ApplyCallback: func() {
-										handler.PerformOpenHealthPack(
-											store.GetSelectedSessionMetadata().ID,
-											item.ID,
-											func(err error) {
-												if err != nil {
-													notification.GetInstance().Push(
-														common.ComposeMessage(
-															translation.GetInstance().GetTranslation("client.networking.open-health-pack-failure"),
-															err.Error()),
-														time.Second*3,
-														common.NotificationErrorTextColor)
-
-													return
-												}
-
-												notification.GetInstance().Push(
-													common.ComposeMessage(
-														translation.GetInstance().GetTranslation("client.networking.open-health-pack-opened"),
-														err.Error()),
-													time.Second*3,
-													common.NotificationInfoTextColor)
-											},
-										)
-									},
-									RemoveCallback: func(success func()) {
-										handler.PerformDropInventoryItem(item.ID, func(err error) {
-											if err != nil {
-												notification.GetInstance().Push(
-													common.ComposeMessage(
-														translation.GetInstance().GetTranslation("client.networking.drop-inventory-item-failure"),
-														err.Error()),
-													time.Second*3,
-													common.NotificationErrorTextColor)
-
-											} else {
-												success()
-											}
-										})
-									},
-								})
-							}
-						}
-
-						inventory.GetInstance().CleanElements()
-
-						inventory.GetInstance().AddElements(elements)
-
-						inventory.GetInstance().Show()
-
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetInventoryOpenedSession(value.INVENTORY_OPENED_TRUE_VALUE))
-					} else {
-						inventory.GetInstance().CleanElements()
-
-						inventory.GetInstance().Hide()
-
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetInventoryOpenedSession(value.INVENTORY_OPENED_FALSE_VALUE))
-					}
-				}
+				iKeyPressed = true
 			}
 
 			if ebiten.IsKeyPressed(ebiten.KeyW) && ebiten.IsKeyPressed(ebiten.KeyA) {
@@ -665,6 +583,133 @@ func (ss *SessionScreen) HandleInput() error {
 			} else if ebiten.IsKeyPressed(ebiten.KeyD) {
 				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
 
+			}
+		}
+
+		if spacePressed {
+			if store.GetHistPlayerWithFistStartedNetworking() == value.HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_FALSE_STATE {
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetHitPlayerWithFistStartedNetworking(
+						value.HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_TRUE_STATE))
+
+				call.PerformHitPlayerWithFist(0, "", func(err error) {
+					if err != nil {
+						notification.GetInstance().Push(
+							common.ComposeMessage(
+								"ERROR HAPPENED",
+								err.Error()),
+							time.Second*3,
+							common.NotificationErrorTextColor)
+
+						return
+					}
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetHitPlayerWithFistStartedNetworking(
+							value.HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_FALSE_STATE))
+				})
+			}
+		}
+
+		if iKeyPressed {
+			if store.GetChestOpenedSession() == value.CHEST_OPENED_FALSE_VALUE {
+				if store.GetInventoryOpenedSession() == value.INVENTORY_OPENED_FALSE_VALUE {
+					retrievedUsersMetadata := store.GetRetrievedUsersMetadataSession()[store.GetRepositoryUUID()]
+
+					var elements []dto.InventoryElement
+
+					for _, item := range retrievedUsersMetadata.Inventory {
+						if item.Name == dto.CHEST_ITEM_LETTER_TYPE {
+							elements = append(elements, dto.InventoryElement{
+								Image: loader.GetInstance().GetStatic(loader.LetterScroll),
+								ApplyCallback: func(success func()) {
+									letter := loader.GetRandomLetter(uint64(item.ID))
+
+									dispatcher.GetInstance().Dispatch(
+										action.NewSetLetterNameAction(letter))
+								},
+								RemoveCallback: func(success func()) {
+									handler.PerformDropInventoryItem(item.ID, func(err error) {
+										if err != nil {
+											notification.GetInstance().Push(
+												common.ComposeMessage(
+													translation.GetInstance().GetTranslation("client.networking.drop-inventory-item-failure"),
+													err.Error()),
+												time.Second*3,
+												common.NotificationErrorTextColor)
+
+										} else {
+											success()
+										}
+									})
+								},
+							})
+						} else if item.Name == dto.CHEST_ITEM_HEALTH_PACK_TYPE {
+							elements = append(elements, dto.InventoryElement{
+								Image: loader.GetInstance().GetStatic(loader.StandardHealthPack),
+								ApplyCallback: func(success func()) {
+									handler.PerformOpenHealthPack(
+										store.GetSelectedSessionMetadata().ID,
+										item.ID,
+										func(err error) {
+											if err != nil {
+												notification.GetInstance().Push(
+													common.ComposeMessage(
+														translation.GetInstance().GetTranslation(
+															"client.networking.open-health-pack-failure"),
+														err.Error()),
+													time.Second*3,
+													common.NotificationErrorTextColor)
+
+												return
+											}
+
+											notification.GetInstance().Push(
+												translation.GetInstance().GetTranslation(
+													"client.networking.open-health-pack-opened"),
+												time.Second*3,
+												common.NotificationInfoTextColor)
+
+											success()
+										},
+									)
+								},
+								RemoveCallback: func(success func()) {
+									handler.PerformDropInventoryItem(item.ID, func(err error) {
+										if err != nil {
+											notification.GetInstance().Push(
+												common.ComposeMessage(
+													translation.GetInstance().GetTranslation(
+														"client.networking.drop-inventory-item-failure"),
+													err.Error()),
+												time.Second*3,
+												common.NotificationErrorTextColor)
+
+										} else {
+											success()
+										}
+									})
+								},
+							})
+						}
+					}
+
+					inventory.GetInstance().CleanElements()
+
+					inventory.GetInstance().AddElements(elements)
+
+					inventory.GetInstance().Show()
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetInventoryOpenedSession(value.INVENTORY_OPENED_TRUE_VALUE))
+				} else {
+					inventory.GetInstance().CleanElements()
+
+					inventory.GetInstance().Hide()
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetInventoryOpenedSession(value.INVENTORY_OPENED_FALSE_VALUE))
+				}
 			}
 		}
 
@@ -799,9 +844,11 @@ func (ss *SessionScreen) HandleInput() error {
 															return
 														}
 
-														letter := loader.GetRandomLetter(uint64(insideItem.ID))
+														letterPath := loader.GetRandomLetter(uint64(insideItem.ID))
 
-														exists, err := repository.GetCollectionsRepository().Exists(letter)
+														letter := loader.GetInstance().GetLetter(letterPath)
+
+														exists, err := repository.GetCollectionsRepository().Exists(letter.Title)
 														if err != nil {
 															notification.GetInstance().Push(
 																common.ComposeMessage(
@@ -812,7 +859,7 @@ func (ss *SessionScreen) HandleInput() error {
 																common.NotificationErrorTextColor)
 														} else {
 															if !exists {
-																err = repository.GetCollectionsRepository().Insert(letter)
+																err = repository.GetCollectionsRepository().Insert(letter.Title, letterPath)
 																if err != nil {
 																	notification.GetInstance().Push(
 																		common.ComposeMessage(
@@ -848,7 +895,8 @@ func (ss *SessionScreen) HandleInput() error {
 														if err != nil {
 															notification.GetInstance().Push(
 																common.ComposeMessage(
-																	translation.GetInstance().GetTranslation("client.networking.take-chest-item-failure"),
+																	translation.GetInstance().GetTranslation(
+																		"client.networking.take-chest-item-failure"),
 																	err.Error()),
 																time.Second*3,
 																common.NotificationErrorTextColor)
@@ -1088,5 +1136,6 @@ func newSessionScreen() screen.Screen {
 	}
 }
 
-// TODO: apply health pack
+// TODO: fix random letters persist operation.
+// TODO: fix monitoring startup from UI.
 // TODO: implement hit for another player, when it's near us

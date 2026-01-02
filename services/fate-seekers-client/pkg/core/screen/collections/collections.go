@@ -118,9 +118,9 @@ func newCollectionsScreen() screen.Screen {
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 	})
 
-	collections.GetInstance().SetEntrySelectedCallback(func(entry interface{}) {
+	collections.GetInstance().SetEntrySelectedCallback(func(path string) {
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetLetterNameAction(entry.(string)))
+			action.NewSetLetterNameAction(path))
 	})
 
 	return &CollectionsScreen{

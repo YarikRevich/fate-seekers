@@ -46,7 +46,9 @@ func (ic *InventoryComponent) AddElements(elements []dto.InventoryElement) {
 							ic.elements.RemoveChild(graphic)
 						})
 					} else if args.Button == ebiten.MouseButtonLeft {
-						element.ApplyCallback()
+						element.ApplyCallback(func() {
+							ic.elements.RemoveChild(graphic)
+						})
 					}
 				}),
 			),

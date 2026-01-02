@@ -332,7 +332,7 @@ message GetChestsResponse {
 // OpenHealthPackRequest represents health pack open request.
 message OpenHealthPackRequest {
     int64 session_id = 1;
-    int64 association_id = 2;
+    int64 inventory_id = 2;
     string issuer = 3 [(buf.validate.field).string.uuid = true];
 };
 

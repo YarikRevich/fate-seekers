@@ -4,7 +4,7 @@
 
 ## General Information
 
-The provided project is a demo used to demonstrate implemented opportunities of a game creation using Go native tools. Provided demo is an isometric world set in space.
+The provided project is a **technical demo** used to demonstrate implemented opportunities of a game creation using Go native tools. Provided demo is an isometric world set in space.
 
 ## Features
 

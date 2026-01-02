@@ -5,5 +5,5 @@ package contentv1
 const (
 	UPDATE_USER_METADATA_POSITIONS = "0"
 	UPDATE_USER_METADATA_STATIC    = "1"
-	SEND_CHAT_MESSAGE              = "4"
+	HIT_PLAYER_WITH_FIST_REQUEST   = "2"
 )

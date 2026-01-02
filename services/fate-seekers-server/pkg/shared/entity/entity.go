@@ -87,11 +87,11 @@ func (g *GenerationsEntity) BeforeCreate(tx *gorm.DB) error {
 	}
 
 	switch g.Name {
-	case dto.ChestGenerationType:
+	case dto.CHEST_GENERATION_TYPE:
 		cache.
 			GetInstance().
 			EvictGeneratedChests(g.SessionEntity.Name)
-	case dto.HealthPackGenerationType:
+	case dto.HEALTH_PACK_GENERATION_TYPE:
 		cache.
 			GetInstance().
 			EvictGeneratedHealthPacks(g.SessionEntity.Name)
@@ -136,7 +136,6 @@ type LobbyEntity struct {
 	PositionX      float64       `gorm:"column:position_x;not null"`
 	PositionY      float64       `gorm:"column:position_y;not null"`
 	PositionStatic bool          `gorm:"column:position_static;not null"`
-	Ammo           int64         `gorm:"column:ammo;not null"`
 	CreatedAt      time.Time     `gorm:"column:created_at;autoCreateTime"`
 	UserEntity     UserEntity    `gorm:"foreignKey:UserID;references:ID"`
 	SessionEntity  SessionEntity `gorm:"foreignKey:SessionID;references:ID"`

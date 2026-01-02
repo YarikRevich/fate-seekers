@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/cache"
 	contentv1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/networking/content/api"
@@ -245,8 +246,12 @@ func (h *Handler) Process(key string, value []byte) error {
 			GetInstance().
 			CommitMetadataTransaction()
 	case contentv1.HIT_PLAYER_WITH_FIST_REQUEST:
+		var message contentv1.HitPlayerWithFistRequest
+		if err := proto.Unmarshal(value, &message); err != nil {
+			return err
+		}
 
-	case contentv1.SEND_CHAT_MESSAGE:
+		fmt.Println(message)
 	}
 
 	return nil

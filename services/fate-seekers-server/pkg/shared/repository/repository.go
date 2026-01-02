@@ -319,7 +319,7 @@ func (w *generationsRepositoryImpl) GetChestTypeBySessionID(sessionID int64) ([]
 	var result []*entity.GenerationsEntity
 
 	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
-		Where("session_id = ? AND type = ?", sessionID, dto.ChestGenerationType).
+		Where("session_id = ? AND type = ?", sessionID, dto.CHEST_GENERATION_TYPE).
 		Find(&result).Error
 
 	w.mu.RUnlock()
@@ -336,7 +336,7 @@ func (w *generationsRepositoryImpl) GetChestTypeByInstanceAndSessionIDWithTransa
 	var result *entity.GenerationsEntity
 
 	err := transaction.Table((&entity.GenerationsEntity{}).TableName()).
-		Where("instance = ? AND session_id = ? AND type = ?", instance, sessionID, dto.ChestGenerationType).
+		Where("instance = ? AND session_id = ? AND type = ?", instance, sessionID, dto.CHEST_GENERATION_TYPE).
 		Find(&result).Error
 
 	if err != nil {
@@ -365,7 +365,7 @@ func (w *generationsRepositoryImpl) GetHealthPackTypeBySessionID(sessionID int64
 	var result []*entity.GenerationsEntity
 
 	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
-		Where("session_id = ? AND type = ?", sessionID, dto.HealthPackGenerationType).
+		Where("session_id = ? AND type = ?", sessionID, dto.HEALTH_PACK_GENERATION_TYPE).
 		Find(&result).Error
 
 	w.mu.RUnlock()
@@ -708,6 +708,7 @@ type InventoryRepository interface {
 	InsertOrUpdate(request dto.InventoryRepositoryInsertOrUpdateRequest) error
 	DeleteByUserIDAndID(inventoryID, userID int64) error
 	GetBySessionIDAndUserID(sessionID, userID int64) ([]*entity.InventoryEntity, bool, error)
+	CountByLobbyIDAndUserID(lobbyID, userID int64) (int64, error)
 }
 
 // inventoryRepositoryImpl represents implementation of InventoryRepository.
@@ -798,6 +799,28 @@ func (w *inventoryRepositoryImpl) GetBySessionIDAndUserID(sessionID, userID int6
 	w.mu.RUnlock()
 
 	return result, true, nil
+}
+
+// CountByLobbyIDAndUserID represents inventory count by the provided lobby id and user id.
+func (w *inventoryRepositoryImpl) CountByLobbyIDAndUserID(lobbyID, userID int64) (int64, error) {
+	w.mu.RLock()
+
+	instance := db.GetInstance()
+
+	var count int64
+
+	err := instance.Table((&entity.InventoryEntity{}).TableName()).
+		Where("lobby_id = ? AND user_id = ?", lobbyID, userID).
+		Count(&count).Error
+
+	if err != nil {
+		w.mu.RUnlock()
+		return 0, err
+	}
+
+	w.mu.RUnlock()
+
+	return count, nil
 }
 
 // createInventoryRepository initializes inventoryRepositoryImpl.

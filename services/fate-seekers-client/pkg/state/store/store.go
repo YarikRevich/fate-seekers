@@ -204,6 +204,13 @@ func GetHealthPacksRetrievalStartedNetworking() string {
 	return instance.GetState(networking.HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
 }
 
+// GetHistPlayerWithFistStartedNetworking retrieves hit player with fist request started networking state value.
+func GetHistPlayerWithFistStartedNetworking() string {
+	instance := GetInstance()
+
+	return instance.GetState(networking.HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_STATE).(string)
+}
+
 // GetLetterUpdated retrieves letter updated state value.
 func GetLetterUpdated() string {
 	instance := GetInstance()

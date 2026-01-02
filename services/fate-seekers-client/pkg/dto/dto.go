@@ -48,11 +48,11 @@ type LetterLoaderAttachmentUnit struct {
 
 // LetterLoaderUnit represents a letter unit used by loader to interprite raw file.
 type LetterLoaderUnit struct {
+	// Reprsents letter title in the collections view.
+	Title string `json:"title"`
+
 	// Represents letter text.
 	Text string `json:"text"`
-
-	// Represents letter collection.
-	Collection LetterLoaderCollectionUnit `json:"collection"`
 
 	// Represents letter attachment.
 	Attachment LetterLoaderAttachmentUnit `json:"attachment"`
@@ -299,17 +299,22 @@ type SoundableTile struct {
 
 // InventoryElement represents inventory element component.
 type InventoryElement struct {
+	// Represents inventory element image.
 	Image *ebiten.Image
 
-	ApplyCallback func()
+	// Represents apply interaction callback
+	ApplyCallback func(success func())
 
+	// Represents remove interaction callback
 	RemoveCallback func(success func())
 }
 
 // ChestElement represents chest element component.
 type ChestElement struct {
+	// Represents inventory element image.
 	Image *ebiten.Image
 
+	// Represents chests click interaction callback.
 	Callback func(success func())
 }
 
@@ -353,9 +358,6 @@ const (
 )
 
 const (
-	CHEST_ITEM_WEAPON_TYPE      = "weapon"
-	CHEST_ITEM_WEAPON_AMMO_TYPE = "weapon_ammo"
 	CHEST_ITEM_HEALTH_PACK_TYPE = "standard_health_pack"
-
-	CHEST_ITEM_LETTER_TYPE = "letter"
+	CHEST_ITEM_LETTER_TYPE      = "letter"
 )

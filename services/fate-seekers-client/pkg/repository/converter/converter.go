@@ -9,7 +9,7 @@ func ConvertRetrievedCollectionsToListEntries(
 	var output []interface{}
 
 	for _, lobby := range input {
-		output = append(output, lobby.Name)
+		output = append(output, lobby)
 	}
 
 	return output

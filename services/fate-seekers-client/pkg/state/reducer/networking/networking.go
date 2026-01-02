@@ -25,6 +25,7 @@ const (
 	USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE       = "users_metadata_retrieval_started"
 	CHESTS_RETRIEVAL_STARTED_NETWORKING_STATE               = "chests_retrieval_started"
 	HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_STATE         = "health_packs_retrieval_started"
+	HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_STATE           = "hit_player_with_fist_started"
 )
 
 // NetworkingStateReducer represents reducer used for networking state management.
@@ -70,6 +71,9 @@ func (nsr *NetworkingStateReducer) Init() {
 	nsr.store.SetState(
 		HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_STATE,
 		value.HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE)
+	nsr.store.SetState(
+		HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_STATE,
+		value.HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_FALSE_STATE)
 }
 
 func (nsr *NetworkingStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -149,6 +153,11 @@ func (nsr *NetworkingStateReducer) GetProcessor() func(value godux.Action) inter
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{
 					Key: HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_STATE, Value: value.Value})
+
+		case action.SET_HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_STATE, Value: value.Value})
 
 		default:
 			return nil

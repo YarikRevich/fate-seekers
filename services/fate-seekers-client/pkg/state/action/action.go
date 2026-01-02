@@ -47,6 +47,7 @@ const (
 	SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION       = "SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION"
 	SET_CHESTS_RETRIEVAL_STARTED_NETWORKING_ACTION               = "SET_CHESTS_RETRIEVAL_STARTED_NETWORKING_ACTION"
 	SET_HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_ACTION         = "SET_HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_ACTION"
+	SET_HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_ACTION           = "SET_HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_ACTION"
 )
 
 // Describes all the available state actions for letter reducer.
@@ -343,6 +344,14 @@ func NewSetChestsRetrievalStartedNetworking(value string) godux.Action {
 func NewSetHealthPacksRetrievalStartedNetworking(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetHitPlayerWithFistStartedNetworking creates new set hit player with fist started networking action.
+func NewSetHitPlayerWithFistStartedNetworking(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_ACTION,
 		Value: value,
 	}
 }

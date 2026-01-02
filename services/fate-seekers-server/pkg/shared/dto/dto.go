@@ -7,11 +7,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
-// Describes all the available letter attachment types.
+// Describes all the settings used for inventory management.
 const (
-	ATTACHMENT_IMAGE_TYPE     = "image"
-	ATTACHMENT_ANIMATION_TYPE = "animation"
-	ATTACHMENT_AUDIO_TYPE     = "audio"
+	MAX_INVENTORY_CAPACITY = 8
 )
 
 // Describes all the available event duration time.
@@ -75,9 +73,6 @@ type LetterLoaderAttachmentUnit struct {
 type LetterLoaderUnit struct {
 	// Represents letter text.
 	Text string `json:"text"`
-
-	// Represents letter collection.
-	Collection LetterLoaderCollectionUnit `json:"collection"`
 
 	// Represents letter attachment.
 	Attachment LetterLoaderAttachmentUnit `json:"attachment"`
@@ -239,7 +234,6 @@ type CacheMetadataEntity struct {
 	Active         bool
 	Eliminated     bool
 	Host           bool
-	Ammo           int
 	Inventory      []CacheInventoryEntity
 }
 
@@ -320,6 +314,11 @@ type GeneratedHealthPack struct {
 
 // Describes all the available generation types.
 const (
-	ChestGenerationType      = "chest"
-	HealthPackGenerationType = "health_pack"
+	CHEST_GENERATION_TYPE       = "chest"
+	HEALTH_PACK_GENERATION_TYPE = "health_pack"
+)
+
+// Describes all the health rates related to health packs.
+const (
+	HEALTH_PACK_RATE = 20
 )

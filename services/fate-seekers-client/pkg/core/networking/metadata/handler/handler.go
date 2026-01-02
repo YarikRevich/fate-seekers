@@ -538,7 +538,7 @@ func PerformTakeChestItem(sessionID, lobbyID, chestID, chestItemID int64, callba
 }
 
 // PerformOpenHealthPack performs health pack open operation request.
-func PerformOpenHealthPack(sessionID, associationID int64, callback func(err error)) {
+func PerformOpenHealthPack(sessionID, inventoryID int64, callback func(err error)) {
 	go func() {
 		_, err := connector.
 			GetInstance().
@@ -546,9 +546,9 @@ func PerformOpenHealthPack(sessionID, associationID int64, callback func(err err
 			OpenHealthPack(
 				context.Background(),
 				&metadatav1.OpenHealthPackRequest{
-					SessionId:     sessionID,
-					AssociationId: associationID,
-					Issuer:        store.GetRepositoryUUID(),
+					SessionId:   sessionID,
+					InventoryId: inventoryID,
+					Issuer:      store.GetRepositoryUUID(),
 				})
 
 		if err != nil {

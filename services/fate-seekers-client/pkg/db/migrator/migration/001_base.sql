@@ -8,6 +8,7 @@
 CREATE TABLE collections (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
+    path TEXT NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL
 );
 

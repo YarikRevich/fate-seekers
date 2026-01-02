@@ -134,13 +134,19 @@ const (
 
 // Describes all the available letters to be loaded.
 const (
-	LoneManLetter = "lone-man.json"
+	LastLetterLetter  = "last-letter.json"
+	TransmissionOne   = "transmission-1.json"
+	TransmissionTwo   = "transmission-2.json"
+	TransmissionThree = "transmission-3.json"
 )
 
 // Represents all the available letters used for random selection.
 var (
 	AvailableLetters = []string{
-		LoneManLetter,
+		LastLetterLetter,
+		TransmissionOne,
+		TransmissionTwo,
+		TransmissionThree,
 	}
 )
 
