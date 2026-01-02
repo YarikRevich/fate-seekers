@@ -2057,7 +2057,42 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 func (h *Handler) DropInventoryItem(context context.Context, request *metadatav1.DropInventoryItemRequest) (*metadatav1.DropInventoryItemResponse, error) {
 	response := new(metadatav1.DropInventoryItemResponse)
 
-	// repository.GetInventoryRepository().DeleteByUserIDAndSessionID()
+	var userID int64
+
+	cachedUserID, ok := cache.
+		GetInstance().
+		GetUsers(request.GetIssuer())
+	if ok {
+		userID = cachedUserID
+	} else {
+		user, exists, err := repository.
+			GetUsersRepository().
+			GetByName(request.GetIssuer())
+		if err != nil {
+			return nil, err
+		}
+
+		if !exists {
+			return nil, ErrUserDoesNotExist
+		}
+
+		userID = user.ID
+	}
+
+	cache.GetInstance().BeginMetadataTransaction()
+
+	err := repository.
+		GetInventoryRepository().
+		DeleteByUserIDAndID(request.GetInventoryId(), userID)
+	if err != nil {
+		cache.GetInstance().CommitMetadataTransaction()
+
+		return nil, err
+	}
+
+	cache.GetInstance().EvictMetadata(request.GetIssuer())
+
+	cache.GetInstance().CommitMetadataTransaction()
 
 	return response, nil
 }

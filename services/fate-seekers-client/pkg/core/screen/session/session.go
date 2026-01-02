@@ -560,9 +560,19 @@ func (ss *SessionScreen) HandleInput() error {
 											action.NewSetLetterNameAction(letter))
 									},
 									RemoveCallback: func(success func()) {
-										// TODO: call remove action
+										handler.PerformDropInventoryItem(item.ID, func(err error) {
+											if err != nil {
+												notification.GetInstance().Push(
+													common.ComposeMessage(
+														translation.GetInstance().GetTranslation("client.networking.drop-inventory-item-failure"),
+														err.Error()),
+													time.Second*3,
+													common.NotificationErrorTextColor)
 
-										success()
+											} else {
+												success()
+											}
+										})
 									},
 								})
 							} else if item.Name == dto.CHEST_ITEM_HEALTH_PACK_TYPE {
@@ -594,9 +604,19 @@ func (ss *SessionScreen) HandleInput() error {
 										)
 									},
 									RemoveCallback: func(success func()) {
-										// TODO: call remove action
+										handler.PerformDropInventoryItem(item.ID, func(err error) {
+											if err != nil {
+												notification.GetInstance().Push(
+													common.ComposeMessage(
+														translation.GetInstance().GetTranslation("client.networking.drop-inventory-item-failure"),
+														err.Error()),
+													time.Second*3,
+													common.NotificationErrorTextColor)
 
-										success()
+											} else {
+												success()
+											}
+										})
 									},
 								})
 							}
@@ -963,7 +983,6 @@ func (ss *SessionScreen) HandleInput() error {
 }
 
 func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
-	// TODO: refactor to remove session sync helper lock usage.
 	store.RetrievedUsersMetadataSessionSyncHelper.Lock()
 
 	retrievedUsersMetadataSession := store.GetRetrievedUsersMetadataSession()
@@ -1016,9 +1035,6 @@ func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
 			}
 
 			screen.DrawImage(ss.eventWorld, &ebiten.DrawImageOptions{})
-
-			// loader.GetInstance().GetMapTilesetStandardChest(loader.FirstMap)
-			// screen.DrawImage(, &ebiten.DrawImageOptions{})
 		}
 	}
 
@@ -1071,3 +1087,6 @@ func newSessionScreen() screen.Screen {
 		toxicRainEventShaderEffect:       toxicrain.NewToxicRainEventEffect(),
 	}
 }
+
+// TODO: apply health pack
+// TODO: implement hit for another player, when it's near us

@@ -706,8 +706,7 @@ func createLobbiesRepository() LobbiesRepository {
 // InventoryRepository represents intentory entity repository.
 type InventoryRepository interface {
 	InsertOrUpdate(request dto.InventoryRepositoryInsertOrUpdateRequest) error
-	DeleteByUserIDAndSessionID(userID, sessionID int64) error
-	DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error
+	DeleteByUserIDAndID(inventoryID, userID int64) error
 	GetBySessionIDAndUserID(sessionID, userID int64) ([]*entity.InventoryEntity, bool, error)
 }
 
@@ -750,26 +749,18 @@ func (w *inventoryRepositoryImpl) InsertOrUpdateWithTransaction(transaction *gor
 }
 
 // deleteByUserIDAndSessionID deletes inventory by the provided user id with provided db instance.
-func (w *inventoryRepositoryImpl) deleteByUserIDAndSessionID(instance *gorm.DB, userID, sessionID int64) error {
+func (w *inventoryRepositoryImpl) DeleteByUserIDAndID(inventoryID, userID int64) error {
 	w.mu.Lock()
 
+	instance := db.GetInstance()
+
 	err := instance.Table((&entity.InventoryEntity{}).TableName()).
-		Where("user_id = ? AND session_id = ?", userID, sessionID).
+		Where("id = ? AND user_id = ?", inventoryID, userID).
 		Delete(&entity.InventoryEntity{}).Error
 
 	w.mu.Unlock()
 
 	return err
-}
-
-// DeleteByUserIDAndSessionID deletes lobby by the provided user id.
-func (w *inventoryRepositoryImpl) DeleteByUserIDAndSessionID(userID, sessionID int64) error {
-	return w.deleteByUserIDAndSessionID(db.GetInstance(), userID, sessionID)
-}
-
-// DeleteByUserIDAndSessionIDWithTransaction deletes lobby by the provided user id with provided transaction.
-func (w *inventoryRepositoryImpl) DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error {
-	return w.deleteByUserIDAndSessionID(transaction, userID, sessionID)
 }
 
 // GetBySessionIDAndUserID retrieves inventory by the provided session id and user id.

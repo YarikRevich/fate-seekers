@@ -263,7 +263,7 @@ message GetUsersMetadataResponse {
 // DropInventoryItemRequest represents inventory item drop request message.
 message DropInventoryItemRequest {
     string issuer = 1 [(buf.validate.field).string.uuid = true];
-    int64 association_id = 2;
+    int64 inventory_id = 2;
 };
 
 // DropInventoryItemResponse represents inventory item drop response message.

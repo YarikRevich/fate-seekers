@@ -267,6 +267,10 @@
         "one": "Unable to perform open health pack operation",
         "other": "Unable to perform open health pack operation"
     },
+    "client.networking.drop-inventory-item-failure": {
+        "one": "Unable to perform drop inventory item operation",
+        "other": "Unable to perform drop inventory item operation"
+    },
     "client.networking.open-health-pack-opened": {
         "one": "Health pack has been opened and applied",
         "other": "Health pack has been opened and applied"

@@ -582,3 +582,48 @@ func PerformOpenHealthPack(sessionID, associationID int64, callback func(err err
 		callback(nil)
 	}()
 }
+
+// PerformDropInventoryItem performs drop inventory item operation request.
+func PerformDropInventoryItem(inventoryID int64, callback func(err error)) {
+	go func() {
+		_, err := connector.
+			GetInstance().
+			GetClient().
+			DropInventoryItem(
+				context.Background(),
+				&metadatav1.DropInventoryItemRequest{
+					InventoryId: inventoryID,
+					Issuer:      store.GetRepositoryUUID(),
+				})
+
+		if err != nil {
+			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
+
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+				callback(common.ErrConnectionLost)
+
+				return
+			}
+
+			errRaw, ok := status.FromError(err)
+			if !ok {
+				callback(err)
+
+				return
+			}
+
+			callback(errors.New(errRaw.Message()))
+
+			return
+		}
+
+		callback(nil)
+	}()
+}
