@@ -30,9 +30,6 @@ type BarComponent struct {
 	// Represents weapon graphic.
 	weaponGraphic *widget.Graphic
 
-	// Represents weapon text.
-	weaponText *widget.Text
-
 	// Represents container widget.
 	container *widget.Container
 }
@@ -50,11 +47,6 @@ func (bc *BarComponent) SetHealthText(value uint64) {
 // SetWeaponGraphic sets graphic by the provided value for weapon graphic widget.
 func (bc *BarComponent) SetWeaponGraphic(value *ebiten.Image) {
 	bc.weaponGraphic.Image = value
-}
-
-// SetWeaponText sets label by the provided value for weapon text widget.
-func (bc *BarComponent) SetWeaponText(currentValue, maxValue uint64) {
-	bc.weaponText.Label = fmt.Sprintf("%d / %d", currentValue, maxValue)
 }
 
 // GetContainer retrieves container widget.
@@ -81,7 +73,7 @@ func newBarComponent() *BarComponent {
 		widget.ContainerOpts.Layout(widget.NewRowLayout(
 			widget.RowLayoutOpts.Direction(widget.DirectionHorizontal),
 			widget.RowLayoutOpts.Spacing(
-				scaler.GetPercentageOf(config.GetWorldWidth(), 58)),
+				scaler.GetPercentageOf(config.GetWorldWidth(), 68)),
 			widget.RowLayoutOpts.Padding(widget.Insets{
 				Left:   scaler.GetPercentageOf(config.GetWorldWidth(), 3),
 				Right:  scaler.GetPercentageOf(config.GetWorldWidth(), 3),
@@ -201,7 +193,7 @@ func newBarComponent() *BarComponent {
 			))))
 
 	weaponGraphic := widget.NewGraphic(
-		widget.GraphicOpts.Image(loader.GetInstance().GetStatic(loader.DefaultLaserGun)),
+		widget.GraphicOpts.Image(loader.GetInstance().GetStatic(loader.Fist)),
 		widget.GraphicOpts.WidgetOpts(
 			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
 				HorizontalPosition: widget.AnchorLayoutPositionCenter,
@@ -214,45 +206,12 @@ func newBarComponent() *BarComponent {
 
 	weaponContainer.AddChild(weaponGraphicContainer)
 
-	weaponAmmoContainer := widget.NewContainer(
-		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.TrackHover(false),
-			widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-				Position: widget.RowLayoutPositionEnd,
-				Stretch:  true,
-			})),
-		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)),
-		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
-			widget.AnchorLayoutOpts.Padding(widget.Insets{
-				Left:  scaler.GetPercentageOf(config.GetWorldWidth(), 3),
-				Right: scaler.GetPercentageOf(config.GetWorldWidth(), 3),
-			}),
-		)))
-
-	weaponText := widget.NewText(
-		widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionCenter),
-		widget.TextOpts.WidgetOpts(
-			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-				HorizontalPosition: widget.AnchorLayoutPositionCenter,
-				VerticalPosition:   widget.AnchorLayoutPositionCenter,
-			}),
-		),
-		widget.TextOpts.Text(
-			"0 / 0",
-			generalFont,
-			color.White))
-
-	weaponAmmoContainer.AddChild(weaponText)
-
-	weaponContainer.AddChild(weaponAmmoContainer)
-
 	container.AddChild(weaponContainer)
 
 	result = &BarComponent{
 		healthGraphic: healthGraphic,
 		healthText:    healthText,
 		weaponGraphic: weaponGraphic,
-		weaponText:    weaponText,
 		container:     container,
 	}
 

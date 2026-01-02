@@ -45,7 +45,6 @@ const (
 	SET_UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_ACTION = "SET_UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_ACTION"
 	SET_EVENT_RETRIEVAL_STARTED_NETWORKING_ACTION                = "SET_EVENT_RETRIEVAL_STARTED_NETWORKING_ACTION"
 	SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION       = "SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION"
-	SET_USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_ACTION       = "SET_USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_ACTION"
 	SET_CHESTS_RETRIEVAL_STARTED_NETWORKING_ACTION               = "SET_CHESTS_RETRIEVAL_STARTED_NETWORKING_ACTION"
 	SET_HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_ACTION         = "SET_HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_ACTION"
 )
@@ -116,6 +115,10 @@ const (
 	DIAGONAL_UP_RIGHT_POSITION_SESSION_ACTION   = "DIAGONAL_UP_RIGHT_POSITION_SESSION_ACTION"
 	DIAGONAL_DOWN_LEFT_POSITION_SESSION_ACTION  = "DIAGONAL_DOWN_LEFT_POSITION_SESSION_ACTION"
 	DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION = "DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION"
+	SET_RETRIEVED_CHESTS_SESSION_ACTION         = "SET_RETRIEVED_CHESTS_SESSION_ACTION"
+	SET_INVENTORY_OPENED_ACTION                 = "SET_INVENTORY_OPENED_ACTION"
+	SET_CHEST_OPENED_ACTION                     = "SET_CHEST_OPENED_ACTION"
+	SET_SELECTED_POSITION_ACTION                = "SET_SELECTED_POSITION_ACTION"
 )
 
 // Describes all the available state actions for collections reducer.
@@ -324,14 +327,6 @@ func NewSetUpdateUserMetadataPositionsStartedNetworking(value string) godux.Acti
 func NewSetUsersMetadataRetrievalStartedNetworking(value string) godux.Action {
 	return godux.Action{
 		Type:  SET_USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_ACTION,
-		Value: value,
-	}
-}
-
-// NewSetUserInventoryRetrievalStartedNetworking creates new set user inventory retrieval started networking action.
-func NewSetUserInventoryRetrievalStartedNetworking(value string) godux.Action {
-	return godux.Action{
-		Type:  SET_USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_ACTION,
 		Value: value,
 	}
 }
@@ -632,6 +627,38 @@ func NewDiagonalDownLeftPositionSession() godux.Action {
 func NewDiagonalDownRightPositionSession() godux.Action {
 	return godux.Action{
 		Type: DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION,
+	}
+}
+
+// NewSetRetrievedChestsSession creates new retrieved chests session action.
+func NewSetRetrievedChestsSession(value []dto.RetrievedChests) godux.Action {
+	return godux.Action{
+		Type:  SET_RETRIEVED_CHESTS_SESSION_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetInventoryOpenedSession creates new inventory opened session action.
+func NewSetInventoryOpenedSession(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_INVENTORY_OPENED_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetChestOpenedSession creates new chest opened session action.
+func NewSetChestOpenedSession(value string) godux.Action {
+	return godux.Action{
+		Type:  SET_CHEST_OPENED_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetSelectedPositionSession creates new selected position  session action.
+func NewSetSelectedPositionSession(value *dto.SelectedObjectDetails) godux.Action {
+	return godux.Action{
+		Type:  SET_SELECTED_POSITION_ACTION,
+		Value: value,
 	}
 }
 

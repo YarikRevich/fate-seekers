@@ -54,8 +54,6 @@ func (s *Static) Draw(screen *ebiten.Image, selected bool, camera *kamera.Camera
 		s.opts.ColorM.Translate(intensity, intensity, intensity*0.5, 0)
 	}
 
-	s.opts.ColorM.Translate(100, 100, 100, 255)
-
 	camera.Draw(s.image, &s.opts, screen)
 }
 

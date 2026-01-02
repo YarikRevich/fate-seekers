@@ -8,9 +8,6 @@ import (
 
 // Describes all the available screen reducer store values.
 const (
-	ACTIVE_SCREEN_LOGO_VALUE  = "logo"
-	ACTIVE_SCREEN_INTRO_VALUE = "intro"
-
 	// Entry screen is expected to be used for initialization operations.
 	ACTIVE_SCREEN_ENTRY_VALUE = "entry"
 
@@ -35,7 +32,8 @@ const (
 
 // Describes all the available application reducer store values.
 const (
-	EXIT_APPLICATION_TRUE_VALUE = "true"
+	EXIT_APPLICATION_FALSE_VALUE = "false"
+	EXIT_APPLICATION_TRUE_VALUE  = "true"
 
 	LOADING_APPLICATION_EMPTY_VALUE = 0
 
@@ -98,9 +96,6 @@ const (
 
 	USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE  = "true"
 	USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE = "false"
-
-	USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE  = "true"
-	USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE = "false"
 
 	CHESTS_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE  = "true"
 	CHESTS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE = "false"
@@ -183,6 +178,12 @@ var (
 	STAGE_POSITION_SESSION_EMPTY_VALUE    dto.Position
 	PREVIOUS_POSITION_SESSION_EMPTY_VALUE dto.Position
 	RETRIEVED_USERS_METADATA_EMPTY_VALUE  dto.RetrievedUsersMetadataSessionSet = make(dto.RetrievedUsersMetadataSessionSet)
+	RETRIEVED_CHESTS_EMPTY_VALUE          dto.RetrievedChests
+	INVENTORY_OPENED_FALSE_VALUE                                     = "false"
+	INVENTORY_OPENED_TRUE_VALUE                                      = "true"
+	CHEST_OPENED_FALSE_VALUE                                         = "false"
+	CHEST_OPENED_TRUE_VALUE                                          = "true"
+	SELECTED_POSITION_EMPTY_VALUE         *dto.SelectedObjectDetails = nil
 )
 
 // Describes available collections reducer store values.

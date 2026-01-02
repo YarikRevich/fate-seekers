@@ -22,6 +22,37 @@ func ConvertGetUserSessionsResponseToRetrievedSessionsMetadata(
 	return output
 }
 
+// ConvertGetUserSessionsResponseToRetrievedSessionsMetadata converts provided metadatav1.GetSessionsResponse
+// instance to an array of dto.RetrievedSessionMetadata instances.
+func ConvertGetChestsResponseToRetrievedChests(
+	input *metadatav1.GetChestsResponse) []dto.RetrievedChests {
+	var output []dto.RetrievedChests
+
+	for _, chest := range input.GetChests() {
+		var chestItems []dto.RetrievedChestItems
+
+		for _, chestItem := range chest.GetChestItems() {
+			chestItems = append(chestItems, dto.RetrievedChestItems{
+				ID:     chestItem.GetChestItemId(),
+				Name:   chestItem.GetName(),
+				Active: chestItem.GetActive(),
+			})
+		}
+
+		output = append(output, dto.RetrievedChests{
+			SessionID: chest.GetSessionId(),
+			ID:        chest.GetChestId(),
+			Position: dto.Position{
+				X: chest.GetPosition().GetX(),
+				Y: chest.GetPosition().GetY(),
+			},
+			ChestItems: chestItems,
+		})
+	}
+
+	return output
+}
+
 // ConvertGetUserSessionsResponseToListEntries converts provided metadatav1.GetSessionsResponse instance
 // to an array of list entries used by UI component.
 func ConvertGetUserSessionsResponseToListEntries(

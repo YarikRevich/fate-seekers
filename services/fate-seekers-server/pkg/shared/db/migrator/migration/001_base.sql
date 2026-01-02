@@ -100,20 +100,6 @@ CREATE TABLE inventory (
     FOREIGN KEY (lobby_id) REFERENCES lobbies(id) ON DELETE CASCADE
 );
 
--- --
--- -- Name: idx_inventory_lobby_id; Type: INDEX; Schema: public; 
--- --
-
--- CREATE INDEX idx_inventory_lobby_id
--- ON inventory (lobby_id);
-
---
--- Name: idx_inventory_user_id_session_id; Type: INDEX; Schema: public; 
---
-
-CREATE UNIQUE INDEX idx_inventory_user_id_session_id
-ON inventory (user_id, session_id);
-
 --
 -- Name: messages; Type: TABLE; Schema: public; 
 --

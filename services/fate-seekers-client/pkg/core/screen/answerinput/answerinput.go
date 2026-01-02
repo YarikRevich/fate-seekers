@@ -125,16 +125,30 @@ func newAnswerInputScreen() screen.Screen {
 
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetAnswerInputQuestionUpdated(value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE))
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetActiveScreenAction(
+					value.ACTIVE_SCREEN_SESSION_VALUE))
 		} else {
 			notification.GetInstance().Push(
 				translation.GetInstance().GetTranslation("client.answerinput.failure"),
 				time.Second*2,
 				common.NotificationErrorTextColor)
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetSelectedPositionSession(nil))
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetActiveScreenAction(
+					value.ACTIVE_SCREEN_SESSION_VALUE))
 		}
 	})
 
 	answerinput.GetInstance().SetCloseCallback(func() {
 		shared.GetInstance().GetBlinkingScreenAnimation().Reset()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSelectedPositionSession(nil))
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))

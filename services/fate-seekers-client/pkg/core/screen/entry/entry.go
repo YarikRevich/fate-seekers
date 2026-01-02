@@ -11,11 +11,18 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/subtitles"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/value"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/storage/shared"
 	"github.com/ebitenui/ebitenui"
+	"github.com/google/uuid"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -40,6 +47,31 @@ type EntryScreen struct {
 }
 
 func (es *EntryScreen) HandleInput() error {
+	if store.GetRepositoryUUIDChecked() == value.UUID_CHECKED_REPOSITORY_FALSE_VALUE {
+		flag, ok, err := repository.GetFlagsRepository().GetByName(common.UUID_FLAG_NAME)
+		if err != nil {
+			logging.GetInstance().Fatal(err.Error())
+		}
+
+		if ok {
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetUUIDRepositoryAction(flag.Value))
+		} else {
+			uuidRaw := uuid.NewString()
+
+			err = repository.GetFlagsRepository().InsertOrUpdate(common.UUID_FLAG_NAME, uuidRaw)
+			if err != nil {
+				logging.GetInstance().Fatal(err.Error())
+			}
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetUUIDRepositoryAction(uuidRaw))
+		}
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetUUIDCheckedRepositoryAction(value.UUID_CHECKED_REPOSITORY_TRUE_VALUE))
+	}
+
 	if !es.transparentTransitionEffect.Done() {
 		if !es.transparentTransitionEffect.OnEnd() {
 			es.transparentTransitionEffect.Update()
@@ -50,21 +82,12 @@ func (es *EntryScreen) HandleInput() error {
 
 	shared.GetInstance().GetBackgroundAnimation().Update()
 
-	// select {
-	// case <-es.stubTimer.C:
-	// 	dispatcher.GetInstance().Dispatch(
-	// 		action.NewSetLoadingApplicationAction(value.LOADING_APPLICATION_FALSE_VALUE))
+	subtitles.GetInstance().Push(
+		translation.GetInstance().GetTranslation("client.entry.welcome"),
+		time.Second*3)
 
 	dispatcher.GetInstance().Dispatch(
 		action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
-
-	// 	subtitles.GetInstance().Push("О, лягушка! Так дивно...", time.Second*6)
-	// 	subtitles.GetInstance().Push("'У багатих свої причуди!'", time.Second*6)
-
-	// 	// notification.GetInstance().Push("Тестове повідомлення!", time.Second*6)
-	// 	// notification.GetInstance().Push("Друге повідомлення!", time.Second*6)
-	// default:
-	// }
 
 	es.ui.Update()
 

@@ -3,9 +3,9 @@ package loader
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"image"
 	"io/fs"
+	"math/rand"
 	"path/filepath"
 	"sync"
 
@@ -61,6 +61,16 @@ const (
 	MapTilemap = "tilemap/tilemap.tmx"
 )
 
+// Describes tileset image source file.
+const (
+	MapTileset = "tileset/tileset.png"
+)
+
+// Describes tileset standard chest for first map.
+const (
+	StandardChestFirstMap = 222
+)
+
 // Describes available tilemap properties
 const (
 	TilemapCollidableProperty         = "collidable"
@@ -103,9 +113,13 @@ const (
 
 	DefaultLaserGun = "default_laser_gun/default_laser_gun.png"
 
+	Fist = "fist/fist.png"
+
 	Pointer = "pointer/pointer.png"
 
-	OpenedStandardChest = "session/opened_standard_chest.png"
+	StandardHealthPack = "standard_health_pack/standard_health_pack.png"
+
+	LetterScroll = "letter_scroll/letter_scroll.png"
 )
 
 // Describes all the available shaders to be loaded.
@@ -121,6 +135,13 @@ const (
 // Describes all the available letters to be loaded.
 const (
 	LoneManLetter = "lone-man.json"
+)
+
+// Represents all the available letters used for random selection.
+var (
+	AvailableLetters = []string{
+		LoneManLetter,
+	}
 )
 
 // Describes all the available client templates to be loaded.
@@ -245,6 +266,37 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 	return file
 }
 
+// GetMapTilesetStandardChest retrieves map tileset standard chest.
+func (l *Loader) GetMapTilesetStandardChest(selectedMap string) *ebiten.Image {
+	parsedMap := l.GetMap(selectedMap)
+
+	tilesetColumns := parsedMap.Tilesets[0].Columns
+
+	if tilesetColumns == 0 {
+		tilesetColumns = parsedMap.Tilesets[0].Image.Width / (parsedMap.Tilesets[0].TileWidth + parsedMap.Tilesets[0].Spacing)
+	}
+
+	var x, y int
+
+	switch selectedMap {
+	case FirstMap:
+		x = StandardChestFirstMap % tilesetColumns
+		y = StandardChestFirstMap / tilesetColumns
+	}
+
+	xOffset := int(x)*parsedMap.Tilesets[0].Spacing + parsedMap.Tilesets[0].Margin
+	yOffset := int(y)*parsedMap.Tilesets[0].Spacing + parsedMap.Tilesets[0].Margin
+
+	rect := image.Rect(x*parsedMap.Tilesets[0].TileWidth+xOffset,
+		y*parsedMap.Tilesets[0].TileHeight+yOffset,
+		(x+1)*parsedMap.Tilesets[0].TileWidth+xOffset,
+		(y+1)*parsedMap.Tilesets[0].TileHeight+yOffset)
+
+	return getMapTileImage(
+		filepath.Join(common.ClientBasePath, MapsPath, FirstMap, MapTileset),
+		rect)
+}
+
 // GetMapLayerTiles retrieves map layer tiles for the provided layer.
 func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) (
 	*btree.Map[float64, []*dto.ProcessedTile],
@@ -279,6 +331,8 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 			tileImage, ok := tiles.Load(layer.Tiles[i].Tileset.FirstGID + layer.Tiles[i].ID)
 			if !ok {
 				for k := uint32(0); k < uint32(layer.Tiles[i].Tileset.TileCount); k++ {
+					// TODO: use this approach to retrieve box image.
+
 					tiles.Store(k+layer.Tiles[i].Tileset.FirstGID, getMapTileImage(
 						layer.Tiles[i].Tileset.GetFileFullPath(layer.Tiles[i].Tileset.Image.Source),
 						layer.Tiles[i].Tileset.GetTileRect(uint32(k))))
@@ -335,8 +389,6 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 
 					chestProperty := tile.Properties.GetBool(TilemapChestLocationProperty)
 					if chestProperty {
-						fmt.Println(chestProperty, position)
-
 						chests = append(chests, position)
 					}
 
@@ -687,6 +739,13 @@ func (l *Loader) GetAnimation(name string, shared bool) *asebiten.Animation {
 	}
 
 	return animation
+}
+
+// GetRandomLetter performs random letter selection.
+func GetRandomLetter(seed uint64) string {
+	rand.Seed(int64(seed))
+
+	return AvailableLetters[rand.Intn(len(AvailableLetters))]
 }
 
 // newLoader initializes Loader.

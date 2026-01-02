@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/logging"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring/manager"
 	monitoringmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/monitoring/manager"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/storage/shared"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/effect/transition"
@@ -16,7 +18,9 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/builder"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/component/monitoring"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/ui/manager/translation"
 	"github.com/ebitenui/ebitenui"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -89,7 +93,21 @@ func newMonitoringScreen() screen.Screen {
 		ui: builder.Build(
 			monitoring.NewMonitoringComponent(
 				func() {
+					manager.GetInstance().Deploy(func(err error) {
+						if err != nil {
+							logging.GetInstance().Error(
+								common.ComposeMessage(
+									translation.GetInstance().GetTranslation("server.networking.start-failure"),
+									err.Error()))
 
+							gracefulShutdown <- true
+
+							return
+						}
+
+						logging.GetInstance().Info(
+							translation.GetInstance().GetTranslation("server.monitoring.start.monitoring.title"))
+					})
 					// if store.GetEntryHandshakeStartedNetworking() == value.ENTRY_HANDSHAKE_STARTED_NETWORKING_FALSE_VALUE {
 					// 	dispatcher.GetInstance().Dispatch(
 					// 		action.NewIncrementLoadingApplicationAction())
@@ -109,6 +127,8 @@ func newMonitoringScreen() screen.Screen {
 					// 		}
 					// 	})
 					// }
+
+					// TODO: do state updates, when
 				},
 				func() {
 

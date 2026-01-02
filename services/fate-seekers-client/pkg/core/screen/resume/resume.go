@@ -133,8 +133,8 @@ func newResumeScreen() screen.Screen {
 								action.NewSetStateResetApplicationAction(
 									value.STATE_RESET_APPLICATION_FALSE_VALUE))
 
-						dispatcher.GetInstance().Dispatch(
-							action.NewSetResetSession(value.RESET_SESSION_TRUE_VALUE))
+						// dispatcher.GetInstance().Dispatch(
+						// 	action.NewSetResetSession(value.RESET_SESSION_TRUE_VALUE))
 
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))

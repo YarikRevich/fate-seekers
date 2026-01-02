@@ -488,3 +488,97 @@ func PerformLeaveLobby(sessionID int64, callback func(err error)) {
 		callback(nil)
 	}()
 }
+
+// PerformTakeChestItem performs chest item take request.
+func PerformTakeChestItem(sessionID, lobbyID, chestID, chestItemID int64, callback func(err error)) {
+	go func() {
+		_, err := connector.
+			GetInstance().
+			GetClient().
+			TakeChestItem(
+				context.Background(),
+				&metadatav1.TakeChestItemRequest{
+					SessionId:     sessionID,
+					LobbyId:       lobbyID,
+					GenerationId:  chestID,
+					AssociationId: chestItemID,
+					Issuer:        store.GetRepositoryUUID(),
+				})
+
+		if err != nil {
+			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
+
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+				callback(common.ErrConnectionLost)
+
+				return
+			}
+
+			errRaw, ok := status.FromError(err)
+			if !ok {
+				callback(err)
+
+				return
+			}
+
+			callback(errors.New(errRaw.Message()))
+
+			return
+		}
+
+		callback(nil)
+	}()
+}
+
+// PerformOpenHealthPack performs health pack open operation request.
+func PerformOpenHealthPack(sessionID, associationID int64, callback func(err error)) {
+	go func() {
+		_, err := connector.
+			GetInstance().
+			GetClient().
+			OpenHealthPack(
+				context.Background(),
+				&metadatav1.OpenHealthPackRequest{
+					SessionId:     sessionID,
+					AssociationId: associationID,
+					Issuer:        store.GetRepositoryUUID(),
+				})
+
+		if err != nil {
+			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
+
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+				callback(common.ErrConnectionLost)
+
+				return
+			}
+
+			errRaw, ok := status.FromError(err)
+			if !ok {
+				callback(err)
+
+				return
+			}
+
+			callback(errors.New(errRaw.Message()))
+
+			return
+		}
+
+		callback(nil)
+	}()
+}

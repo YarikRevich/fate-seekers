@@ -214,6 +214,7 @@ type LobbiesRepositoryInsertOrUpdateRequest struct {
 // InventoryRepositoryInsertOrUpdateRequest represents inventory repository entity update request.
 type InventoryRepositoryInsertOrUpdateRequest struct {
 	UserID    int64
+	LobbyID   int64
 	SessionID int64
 	Name      string
 }
@@ -239,10 +240,12 @@ type CacheMetadataEntity struct {
 	Eliminated     bool
 	Host           bool
 	Ammo           int
+	Inventory      []CacheInventoryEntity
 }
 
 // CacheInventoryEntity represents cache inventory entity used by global networking cache.
 type CacheInventoryEntity struct {
+	ID   int64
 	Name string
 }
 

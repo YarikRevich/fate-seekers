@@ -604,7 +604,6 @@ func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) ([]*entity.LobbyEntity
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
 		Preload((&entity.UserEntity{}).TableView()).
 		Preload((&entity.SessionEntity{}).TableView()).
-		// Preload((&entity.InventoryEntity{}).TableView()).
 		Where("user_id = ?", userID).
 		Find(&result).Error
 
@@ -724,6 +723,7 @@ func (w *inventoryRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.
 
 	err := instance.Create(&entity.InventoryEntity{
 		UserID:    request.UserID,
+		LobbyID:   request.LobbyID,
 		SessionID: request.SessionID,
 		Name:      request.Name,
 	}).Error

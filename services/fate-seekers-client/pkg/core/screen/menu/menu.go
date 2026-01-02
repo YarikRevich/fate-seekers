@@ -11,8 +11,12 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/handler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/ping"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/collision"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/renderer"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
+	selected "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/selecter"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/sounder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/menu"
@@ -77,6 +81,14 @@ func (ms *MenuScreen) HandleInput() error {
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetStartSessionTravel(value.START_SESSION_TRAVEL_FALSE_VALUE))
+
+		selected.GetInstance().Clean()
+
+		collision.GetInstance().Clean()
+
+		sounder.GetInstance().Clean()
+
+		renderer.GetInstance().Clean()
 
 		prompt.GetInstance().ShowSubmitButton()
 	}

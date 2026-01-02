@@ -161,7 +161,12 @@ func (s *Sounder) Update(camera *kamera.Camera) {
 		for _, polygon := range s.collisionPolygons {
 			if polygon.IsIntersecting(s.mainTrackableObject) {
 				if !sound.GetInstance().GetSoundSounderMainFxManager().IsFXPlaying() {
-					switch s.soundableTileObjects[polygon.ID()].Name {
+					value, ok := s.soundableTileObjects[polygon.ID()]
+					if !ok {
+						continue
+					}
+
+					switch value.Name {
 					case loader.TilemapSoundRockValue:
 						sound.GetInstance().GetSoundSounderMainFxManager().PushWithHandbrake(loader.RockFXSound)
 					}

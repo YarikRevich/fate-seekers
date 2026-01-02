@@ -31,10 +31,10 @@ settings:
   # Represents section used for sound settings description.
   sound:
     # Represents music level property.
-    music: 0
+    music: 5
 
     # Represents FX level property.
-    fx: 0
+    fx: 50
 
 # Represents sector used for internal operation properties. 
 operation:

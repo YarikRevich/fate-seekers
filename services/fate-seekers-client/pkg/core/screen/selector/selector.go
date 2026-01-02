@@ -136,11 +136,15 @@ func newSelectorScreen() screen.Screen {
 					func(value dto.RetrievedSessionMetadata) bool {
 						return value.Name == sessionName
 					}) {
-					var sessionID int64
+					var (
+						sessionID   int64
+						sessionSeed uint64
+					)
 
 					for _, session := range store.GetRetrievedSessionsMetadata() {
 						if session.Name == sessionName {
 							sessionID = session.SessionID
+							sessionSeed = session.Seed
 
 							break
 						}
@@ -150,6 +154,7 @@ func newSelectorScreen() screen.Screen {
 						action.NewSetSelectedSessionMetadata(&dto.SelectedSessionMetadata{
 							ID:   sessionID,
 							Name: sessionName,
+							Seed: sessionSeed,
 						}))
 
 					handler.PerformCreateLobby(sessionID, func(err error) {
@@ -232,14 +237,16 @@ func newSelectorScreen() screen.Screen {
 							converter.ConvertGetUserSessionsResponseToListEntries(response))
 
 						var (
-							found     bool
-							sessionID int64
+							found       bool
+							sessionID   int64
+							sessionSeed uint64
 						)
 
 						for _, session := range convertedGetSessionsResponse {
 							if session.Name == sessionName {
 								found = true
 								sessionID = session.SessionID
+								sessionSeed = session.Seed
 
 								break
 							}
@@ -250,6 +257,7 @@ func newSelectorScreen() screen.Screen {
 								action.NewSetSelectedSessionMetadata(&dto.SelectedSessionMetadata{
 									ID:   sessionID,
 									Name: sessionName,
+									Seed: sessionSeed,
 								}))
 
 							handler.PerformCreateLobby(sessionID, func(err error) {
@@ -334,6 +342,7 @@ func newSelectorScreen() screen.Screen {
 									action.NewSetSelectedSessionMetadata(&dto.SelectedSessionMetadata{
 										ID:   response.Session.GetSessionId(),
 										Name: response.Session.GetName(),
+										Seed: response.Session.GetSeed(),
 									}))
 
 								handler.PerformCreateLobby(response.GetSession().GetSessionId(), func(err error) {

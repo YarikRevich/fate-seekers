@@ -123,40 +123,23 @@ func (*AssociationsEntity) TableView() string {
 	return "AssociationsEntity"
 }
 
-// BeforeCreate performs associations cache entity eviction before generations entity create.
-func (a *AssociationsEntity) BeforeCreate(tx *gorm.DB) error {
-	if err := tx.
-		Model(&SessionEntity{}).
-		Where("id = ?", a.SessionID).
-		First(&a.SessionEntity).Error; err != nil {
-		return err
-	}
-
-	cache.
-		GetInstance().
-		EvictGeneratedChests(a.SessionEntity.Name)
-
-	return nil
-}
-
 // LobbyEntity represents lobbies entity.
 type LobbyEntity struct {
-	ID             int64             `gorm:"column:id;primaryKey;auto_increment;not null"`
-	UserID         int64             `gorm:"column:user_id;not null"`
-	SessionID      int64             `gorm:"column:session_id;not null"`
-	Skin           int64             `gorm:"column:skin;not null"`
-	Health         int64             `gorm:"column:health;not null;default:100"`
-	Active         bool              `gorm:"column:active;not null"`
-	Host           bool              `gorm:"column:host;not null"`
-	Eliminated     bool              `gorm:"column:eliminated;not null"`
-	PositionX      float64           `gorm:"column:position_x;not null"`
-	PositionY      float64           `gorm:"column:position_y;not null"`
-	PositionStatic bool              `gorm:"column:position_static;not null"`
-	Ammo           int64             `gorm:"column:ammo;not null"`
-	CreatedAt      time.Time         `gorm:"column:created_at;autoCreateTime"`
-	UserEntity     UserEntity        `gorm:"foreignKey:UserID;references:ID"`
-	SessionEntity  SessionEntity     `gorm:"foreignKey:SessionID;references:ID"`
-	Inventory      []InventoryEntity `gorm:"foreignKey:LobbyID"`
+	ID             int64         `gorm:"column:id;primaryKey;auto_increment;not null"`
+	UserID         int64         `gorm:"column:user_id;not null"`
+	SessionID      int64         `gorm:"column:session_id;not null"`
+	Skin           int64         `gorm:"column:skin;not null"`
+	Health         int64         `gorm:"column:health;not null;default:100"`
+	Active         bool          `gorm:"column:active;not null"`
+	Host           bool          `gorm:"column:host;not null"`
+	Eliminated     bool          `gorm:"column:eliminated;not null"`
+	PositionX      float64       `gorm:"column:position_x;not null"`
+	PositionY      float64       `gorm:"column:position_y;not null"`
+	PositionStatic bool          `gorm:"column:position_static;not null"`
+	Ammo           int64         `gorm:"column:ammo;not null"`
+	CreatedAt      time.Time     `gorm:"column:created_at;autoCreateTime"`
+	UserEntity     UserEntity    `gorm:"foreignKey:UserID;references:ID"`
+	SessionEntity  SessionEntity `gorm:"foreignKey:SessionID;references:ID"`
 }
 
 // TableName retrieves name of database table.

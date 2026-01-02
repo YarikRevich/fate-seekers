@@ -190,13 +190,6 @@ func GetUsersMetadataRetrievalStartedNetworking() string {
 	return instance.GetState(networking.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
 }
 
-// GetUserInventoryRetrievalStartedNetworking retrieves user inventory retrieval started networking state value.
-func GetUserInventoryRetrievalStartedNetworking() string {
-	instance := GetInstance()
-
-	return instance.GetState(networking.USERS_METADATA_RETRIEVAL_STARTED_NETWORKING_STATE).(string)
-}
-
 // GetChestsRetrievalStartedNetworking retrieves chests retrieval started networking state value.
 func GetChestsRetrievalStartedNetworking() string {
 	instance := GetInstance()
@@ -370,6 +363,34 @@ func GetPreviousPositionSession() dto.Position {
 	instance := GetInstance()
 
 	return instance.GetState(session.PREVIOUS_POSITION_SESSION_STATE).(dto.Position)
+}
+
+// GetRetrievedChestsSession retrieves retrieved chests session state value.
+func GetRetrievedChestsSession() []dto.RetrievedChests {
+	instance := GetInstance()
+
+	return instance.GetState(session.RETRIEVED_CHESTS_SESSION_STATE).([]dto.RetrievedChests)
+}
+
+// GetInventoryOpenedSession retrieves inventory opened session state value.
+func GetInventoryOpenedSession() string {
+	instance := GetInstance()
+
+	return instance.GetState(session.INVENTORY_OPENED_STATE).(string)
+}
+
+// GetChestOpenedSession retrieves chest opened session state value.
+func GetChestOpenedSession() string {
+	instance := GetInstance()
+
+	return instance.GetState(session.CHEST_OPENED_STATE).(string)
+}
+
+// GetSelectedPositionSession retrieves selected position session state value.
+func GetSelectedPositionSession() *dto.SelectedObjectDetails {
+	instance := GetInstance()
+
+	return instance.GetState(session.SELECTED_POSITION_STATE).(*dto.SelectedObjectDetails)
 }
 
 // RetrievedUsersMetadataSessionSyncHelper represents retrieved users metadata session sync helper.

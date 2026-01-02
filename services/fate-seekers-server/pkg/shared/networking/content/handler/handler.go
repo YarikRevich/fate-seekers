@@ -85,7 +85,18 @@ func (h *Handler) Process(key string, value []byte) error {
 				return ErrLobbyDoesNotExist
 			}
 
-			newLobbies := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies)
+			inventory, _, err := repository.
+				GetInventoryRepository().
+				GetBySessionIDAndUserID(message.GetSessionId(), userID)
+			if err != nil {
+				cache.
+					GetInstance().
+					CommitMetadataTransaction()
+
+				return err
+			}
+
+			newLobbies := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies, inventory)
 
 			for _, newLobby := range newLobbies {
 				if newLobby.LobbyID == message.GetLobbyId() {
@@ -188,7 +199,18 @@ func (h *Handler) Process(key string, value []byte) error {
 				return ErrLobbyDoesNotExist
 			}
 
-			newLobbies := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies)
+			inventory, _, err := repository.
+				GetInventoryRepository().
+				GetBySessionIDAndUserID(message.GetSessionId(), userID)
+			if err != nil {
+				cache.
+					GetInstance().
+					CommitMetadataTransaction()
+
+				return err
+			}
+
+			newLobbies := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies, inventory)
 
 			for _, newLobby := range newLobbies {
 				if newLobby.LobbyID == message.GetLobbyId() {
@@ -222,8 +244,8 @@ func (h *Handler) Process(key string, value []byte) error {
 		cache.
 			GetInstance().
 			CommitMetadataTransaction()
-	case contentv1.OPEN_GENERATED_CHEST:
-	case contentv1.OPEN_GENERATED_HEALTH_PACK:
+	case contentv1.HIT_PLAYER_WITH_FIST_REQUEST:
+
 	case contentv1.SEND_CHAT_MESSAGE:
 	}
 

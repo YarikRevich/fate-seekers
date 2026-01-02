@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -47,19 +46,6 @@ type NetworkingCache struct {
 
 	// Represents mutex used for metadata related transactions.
 	metadataMutex sync.Mutex
-
-	// Represents inventory cache instance.
-	inventory *lru.Cache[string, []dto.CacheInventoryEntity]
-
-	// Represents mutex used for inventory related transactions.
-	inventoryMutex sync.Mutex
-
-	// Represents expirable messages cache, which contains offset for the message table.
-	// If user stops request messages, all the messages would be retrieved.
-	messages *lru.Cache[string, int]
-
-	// Represents mutex used for messages related transactions.
-	messagesMutex sync.Mutex
 
 	// Represents users cache instance.
 	users *lru.Cache[string, int64]
@@ -237,56 +223,6 @@ func (nc *NetworkingCache) EvictMetadata(key string) {
 	nc.metadata.Remove(key)
 }
 
-// BeginInventoryTransaction begins inventory cache instance transaction.
-func (nc *NetworkingCache) BeginInventoryTransaction() {
-	nc.inventoryMutex.Lock()
-}
-
-// CommitInventoryTransaction commits inventory cache instance transaction.
-func (nc *NetworkingCache) CommitInventoryTransaction() {
-	nc.inventoryMutex.Unlock()
-}
-
-// AddGeneratedChests adds generated chests cache instance.
-func (nc *NetworkingCache) AddInventory(sessionName, userName string, value []dto.CacheInventoryEntity) {
-	nc.inventory.Add(fmt.Sprintf("%s:%s", sessionName, userName), value)
-}
-
-// GetInventory retrieves inventory cache instance by the provided key.
-func (nc *NetworkingCache) GetInventory(sessionName, userName string) ([]dto.CacheInventoryEntity, bool) {
-	return nc.inventory.Get(fmt.Sprintf("%s:%s", sessionName, userName))
-}
-
-// EvictGeneratedChests evicts generated chests cache for the provided key.
-func (nc *NetworkingCache) EvictInventory(sessionName, userName string) {
-	nc.inventory.Remove(fmt.Sprintf("%s:%s", sessionName, userName))
-}
-
-// BeginMessagesTransaction begins messages cache instance transaction.
-func (nc *NetworkingCache) BeginMessagesTransaction() {
-	nc.messagesMutex.Lock()
-}
-
-// CommitMessagesTransaction commits messages cache instance transaction.
-func (nc *NetworkingCache) CommitMessagesTransaction() {
-	nc.messagesMutex.Unlock()
-}
-
-// AddMessage adds messages cache instance.
-func (nc *NetworkingCache) AddMessages(key string, value int) {
-	nc.messages.Add(key, value)
-}
-
-// GetMessage retrieves messages cache instance by the provided key.
-func (nc *NetworkingCache) GetMessage(key string) (int, bool) {
-	return nc.messages.Get(key)
-}
-
-// EvictMessages evicts messages cache for the provided key.
-func (nc *NetworkingCache) EvictMessages(key string) {
-	nc.messages.Remove(key)
-}
-
 // AddUser adds users cache instance with the provided key and value.
 func (nc *NetworkingCache) AddUser(key string, value int64) {
 	nc.users.Add(key, value)
@@ -376,17 +312,6 @@ func newNetworkingCache() *NetworkingCache {
 		logging.GetInstance().Fatal(err.Error())
 	}
 
-	inventory, err := lru.New[string, []dto.CacheInventoryEntity](
-		config.GetOperationMaxSessionsAmount() * config.MAX_SESSION_USERS)
-	if err != nil {
-		logging.GetInstance().Fatal(err.Error())
-	}
-
-	messages, err := lru.New[string, int](config.GetOperationMaxSessionsAmount())
-	if err != nil {
-		logging.GetInstance().Fatal(err.Error())
-	}
-
 	users, err := lru.New[string, int64](config.GetOperationMaxSessionsAmount() * config.MAX_SESSION_USERS)
 	if err != nil {
 		logging.GetInstance().Fatal(err.Error())
@@ -410,8 +335,6 @@ func newNetworkingCache() *NetworkingCache {
 		lobbySets:            lobbySets,
 		userActivity:         userActivity,
 		metadata:             metadata,
-		inventory:            inventory,
-		messages:             messages,
 		users:                users,
 		generatedChests:      generatedChests,
 		generatedHealthPacks: generatedHealthPacks,

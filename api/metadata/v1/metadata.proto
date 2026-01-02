@@ -52,8 +52,8 @@ service MetadataService {
     // GetUsersMetadata performs users metadata retrieval request by the configured user.
     rpc GetUsersMetadata(GetUsersMetadataRequest) returns (stream GetUsersMetadataResponse) {};
 
-    // GetUserInventory performs user inventory retrieval request by the configured user.
-    rpc GetUserInventory(GetUserInventoryRequest) returns (stream GetUserInventoryResponse) {};
+    // DropInventoryItem performs inventory item drop request by the configured user.
+    rpc DropInventoryItem(DropInventoryItemRequest) returns (DropInventoryItemResponse) {};
 
     // TakeChestItem performs chest item take operaiton for the selected chest by the configured user.
     rpc TakeChestItem(TakeChestItemRequest) returns (TakeChestItemResponse) {};
@@ -72,15 +72,6 @@ service MetadataService {
 
     // GetEvents performs weather events retrieval for the selected session by the configured user.
     rpc GetEvents(GetEventsRequest) returns (stream GetEventsResponse) {};
-
-    // GetMap performs map retrieval for the selected session by the configured user.
-    rpc GetMap(GetMapRequest) returns (stream GetMapResponse) {};
-    
-    // GetChatMessages performs chat messages retrieval for the selected session by the configured user.
-    rpc GetChatMessages(GetChatMessagesRequest) returns (stream GetChatMessagesResponse) {};
-
-    // CreateChatMessage performs chat message creation for the selected session by the configured user.
-    rpc CreateChatMessage(CreateChatMessageRequest) returns (CreateChatMessageResponse) {};
 }
 
 // PingConnectionRequest represents  ping connection request message.
@@ -243,6 +234,12 @@ message GetUsersMetadataRequest {
     string issuer = 2 [(buf.validate.field).string.uuid = true];
 };
 
+// Inventory represents inventory user metadata message.
+message Inventory {
+    int64 inventory_id = 1;
+    string name = 2;
+};
+
 // UserMetadata represents common user metadata message.
 message UserMetadata {
     string issuer = 1 [(buf.validate.field).string.uuid = true];
@@ -254,6 +251,8 @@ message UserMetadata {
 
     // Represents current animation state.
     bool static = 7;
+
+    repeated Inventory inventory = 8;
 };
 
 // GetUsersMetadataResponse represents users metadata retrieval response message.
@@ -261,21 +260,15 @@ message GetUsersMetadataResponse {
     repeated UserMetadata user_metadata = 1;
 };
 
-// GetUserInventoryRequest represents user inventory retrieval response message.
-message GetUserInventoryRequest {
+// DropInventoryItemRequest represents inventory item drop request message.
+message DropInventoryItemRequest {
     string issuer = 1 [(buf.validate.field).string.uuid = true];
-    int64 session_id = 2;
+    int64 association_id = 2;
 };
 
-// UserInventoryItem represents user inventory item message.
-message UserInventoryItem {
-    string name = 1;
+// DropInventoryItemResponse represents inventory item drop response message.
+message DropInventoryItemResponse {  
 };
-
-// GetUserInventoryResponse represents user inventory response message
-message GetUserInventoryResponse {
-    repeated UserInventoryItem user_inventory_items = 1;
-};  
 
 // Position represents common position message.
 message Position {
@@ -286,9 +279,10 @@ message Position {
 // TakeChestItemRequest represents take chest item operation request.
 message TakeChestItemRequest {
     int64 session_id = 1;
-    int64 generation_id = 2;
-    int64 association_id = 3;
-    string issuer = 4 [(buf.validate.field).string.uuid = true];
+    int64 lobby_id = 2;
+    int64 generation_id = 3;
+    int64 association_id = 4;
+    string issuer = 5 [(buf.validate.field).string.uuid = true];
 };
 
 // TakeChestItemResponse represents take chest item opereation response.
@@ -317,15 +311,17 @@ message GetChestsRequest {
 message ChestItem {
     int64 chest_item_id = 1;
     string name = 2;
+    bool active = 3;
 };
 
 // Chest represents chest message.
 message Chest {
-    int64 chest_id = 1;
-    Position position = 2;
-    bool active = 3;
-    string instance = 4;
-    repeated ChestItem chest_items = 5;
+    int64 session_id = 1;
+    int64 chest_id = 2;
+    Position position = 3;
+    bool active = 4;
+    string instance = 5;
+    repeated ChestItem chest_items = 6;
 };
 
 // GetChestsResponse represents chests retrieval response streaming message.
@@ -336,7 +332,7 @@ message GetChestsResponse {
 // OpenHealthPackRequest represents health pack open request.
 message OpenHealthPackRequest {
     int64 session_id = 1;
-    int64 generation_id = 2;
+    int64 association_id = 2;
     string issuer = 3 [(buf.validate.field).string.uuid = true];
 };
 
@@ -372,42 +368,4 @@ message GetEventsRequest {
 // GetEventsResponse represents event retrieval response message.
 message GetEventsResponse {
     string name = 1;
-};
-
-// GetMapRequest represents map retrieval request message.
-message GetMapRequest {
-    int64 session_id = 1;
-};
-
-// GetMapResponse represents map retrieval response streaming message.
-message GetMapResponse {
-    repeated Position positions = 1;
-};
-
-// GetChatMessagesRequest represents chat messages retrieval request message.
-message GetChatMessagesRequest {
-    int64 session_id = 1;
-    uint64 offset = 2;
-};
-
-// ChatMessage represents common chat retrieval message.
-message ChatMessage {
-    string content = 1;
-    string issuer = 2 [(buf.validate.field).string.uuid = true];
-    google.protobuf.Timestamp timestamp = 3;
-};
-
-// GetChatMessagesResponse represents chat messages retrieval response streaming message.
-message GetChatMessagesResponse {
-    repeated ChatMessage messages = 1;
-};
-
-// CreateChatMessageRequest represents chat message creation request message.
-message CreateChatMessageRequest {
-    int64 session_id = 1;
-    uint64 offset = 2;
-};
-
-// CreateChatMessageResponse represents chat message creation request message.
-message CreateChatMessageResponse {
 };

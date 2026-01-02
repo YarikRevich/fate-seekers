@@ -25,19 +25,16 @@
  <tile id="44">
   <properties>
    <property name="collidable" type="bool" value="true"/>
-   <property name="selectable" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="222">
   <properties>
    <property name="collidable" type="bool" value="true"/>
-   <property name="selectable" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="287">
   <properties>
    <property name="collidable" type="bool" value="true"/>
-   <property name="selectable" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="294">
@@ -48,7 +45,6 @@
  <tile id="292">
   <properties>
    <property name="collidable" type="bool" value="true"/>
-   <property name="selectable" type="bool" value="true"/>
   </properties>
  </tile>
  <tile id="140">

@@ -16,6 +16,10 @@ const (
 	STAGE_POSITION_SESSION_STATE           = "stage_position"
 	PREVIOUS_POSITION_SESSION_STATE        = "previous_position"
 	RETRIEVED_USERS_METADATA_SESSION_STATE = "retrieved_users_metadata"
+	RETRIEVED_CHESTS_SESSION_STATE         = "retrieved_chests"
+	INVENTORY_OPENED_STATE                 = "inventory_opened"
+	CHEST_OPENED_STATE                     = "chest_opened"
+	SELECTED_POSITION_STATE                = "selected_position"
 )
 
 // SessionStateReducer represents reducer used for session state management.
@@ -31,6 +35,10 @@ func (ssr *SessionStateReducer) Init() {
 	ssr.store.SetState(STAGE_POSITION_SESSION_STATE, value.STAGE_POSITION_SESSION_EMPTY_VALUE)
 	ssr.store.SetState(PREVIOUS_POSITION_SESSION_STATE, value.POSITION_SESSION_EMPTY_VALUE)
 	ssr.store.SetState(RETRIEVED_USERS_METADATA_SESSION_STATE, value.RETRIEVED_USERS_METADATA_EMPTY_VALUE)
+	ssr.store.SetState(RETRIEVED_CHESTS_SESSION_STATE, value.RETRIEVED_CHESTS_EMPTY_VALUE)
+	ssr.store.SetState(INVENTORY_OPENED_STATE, value.INVENTORY_OPENED_FALSE_VALUE)
+	ssr.store.SetState(CHEST_OPENED_STATE, value.CHEST_OPENED_FALSE_VALUE)
+	ssr.store.SetState(SELECTED_POSITION_STATE, value.SELECTED_POSITION_EMPTY_VALUE)
 }
 
 func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interface{} {
@@ -163,6 +171,23 @@ func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interfac
 
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{Key: STAGE_POSITION_SESSION_STATE, Value: valueRaw})
+
+		case action.SET_RETRIEVED_CHESTS_SESSION_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: RETRIEVED_CHESTS_SESSION_STATE, Value: value.Value})
+
+		case action.SET_INVENTORY_OPENED_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: INVENTORY_OPENED_STATE, Value: value.Value})
+
+		case action.SET_CHEST_OPENED_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: CHEST_OPENED_STATE, Value: value.Value})
+
+		case action.SET_SELECTED_POSITION_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{Key: SELECTED_POSITION_STATE, Value: value.Value})
 
 		default:
 			return nil
