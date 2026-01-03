@@ -29,6 +29,7 @@ type InventoryComponent struct {
 	elements *widget.Container
 }
 
+// AddElements adds new elements to inventory component.
 func (ic *InventoryComponent) AddElements(elements []dto.InventoryElement) {
 	for _, element := range elements {
 		var graphic *widget.Graphic
@@ -58,14 +59,17 @@ func (ic *InventoryComponent) AddElements(elements []dto.InventoryElement) {
 	}
 }
 
+// CleanElements removes all the elements.
 func (ic *InventoryComponent) CleanElements() {
 	ic.elements.RemoveChildren()
 }
 
+// Show shows inventory component.
 func (ic *InventoryComponent) Show() {
 	ic.container.GetWidget().Visibility = widget.Visibility_Show
 }
 
+// Hide hides inventory component.
 func (ic *InventoryComponent) Hide() {
 	ic.container.GetWidget().Visibility = widget.Visibility_Hide
 }

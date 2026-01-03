@@ -1,8 +1,8 @@
 {
     "title": "Last Letter",
-    "text": "That's the only thing left from her",
+    "text": "...",
     "attachment": {
         "type": "image",
-        "location": "letter/flowers.jpg"
+        "location": "letter/flowers.png"
     }
 }

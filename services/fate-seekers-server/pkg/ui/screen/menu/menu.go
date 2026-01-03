@@ -192,13 +192,6 @@ func newMenuScreen() screen.Screen {
 		}
 	})
 
-	menu.GetInstance().SetMonitoringCallback(func() {
-		transparentTransitionEffect.Reset()
-
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MONITORING_VALUE))
-	})
-
 	menu.GetInstance().SetSettingsCallback(func() {
 		transparentTransitionEffect.Reset()
 

@@ -203,9 +203,13 @@ const (
 	AmbientMusicSound   = "music/ambient/ambient.mp3"
 	EnergetykMusicSound = "music/energetyk/energetyk.mp3"
 
-	ButtonFXSound    = "fx/button/button.ogg"
-	ToxicRainFXSound = "fx/toxicrain/toxicrain.ogg"
-	RockFXSound      = "fx/rock/rock.ogg"
+	ButtonFXSound                 = "fx/button/button.ogg"
+	ToxicRainFXSound              = "fx/toxicrain/toxicrain.ogg"
+	RockFXSound                   = "fx/rock/rock.ogg"
+	FistFXSound                   = "fx/fist/fist.ogg"
+	ChestFXSound                  = "fx/chest/chest.ogg"
+	LetterScrollActivationFxSound = "fx/letter_scroll_activation/letter_scroll_activation.ogg"
+	HealthPackActivationFxSound   = "fx/health_pack_activation/health_pack_activation.ogg"
 )
 
 // Decsribes all the embedded files specific paths.
@@ -749,9 +753,9 @@ func (l *Loader) GetAnimation(name string, shared bool) *asebiten.Animation {
 
 // GetRandomLetter performs random letter selection.
 func GetRandomLetter(seed uint64) string {
-	rand.Seed(int64(seed))
+	source := rand.New(rand.NewSource(int64(seed)))
 
-	return AvailableLetters[rand.Intn(len(AvailableLetters))]
+	return AvailableLetters[source.Intn(len(AvailableLetters))]
 }
 
 // newLoader initializes Loader.

@@ -12,6 +12,16 @@ const (
 	MAX_INVENTORY_CAPACITY = 8
 )
 
+// Describes all the settings used for attack distance.
+const (
+	HIT_PLAYER_WITH_FIST_DISTANCE = 20
+)
+
+// Describes all the settings used for attack rates.
+const (
+	HIT_PLAYER_WITH_FIST_RATE = 5
+)
+
 // Describes all the available event duration time.
 const (
 	EVENT_DURATION_TIME_TOXIC_RAIN = time.Second * 20

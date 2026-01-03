@@ -251,10 +251,6 @@ func (ss *SessionScreen) HandleInput() error {
 								action.NewSetHealthPacksRetrievalStartedNetworking(
 									value.HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
 
-							// dispatcher.GetInstance().Dispatch(
-							// 	action.NewSetUserInventoryRetrievalStartedNetworking(
-							// 		value.USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
-
 							dispatcher.GetInstance().Dispatch(
 								action.NewSetResetDeath(value.RESET_DEATH_TRUE_VALUE))
 
@@ -289,7 +285,7 @@ func (ss *SessionScreen) HandleInput() error {
 								}
 							}
 
-							if previousUsersMetadata.Health != userMetadata.Health {
+							if previousUsersMetadata.Health > userMetadata.Health {
 								sharedUsersMetadataHealthHitsIssuers[userMetadata.GetIssuer()] = true
 							}
 						}
@@ -588,15 +584,17 @@ func (ss *SessionScreen) HandleInput() error {
 
 		if spacePressed {
 			if store.GetHistPlayerWithFistStartedNetworking() == value.HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_FALSE_STATE {
+				sound.GetInstance().GetSoundSounderMeleeFxManager().PushWithHandbrake(loader.FistFXSound)
+
 				dispatcher.GetInstance().Dispatch(
 					action.NewSetHitPlayerWithFistStartedNetworking(
 						value.HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_TRUE_STATE))
 
-				call.PerformHitPlayerWithFist(0, "", func(err error) {
+				call.PerformHitPlayerWithFist(store.GetSelectedSessionMetadata().ID, func(err error) {
 					if err != nil {
 						notification.GetInstance().Push(
 							common.ComposeMessage(
-								"ERROR HAPPENED",
+								translation.GetInstance().GetTranslation("client.networking.hit-player-with-fist-failure"),
 								err.Error()),
 							time.Second*3,
 							common.NotificationErrorTextColor)
@@ -624,6 +622,10 @@ func (ss *SessionScreen) HandleInput() error {
 								Image: loader.GetInstance().GetStatic(loader.LetterScroll),
 								ApplyCallback: func(success func()) {
 									letter := loader.GetRandomLetter(uint64(item.ID))
+
+									sound.GetInstance().
+										GetSoundSounderLetterScrollActivationFxManager().
+										PushWithHandbrake(loader.LetterScrollActivationFxSound)
 
 									dispatcher.GetInstance().Dispatch(
 										action.NewSetLetterNameAction(letter))
@@ -663,6 +665,10 @@ func (ss *SessionScreen) HandleInput() error {
 
 												return
 											}
+
+											sound.GetInstance().
+												GetSoundSounderHealthPackActivationFxManager().
+												PushWithHandbrake(loader.HealthPackActivationFxSound)
 
 											notification.GetInstance().Push(
 												translation.GetInstance().GetTranslation(
@@ -758,7 +764,7 @@ func (ss *SessionScreen) HandleInput() error {
 				dispatcher.GetInstance().Dispatch(action.NewSyncStagePositionYSession())
 			}
 		} else {
-			sounder.GetInstance().InterruptMainTrackableObject()
+			sounder.GetInstance().InterruptStepsTrackableObject()
 		}
 	}
 
@@ -1136,6 +1142,5 @@ func newSessionScreen() screen.Screen {
 	}
 }
 
-// TODO: fix random letters persist operation.
-// TODO: fix monitoring startup from UI.
-// TODO: implement hit for another player, when it's near us
+// TODO: fix stuck action when player is dead.
+// TODO: add more sounds.

@@ -59,23 +59,6 @@ func Init(root *cobra.Command) {
 				case <-gracefulShutdown:
 				}
 
-				// 			"server.monitoring.start.title": {
-				//     "one": "FateSeekers gaming server has been started!",
-				//     "other": "FateSeekers gaming server has been started!"
-				// },
-				// "server.monitoring.start.monitoring.title": {
-				//     "one": "FateSeekers gaming server has been started(including monitoring)!",
-				//     "other": "FateSeekers gaming server has been started(including monitoring)!"
-				// },
-				// "server.monitoring.stop.title": {
-				//     "one": "FateSeekers gaming server has been stoped!",
-				//     "other": "FateSeekers gaming server has been stoped!"
-				// },
-				// "server.monitoring.stop.monitoring.title": {
-				//     "one": "FateSeekers gaming server has been stoped(including monitoring)!",
-				//     "other": "FateSeekers gaming server has been stoped(including monitoring)!"
-				// }
-
 				connector.GetInstance().Close(func(err error) {
 					if err != nil {
 						logging.GetInstance().Error(

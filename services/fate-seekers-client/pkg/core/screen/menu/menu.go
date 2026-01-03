@@ -82,6 +82,8 @@ func (ms *MenuScreen) HandleInput() error {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetStartSessionTravel(value.START_SESSION_TRAVEL_FALSE_VALUE))
 
+		clear(store.GetRetrievedUsersMetadataSession())
+
 		selected.GetInstance().Clean()
 
 		collision.GetInstance().Clean()

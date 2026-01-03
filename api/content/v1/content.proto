@@ -39,7 +39,6 @@ message UpdateUserMetadataStaticResponse {
 message HitPlayerWithFistRequest {
     string issuer = 1 [(buf.validate.field).string.uuid = true];
     int64 session_id = 2;
-    string other = 3;
 };
 
 // HitPlayerWithFistResponse represents git player with fist response message.

@@ -271,6 +271,10 @@
         "one": "Unable to perform drop inventory item operation",
         "other": "Unable to perform drop inventory item operation"
     },
+    "client.networking.hit-player-with-fist-failure": {
+        "one": "Unable to perform hit player with fist operation",
+        "other": "Unable to perform hit player with fist operation"
+    },
     "client.networking.open-health-pack-opened": {
         "one": "Health pack has been opened and applied",
         "other": "Health pack has been opened and applied"

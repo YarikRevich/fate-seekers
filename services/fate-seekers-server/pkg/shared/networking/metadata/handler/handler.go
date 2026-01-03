@@ -811,8 +811,6 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 				return err
 			}
 
-			fmt.Println(generation.ID, chest.ChestItems, "INGENERATION")
-
 			for _, chestItem := range chest.ChestItems {
 				err = repository.
 					GetAssociationsRepository().

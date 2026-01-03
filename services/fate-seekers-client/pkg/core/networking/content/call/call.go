@@ -8,12 +8,11 @@ import (
 )
 
 // PerformHitPlayerWithFist performs hit player with fist operation request.
-func PerformHitPlayerWithFist(sessionID int64, other string, callback func(err error)) {
+func PerformHitPlayerWithFist(sessionID int64, callback func(err error)) {
 	go func() {
 		message, err := proto.Marshal(&contentv1.HitPlayerWithFistRequest{
 			Issuer:    store.GetRepositoryUUID(),
 			SessionId: sessionID,
-			Other:     other,
 		})
 		if err != nil {
 			callback(err)
