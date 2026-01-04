@@ -166,10 +166,9 @@ func (s *Sounder) Update(camera *kamera.Camera) {
 						continue
 					}
 
-					switch value.Name {
-					case loader.TilemapSoundRockValue:
-						sound.GetInstance().GetSoundSounderStepsFxManager().PushWithHandbrake(loader.RockFXSound)
-					}
+					sound.GetInstance().
+						GetSoundSounderStepsFxManager().
+						PushWithHandbrake(loader.GetSoundName(value.Name))
 				}
 
 				break
@@ -210,10 +209,9 @@ func (s *Sounder) Update(camera *kamera.Camera) {
 									continue
 								}
 
-								switch value.Name {
-								case loader.TilemapSoundRockValue:
-									sound.GetInstance().GetSoundSounderExternalFxManager(key).PushWithHandbrake(loader.RockFXSound)
-								}
+								sound.GetInstance().
+									GetSoundSounderExternalFxManager(key).
+									PushWithHandbrake(loader.GetSoundName(value.Name))
 							}
 
 							break

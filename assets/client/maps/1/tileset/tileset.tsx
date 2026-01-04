@@ -9,17 +9,17 @@
  <tile id="159">
   <properties>
    <property name="spawnable" type="bool" value="true"/>
-   <property name="sound" value="rock"/>
+   <property name="sound" value="sand"/>
   </properties>
  </tile>
  <tile id="84">
   <properties>
-   <property name="sound" value="rock"/>
+   <property name="sound" value="sand"/>
   </properties>
  </tile>
  <tile id="141">
   <properties>
-   <property name="sound" value="rock"/>
+   <property name="sound" value="sand"/>
   </properties>
  </tile>
  <tile id="44">
@@ -50,13 +50,13 @@
  <tile id="140">
   <properties>
    <property name="chest_location" type="bool" value="true"/>
-   <property name="sound" value="rock"/>
+   <property name="sound" value="sand"/>
   </properties>
  </tile>
  <tile id="318">
   <properties>
    <property name="health_pack_location" type="bool" value="true"/>
-   <property name="sound" value="rock"/>
+   <property name="sound" value="sand"/>
   </properties>
  </tile>
 </tileset>

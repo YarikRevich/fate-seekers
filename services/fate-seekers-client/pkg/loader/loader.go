@@ -89,6 +89,7 @@ const (
 // Describes available tilemap sound values.
 const (
 	TilemapSoundRockValue = "rock"
+	TilemapSoundSandValue = "sand"
 )
 
 // Describes all the available statics to be loaded.
@@ -213,6 +214,7 @@ const (
 	ToxicThunderFXSound = "fx/toxic_thunder/toxic_thunder.ogg"
 
 	RockFXSound = "fx/rock/rock.ogg"
+	SandFXSound = "fx/sand/sand.ogg"
 
 	FistFXSound = "fx/fist/fist.ogg"
 
@@ -801,6 +803,16 @@ func GetRandomLetter(seed uint64) string {
 	source := rand.New(rand.NewSource(int64(seed)))
 
 	return AvailableLetters[source.Intn(len(AvailableLetters))]
+}
+
+// GetSoundName performs sound name retrieval based on the property value.
+func GetSoundName(name string) string {
+	switch name {
+	case TilemapSoundSandValue:
+		return SandFXSound
+	default:
+		return RockFXSound
+	}
 }
 
 // newLoader initializes Loader.
