@@ -26,6 +26,9 @@ type SoundManager struct {
 	// Represents instance of sound events FX manager.
 	soundEventsFxManager *fx.SoundFXManager
 
+	// Represents instance of sound events announcement FX manager.
+	soundEventsAnnouncementFxManager *fx.SoundFXManager
+
 	// Represents instance of sound sounder steps FX manager.
 	soundSounderStepsFxManager *fx.SoundFXManager
 
@@ -56,6 +59,11 @@ func (sm *SoundManager) GetSoundUIFxManager() *fx.SoundFXManager {
 // GetSoundEventsFxManager retrieves instance of sound events FX manager.
 func (sm *SoundManager) GetSoundEventsFxManager() *fx.SoundFXManager {
 	return sm.soundEventsFxManager
+}
+
+// GetSoundEventsAnnouncementFxManager retrieves instance of sound events announcement FX manager.
+func (sm *SoundManager) GetSoundEventsAnnouncementFxManager() *fx.SoundFXManager {
+	return sm.soundEventsAnnouncementFxManager
 }
 
 // GetSoundSounderStepsFxManager retrieves instance of sound sounder steps FX manager.
@@ -130,6 +138,9 @@ func newSoundManager() *SoundManager {
 	soundEventsFxManager := fx.NewSoundFxManager(audioContext)
 	soundEventsFxManager.Init()
 
+	soundEventsAnnouncementFxManager := fx.NewSoundFxManager(audioContext)
+	soundEventsAnnouncementFxManager.Init()
+
 	soundSounderStepsFxManager := fx.NewSoundFxManager(audioContext)
 	soundSounderStepsFxManager.Init()
 
@@ -152,6 +163,7 @@ func newSoundManager() *SoundManager {
 		audioContext:                                audioContext,
 		soundUIFxManager:                            soundUIFxManager,
 		soundEventsFxManager:                        soundEventsFxManager,
+		soundEventsAnnouncementFxManager:            soundEventsAnnouncementFxManager,
 		soundSounderStepsFxManager:                  soundSounderStepsFxManager,
 		soundSounderMeleeFxManager:                  soundSounderMeleeFxManager,
 		soundSounderChestFxManager:                  soundSounderChestFxManager,

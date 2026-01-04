@@ -32,6 +32,9 @@ type AnswerInputComponent struct {
 	// Represents text widget.
 	text *widget.Text
 
+	// Represents answer input widget.
+	answerInput *widget.TextInput
+
 	// Represents submit callback.
 	submitCallback func(valueRaw string)
 
@@ -40,6 +43,11 @@ type AnswerInputComponent struct {
 
 	// Represents container widget.
 	container *widget.Container
+}
+
+// CleanText performs text label cleanup.
+func (aic *AnswerInputComponent) CleanInput() {
+	aic.answerInput.SetText("")
 }
 
 // SetText modifies text component in the container.
@@ -271,8 +279,9 @@ func newAnswerInputComponent() *AnswerInputComponent {
 	container.AddChild(buttonsContainer)
 
 	result = &AnswerInputComponent{
-		text:      textWidget,
-		container: container,
+		text:        textWidget,
+		answerInput: answerInput,
+		container:   container,
 	}
 
 	return result

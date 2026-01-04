@@ -379,6 +379,13 @@ func GetRetrievedChestsSession() []dto.RetrievedChests {
 	return instance.GetState(session.RETRIEVED_CHESTS_SESSION_STATE).([]dto.RetrievedChests)
 }
 
+// GetRetrievedHealthPacksSession retrieves retrieved health packs session state value.
+func GetRetrievedHealthPacksSession() []dto.RetrievedHealthPack {
+	instance := GetInstance()
+
+	return instance.GetState(session.RETRIEVED_HEALTH_PACKS_SESSION_STATE).([]dto.RetrievedHealthPack)
+}
+
 // GetInventoryOpenedSession retrieves inventory opened session state value.
 func GetInventoryOpenedSession() string {
 	instance := GetInstance()

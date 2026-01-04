@@ -15,7 +15,7 @@ var (
 // Collision represents active map collision manager.
 type Collision struct {
 	// Represents collision polygons mutex.
-	collisionPolygonsMutex sync.Mutex
+	collisionPolygonsMutex sync.RWMutex
 
 	// Represents collision polygons.
 	collisionPolygons map[string]*resolv.ConvexPolygon
@@ -37,30 +37,29 @@ func (c *Collision) SetMainTrackableObject(value dto.Position, shiftWidth, shift
 	c.mainTrackableObjectMutex.Unlock()
 }
 
-// AddCollidableTileObject adds new collidable tile object with the provided value.
-func (c *Collision) AddCollidableTileObject(key string, value *dto.CollidableTile) {
+// CollidablExists checks if collidable with the provided name exists.
+func (c *Collision) CollidableExists(name string) bool {
 	c.collisionPolygonsMutex.Lock()
 
-	collider := resolv.NewConvexPolygon(
-		value.Position.X-(float64(value.TileWidth)/2), value.Position.Y-(float64(value.TileHeight)/2),
-		[]float64{
-			float64(value.TileWidth) / 2.0, 0,
-			float64(value.TileWidth), float64(value.TileHeight) / 2.0,
-			float64(value.TileWidth) / 2.0, float64(value.TileHeight),
-			0, float64(value.TileHeight) / 2.0,
-		},
-	)
+	_, ok := c.collisionPolygons[name]
+
+	c.collisionPolygonsMutex.Unlock()
+
+	return ok
+}
+
+// addCollidable adds collidable object with the provided key.
+func (c *Collision) addCollidable(key string, collider *resolv.ConvexPolygon) {
+	c.collisionPolygonsMutex.Lock()
 
 	c.collisionPolygons[key] = collider
 
 	c.collisionPolygonsMutex.Unlock()
 }
 
-// AddCollidableStaticObject adds new collidable static object with the provided name and value.
-func (c *Collision) AddCollidableStaticObject(name string, value *dto.CollidableStatic) {
-	c.collisionPolygonsMutex.Lock()
-
-	collider := resolv.NewConvexPolygon(
+// AddCollidableTileObject adds new collidable tile object with the provided value.
+func (c *Collision) AddCollidableTileObject(key string, value *dto.CollidableTile) {
+	c.addCollidable(key, resolv.NewConvexPolygon(
 		value.Position.X-(float64(value.TileWidth)/2), value.Position.Y-(float64(value.TileHeight)/2),
 		[]float64{
 			float64(value.TileWidth) / 2.0, 0,
@@ -68,11 +67,31 @@ func (c *Collision) AddCollidableStaticObject(name string, value *dto.Collidable
 			float64(value.TileWidth) / 2.0, float64(value.TileHeight),
 			0, float64(value.TileHeight) / 2.0,
 		},
-	)
+	))
+}
 
-	c.collisionPolygons[name] = collider
+// AddCollidableStaticObject adds new collidable static object with the provided name and value.
+func (c *Collision) AddCollidableStaticObject(name string, value *dto.CollidableStatic) {
+	c.addCollidable(name, resolv.NewConvexPolygon(
+		value.Position.X-(float64(value.TileWidth)/2), value.Position.Y-(float64(value.TileHeight)/2),
+		[]float64{
+			float64(value.TileWidth) / 2.0, 0,
+			float64(value.TileWidth), float64(value.TileHeight) / 2.0,
+			float64(value.TileWidth) / 2.0, float64(value.TileHeight),
+			0, float64(value.TileHeight) / 2.0,
+		},
+	))
+}
 
-	c.collisionPolygonsMutex.Unlock()
+// GetCollidableStaticObject retrieves collidable static object with the provided name.
+func (c *Collision) GetCollidableStaticObject(name string) *resolv.ConvexPolygon {
+	c.collisionPolygonsMutex.RLock()
+
+	result, _ := c.collisionPolygons[name]
+
+	c.collisionPolygonsMutex.RUnlock()
+
+	return result
 }
 
 // RemoveCollidableObject removes collidable object with the provided name and value.

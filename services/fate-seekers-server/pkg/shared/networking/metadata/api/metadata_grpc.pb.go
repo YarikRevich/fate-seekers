@@ -35,6 +35,7 @@ const (
 	MetadataService_GetUsersMetadata_FullMethodName      = "/metadata.v1.MetadataService/GetUsersMetadata"
 	MetadataService_DropInventoryItem_FullMethodName     = "/metadata.v1.MetadataService/DropInventoryItem"
 	MetadataService_TakeChestItem_FullMethodName         = "/metadata.v1.MetadataService/TakeChestItem"
+	MetadataService_TakeHealthPack_FullMethodName        = "/metadata.v1.MetadataService/TakeHealthPack"
 	MetadataService_OpenChest_FullMethodName             = "/metadata.v1.MetadataService/OpenChest"
 	MetadataService_GetChests_FullMethodName             = "/metadata.v1.MetadataService/GetChests"
 	MetadataService_OpenHealthPack_FullMethodName        = "/metadata.v1.MetadataService/OpenHealthPack"
@@ -82,6 +83,8 @@ type MetadataServiceClient interface {
 	DropInventoryItem(ctx context.Context, in *DropInventoryItemRequest, opts ...grpc.CallOption) (*DropInventoryItemResponse, error)
 	// TakeChestItem performs chest item take operaiton for the selected chest by the configured user.
 	TakeChestItem(ctx context.Context, in *TakeChestItemRequest, opts ...grpc.CallOption) (*TakeChestItemResponse, error)
+	// TakeHealthPack performs health pack take operaiton for the selected health pack by the configured user.
+	TakeHealthPack(ctx context.Context, in *TakeHealthPackRequest, opts ...grpc.CallOption) (*TakeHealthPackResponse, error)
 	// OpenChest performs chest open operation for the selected chest by the configured user.
 	OpenChest(ctx context.Context, in *OpenChestRequest, opts ...grpc.CallOption) (*OpenChestResponse, error)
 	// GetChests performs chests retrieval for the selected session by the configured user.
@@ -292,6 +295,16 @@ func (c *metadataServiceClient) TakeChestItem(ctx context.Context, in *TakeChest
 	return out, nil
 }
 
+func (c *metadataServiceClient) TakeHealthPack(ctx context.Context, in *TakeHealthPackRequest, opts ...grpc.CallOption) (*TakeHealthPackResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TakeHealthPackResponse)
+	err := c.cc.Invoke(ctx, MetadataService_TakeHealthPack_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *metadataServiceClient) OpenChest(ctx context.Context, in *OpenChestRequest, opts ...grpc.CallOption) (*OpenChestResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OpenChestResponse)
@@ -409,6 +422,8 @@ type MetadataServiceServer interface {
 	DropInventoryItem(context.Context, *DropInventoryItemRequest) (*DropInventoryItemResponse, error)
 	// TakeChestItem performs chest item take operaiton for the selected chest by the configured user.
 	TakeChestItem(context.Context, *TakeChestItemRequest) (*TakeChestItemResponse, error)
+	// TakeHealthPack performs health pack take operaiton for the selected health pack by the configured user.
+	TakeHealthPack(context.Context, *TakeHealthPackRequest) (*TakeHealthPackResponse, error)
 	// OpenChest performs chest open operation for the selected chest by the configured user.
 	OpenChest(context.Context, *OpenChestRequest) (*OpenChestResponse, error)
 	// GetChests performs chests retrieval for the selected session by the configured user.
@@ -476,6 +491,9 @@ func (UnimplementedMetadataServiceServer) DropInventoryItem(context.Context, *Dr
 }
 func (UnimplementedMetadataServiceServer) TakeChestItem(context.Context, *TakeChestItemRequest) (*TakeChestItemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TakeChestItem not implemented")
+}
+func (UnimplementedMetadataServiceServer) TakeHealthPack(context.Context, *TakeHealthPackRequest) (*TakeHealthPackResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TakeHealthPack not implemented")
 }
 func (UnimplementedMetadataServiceServer) OpenChest(context.Context, *OpenChestRequest) (*OpenChestResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method OpenChest not implemented")
@@ -769,6 +787,24 @@ func _MetadataService_TakeChestItem_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MetadataService_TakeHealthPack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TakeHealthPackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MetadataServiceServer).TakeHealthPack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MetadataService_TakeHealthPack_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MetadataServiceServer).TakeHealthPack(ctx, req.(*TakeHealthPackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MetadataService_OpenChest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OpenChestRequest)
 	if err := dec(in); err != nil {
@@ -892,6 +928,10 @@ var MetadataService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TakeChestItem",
 			Handler:    _MetadataService_TakeChestItem_Handler,
+		},
+		{
+			MethodName: "TakeHealthPack",
+			Handler:    _MetadataService_TakeHealthPack_Handler,
 		},
 		{
 			MethodName: "OpenChest",

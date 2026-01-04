@@ -178,6 +178,10 @@ func (ss *SessionScreen) HandleInput() error {
 									time.Second*3,
 									common.NotificationInfoTextColor)
 
+								sound.GetInstance().
+									GetSoundEventsAnnouncementFxManager().
+									PushWithHandbrake(loader.ToxicThunderFXSound)
+
 								ss.camera.AddTrauma(0.8)
 
 								dispatcher.GetInstance().Dispatch(
@@ -438,10 +442,6 @@ func (ss *SessionScreen) HandleInput() error {
 								response)))
 
 					for _, chest := range response.GetChests() {
-						if !chest.Active {
-							continue
-						}
-
 						if !renderer.GetInstance().SecondaryLocalStaticObjectExists(chest.GetInstance()) {
 							staticUnit := static.NewStatic(
 								loader.GetInstance().GetMapTilesetStandardChest(loader.FirstMap),
@@ -461,19 +461,19 @@ func (ss *SessionScreen) HandleInput() error {
 								TileHeight: int(shiftHeight),
 							})
 
-							selected.GetInstance().AddSelectableStaticObject(chest.GetInstance(), &dto.SelectableStatic{
-								Position: dto.Position{
-									X: chest.GetPosition().X,
-									Y: chest.GetPosition().Y,
-								},
-								TileWidth:  int(shiftWidth),
-								TileHeight: int(shiftHeight),
-							})
+							if !selected.GetInstance().SelectableStaticObjectExists(chest.GetInstance()) {
+								selected.GetInstance().AddSelectableStaticObject(chest.GetInstance(), &dto.SelectableStatic{
+									Position: dto.Position{
+										X: chest.GetPosition().X,
+										Y: chest.GetPosition().Y,
+									},
+									TileWidth:  int(shiftWidth),
+									TileHeight: int(shiftHeight),
+								})
+							}
 
 							renderer.GetInstance().AddSecondaryLocalStaticObject(
 								chest.GetInstance(), staticUnit)
-						} else {
-							continue
 						}
 					}
 
@@ -490,6 +490,65 @@ func (ss *SessionScreen) HandleInput() error {
 		metadatastream.GetGetHealthPacksSubmitter().Clean(func() {
 			metadatastream.GetGetHealthPacksSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetHealthPacksResponse, err error) bool {
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetRetrievedHealthPacksSession(
+							converter.ConvertGetHealthPacksResponseToRetrievedHealthPacks(
+								response)))
+
+					for _, healthPack := range response.GetHealthPacks() {
+						if !healthPack.Active {
+							if renderer.GetInstance().SecondaryLocalStaticObjectExists(healthPack.GetInstance()) {
+								renderer.GetInstance().RemoveSecondaryLocalStaticObject(healthPack.GetInstance())
+							}
+
+							if selected.GetInstance().SelectableStaticObjectExists(healthPack.GetInstance()) {
+								selected.GetInstance().RemoveSelectableStaticObject(healthPack.GetInstance())
+							}
+
+							if collision.GetInstance().CollidableExists(healthPack.GetInstance()) {
+								collision.GetInstance().RemoveCollidableObject(healthPack.GetInstance())
+							}
+
+							continue
+						}
+
+						if !renderer.GetInstance().SecondaryLocalStaticObjectExists(healthPack.GetInstance()) {
+							staticUnit := static.NewStatic(
+								loader.GetInstance().GetMapTilesetFrogHealthPack(loader.FirstMap),
+								dto.Position{
+									X: healthPack.GetPosition().X,
+									Y: healthPack.GetPosition().Y,
+								})
+
+							shiftWidth, shiftHeight := staticUnit.GetShiftBounds()
+
+							if !collision.GetInstance().CollidableExists(healthPack.GetInstance()) {
+								collision.GetInstance().AddCollidableStaticObject(healthPack.GetInstance(), &dto.CollidableStatic{
+									Position: dto.Position{
+										X: healthPack.GetPosition().X,
+										Y: healthPack.GetPosition().Y,
+									},
+									TileWidth:  int(shiftWidth),
+									TileHeight: int(shiftHeight),
+								})
+							}
+
+							if !selected.GetInstance().SelectableStaticObjectExists(healthPack.GetInstance()) {
+								selected.GetInstance().AddSelectableStaticObject(healthPack.GetInstance(), &dto.SelectableStatic{
+									Position: dto.Position{
+										X: healthPack.GetPosition().X,
+										Y: healthPack.GetPosition().Y,
+									},
+									TileWidth:  int(shiftWidth),
+									TileHeight: int(shiftHeight),
+								})
+							}
+
+							renderer.GetInstance().AddSecondaryLocalStaticObject(
+								healthPack.GetInstance(), staticUnit)
+						}
+					}
+
 					return false
 				})
 		})
@@ -818,8 +877,54 @@ func (ss *SessionScreen) HandleInput() error {
 	if store.GetSelectedPositionSession() != nil {
 		selectedPosition := store.GetSelectedPositionSession()
 
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSelectedPositionSession(nil))
+
 		switch selectedPosition.Kind {
 		case dto.SELECTED_LOCAL_STATIC_OBJECT:
+			var found bool
+
+			for _, item := range store.GetRetrievedHealthPacksSession() {
+				if item.Position == selectedPosition.Position {
+					handler.PerformTakeHealthPack(
+						item.SessionID,
+						item.ID,
+						func(err error) {
+							if err != nil {
+								notification.GetInstance().Push(
+									common.ComposeMessage(
+										translation.GetInstance().GetTranslation(
+											"client.networking.take-health-pack-failure"),
+										err.Error()),
+									time.Second*3,
+									common.NotificationErrorTextColor)
+
+								return
+							}
+
+							if item.Name == dto.FROG_HEALTH_PACK_TYPE {
+								sound.GetInstance().
+									GetSoundSounderHealthPackActivationFxManager().
+									PushWithHandbrake(loader.FrogHealthPackActivationFxSound)
+							}
+
+							notification.GetInstance().Push(
+								translation.GetInstance().GetTranslation(
+									"client.networking.open-health-pack-opened"),
+								time.Second*3,
+								common.NotificationInfoTextColor)
+						})
+
+					found = true
+
+					break
+				}
+			}
+
+			if found {
+				break
+			}
+
 			for _, item := range store.GetRetrievedChestsSession() {
 				if item.Position == selectedPosition.Position {
 					if store.GetInventoryOpenedSession() == value.INVENTORY_OPENED_FALSE_VALUE {
@@ -884,6 +989,10 @@ func (ss *SessionScreen) HandleInput() error {
 															}
 														}
 
+														sound.GetInstance().
+															GetSoundSounderChestFxManager().
+															PushWithHandbrake(loader.ChestGrabFXSound)
+
 														success()
 													})
 											},
@@ -909,6 +1018,10 @@ func (ss *SessionScreen) HandleInput() error {
 
 															return
 														}
+
+														sound.GetInstance().
+															GetSoundSounderChestFxManager().
+															PushWithHandbrake(loader.ChestGrabFXSound)
 
 														success()
 													})
@@ -961,9 +1074,22 @@ func (ss *SessionScreen) HandleInput() error {
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetSelectedPositionSession(&selectedPosition))
 
-			dispatcher.GetInstance().Dispatch(
-				action.NewSetActiveScreenAction(
-					value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+			switch selectedPosition.Kind {
+			case dto.SELECTED_LOCAL_STATIC_OBJECT:
+				for _, item := range store.GetRetrievedChestsSession() {
+					if item.Position == selectedPosition.Position {
+						sound.GetInstance().
+							GetSoundSounderChestFxManager().
+							PushWithHandbrake(loader.ChestActivationFXSound)
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetActiveScreenAction(
+								value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+
+						break
+					}
+				}
+			}
 		}
 	} else {
 		if !ss.pressTransparentTransitionEffect.Done() {
@@ -1141,6 +1267,3 @@ func newSessionScreen() screen.Screen {
 		toxicRainEventShaderEffect:       toxicrain.NewToxicRainEventEffect(),
 	}
 }
-
-// TODO: fix stuck action when player is dead.
-// TODO: add more sounds.

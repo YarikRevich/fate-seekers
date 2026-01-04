@@ -2,7 +2,6 @@ package activity
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
@@ -28,8 +27,6 @@ func Run() {
 
 		for range ticker.C {
 			ticker.Stop()
-
-			fmt.Println("BEFORE 1")
 
 			cache.
 				GetInstance().

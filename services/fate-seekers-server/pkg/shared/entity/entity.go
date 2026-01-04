@@ -183,32 +183,6 @@ func (*InventoryEntity) TableView() string {
 	return "InventoryEntity"
 }
 
-// MessageEntity represents messages entity.
-type MessageEntity struct {
-	ID         int64      `gorm:"column:id;primaryKey;auto_increment;not null"`
-	Content    string     `gorm:"column:name;not null"`
-	Issuer     int64      `gorm:"column:issuer;not null"`
-	CreatedAt  time.Time  `gorm:"column:created_at;autoCreateTime"`
-	UserEntity UserEntity `gorm:"foreignKey:Issuer;references:ID"`
-}
-
-// TableName retrieves name of database table.
-func (*MessageEntity) TableName() string {
-	return "messages"
-}
-
-// BeforeCreate performs message cache entity eviction before messages entity creation.
-func (m *MessageEntity) BeforeCreate(tx *gorm.DB) error {
-	if err := tx.
-		Model(&UserEntity{}).
-		Where("id = ?", m.Issuer).
-		First(&m.UserEntity).Error; err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // UserEntity represents users entity.
 type UserEntity struct {
 	ID        int64     `gorm:"column:id;primaryKey;auto_increment;not null"`

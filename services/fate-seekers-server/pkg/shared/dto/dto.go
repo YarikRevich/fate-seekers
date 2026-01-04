@@ -14,7 +14,7 @@ const (
 
 // Describes all the settings used for attack distance.
 const (
-	HIT_PLAYER_WITH_FIST_DISTANCE = 20
+	HIT_PLAYER_WITH_FIST_DISTANCE = 80
 )
 
 // Describes all the settings used for attack rates.
@@ -331,4 +331,6 @@ const (
 // Describes all the health rates related to health packs.
 const (
 	HEALTH_PACK_RATE = 20
+
+	FROG_HEALTH_PACK_RATE = 30
 )

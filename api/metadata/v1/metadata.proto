@@ -58,6 +58,9 @@ service MetadataService {
     // TakeChestItem performs chest item take operaiton for the selected chest by the configured user.
     rpc TakeChestItem(TakeChestItemRequest) returns (TakeChestItemResponse) {};
 
+    // TakeHealthPack performs health pack take operaiton for the selected health pack by the configured user.
+    rpc TakeHealthPack(TakeHealthPackRequest) returns (TakeHealthPackResponse) {};
+
     // OpenChest performs chest open operation for the selected chest by the configured user.
     rpc OpenChest(OpenChestRequest) returns (OpenChestResponse) {};
 
@@ -290,6 +293,19 @@ message TakeChestItemResponse {
 
 };
 
+// TakeHealthPackRequest represents take health pack opereation request.
+message TakeHealthPackRequest {
+    int64 session_id = 1;
+    int64 lobby_id = 2;
+    int64 generation_id = 3;
+    string issuer = 4 [(buf.validate.field).string.uuid = true];
+};
+
+// TakeHealthPackResponse represents take health pack opereation response.
+message TakeHealthPackResponse {
+    
+};
+
 // OpenChestRequest represents chest open request.
 message OpenChestRequest {
     int64 session_id = 1;
@@ -348,10 +364,12 @@ message GetHealthPacksRequest {
 
 // HealthPack represents health pack message.
 message HealthPack {
-    int64 health_pack_id = 1;
-    Position position = 2;
-    bool active = 3;
-    string instance = 4;
+    int64 session_id = 1;
+    int64 health_pack_id = 2;
+    string name = 3;
+    Position position = 4;
+    bool active = 5;
+    string instance = 6;
 };
 
 // GetHealthPacksResponse represents health packs retrieval response streaming message.

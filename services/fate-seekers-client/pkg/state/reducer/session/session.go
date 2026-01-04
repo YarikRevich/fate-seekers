@@ -17,6 +17,7 @@ const (
 	PREVIOUS_POSITION_SESSION_STATE        = "previous_position"
 	RETRIEVED_USERS_METADATA_SESSION_STATE = "retrieved_users_metadata"
 	RETRIEVED_CHESTS_SESSION_STATE         = "retrieved_chests"
+	RETRIEVED_HEALTH_PACKS_SESSION_STATE   = "retrieved_health_packs"
 	INVENTORY_OPENED_STATE                 = "inventory_opened"
 	CHEST_OPENED_STATE                     = "chest_opened"
 	SELECTED_POSITION_STATE                = "selected_position"
@@ -36,6 +37,7 @@ func (ssr *SessionStateReducer) Init() {
 	ssr.store.SetState(PREVIOUS_POSITION_SESSION_STATE, value.POSITION_SESSION_EMPTY_VALUE)
 	ssr.store.SetState(RETRIEVED_USERS_METADATA_SESSION_STATE, value.RETRIEVED_USERS_METADATA_EMPTY_VALUE)
 	ssr.store.SetState(RETRIEVED_CHESTS_SESSION_STATE, value.RETRIEVED_CHESTS_EMPTY_VALUE)
+	ssr.store.SetState(RETRIEVED_HEALTH_PACKS_SESSION_STATE, value.RETRIEVED_HEALTH_PACKS_EMPTY_VALUE)
 	ssr.store.SetState(INVENTORY_OPENED_STATE, value.INVENTORY_OPENED_FALSE_VALUE)
 	ssr.store.SetState(CHEST_OPENED_STATE, value.CHEST_OPENED_FALSE_VALUE)
 	ssr.store.SetState(SELECTED_POSITION_STATE, value.SELECTED_POSITION_EMPTY_VALUE)
@@ -176,6 +178,11 @@ func (ssr *SessionStateReducer) GetProcessor() func(value godux.Action) interfac
 			return dto.ComposeReducerResult(
 				dto.ReducerResultUnit{
 					Key: RETRIEVED_CHESTS_SESSION_STATE, Value: value.Value})
+
+		case action.SET_RETRIEVED_HEALTH_PACKS_SESSION_ACTION:
+			return dto.ComposeReducerResult(
+				dto.ReducerResultUnit{
+					Key: RETRIEVED_HEALTH_PACKS_SESSION_STATE, Value: value.Value})
 
 		case action.SET_INVENTORY_OPENED_ACTION:
 			return dto.ComposeReducerResult(

@@ -119,6 +119,15 @@ func newAnswerInputScreen() screen.Screen {
 			return
 		}
 
+		shared.GetInstance().GetBlinkingScreenAnimation().Reset()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetAnswerInputQuestionUpdated(value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE))
+
+		answerinput.GetInstance().CleanInput()
+
+		transparentTransitionEffect.Reset()
+
 		if answerinputmanager.GetInstance().GetGeneratedQuestion().Answer == result {
 			notification.GetInstance().Push(
 				translation.GetInstance().GetTranslation("client.answerinput.success"),
@@ -128,7 +137,9 @@ func newAnswerInputScreen() screen.Screen {
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetAnswerInputQuestionUpdated(value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE))
 
-			sound.GetInstance().GetSoundSounderChestFxManager().PushWithHandbrake(loader.ChestFXSound)
+			sound.GetInstance().
+				GetSoundSounderChestFxManager().
+				PushWithHandbrake(loader.ChestOpenFXSound)
 
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetActiveScreenAction(
@@ -153,6 +164,8 @@ func newAnswerInputScreen() screen.Screen {
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetSelectedPositionSession(nil))
+
+		answerinput.GetInstance().CleanInput()
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))

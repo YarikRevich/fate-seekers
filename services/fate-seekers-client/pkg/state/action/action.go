@@ -117,6 +117,7 @@ const (
 	DIAGONAL_DOWN_LEFT_POSITION_SESSION_ACTION  = "DIAGONAL_DOWN_LEFT_POSITION_SESSION_ACTION"
 	DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION = "DIAGONAL_DOWN_RIGHT_POSITION_SESSION_ACTION"
 	SET_RETRIEVED_CHESTS_SESSION_ACTION         = "SET_RETRIEVED_CHESTS_SESSION_ACTION"
+	SET_RETRIEVED_HEALTH_PACKS_SESSION_ACTION   = "SET_RETRIEVED_HEALTH_PACKS_SESSION_ACTION"
 	SET_INVENTORY_OPENED_ACTION                 = "SET_INVENTORY_OPENED_ACTION"
 	SET_CHEST_OPENED_ACTION                     = "SET_CHEST_OPENED_ACTION"
 	SET_SELECTED_POSITION_ACTION                = "SET_SELECTED_POSITION_ACTION"
@@ -643,6 +644,14 @@ func NewDiagonalDownRightPositionSession() godux.Action {
 func NewSetRetrievedChestsSession(value []dto.RetrievedChests) godux.Action {
 	return godux.Action{
 		Type:  SET_RETRIEVED_CHESTS_SESSION_ACTION,
+		Value: value,
+	}
+}
+
+// NewSetRetrievedHealthPacksSession creates new retrieved health packs session action.
+func NewSetRetrievedHealthPacksSession(value []dto.RetrievedHealthPack) godux.Action {
+	return godux.Action{
+		Type:  SET_RETRIEVED_HEALTH_PACKS_SESSION_ACTION,
 		Value: value,
 	}
 }

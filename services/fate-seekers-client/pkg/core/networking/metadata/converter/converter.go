@@ -22,8 +22,8 @@ func ConvertGetUserSessionsResponseToRetrievedSessionsMetadata(
 	return output
 }
 
-// ConvertGetUserSessionsResponseToRetrievedSessionsMetadata converts provided metadatav1.GetSessionsResponse
-// instance to an array of dto.RetrievedSessionMetadata instances.
+// ConvertGetUserSessionsResponseToRetrievedSessionsMetadata converts provided metadatav1.GetChestsResponse
+// instance to an array of dto.RetrievedChestsMetadata instances.
 func ConvertGetChestsResponseToRetrievedChests(
 	input *metadatav1.GetChestsResponse) []dto.RetrievedChests {
 	var output []dto.RetrievedChests
@@ -47,6 +47,27 @@ func ConvertGetChestsResponseToRetrievedChests(
 				Y: chest.GetPosition().GetY(),
 			},
 			ChestItems: chestItems,
+		})
+	}
+
+	return output
+}
+
+// ConvertGetHealthPacksResponseToRetrievedHealthPacks converts provided metadatav1.GetHealthPacksResponse
+// instance to an array of dto.RetrievedHealthPacksMetadata instances.
+func ConvertGetHealthPacksResponseToRetrievedHealthPacks(
+	input *metadatav1.GetHealthPacksResponse) []dto.RetrievedHealthPack {
+	var output []dto.RetrievedHealthPack
+
+	for _, healthPacks := range input.GetHealthPacks() {
+		output = append(output, dto.RetrievedHealthPack{
+			SessionID: healthPacks.GetSessionId(),
+			ID:        healthPacks.GetHealthPackId(),
+			Name:      healthPacks.GetName(),
+			Position: dto.Position{
+				X: healthPacks.GetPosition().GetX(),
+				Y: healthPacks.GetPosition().GetY(),
+			},
 		})
 	}
 

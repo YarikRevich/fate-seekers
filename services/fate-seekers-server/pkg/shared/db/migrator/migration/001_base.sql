@@ -100,17 +100,6 @@ CREATE TABLE inventory (
 );
 
 --
--- Name: messages; Type: TABLE; Schema: public; 
---
-
-CREATE TABLE messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    content TEXT NOT NULL,
-    issuer INTEGER NOT NULL,
-    FOREIGN KEY (issuer) REFERENCES users(id)
-);
-
---
 -- Name: users; Type: TABLE; Schema: public; 
 --
 

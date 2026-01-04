@@ -136,9 +136,20 @@ func (s *Selected) AddSelectableTileObject(value *dto.SelectableTile) {
 	s.selectableTileObjectsMutex.Unlock()
 }
 
+// SelectableStaticObjectExists checks if selectable static object with the provided name exists.
+func (s *Selected) SelectableStaticObjectExists(name string) bool {
+	s.localStaticObjectsMutex.RLock()
+
+	_, ok := s.localStaticObjects[name]
+
+	s.localStaticObjectsMutex.RUnlock()
+
+	return ok
+}
+
 // AddSelectableStaticObject adds new selectable static object with the provided value.
 func (s *Selected) AddSelectableStaticObject(key string, value *dto.SelectableStatic) {
-	s.selectableTileObjectsMutex.Lock()
+	s.localStaticObjectsMutex.Lock()
 
 	selected := resolv.NewConvexPolygon(
 		value.Position.X, value.Position.Y,
@@ -152,10 +163,21 @@ func (s *Selected) AddSelectableStaticObject(key string, value *dto.SelectableSt
 
 	s.localStaticObjects[key] = selected
 
-	s.selectableTileObjectsMutex.Unlock()
+	s.localStaticObjectsMutex.Unlock()
 }
 
-// AddSelectableStaticObject adds new selectable static object with the provided value.
+// GetSelectableStaticObject retrieves selectable static object with the provided name.
+func (s *Selected) GetSelectableStaticObject(name string) *resolv.ConvexPolygon {
+	s.localStaticObjectsMutex.RLock()
+
+	result, _ := s.localStaticObjects[name]
+
+	s.localStaticObjectsMutex.RUnlock()
+
+	return result
+}
+
+// RemoveSelectableStaticObject adds new selectable static object with the provided value.
 func (s *Selected) RemoveSelectableStaticObject(key string) {
 	s.selectableTileObjectsMutex.Lock()
 

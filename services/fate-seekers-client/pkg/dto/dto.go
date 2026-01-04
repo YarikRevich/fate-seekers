@@ -146,12 +146,25 @@ type RetrievedSessionMetadata struct {
 	Seed      uint64
 }
 
-// RetrievedChests represents retrieved session holder for reducer components.
+// RetrievedChests represents retrieved chest holder for reducer components.
 type RetrievedChests struct {
 	SessionID  int64
 	ID         int64
 	Position   Position
 	ChestItems []RetrievedChestItems
+}
+
+// Describes all the types of retrieved health packs.
+const (
+	FROG_HEALTH_PACK_TYPE = "frog"
+)
+
+// RetrievedHealthPack represents retrieved health pack holder for reducer components.
+type RetrievedHealthPack struct {
+	SessionID int64
+	ID        int64
+	Name      string
+	Position  Position
 }
 
 // RetrievedChestItems represents retrieved chest items.

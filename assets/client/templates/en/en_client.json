@@ -263,6 +263,10 @@
         "one": "Unable to perform take chest item operation",
         "other": "Unable to perform take chest item operation"
     },
+    "client.networking.take-health-pack-failure": {
+        "one": "Unable to perform take health pack operation",
+        "other": "Unable to perform take health pack operation"
+    },
     "client.networking.open-health-pack-failure": {
         "one": "Unable to perform open health pack operation",
         "other": "Unable to perform open health pack operation"

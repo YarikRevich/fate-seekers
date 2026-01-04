@@ -19,8 +19,6 @@ func GetDelayedPositions(previousPosition, position dto.Position) []dto.Position
 
 		dist := math.Hypot(dx, dy)
 		if dist == 0 || dist <= 1 {
-			// fmt.Println("IN A LOOP")
-
 			break
 		}
 

@@ -17,7 +17,6 @@ var (
 	ErrPersistingAssociations = errors.New("err happened during the process of associations creation response data save.")
 	ErrPersistingLobbies      = errors.New("err happened during the process of lobby creation response data save.")
 	ErrPersistingInventory    = errors.New("err happened during the process of inventory creation response data save.")
-	ErrPersistingMessages     = errors.New("err happened during the process of message creation response data save.")
 	ErrPersistingUsers        = errors.New("err happened during the process of user creation response data save.")
 )
 
@@ -36,9 +35,6 @@ var (
 
 	// GetInventoryRepository retrieves instance of the inventory repository, performing initial creation if needed.
 	GetInventoryRepository = sync.OnceValue[InventoryRepository](createInventoryRepository)
-
-	// GetMessagesRepository retrieves instance of the messages repository, performing initial creation if needed.
-	GetMessagesRepository = sync.OnceValue[MessagesRepository](createMessagesRepository)
 
 	// GetUsersRepository retrieves instance of the users repository, performing initial creation if needed.
 	GetUsersRepository = sync.OnceValue[UsersRepository](createUsersRepository)
@@ -258,6 +254,7 @@ type GenerationsRepository interface {
 	GetChestTypeByInstanceAndSessionIDWithTransaction(
 		transaction *gorm.DB, instance string, sessionID int64) (*entity.GenerationsEntity, bool, error)
 	GetHealthPackTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error)
+	GetByID(generationID int64) (*entity.GenerationsEntity, bool, error)
 }
 
 // generationsRepositoryImpl represents implementation of GenerationsRepository.
@@ -371,6 +368,35 @@ func (w *generationsRepositoryImpl) GetHealthPackTypeBySessionID(sessionID int64
 	w.mu.RUnlock()
 
 	return result, err
+}
+
+// GetByID retrieves generation for the provided generation id.
+func (w *generationsRepositoryImpl) GetByID(generationID int64) (*entity.GenerationsEntity, bool, error) {
+	w.mu.RLock()
+
+	var result *entity.GenerationsEntity
+
+	instance := db.GetInstance()
+
+	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
+		Where("id = ?", generationID).
+		Find(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			w.mu.RUnlock()
+
+			return result, false, nil
+		}
+
+		w.mu.RUnlock()
+
+		return result, false, err
+	}
+
+	w.mu.RUnlock()
+
+	return result, true, nil
 }
 
 // createGenerationsRepository initializes generationsRepositoryImpl.
@@ -826,63 +852,6 @@ func (w *inventoryRepositoryImpl) CountByLobbyIDAndUserID(lobbyID, userID int64)
 // createInventoryRepository initializes inventoryRepositoryImpl.
 func createInventoryRepository() InventoryRepository {
 	return new(inventoryRepositoryImpl)
-}
-
-// MessagesRepository represents messages entity repository.
-type MessagesRepository interface {
-	Insert(issuer int64, content string) error
-	GetByIssuer(issuer int64) ([]*entity.MessageEntity, error)
-}
-
-// messagesRepositoryImpl represents implementation of MessagesRepository.
-type messagesRepositoryImpl struct {
-	// Represents mutex used for database messages repository related operations.
-	mu sync.RWMutex
-}
-
-// Insert inserts new messages entity to the storage.
-func (w *messagesRepositoryImpl) Insert(issuer int64, content string) error {
-	w.mu.Lock()
-
-	instance := db.GetInstance()
-
-	err := instance.Create(
-		&entity.MessageEntity{
-			Issuer:  issuer,
-			Content: content}).Error
-
-	if err != nil {
-		w.mu.Unlock()
-
-		return errors.Wrap(err, ErrPersistingMessages.Error())
-	}
-
-	w.mu.Unlock()
-
-	return nil
-}
-
-// GetAll retrieves all available sessions.
-func (w *messagesRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.MessageEntity, error) {
-	w.mu.RLock()
-
-	instance := db.GetInstance()
-
-	var result []*entity.MessageEntity
-
-	err := instance.Table((&entity.MessageEntity{}).TableName()).
-		Preload((&entity.UserEntity{}).TableView()).
-		Where("issuer = ?", issuer).
-		Find(&result).Error
-
-	w.mu.RUnlock()
-
-	return result, err
-}
-
-// createMessagesRepository initializes messagesRepositoryImpl.
-func createMessagesRepository() MessagesRepository {
-	return new(messagesRepositoryImpl)
 }
 
 // UsersRepository represents users entity repository.

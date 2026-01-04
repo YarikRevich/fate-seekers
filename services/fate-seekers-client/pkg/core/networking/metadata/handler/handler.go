@@ -537,6 +537,52 @@ func PerformTakeChestItem(sessionID, lobbyID, chestID, chestItemID int64, callba
 	}()
 }
 
+// PerformTakeHealthPack performs health pack take request.
+func PerformTakeHealthPack(sessionID, healthPackID int64, callback func(err error)) {
+	go func() {
+		_, err := connector.
+			GetInstance().
+			GetClient().
+			TakeHealthPack(
+				context.Background(),
+				&metadatav1.TakeHealthPackRequest{
+					SessionId:    sessionID,
+					GenerationId: healthPackID,
+					Issuer:       store.GetRepositoryUUID(),
+				})
+
+		if err != nil {
+			if status.Code(err) == codes.Unavailable {
+				dispatcher.
+					GetInstance().
+					Dispatch(
+						action.NewSetStateResetApplicationAction(
+							value.STATE_RESET_APPLICATION_FALSE_VALUE))
+
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
+
+				callback(common.ErrConnectionLost)
+
+				return
+			}
+
+			errRaw, ok := status.FromError(err)
+			if !ok {
+				callback(err)
+
+				return
+			}
+
+			callback(errors.New(errRaw.Message()))
+
+			return
+		}
+
+		callback(nil)
+	}()
+}
+
 // PerformOpenHealthPack performs health pack open operation request.
 func PerformOpenHealthPack(sessionID, inventoryID int64, callback func(err error)) {
 	go func() {

@@ -71,6 +71,11 @@ const (
 	StandardChestFirstMap = 222
 )
 
+// Describes tileset frog health pack for first map.
+const (
+	FrogHealthPackFirstMap = 13
+)
+
 // Describes available tilemap properties
 const (
 	TilemapCollidableProperty         = "collidable"
@@ -200,16 +205,25 @@ const (
 
 // Describes all the available sounds to be loaded.
 const (
-	AmbientMusicSound   = "music/ambient/ambient.mp3"
-	EnergetykMusicSound = "music/energetyk/energetyk.mp3"
+	AmbientMusicSound = "music/ambient/ambient.mp3"
 
-	ButtonFXSound                 = "fx/button/button.ogg"
-	ToxicRainFXSound              = "fx/toxicrain/toxicrain.ogg"
-	RockFXSound                   = "fx/rock/rock.ogg"
-	FistFXSound                   = "fx/fist/fist.ogg"
-	ChestFXSound                  = "fx/chest/chest.ogg"
+	ButtonFXSound = "fx/button/button.ogg"
+
+	ToxicRainFXSound    = "fx/toxic_rain/toxic_rain.ogg"
+	ToxicThunderFXSound = "fx/toxic_thunder/toxic_thunder.ogg"
+
+	RockFXSound = "fx/rock/rock.ogg"
+
+	FistFXSound = "fx/fist/fist.ogg"
+
+	ChestActivationFXSound = "fx/chest_activation/chest_activation.ogg"
+	ChestOpenFXSound       = "fx/chest_open/chest_open.ogg"
+	ChestGrabFXSound       = "fx/chest_grab/chest_grab.ogg"
+
 	LetterScrollActivationFxSound = "fx/letter_scroll_activation/letter_scroll_activation.ogg"
-	HealthPackActivationFxSound   = "fx/health_pack_activation/health_pack_activation.ogg"
+
+	HealthPackActivationFxSound     = "fx/health_pack_activation/health_pack_activation.ogg"
+	FrogHealthPackActivationFxSound = "fx/frog_health_pack_activation/frog_health_pack_activation.ogg"
 )
 
 // Decsribes all the embedded files specific paths.
@@ -274,6 +288,37 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 	logging.GetInstance().Debug("Map has been loaded", zap.String("name", name))
 
 	return file
+}
+
+// GetMapTilesetFrogHealthPack retrieves map tileset frog health pack.
+func (l *Loader) GetMapTilesetFrogHealthPack(selectedMap string) *ebiten.Image {
+	parsedMap := l.GetMap(selectedMap)
+
+	tilesetColumns := parsedMap.Tilesets[0].Columns
+
+	if tilesetColumns == 0 {
+		tilesetColumns = parsedMap.Tilesets[0].Image.Width / (parsedMap.Tilesets[0].TileWidth + parsedMap.Tilesets[0].Spacing)
+	}
+
+	var x, y int
+
+	switch selectedMap {
+	case FirstMap:
+		x = FrogHealthPackFirstMap % tilesetColumns
+		y = FrogHealthPackFirstMap / tilesetColumns
+	}
+
+	xOffset := int(x)*parsedMap.Tilesets[0].Spacing + parsedMap.Tilesets[0].Margin
+	yOffset := int(y)*parsedMap.Tilesets[0].Spacing + parsedMap.Tilesets[0].Margin
+
+	rect := image.Rect(x*parsedMap.Tilesets[0].TileWidth+xOffset,
+		y*parsedMap.Tilesets[0].TileHeight+yOffset,
+		(x+1)*parsedMap.Tilesets[0].TileWidth+xOffset,
+		(y+1)*parsedMap.Tilesets[0].TileHeight+yOffset)
+
+	return getMapTileImage(
+		filepath.Join(common.ClientBasePath, MapsPath, FirstMap, MapTileset),
+		rect)
 }
 
 // GetMapTilesetStandardChest retrieves map tileset standard chest.

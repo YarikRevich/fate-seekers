@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"math/rand"
 	"time"
@@ -40,6 +39,7 @@ var (
 	ErrSessionChestLocationsNotEnough       = errors.New("err happened session chest locations don't fulfil min chests per session amount")
 	ErrSessionHealthPacksLocationsNotEnough = errors.New("err happened session health packs locations don't fulfil min health packs per session amount")
 	ErrInventoryCapacityExceeded            = errors.New("err happened inventory capacity has been exceeded")
+	ErrGenerationIsNotHealthPack            = errors.New("err happened generation is not a health pack")
 	ErrHealthPackDoesNotExist               = errors.New("err happened health pack does not exist")
 	ErrFilteredSessionDoesNotExists         = errors.New("err happened filtered session does not exist")
 	ErrUserIsNotLobbyHost                   = errors.New("err happened user is not a host of a lobby")
@@ -296,13 +296,9 @@ func (h *Handler) CreateSession(ctx context.Context, request *metadatav1.CreateS
 		return nil, ErrSessionAlreadyExists
 	}
 
-	fmt.Println("BEFORE SESSION LOCK")
-
 	cache.
 		GetInstance().
 		BeginSessionsTransaction()
-
-	fmt.Println("BEFORE 3")
 
 	cache.
 		GetInstance().
@@ -426,8 +422,6 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 			return nil, ErrUserDoesNotOwnSession
 		}
 	}
-
-	fmt.Println("BEFORE 4")
 
 	cache.
 		GetInstance().
@@ -770,8 +764,6 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		sessionName = cachedSession.Name
 		sessionSeed = cachedSession.Seed
 	}
-
-	fmt.Println("BEFORE 5")
 
 	cache.
 		GetInstance().
@@ -1139,15 +1131,9 @@ func (h *Handler) GetLobbySet(request *metadatav1.GetLobbySetRequest, stream grp
 
 			response.LobbySet = response.LobbySet[:0]
 
-			fmt.Println("BEFORE LOBBY SET LOCK")
-
-			fmt.Println("BEFORE 6")
-
 			cache.
 				GetInstance().
 				BeginLobbySetTransaction()
-
-			fmt.Println("AFTER LOBBY SET LOCK")
 
 			cachedLobbySet, ok := cache.
 				GetInstance().
@@ -1370,8 +1356,6 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 		GetInstance().
 		CommitSessionsTransaction()
 
-	fmt.Println("BEFORE 7")
-
 	cache.
 		GetInstance().
 		BeginLobbySetTransaction()
@@ -1589,8 +1573,6 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 	cache.
 		GetInstance().
 		CommitSessionsTransaction()
-
-	fmt.Println("BEFORE 8")
 
 	cache.
 		GetInstance().
@@ -2090,18 +2072,10 @@ func (h *Handler) TakeChestItem(context context.Context, request *metadatav1.Tak
 			GetUsersRepository().
 			GetByName(request.GetIssuer())
 		if err != nil {
-			cache.
-				GetInstance().
-				CommitMetadataTransaction()
-
 			return nil, err
 		}
 
 		if !exists {
-			cache.
-				GetInstance().
-				CommitMetadataTransaction()
-
 			return nil, ErrUserDoesNotExist
 		}
 
@@ -2253,6 +2227,237 @@ func (h *Handler) TakeChestItem(context context.Context, request *metadatav1.Tak
 	cache.
 		GetInstance().
 		EvictGeneratedChests(sessionName)
+
+	return response, nil
+}
+
+func (h *Handler) TakeHealthPack(context context.Context, request *metadatav1.TakeHealthPackRequest) (*metadatav1.TakeHealthPackResponse, error) {
+	response := new(metadatav1.TakeHealthPackResponse)
+
+	var userID int64
+
+	cachedUserID, ok := cache.
+		GetInstance().
+		GetUsers(request.GetIssuer())
+	if ok {
+		userID = cachedUserID
+	} else {
+		user, exists, err := repository.
+			GetUsersRepository().
+			GetByName(request.GetIssuer())
+		if err != nil {
+			return nil, err
+		}
+
+		if !exists {
+			return nil, ErrUserDoesNotExist
+		}
+
+		userID = user.ID
+	}
+
+	cache.
+		GetInstance().
+		BeginGeneratedHealthPacksTransaction()
+
+	generation, _, err := repository.
+		GetGenerationRepository().
+		GetByID(request.GetGenerationId())
+	if err != nil {
+		cache.
+			GetInstance().
+			CommitGeneratedHealthPacksTransaction()
+
+		return nil, err
+	}
+
+	if generation.Type != dto.HEALTH_PACK_GENERATION_TYPE || generation.Name != utils.HEALTH_PACK_FROG_TYPE {
+		cache.
+			GetInstance().
+			CommitGeneratedHealthPacksTransaction()
+
+		return nil, ErrGenerationIsNotHealthPack
+	}
+
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
+
+	var sessionName string
+
+	cachedSession, ok := cache.
+		GetInstance().
+		GetSessions(request.GetSessionId())
+	if !ok {
+		session, _, err := repository.
+			GetSessionsRepository().
+			GetByID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, err
+		}
+
+		if !session.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, ErrSessionNotStarted
+		}
+
+		sessionName = session.Name
+
+		cache.
+			GetInstance().
+			AddSessions(
+				request.GetSessionId(),
+				converter.ConvertSessionEntityToCacheSessionEntity(session))
+	} else {
+		if !cachedSession.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, ErrSessionNotStarted
+		}
+
+		sessionName = cachedSession.Name
+	}
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
+	cache.
+		GetInstance().
+		BeginMetadataTransaction()
+
+	metadata, ok := cache.
+		GetInstance().
+		GetMetadata(request.GetIssuer())
+	if !ok {
+		lobbies, exists, err := repository.
+			GetLobbiesRepository().
+			GetByUserID(userID)
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, err
+		}
+
+		if !exists {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, ErrLobbyDoesNotExist
+		}
+
+		inventory, exists, err := repository.
+			GetInventoryRepository().
+			GetBySessionIDAndUserID(request.GetSessionId(), userID)
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, err
+		}
+
+		if !exists {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, ErrHealthPackDoesNotExist
+		}
+
+		metadata = converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies, inventory)
+
+		cache.
+			GetInstance().
+			AddMetadata(request.GetIssuer(), metadata)
+	}
+
+	for _, value := range metadata {
+		if value.SessionID == request.GetSessionId() {
+			if !value.Eliminated {
+				previous := value.Health
+
+				if generation.Name == utils.HEALTH_PACK_FROG_TYPE {
+					if value.Health+dto.FROG_HEALTH_PACK_RATE >= 100 {
+						value.Health = 100
+					} else {
+						value.Health += dto.FROG_HEALTH_PACK_RATE
+					}
+				}
+
+				err = repository.
+					GetGenerationRepository().
+					InsertOrUpdate(dto.GenerationsRepositoryInsertOrUpdateRequest{
+						ID:        generation.ID,
+						SessionID: request.GetSessionId(),
+						Active:    false,
+					})
+				if err != nil {
+					value.Health = previous
+
+					cache.
+						GetInstance().
+						CommitMetadataTransaction()
+
+					cache.
+						GetInstance().
+						CommitGeneratedHealthPacksTransaction()
+
+					return nil, err
+				}
+
+				cache.
+					GetInstance().
+					EvictGeneratedHealthPacks(sessionName)
+
+				break
+			}
+		}
+	}
+
+	cache.
+		GetInstance().
+		CommitMetadataTransaction()
+
+	cache.
+		GetInstance().
+		CommitGeneratedHealthPacksTransaction()
 
 	return response, nil
 }
@@ -2844,7 +3049,9 @@ func (h *Handler) GetHealthPacks(request *metadatav1.GetHealthPacksRequest, stre
 
 			for _, healthPack := range healthPacks {
 				response.HealthPacks = append(response.HealthPacks, &metadatav1.HealthPack{
+					SessionId:    healthPack.SessionID,
 					HealthPackId: healthPack.ID,
+					Name:         healthPack.Name,
 					Active:       healthPack.Active,
 					Position: &metadatav1.Position{
 						X: healthPack.PositionX,

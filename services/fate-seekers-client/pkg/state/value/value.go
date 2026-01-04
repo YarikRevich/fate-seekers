@@ -181,6 +181,7 @@ var (
 	PREVIOUS_POSITION_SESSION_EMPTY_VALUE dto.Position
 	RETRIEVED_USERS_METADATA_EMPTY_VALUE  dto.RetrievedUsersMetadataSessionSet = make(dto.RetrievedUsersMetadataSessionSet)
 	RETRIEVED_CHESTS_EMPTY_VALUE          dto.RetrievedChests
+	RETRIEVED_HEALTH_PACKS_EMPTY_VALUE    dto.RetrievedHealthPack
 	INVENTORY_OPENED_FALSE_VALUE                                     = "false"
 	INVENTORY_OPENED_TRUE_VALUE                                      = "true"
 	CHEST_OPENED_FALSE_VALUE                                         = "false"

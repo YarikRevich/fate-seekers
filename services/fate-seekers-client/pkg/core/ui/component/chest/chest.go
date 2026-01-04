@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/config"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
@@ -23,14 +24,19 @@ var (
 
 // InventoryComponent represents inventory component.
 type ChestComponent struct {
+	// Represents container instance.
 	container *widget.Container
 
+	// Represents general font instance.
 	generalFont *text.GoTextFace
 
+	// Represent button icons.
 	buttonIdleIcon, buttonHoverIcon *image.NineSlice
 
+	// Represents close button callback.
 	closeCallback func()
 
+	// Represents a set of elements to be retrieved.
 	elements *widget.Container
 }
 
@@ -181,6 +187,8 @@ func newChestComponent() *ChestComponent {
 			Bottom: 20,
 		}),
 		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
+			sound.GetInstance().GetSoundUIFxManager().PushWithHandbrake(loader.ButtonFXSound)
+
 			result.closeCallback()
 		}),
 	))
