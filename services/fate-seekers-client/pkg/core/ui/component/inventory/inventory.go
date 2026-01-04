@@ -1,18 +1,89 @@
 package inventory
 
 import (
-	"fmt"
 	"image/color"
+	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
+	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
-// NewInventoryComponent creates new session inventory component.
-func NewInventoryComponent() *widget.Container {
-	result := widget.NewContainer(
+var (
+	// GetInstance retrieves instance of the inventory component, performing initial creation if needed.
+	GetInstance = sync.OnceValue[*InventoryComponent](newInventoryComponent)
+)
+
+// InventoryComponent represents inventory component.
+type InventoryComponent struct {
+	container *widget.Container
+
+	generalFont *text.GoTextFace
+
+	buttonIdleIcon, buttonHoverIcon *image.NineSlice
+
+	elements *widget.Container
+}
+
+// AddElements adds new elements to inventory component.
+func (ic *InventoryComponent) AddElements(elements []dto.InventoryElement) {
+	for _, element := range elements {
+		var graphic *widget.Graphic
+
+		graphic = widget.NewGraphic(
+			widget.GraphicOpts.Image(element.Image),
+			widget.GraphicOpts.WidgetOpts(
+				widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
+					HorizontalPosition: widget.AnchorLayoutPositionCenter,
+					VerticalPosition:   widget.AnchorLayoutPositionCenter,
+				}),
+				widget.WidgetOpts.MouseButtonPressedHandler(func(args *widget.WidgetMouseButtonPressedEventArgs) {
+					if args.Button == ebiten.MouseButtonRight {
+						element.RemoveCallback(func() {
+							ic.elements.RemoveChild(graphic)
+						})
+					} else if args.Button == ebiten.MouseButtonLeft {
+						element.ApplyCallback(func() {
+							ic.elements.RemoveChild(graphic)
+						})
+					}
+				}),
+			),
+		)
+
+		ic.elements.AddChild(graphic)
+	}
+}
+
+// CleanElements removes all the elements.
+func (ic *InventoryComponent) CleanElements() {
+	ic.elements.RemoveChildren()
+}
+
+// Show shows inventory component.
+func (ic *InventoryComponent) Show() {
+	ic.container.GetWidget().Visibility = widget.Visibility_Show
+}
+
+// Hide hides inventory component.
+func (ic *InventoryComponent) Hide() {
+	ic.container.GetWidget().Visibility = widget.Visibility_Hide
+}
+
+// GetContainer retrieves container widget.
+func (ic *InventoryComponent) GetContainer() *widget.Container {
+	return ic.container
+}
+
+// newInventoryComponent creates new session inventory component.
+func newInventoryComponent() *InventoryComponent {
+	var result *InventoryComponent
+
+	container := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.MinSize(400, 300)),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.TrackHover(false)),
 		widget.ContainerOpts.BackgroundImage(common.GetImageAsNineSlice(loader.PanelIdlePanel, 10, 10)),
@@ -38,13 +109,13 @@ func NewInventoryComponent() *widget.Container {
 		Size:   20,
 	}
 
-	result.AddChild(widget.NewText(
+	container.AddChild(widget.NewText(
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
 		widget.TextOpts.Text("Inventory", generalFont, color.White)))
 
-	bc := widget.NewContainer(
+	elements := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
@@ -59,56 +130,17 @@ func NewInventoryComponent() *widget.Container {
 	buttonIdleIcon := common.GetImageAsNineSlice(loader.ButtonIdleButton, 16, 15)
 	buttonHoverIcon := common.GetImageAsNineSlice(loader.ButtonHoverButton, 16, 15)
 
-	i := 0
-	for row := 0; row < 3; row++ {
-		for col := 0; col < 4; col++ {
-			b := widget.NewButton(
-				widget.ButtonOpts.Image(&widget.ButtonImage{
-					Idle:         buttonIdleIcon,
-					Hover:        buttonHoverIcon,
-					Pressed:      buttonIdleIcon,
-					PressedHover: buttonIdleIcon,
-					Disabled:     buttonIdleIcon,
-				}),
-				widget.ButtonOpts.Text(fmt.Sprintf("%s %d", string(rune('A'+i)), i+1), generalFont, &widget.ButtonTextColor{Idle: color.White}))
-			bc.AddChild(b)
+	container.AddChild(elements)
 
-			i++
-		}
+	container.GetWidget().Visibility = widget.Visibility_Hide
+
+	result = &InventoryComponent{
+		container:       container,
+		generalFont:     generalFont,
+		buttonIdleIcon:  buttonIdleIcon,
+		buttonHoverIcon: buttonHoverIcon,
+		elements:        elements,
 	}
-
-	result.AddChild(bc)
-
-	closeContainer := widget.NewContainer(
-		widget.ContainerOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(result.GetWidget().MinWidth, 0)),
-		widget.ContainerOpts.Layout(widget.NewAnchorLayout(
-			widget.AnchorLayoutOpts.Padding(widget.Insets{
-				Top: 20,
-			}),
-		)),
-	)
-
-	closeContainer.AddChild(widget.NewButton(
-		widget.ButtonOpts.Image(&widget.ButtonImage{
-			Idle:         buttonIdleIcon,
-			Hover:        buttonHoverIcon,
-			Pressed:      buttonIdleIcon,
-			PressedHover: buttonIdleIcon,
-			Disabled:     buttonIdleIcon,
-		}),
-		widget.ButtonOpts.Text("Close", generalFont, &widget.ButtonTextColor{Idle: color.White}),
-		widget.ButtonOpts.WidgetOpts(
-			widget.WidgetOpts.LayoutData(widget.AnchorLayoutData{
-				VerticalPosition:   widget.AnchorLayoutPositionEnd,
-				HorizontalPosition: widget.AnchorLayoutPositionEnd,
-				StretchHorizontal:  false,
-				StretchVertical:    false,
-			}),
-		),
-	))
-
-	result.AddChild(closeContainer)
 
 	return result
 }

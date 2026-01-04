@@ -35,9 +35,6 @@ type MenuComponent struct {
 	// Represents stop callback.
 	stopCallback func()
 
-	// Represents monitoring callback.
-	monitoringCallback func()
-
 	// Represents settings callback.
 	settingsCallback func()
 
@@ -76,11 +73,6 @@ func (mc *MenuComponent) SetStartCallback(callback func()) {
 // SetStopCallback modified stop callback in the container.
 func (mc *MenuComponent) SetStopCallback(callback func()) {
 	mc.stopCallback = callback
-}
-
-// SetMonitoringCallback modified monitoring callback in the container.
-func (mc *MenuComponent) SetMonitoringCallback(callback func()) {
-	mc.monitoringCallback = callback
 }
 
 // SetSettingsCallback modified settings callback in the container.
@@ -285,34 +277,6 @@ func newMenuComponent() *MenuComponent {
 	)
 
 	buttonsContainer.AddChild(stopButtonWidget)
-
-	buttonsContainer.AddChild(widget.NewButton(
-		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
-			Stretch: true,
-		})),
-		widget.ButtonOpts.Image(&widget.ButtonImage{
-			Idle:         buttonIdleIcon,
-			Hover:        buttonHoverIcon,
-			Pressed:      buttonIdleIcon,
-			PressedHover: buttonIdleIcon,
-			Disabled:     buttonIdleIcon,
-		}),
-		widget.ButtonOpts.Text(
-			translation.GetInstance().GetTranslation("server.menu.monitoring"),
-			buttonFont,
-			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
-		widget.ButtonOpts.TextPadding(widget.Insets{
-			Left:   30,
-			Right:  30,
-			Top:    20,
-			Bottom: 20,
-		}),
-		widget.ButtonOpts.PressedHandler(func(args *widget.ButtonPressedEventArgs) {
-			sound.GetInstance().GetSoundFxManager().PushWithHandbrake(loader.ButtonFXSound)
-
-			result.monitoringCallback()
-		}),
-	))
 
 	buttonsContainer.AddChild(widget.NewButton(
 		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{

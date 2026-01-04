@@ -10,6 +10,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/entity"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
@@ -34,7 +35,7 @@ type CollectionsComponent struct {
 	list *widget.List
 
 	// Represents the callback fired when a list item is clicked.
-	entrySelectedCallback func(entry interface{})
+	entrySelectedCallback func(path string)
 
 	// Represents back callback.
 	backCallback func()
@@ -49,7 +50,7 @@ func (cc *CollectionsComponent) SetListsEntries(value []interface{}) {
 }
 
 // SetEntrySelectedCallback modifies the callback executed when a list item is clicked.
-func (cc *CollectionsComponent) SetEntrySelectedCallback(callback func(entry interface{})) {
+func (cc *CollectionsComponent) SetEntrySelectedCallback(callback func(path string)) {
 	cc.entrySelectedCallback = callback
 }
 
@@ -173,11 +174,11 @@ func newCollectionsComponent() *CollectionsComponent {
 		widget.ListOpts.HideHorizontalSlider(),
 		widget.ListOpts.Entries([]interface{}{}),
 		widget.ListOpts.EntryLabelFunc(func(e interface{}) string {
-			return e.(string)
+			return (e.(entity.CollectionEntity)).Name
 		}),
 		widget.ListOpts.EntrySelectedHandler(func(args *widget.ListEntrySelectedEventArgs) {
 			if result.entrySelectedCallback != nil {
-				result.entrySelectedCallback(args.Entry)
+				result.entrySelectedCallback((args.Entry.(entity.CollectionEntity)).Path)
 			}
 		}),
 		widget.ListOpts.EntryFontFace(generalFont),

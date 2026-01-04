@@ -52,7 +52,7 @@ func (uumps *updateUserMetadataPositionsSubmitter) close() {
 // required to return boolean value, which defines whether submitter should be closed
 // or not.
 func (uumps *updateUserMetadataPositionsSubmitter) Submit(
-	lobbyID int64, callback func(err error) bool) {
+	sessionID, lobbyID int64, callback func(err error) bool) {
 	uumps.ctx, uumps.cancel = context.WithCancel(context.Background())
 
 	go func() {
@@ -66,9 +66,10 @@ func (uumps *updateUserMetadataPositionsSubmitter) Submit(
 				if position == uumps.previousPosition {
 					if !uumps.staticPosition {
 						message, err := proto.Marshal(&contentv1.UpdateUserMetadataStaticRequest{
-							Issuer:  store.GetRepositoryUUID(),
-							LobbyId: lobbyID,
-							Static:  true,
+							Issuer:    store.GetRepositoryUUID(),
+							SessionId: sessionID,
+							LobbyId:   lobbyID,
+							Static:    true,
 						})
 						if err != nil {
 							if callback(err) {
@@ -122,9 +123,10 @@ func (uumps *updateUserMetadataPositionsSubmitter) Submit(
 
 				if uumps.staticPosition {
 					message, err := proto.Marshal(&contentv1.UpdateUserMetadataStaticRequest{
-						Issuer:  store.GetRepositoryUUID(),
-						LobbyId: lobbyID,
-						Static:  false,
+						Issuer:    store.GetRepositoryUUID(),
+						SessionId: sessionID,
+						LobbyId:   lobbyID,
+						Static:    false,
 					})
 					if err != nil {
 						if callback(err) {

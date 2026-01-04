@@ -15,7 +15,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository/converter"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
@@ -52,7 +51,7 @@ func (cs *CollectionsScreen) HandleInput() error {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetResetCollections(value.RESET_COLLECTIONS_TRUE_VALUE))
 
-		exists, err := repository.GetCollectionsRepository().Exists("test")
+		items, err := repository.GetCollectionsRepository().GetAll()
 		if err != nil {
 			notification.GetInstance().Push(
 				common.ComposeMessage(
@@ -60,32 +59,10 @@ func (cs *CollectionsScreen) HandleInput() error {
 					err.Error()),
 				time.Second*3,
 				common.NotificationErrorTextColor)
+
 		} else {
-			if !exists {
-				err = repository.GetCollectionsRepository().Insert("test")
-				if err != nil {
-					notification.GetInstance().Push(
-						common.ComposeMessage(
-							translation.GetInstance().GetTranslation("client.repository.collections-retrieval-failure"),
-							err.Error()),
-						time.Second*3,
-						common.NotificationErrorTextColor)
-				}
-			}
-
-			items, err := repository.GetCollectionsRepository().GetAll()
-			if err != nil {
-				notification.GetInstance().Push(
-					common.ComposeMessage(
-						translation.GetInstance().GetTranslation("client.repository.collections-retrieval-failure"),
-						err.Error()),
-					time.Second*3,
-					common.NotificationErrorTextColor)
-
-			} else {
-				collections.GetInstance().SetListsEntries(
-					converter.ConvertRetrievedCollectionsToListEntries(items))
-			}
+			collections.GetInstance().SetListsEntries(
+				converter.ConvertRetrievedCollectionsToListEntries(items))
 		}
 	}
 
@@ -141,9 +118,9 @@ func newCollectionsScreen() screen.Screen {
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
 	})
 
-	collections.GetInstance().SetEntrySelectedCallback(func(entry interface{}) {
+	collections.GetInstance().SetEntrySelectedCallback(func(path string) {
 		dispatcher.GetInstance().Dispatch(
-			action.NewSetLetterNameAction(loader.LoneManLetter))
+			action.NewSetLetterNameAction(path))
 	})
 
 	return &CollectionsScreen{

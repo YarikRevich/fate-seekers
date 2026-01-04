@@ -17,7 +17,6 @@ var (
 	ErrPersistingAssociations = errors.New("err happened during the process of associations creation response data save.")
 	ErrPersistingLobbies      = errors.New("err happened during the process of lobby creation response data save.")
 	ErrPersistingInventory    = errors.New("err happened during the process of inventory creation response data save.")
-	ErrPersistingMessages     = errors.New("err happened during the process of message creation response data save.")
 	ErrPersistingUsers        = errors.New("err happened during the process of user creation response data save.")
 )
 
@@ -36,9 +35,6 @@ var (
 
 	// GetInventoryRepository retrieves instance of the inventory repository, performing initial creation if needed.
 	GetInventoryRepository = sync.OnceValue[InventoryRepository](createInventoryRepository)
-
-	// GetMessagesRepository retrieves instance of the messages repository, performing initial creation if needed.
-	GetMessagesRepository = sync.OnceValue[MessagesRepository](createMessagesRepository)
 
 	// GetUsersRepository retrieves instance of the users repository, performing initial creation if needed.
 	GetUsersRepository = sync.OnceValue[UsersRepository](createUsersRepository)
@@ -258,6 +254,7 @@ type GenerationsRepository interface {
 	GetChestTypeByInstanceAndSessionIDWithTransaction(
 		transaction *gorm.DB, instance string, sessionID int64) (*entity.GenerationsEntity, bool, error)
 	GetHealthPackTypeBySessionID(sessionID int64) ([]*entity.GenerationsEntity, error)
+	GetByID(generationID int64) (*entity.GenerationsEntity, bool, error)
 }
 
 // generationsRepositoryImpl represents implementation of GenerationsRepository.
@@ -319,7 +316,7 @@ func (w *generationsRepositoryImpl) GetChestTypeBySessionID(sessionID int64) ([]
 	var result []*entity.GenerationsEntity
 
 	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
-		Where("session_id = ? AND type = ?", sessionID, dto.ChestGenerationType).
+		Where("session_id = ? AND type = ?", sessionID, dto.CHEST_GENERATION_TYPE).
 		Find(&result).Error
 
 	w.mu.RUnlock()
@@ -336,7 +333,7 @@ func (w *generationsRepositoryImpl) GetChestTypeByInstanceAndSessionIDWithTransa
 	var result *entity.GenerationsEntity
 
 	err := transaction.Table((&entity.GenerationsEntity{}).TableName()).
-		Where("instance = ? AND session_id = ? AND type = ?", instance, sessionID, dto.ChestGenerationType).
+		Where("instance = ? AND session_id = ? AND type = ?", instance, sessionID, dto.CHEST_GENERATION_TYPE).
 		Find(&result).Error
 
 	if err != nil {
@@ -365,12 +362,41 @@ func (w *generationsRepositoryImpl) GetHealthPackTypeBySessionID(sessionID int64
 	var result []*entity.GenerationsEntity
 
 	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
-		Where("session_id = ? AND type = ?", sessionID, dto.HealthPackGenerationType).
+		Where("session_id = ? AND type = ?", sessionID, dto.HEALTH_PACK_GENERATION_TYPE).
 		Find(&result).Error
 
 	w.mu.RUnlock()
 
 	return result, err
+}
+
+// GetByID retrieves generation for the provided generation id.
+func (w *generationsRepositoryImpl) GetByID(generationID int64) (*entity.GenerationsEntity, bool, error) {
+	w.mu.RLock()
+
+	var result *entity.GenerationsEntity
+
+	instance := db.GetInstance()
+
+	err := instance.Table((&entity.GenerationsEntity{}).TableName()).
+		Where("id = ?", generationID).
+		Find(&result).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			w.mu.RUnlock()
+
+			return result, false, nil
+		}
+
+		w.mu.RUnlock()
+
+		return result, false, err
+	}
+
+	w.mu.RUnlock()
+
+	return result, true, nil
 }
 
 // createGenerationsRepository initializes generationsRepositoryImpl.
@@ -604,7 +630,6 @@ func (w *lobbiesRepositoryImpl) GetByUserID(userID int64) ([]*entity.LobbyEntity
 	err := instance.Table((&entity.LobbyEntity{}).TableName()).
 		Preload((&entity.UserEntity{}).TableView()).
 		Preload((&entity.SessionEntity{}).TableView()).
-		// Preload((&entity.InventoryEntity{}).TableView()).
 		Where("user_id = ?", userID).
 		Find(&result).Error
 
@@ -707,9 +732,9 @@ func createLobbiesRepository() LobbiesRepository {
 // InventoryRepository represents intentory entity repository.
 type InventoryRepository interface {
 	InsertOrUpdate(request dto.InventoryRepositoryInsertOrUpdateRequest) error
-	DeleteByUserIDAndSessionID(userID, sessionID int64) error
-	DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error
+	DeleteByUserIDAndID(inventoryID, userID int64) error
 	GetBySessionIDAndUserID(sessionID, userID int64) ([]*entity.InventoryEntity, bool, error)
+	CountByLobbyIDAndUserID(lobbyID, userID int64) (int64, error)
 }
 
 // inventoryRepositoryImpl represents implementation of InventoryRepository.
@@ -724,6 +749,7 @@ func (w *inventoryRepositoryImpl) insertOrUpdate(instance *gorm.DB, request dto.
 
 	err := instance.Create(&entity.InventoryEntity{
 		UserID:    request.UserID,
+		LobbyID:   request.LobbyID,
 		SessionID: request.SessionID,
 		Name:      request.Name,
 	}).Error
@@ -750,26 +776,18 @@ func (w *inventoryRepositoryImpl) InsertOrUpdateWithTransaction(transaction *gor
 }
 
 // deleteByUserIDAndSessionID deletes inventory by the provided user id with provided db instance.
-func (w *inventoryRepositoryImpl) deleteByUserIDAndSessionID(instance *gorm.DB, userID, sessionID int64) error {
+func (w *inventoryRepositoryImpl) DeleteByUserIDAndID(inventoryID, userID int64) error {
 	w.mu.Lock()
 
+	instance := db.GetInstance()
+
 	err := instance.Table((&entity.InventoryEntity{}).TableName()).
-		Where("user_id = ? AND session_id = ?", userID, sessionID).
+		Where("id = ? AND user_id = ?", inventoryID, userID).
 		Delete(&entity.InventoryEntity{}).Error
 
 	w.mu.Unlock()
 
 	return err
-}
-
-// DeleteByUserIDAndSessionID deletes lobby by the provided user id.
-func (w *inventoryRepositoryImpl) DeleteByUserIDAndSessionID(userID, sessionID int64) error {
-	return w.deleteByUserIDAndSessionID(db.GetInstance(), userID, sessionID)
-}
-
-// DeleteByUserIDAndSessionIDWithTransaction deletes lobby by the provided user id with provided transaction.
-func (w *inventoryRepositoryImpl) DeleteByUserIDAndSessionIDWithTransaction(transaction *gorm.DB, userID, sessionID int64) error {
-	return w.deleteByUserIDAndSessionID(transaction, userID, sessionID)
 }
 
 // GetBySessionIDAndUserID retrieves inventory by the provided session id and user id.
@@ -809,66 +827,31 @@ func (w *inventoryRepositoryImpl) GetBySessionIDAndUserID(sessionID, userID int6
 	return result, true, nil
 }
 
-// createInventoryRepository initializes inventoryRepositoryImpl.
-func createInventoryRepository() InventoryRepository {
-	return new(inventoryRepositoryImpl)
-}
-
-// MessagesRepository represents messages entity repository.
-type MessagesRepository interface {
-	Insert(issuer int64, content string) error
-	GetByIssuer(issuer int64) ([]*entity.MessageEntity, error)
-}
-
-// messagesRepositoryImpl represents implementation of MessagesRepository.
-type messagesRepositoryImpl struct {
-	// Represents mutex used for database messages repository related operations.
-	mu sync.RWMutex
-}
-
-// Insert inserts new messages entity to the storage.
-func (w *messagesRepositoryImpl) Insert(issuer int64, content string) error {
-	w.mu.Lock()
-
-	instance := db.GetInstance()
-
-	err := instance.Create(
-		&entity.MessageEntity{
-			Issuer:  issuer,
-			Content: content}).Error
-
-	if err != nil {
-		w.mu.Unlock()
-
-		return errors.Wrap(err, ErrPersistingMessages.Error())
-	}
-
-	w.mu.Unlock()
-
-	return nil
-}
-
-// GetAll retrieves all available sessions.
-func (w *messagesRepositoryImpl) GetByIssuer(issuer int64) ([]*entity.MessageEntity, error) {
+// CountByLobbyIDAndUserID represents inventory count by the provided lobby id and user id.
+func (w *inventoryRepositoryImpl) CountByLobbyIDAndUserID(lobbyID, userID int64) (int64, error) {
 	w.mu.RLock()
 
 	instance := db.GetInstance()
 
-	var result []*entity.MessageEntity
+	var count int64
 
-	err := instance.Table((&entity.MessageEntity{}).TableName()).
-		Preload((&entity.UserEntity{}).TableView()).
-		Where("issuer = ?", issuer).
-		Find(&result).Error
+	err := instance.Table((&entity.InventoryEntity{}).TableName()).
+		Where("lobby_id = ? AND user_id = ?", lobbyID, userID).
+		Count(&count).Error
+
+	if err != nil {
+		w.mu.RUnlock()
+		return 0, err
+	}
 
 	w.mu.RUnlock()
 
-	return result, err
+	return count, nil
 }
 
-// createMessagesRepository initializes messagesRepositoryImpl.
-func createMessagesRepository() MessagesRepository {
-	return new(messagesRepositoryImpl)
+// createInventoryRepository initializes inventoryRepositoryImpl.
+func createInventoryRepository() InventoryRepository {
+	return new(inventoryRepositoryImpl)
 }
 
 // UsersRepository represents users entity repository.

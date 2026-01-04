@@ -502,7 +502,10 @@ func (r *Renderer) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 
 			switch item.Type {
 			case dto.RendererPositionItemSecondaryTile:
-				value, _ := r.secondaryTileObjects.Get(item.Name)
+				value, ok := r.secondaryTileObjects.Get(item.Name)
+				if !ok {
+					continue
+				}
 
 				if r.selectedObjectEnabled && value.GetPosition() == r.selectedObjectPosition {
 					selected = true
@@ -511,7 +514,10 @@ func (r *Renderer) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 				value.Draw(screen, selected, camera)
 
 			case dto.RendererPositionItemSecondaryStatic:
-				static := r.secondaryLocalStaticObjects[item.Name]
+				static, ok := r.secondaryLocalStaticObjects[item.Name]
+				if !ok {
+					continue
+				}
 
 				if r.selectedObjectEnabled && static.GetPosition() == r.selectedObjectPosition {
 					selected = true
@@ -520,7 +526,10 @@ func (r *Renderer) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 				static.Draw(screen, selected, camera)
 
 			case dto.RendererPositionItemSecondaryExternalMovable:
-				movable := r.secondaryExternalMovableObjects[item.Name]
+				movable, ok := r.secondaryExternalMovableObjects[item.Name]
+				if !ok {
+					continue
+				}
 
 				if r.selectedObjectEnabled && movable.GetPosition() == r.selectedObjectPosition {
 					selected = true
@@ -539,7 +548,10 @@ func (r *Renderer) Draw(screen *ebiten.Image, camera *kamera.Camera) {
 				movable.Draw(screen, resetDelayedPositions, selected, false, camera)
 
 			case dto.RendererPositionItemMainCenteredMovable:
-				movable := r.mainCenteredMovableObjects[item.Name]
+				movable, ok := r.mainCenteredMovableObjects[item.Name]
+				if !ok {
+					continue
+				}
 
 				if r.selectedObjectEnabled && movable.GetPosition() == r.selectedObjectPosition {
 					selected = true

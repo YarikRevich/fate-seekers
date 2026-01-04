@@ -12,7 +12,6 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen/entry"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen/menu"
-	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen/monitoring"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/screen/settings"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/ui/state/dispatcher"
@@ -124,9 +123,6 @@ func (r *Runtime) Update() error {
 	switch store.GetActiveScreen() {
 	case value.ACTIVE_SCREEN_MENU_VALUE:
 		r.activeScreen = menu.GetInstance()
-
-	case value.ACTIVE_SCREEN_MONITORING_VALUE:
-		r.activeScreen = monitoring.GetInstance()
 
 	case value.ACTIVE_SCREEN_SETTINGS_VALUE:
 		r.activeScreen = settings.GetInstance()

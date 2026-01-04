@@ -9,6 +9,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/options"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
@@ -17,6 +18,7 @@ import (
 	answerinputmanager "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/answerinput"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -117,6 +119,15 @@ func newAnswerInputScreen() screen.Screen {
 			return
 		}
 
+		shared.GetInstance().GetBlinkingScreenAnimation().Reset()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetAnswerInputQuestionUpdated(value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE))
+
+		answerinput.GetInstance().CleanInput()
+
+		transparentTransitionEffect.Reset()
+
 		if answerinputmanager.GetInstance().GetGeneratedQuestion().Answer == result {
 			notification.GetInstance().Push(
 				translation.GetInstance().GetTranslation("client.answerinput.success"),
@@ -125,16 +136,36 @@ func newAnswerInputScreen() screen.Screen {
 
 			dispatcher.GetInstance().Dispatch(
 				action.NewSetAnswerInputQuestionUpdated(value.ANSWER_INPUT_QUESTION_UPDATED_FALSE_VALUE))
+
+			sound.GetInstance().
+				GetSoundSounderChestFxManager().
+				PushWithHandbrake(loader.ChestOpenFXSound)
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetActiveScreenAction(
+					value.ACTIVE_SCREEN_SESSION_VALUE))
 		} else {
 			notification.GetInstance().Push(
 				translation.GetInstance().GetTranslation("client.answerinput.failure"),
 				time.Second*2,
 				common.NotificationErrorTextColor)
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetSelectedPositionSession(nil))
+
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetActiveScreenAction(
+					value.ACTIVE_SCREEN_SESSION_VALUE))
 		}
 	})
 
 	answerinput.GetInstance().SetCloseCallback(func() {
 		shared.GetInstance().GetBlinkingScreenAnimation().Reset()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSelectedPositionSession(nil))
+
+		answerinput.GetInstance().CleanInput()
 
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_SESSION_VALUE))

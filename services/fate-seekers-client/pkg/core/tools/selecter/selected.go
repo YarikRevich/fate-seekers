@@ -16,8 +16,19 @@ var (
 	GetInstance = sync.OnceValue[*Selected](newSelected)
 )
 
+// Describes all the available configurations related to selected processing.
+const (
+	MIN_DISTANCE_TO_LOCAL_STATIC = 65
+)
+
 // Selected represents active map selected manager.
 type Selected struct {
+	// Represents tertiary static objects mutex.
+	mainTrackableObjectMutex sync.Mutex
+
+	// Represents main trackable soundable object.
+	mainTrackableObject *resolv.ConvexPolygon
+
 	// Represents selectable tile objects mutex.
 	selectableTileObjectsMutex sync.Mutex
 
@@ -40,7 +51,26 @@ type Selected struct {
 	cursorTrackableObject *resolv.ConvexPolygon
 }
 
-// TODO: implement local static object addition logic(with kind provision)
+// SetMainTrackableObject sets main trackable object with the provided value.
+func (s *Selected) SetMainTrackableObject(value dto.Position, shiftWidth, shiftHeight float64) {
+	s.mainTrackableObjectMutex.Lock()
+
+	s.mainTrackableObject = resolv.NewRectangle(
+		value.X, value.Y, shiftWidth/2, shiftHeight/2)
+
+	s.mainTrackableObjectMutex.Unlock()
+}
+
+// MainTrackableObjectExists checks if main trackable object exists with the provided value.
+func (s *Selected) MainTrackableObjectExists() bool {
+	s.mainTrackableObjectMutex.Lock()
+
+	value := s.mainTrackableObject
+
+	s.mainTrackableObjectMutex.Unlock()
+
+	return value != nil
+}
 
 // PruneExternalMovableObjects performs clean operation for abondoned external movables.
 func (s *Selected) PruneExternalMovableObjects(names map[string]bool) {
@@ -106,9 +136,20 @@ func (s *Selected) AddSelectableTileObject(value *dto.SelectableTile) {
 	s.selectableTileObjectsMutex.Unlock()
 }
 
+// SelectableStaticObjectExists checks if selectable static object with the provided name exists.
+func (s *Selected) SelectableStaticObjectExists(name string) bool {
+	s.localStaticObjectsMutex.RLock()
+
+	_, ok := s.localStaticObjects[name]
+
+	s.localStaticObjectsMutex.RUnlock()
+
+	return ok
+}
+
 // AddSelectableStaticObject adds new selectable static object with the provided value.
-func (s *Selected) AddSelectableStaticObject(value *dto.SelectableTile) {
-	s.selectableTileObjectsMutex.Lock()
+func (s *Selected) AddSelectableStaticObject(key string, value *dto.SelectableStatic) {
+	s.localStaticObjectsMutex.Lock()
 
 	selected := resolv.NewConvexPolygon(
 		value.Position.X, value.Position.Y,
@@ -120,26 +161,27 @@ func (s *Selected) AddSelectableStaticObject(value *dto.SelectableTile) {
 		},
 	)
 
-	s.selectableTileObjects = append(s.selectableTileObjects, selected)
+	s.localStaticObjects[key] = selected
 
-	s.selectableTileObjectsMutex.Unlock()
+	s.localStaticObjectsMutex.Unlock()
 }
 
-// AddSelectableStaticObject adds new selectable static object with the provided value.
+// GetSelectableStaticObject retrieves selectable static object with the provided name.
+func (s *Selected) GetSelectableStaticObject(name string) *resolv.ConvexPolygon {
+	s.localStaticObjectsMutex.RLock()
+
+	result, _ := s.localStaticObjects[name]
+
+	s.localStaticObjectsMutex.RUnlock()
+
+	return result
+}
+
+// RemoveSelectableStaticObject adds new selectable static object with the provided value.
 func (s *Selected) RemoveSelectableStaticObject(key string) {
 	s.selectableTileObjectsMutex.Lock()
 
-	// selected := resolv.NewConvexPolygon(
-	// 	value.Position.X, value.Position.Y,
-	// 	[]float64{
-	// 		float64(value.TileWidth/2) / 2.0, 0,
-	// 		float64(value.TileWidth / 2), float64(value.TileHeight/2) / 2.0,
-	// 		float64(value.TileWidth/2) / 2.0, float64(value.TileHeight / 2),
-	// 		0, float64(value.TileHeight/2) / 2.0,
-	// 	},
-	// )
-
-	// s.selectableTileObjects = append(s.selectableTileObjects, selected)
+	delete(s.localStaticObjects, key)
 
 	s.selectableTileObjectsMutex.Unlock()
 }
@@ -160,6 +202,42 @@ func (s *Selected) Scan(camera *kamera.Camera) (dto.SelectedObjectDetails, bool)
 	worldCursorPositionX := (camera.X + float64(cursorPositionX))
 	worldCursorPositionY := -(camera.Y + float64(cursorPositionY))
 
+	s.mainTrackableObjectMutex.Lock()
+
+	if s.mainTrackableObject != nil {
+		s.localStaticObjectsMutex.Lock()
+
+		for _, object := range s.localStaticObjects {
+			width := object.Bounds().Width()
+			height := object.Bounds().Height()
+
+			s.cursorTrackableObject.SetPosition(worldCursorPositionX-(width/4.25), worldCursorPositionY+float64(height))
+
+			if s.cursorTrackableObject.IsIntersecting(object) {
+
+				if object.DistanceTo(s.mainTrackableObject) > MIN_DISTANCE_TO_LOCAL_STATIC {
+					continue
+				}
+
+				s.mainTrackableObjectMutex.Unlock()
+
+				s.localStaticObjectsMutex.Unlock()
+
+				return dto.SelectedObjectDetails{
+					Position: dto.Position{
+						X: object.Position().X,
+						Y: object.Position().Y,
+					},
+					Kind: dto.SELECTED_LOCAL_STATIC_OBJECT,
+				}, true
+			}
+		}
+
+		s.localStaticObjectsMutex.Unlock()
+	}
+
+	s.mainTrackableObjectMutex.Unlock()
+
 	s.externalMovableObjectsMutex.Lock()
 
 	for _, object := range s.externalMovableObjects {
@@ -176,7 +254,7 @@ func (s *Selected) Scan(camera *kamera.Camera) (dto.SelectedObjectDetails, bool)
 					X: object.Position().X,
 					Y: object.Position().Y,
 				},
-				Kind: dto.SelectedMovableObject,
+				Kind: dto.SELECTED_MOVABLE_OBJECT,
 			}, true
 		}
 	}
@@ -199,7 +277,7 @@ func (s *Selected) Scan(camera *kamera.Camera) (dto.SelectedObjectDetails, bool)
 					X: object.Position().X,
 					Y: object.Position().Y,
 				},
-				Kind: dto.SelectedTileObject,
+				Kind: dto.SELECTED_TILE_OBJECT,
 			}, true
 		}
 	}
@@ -211,6 +289,12 @@ func (s *Selected) Scan(camera *kamera.Camera) (dto.SelectedObjectDetails, bool)
 
 // Clean performs clean operation for the configured collision holders.
 func (s *Selected) Clean() {
+	s.mainTrackableObjectMutex.Lock()
+
+	s.mainTrackableObject = nil
+
+	s.mainTrackableObjectMutex.Unlock()
+
 	s.externalMovableObjectsMutex.Lock()
 
 	clear(s.externalMovableObjects)
@@ -222,12 +306,19 @@ func (s *Selected) Clean() {
 	s.selectableTileObjects = s.selectableTileObjects[:0]
 
 	s.selectableTileObjectsMutex.Unlock()
+
+	s.localStaticObjectsMutex.Lock()
+
+	clear(s.localStaticObjects)
+
+	s.localStaticObjectsMutex.Unlock()
 }
 
 // newSelected initializes Selected.
 func newSelected() *Selected {
 	return &Selected{
 		externalMovableObjects: make(map[string]*resolv.ConvexPolygon),
+		localStaticObjects:     make(map[string]*resolv.ConvexPolygon),
 		cursorTrackableObject:  resolv.NewRectangle(0, 0, 10, 10),
 	}
 }

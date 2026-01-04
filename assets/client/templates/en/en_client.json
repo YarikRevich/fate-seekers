@@ -259,6 +259,30 @@
         "one": "Unable to perform user metadata positions update",
         "other": "Unable to perform user metadata positions update"
     },
+    "client.networking.take-chest-item-failure": {
+        "one": "Unable to perform take chest item operation",
+        "other": "Unable to perform take chest item operation"
+    },
+    "client.networking.take-health-pack-failure": {
+        "one": "Unable to perform take health pack operation",
+        "other": "Unable to perform take health pack operation"
+    },
+    "client.networking.open-health-pack-failure": {
+        "one": "Unable to perform open health pack operation",
+        "other": "Unable to perform open health pack operation"
+    },
+    "client.networking.drop-inventory-item-failure": {
+        "one": "Unable to perform drop inventory item operation",
+        "other": "Unable to perform drop inventory item operation"
+    },
+    "client.networking.hit-player-with-fist-failure": {
+        "one": "Unable to perform hit player with fist operation",
+        "other": "Unable to perform hit player with fist operation"
+    },
+    "client.networking.open-health-pack-opened": {
+        "one": "Health pack has been opened and applied",
+        "other": "Health pack has been opened and applied"
+    },
     "client.networking.event-retrieval-failure": {
         "one": "Unable to perform events retrieval",
         "other": "Unable to perform events retrieval"
@@ -279,6 +303,10 @@
         "one": "Unable to perform user collections retrieval",
         "other": "Unable to perform user collections retrieval"
     },
+    "client.repository.collections-added": {
+        "one": "Letter has been added to the collection",
+        "other": "Letter has been added to the collection"
+    },
     "client.gamepad.connected": {
         "one": "Controller has been connected",
         "other": "Controller has been connected"
@@ -286,6 +314,10 @@
     "client.gamepad.disconnected": {
         "one": "Controller has been disconnected",
         "other": "Controller has been disconnected"
+    },
+    "client.entry.welcome": {
+        "one": "So, let's begin!",
+        "other": "So, let's begin!"
     },
     "client.skin.0.name": {
         "one": "Ariyan",

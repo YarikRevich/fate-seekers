@@ -87,11 +87,11 @@ func (g *GenerationsEntity) BeforeCreate(tx *gorm.DB) error {
 	}
 
 	switch g.Name {
-	case dto.ChestGenerationType:
+	case dto.CHEST_GENERATION_TYPE:
 		cache.
 			GetInstance().
 			EvictGeneratedChests(g.SessionEntity.Name)
-	case dto.HealthPackGenerationType:
+	case dto.HEALTH_PACK_GENERATION_TYPE:
 		cache.
 			GetInstance().
 			EvictGeneratedHealthPacks(g.SessionEntity.Name)
@@ -123,40 +123,22 @@ func (*AssociationsEntity) TableView() string {
 	return "AssociationsEntity"
 }
 
-// BeforeCreate performs associations cache entity eviction before generations entity create.
-func (a *AssociationsEntity) BeforeCreate(tx *gorm.DB) error {
-	if err := tx.
-		Model(&SessionEntity{}).
-		Where("id = ?", a.SessionID).
-		First(&a.SessionEntity).Error; err != nil {
-		return err
-	}
-
-	cache.
-		GetInstance().
-		EvictGeneratedChests(a.SessionEntity.Name)
-
-	return nil
-}
-
 // LobbyEntity represents lobbies entity.
 type LobbyEntity struct {
-	ID             int64             `gorm:"column:id;primaryKey;auto_increment;not null"`
-	UserID         int64             `gorm:"column:user_id;not null"`
-	SessionID      int64             `gorm:"column:session_id;not null"`
-	Skin           int64             `gorm:"column:skin;not null"`
-	Health         int64             `gorm:"column:health;not null;default:100"`
-	Active         bool              `gorm:"column:active;not null"`
-	Host           bool              `gorm:"column:host;not null"`
-	Eliminated     bool              `gorm:"column:eliminated;not null"`
-	PositionX      float64           `gorm:"column:position_x;not null"`
-	PositionY      float64           `gorm:"column:position_y;not null"`
-	PositionStatic bool              `gorm:"column:position_static;not null"`
-	Ammo           int64             `gorm:"column:ammo;not null"`
-	CreatedAt      time.Time         `gorm:"column:created_at;autoCreateTime"`
-	UserEntity     UserEntity        `gorm:"foreignKey:UserID;references:ID"`
-	SessionEntity  SessionEntity     `gorm:"foreignKey:SessionID;references:ID"`
-	Inventory      []InventoryEntity `gorm:"foreignKey:LobbyID"`
+	ID             int64         `gorm:"column:id;primaryKey;auto_increment;not null"`
+	UserID         int64         `gorm:"column:user_id;not null"`
+	SessionID      int64         `gorm:"column:session_id;not null"`
+	Skin           int64         `gorm:"column:skin;not null"`
+	Health         int64         `gorm:"column:health;not null;default:100"`
+	Active         bool          `gorm:"column:active;not null"`
+	Host           bool          `gorm:"column:host;not null"`
+	Eliminated     bool          `gorm:"column:eliminated;not null"`
+	PositionX      float64       `gorm:"column:position_x;not null"`
+	PositionY      float64       `gorm:"column:position_y;not null"`
+	PositionStatic bool          `gorm:"column:position_static;not null"`
+	CreatedAt      time.Time     `gorm:"column:created_at;autoCreateTime"`
+	UserEntity     UserEntity    `gorm:"foreignKey:UserID;references:ID"`
+	SessionEntity  SessionEntity `gorm:"foreignKey:SessionID;references:ID"`
 }
 
 // TableName retrieves name of database table.
@@ -199,32 +181,6 @@ func (*InventoryEntity) TableName() string {
 // TableView retrieves name of database table view.
 func (*InventoryEntity) TableView() string {
 	return "InventoryEntity"
-}
-
-// MessageEntity represents messages entity.
-type MessageEntity struct {
-	ID         int64      `gorm:"column:id;primaryKey;auto_increment;not null"`
-	Content    string     `gorm:"column:name;not null"`
-	Issuer     int64      `gorm:"column:issuer;not null"`
-	CreatedAt  time.Time  `gorm:"column:created_at;autoCreateTime"`
-	UserEntity UserEntity `gorm:"foreignKey:Issuer;references:ID"`
-}
-
-// TableName retrieves name of database table.
-func (*MessageEntity) TableName() string {
-	return "messages"
-}
-
-// BeforeCreate performs message cache entity eviction before messages entity creation.
-func (m *MessageEntity) BeforeCreate(tx *gorm.DB) error {
-	if err := tx.
-		Model(&UserEntity{}).
-		Where("id = ?", m.Issuer).
-		First(&m.UserEntity).Error; err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // UserEntity represents users entity.

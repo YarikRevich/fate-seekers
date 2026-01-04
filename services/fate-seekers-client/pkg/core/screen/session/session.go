@@ -1,7 +1,6 @@
 package session
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -9,8 +8,11 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/shader/event/toxicrain"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/effect/transition/transparent"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/call"
 	contentstream "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/content/stream"
 	metadatav1 "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/api"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/converter"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/handler"
 	metadatastream "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/networking/metadata/stream"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/screen"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/sound"
@@ -25,12 +27,15 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/sounder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/builder"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/bar"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/chest"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/inventory"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/press"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/notification"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/repository"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/action"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/dispatcher"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/state/store"
@@ -103,19 +108,6 @@ type SessionScreen struct {
 }
 
 func (ss *SessionScreen) HandleInput() error {
-	if store.GetResetSession() == value.RESET_SESSION_TRUE_VALUE {
-		selected.GetInstance().Clean()
-
-		collision.GetInstance().Clean()
-
-		sounder.GetInstance().Clean()
-
-		renderer.GetInstance().Clean()
-
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetResetSession(value.RESET_SESSION_FALSE_VALUE))
-	}
-
 	if store.GetUpdateUserMetadataPositionsStartedNetworking() == value.UPDATE_USER_METADATA_POSITIONS_STARTED_NETWORKING_FALSE_VALUE {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetUpdateUserMetadataPositionsStartedNetworking(
@@ -123,7 +115,9 @@ func (ss *SessionScreen) HandleInput() error {
 
 		contentstream.GetUpdateUserMetadataPositionsSubmitter().Clean(func() {
 			contentstream.GetUpdateUserMetadataPositionsSubmitter().Submit(
-				store.GetSelectedLobbySetUnitMetadata().ID, func(err error) bool {
+				store.GetSelectedSessionMetadata().ID,
+				store.GetSelectedLobbySetUnitMetadata().ID,
+				func(err error) bool {
 					if store.GetActiveScreen() != value.ACTIVE_SCREEN_SESSION_VALUE {
 						dispatcher.GetInstance().Dispatch(
 							action.NewSetUpdateUserMetadataPositionsStartedNetworking(
@@ -183,6 +177,10 @@ func (ss *SessionScreen) HandleInput() error {
 									translation.GetInstance().GetTranslation("client.networking.event-toxic-rain-starated"),
 									time.Second*3,
 									common.NotificationInfoTextColor)
+
+								sound.GetInstance().
+									GetSoundEventsAnnouncementFxManager().
+									PushWithHandbrake(loader.ToxicThunderFXSound)
 
 								ss.camera.AddTrauma(0.8)
 
@@ -257,10 +255,6 @@ func (ss *SessionScreen) HandleInput() error {
 								action.NewSetHealthPacksRetrievalStartedNetworking(
 									value.HEALTH_PACKS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
 
-							// dispatcher.GetInstance().Dispatch(
-							// 	action.NewSetUserInventoryRetrievalStartedNetworking(
-							// 		value.USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE))
-
 							dispatcher.GetInstance().Dispatch(
 								action.NewSetResetDeath(value.RESET_DEATH_TRUE_VALUE))
 
@@ -295,7 +289,7 @@ func (ss *SessionScreen) HandleInput() error {
 								}
 							}
 
-							if previousUsersMetadata.Health != userMetadata.Health {
+							if previousUsersMetadata.Health > userMetadata.Health {
 								sharedUsersMetadataHealthHitsIssuers[userMetadata.GetIssuer()] = true
 							}
 						}
@@ -317,6 +311,15 @@ func (ss *SessionScreen) HandleInput() error {
 							}
 						}
 
+						var inventory []dto.RetrievedInventoryUnit
+
+						for _, item := range userMetadata.GetInventory() {
+							inventory = append(inventory, dto.RetrievedInventoryUnit{
+								ID:   item.GetInventoryId(),
+								Name: item.GetName(),
+							})
+						}
+
 						retrievedUsersMetadataSession[userMetadata.GetIssuer()] =
 							dto.RetrievedUsersMetadataSessionUnit{
 								Health:             userMetadata.GetHealth(),
@@ -329,6 +332,7 @@ func (ss *SessionScreen) HandleInput() error {
 									X: userMetadata.GetPosition().GetX(),
 									Y: userMetadata.GetPosition().GetY(),
 								},
+								Inventory: inventory,
 							}
 
 						store.RetrievedUsersMetadataSessionSyncHelper.Unlock()
@@ -424,21 +428,6 @@ func (ss *SessionScreen) HandleInput() error {
 		})
 	}
 
-	if store.GetUserInventoryRetrievalStartedNetworking() == value.USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE {
-		dispatcher.GetInstance().Dispatch(
-			action.NewSetUserInventoryRetrievalStartedNetworking(
-				value.USER_INVENTORY_RETRIEVAL_STARTED_NETWORKING_TRUE_STATE))
-
-		metadatastream.GetGetUserInventorySubmitter().Clean(func() {
-			metadatastream.GetGetUserInventorySubmitter().Submit(
-				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetUserInventoryResponse, err error) bool {
-					fmt.Println(response.GetUserInventoryItems(), err, "INVENTORY ITEMS")
-
-					return false
-				})
-		})
-	}
-
 	if store.GetChestsRetrievalStartedNetworking() == value.CHESTS_RETRIEVAL_STARTED_NETWORKING_FALSE_STATE {
 		dispatcher.GetInstance().Dispatch(
 			action.NewSetChestsRetrievalStartedNetworking(
@@ -447,11 +436,15 @@ func (ss *SessionScreen) HandleInput() error {
 		metadatastream.GetGetChestsSubmitter().Clean(func() {
 			metadatastream.GetGetChestsSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetChestsResponse, err error) bool {
-					for _, chest := range response.GetChests() {
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetRetrievedChestsSession(
+							converter.ConvertGetChestsResponseToRetrievedChests(
+								response)))
 
+					for _, chest := range response.GetChests() {
 						if !renderer.GetInstance().SecondaryLocalStaticObjectExists(chest.GetInstance()) {
 							staticUnit := static.NewStatic(
-								loader.GetInstance().GetStatic(loader.OpenedStandardChest),
+								loader.GetInstance().GetMapTilesetStandardChest(loader.FirstMap),
 								dto.Position{
 									X: chest.GetPosition().X,
 									Y: chest.GetPosition().Y,
@@ -468,15 +461,20 @@ func (ss *SessionScreen) HandleInput() error {
 								TileHeight: int(shiftHeight),
 							})
 
+							if !selected.GetInstance().SelectableStaticObjectExists(chest.GetInstance()) {
+								selected.GetInstance().AddSelectableStaticObject(chest.GetInstance(), &dto.SelectableStatic{
+									Position: dto.Position{
+										X: chest.GetPosition().X,
+										Y: chest.GetPosition().Y,
+									},
+									TileWidth:  int(shiftWidth),
+									TileHeight: int(shiftHeight),
+								})
+							}
+
 							renderer.GetInstance().AddSecondaryLocalStaticObject(
 								chest.GetInstance(), staticUnit)
-						} else {
-
 						}
-
-						// for _, chestItem := range chest.GetChestItems() {
-						// 	fmt.Println(chestItem.GetName())
-						// }
 					}
 
 					return false
@@ -492,20 +490,68 @@ func (ss *SessionScreen) HandleInput() error {
 		metadatastream.GetGetHealthPacksSubmitter().Clean(func() {
 			metadatastream.GetGetHealthPacksSubmitter().Submit(
 				store.GetSelectedSessionMetadata().ID, func(response *metadatav1.GetHealthPacksResponse, err error) bool {
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetRetrievedHealthPacksSession(
+							converter.ConvertGetHealthPacksResponseToRetrievedHealthPacks(
+								response)))
+
+					for _, healthPack := range response.GetHealthPacks() {
+						if !healthPack.Active {
+							if renderer.GetInstance().SecondaryLocalStaticObjectExists(healthPack.GetInstance()) {
+								renderer.GetInstance().RemoveSecondaryLocalStaticObject(healthPack.GetInstance())
+							}
+
+							if selected.GetInstance().SelectableStaticObjectExists(healthPack.GetInstance()) {
+								selected.GetInstance().RemoveSelectableStaticObject(healthPack.GetInstance())
+							}
+
+							if collision.GetInstance().CollidableExists(healthPack.GetInstance()) {
+								collision.GetInstance().RemoveCollidableObject(healthPack.GetInstance())
+							}
+
+							continue
+						}
+
+						if !renderer.GetInstance().SecondaryLocalStaticObjectExists(healthPack.GetInstance()) {
+							staticUnit := static.NewStatic(
+								loader.GetInstance().GetMapTilesetFrogHealthPack(loader.FirstMap),
+								dto.Position{
+									X: healthPack.GetPosition().X,
+									Y: healthPack.GetPosition().Y,
+								})
+
+							shiftWidth, shiftHeight := staticUnit.GetShiftBounds()
+
+							if !collision.GetInstance().CollidableExists(healthPack.GetInstance()) {
+								collision.GetInstance().AddCollidableStaticObject(healthPack.GetInstance(), &dto.CollidableStatic{
+									Position: dto.Position{
+										X: healthPack.GetPosition().X,
+										Y: healthPack.GetPosition().Y,
+									},
+									TileWidth:  int(shiftWidth),
+									TileHeight: int(shiftHeight),
+								})
+							}
+
+							if !selected.GetInstance().SelectableStaticObjectExists(healthPack.GetInstance()) {
+								selected.GetInstance().AddSelectableStaticObject(healthPack.GetInstance(), &dto.SelectableStatic{
+									Position: dto.Position{
+										X: healthPack.GetPosition().X,
+										Y: healthPack.GetPosition().Y,
+									},
+									TileWidth:  int(shiftWidth),
+									TileHeight: int(shiftHeight),
+								})
+							}
+
+							renderer.GetInstance().AddSecondaryLocalStaticObject(
+								healthPack.GetInstance(), staticUnit)
+						}
+					}
+
 					return false
 				})
 		})
-	}
-
-	{
-		// if !sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() {
-		// 	sound.GetInstance().GetSoundMusicManager().StartMusic(loader.EnergetykMusicSound)
-		// }
-
-		// if sound.GetInstance().GetSoundMusicManager().IsMusicPlaying() &&
-		// 	!sound.GetInstance().GetSoundMusicManager().IsMusicStopping() {
-		// 	sound.GetInstance().GetSoundMusicManager().StopMusic()
-		// }
 	}
 
 	store.RetrievedUsersMetadataSessionSyncHelper.Lock()
@@ -515,8 +561,16 @@ func (ss *SessionScreen) HandleInput() error {
 	retrievedUsersMetadataSession := store.GetRetrievedUsersMetadataSession()
 
 	if _, ok := retrievedUsersMetadataSession[store.GetRepositoryUUID()]; ok {
+		var (
+			spacePressed bool
+			iKeyPressed  bool
+		)
+
 		if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE && ebiten.IsFocused() {
 			gamepadID := ebiten.GamepadIDs()[0]
+
+			// TODO: check if space is pressed
+			// TODO: check if I button is pressed
 
 			direction := gamepad.GetGamepadLeftStickDirection(gamepadID)
 
@@ -552,6 +606,14 @@ func (ss *SessionScreen) HandleInput() error {
 					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
 			}
 
+			if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+				spacePressed = true
+			}
+
+			if inpututil.IsKeyJustPressed(ebiten.KeyI) {
+				iKeyPressed = true
+			}
+
 			if ebiten.IsKeyPressed(ebiten.KeyW) && ebiten.IsKeyPressed(ebiten.KeyA) {
 				dispatcher.GetInstance().Dispatch(action.NewDiagonalUpLeftPositionSession())
 
@@ -576,6 +638,143 @@ func (ss *SessionScreen) HandleInput() error {
 			} else if ebiten.IsKeyPressed(ebiten.KeyD) {
 				dispatcher.GetInstance().Dispatch(action.NewIncrementXPositionSession())
 
+			}
+		}
+
+		if spacePressed {
+			if store.GetHistPlayerWithFistStartedNetworking() == value.HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_FALSE_STATE {
+				sound.GetInstance().GetSoundSounderMeleeFxManager().PushWithHandbrake(loader.FistFXSound)
+
+				dispatcher.GetInstance().Dispatch(
+					action.NewSetHitPlayerWithFistStartedNetworking(
+						value.HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_TRUE_STATE))
+
+				call.PerformHitPlayerWithFist(store.GetSelectedSessionMetadata().ID, func(err error) {
+					if err != nil {
+						notification.GetInstance().Push(
+							common.ComposeMessage(
+								translation.GetInstance().GetTranslation("client.networking.hit-player-with-fist-failure"),
+								err.Error()),
+							time.Second*3,
+							common.NotificationErrorTextColor)
+
+						return
+					}
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetHitPlayerWithFistStartedNetworking(
+							value.HIT_PLAYER_WITH_FIST_STARTED_NETWORKING_FALSE_STATE))
+				})
+			}
+		}
+
+		if iKeyPressed {
+			if store.GetChestOpenedSession() == value.CHEST_OPENED_FALSE_VALUE {
+				if store.GetInventoryOpenedSession() == value.INVENTORY_OPENED_FALSE_VALUE {
+					retrievedUsersMetadata := store.GetRetrievedUsersMetadataSession()[store.GetRepositoryUUID()]
+
+					var elements []dto.InventoryElement
+
+					for _, item := range retrievedUsersMetadata.Inventory {
+						if item.Name == dto.CHEST_ITEM_LETTER_TYPE {
+							elements = append(elements, dto.InventoryElement{
+								Image: loader.GetInstance().GetStatic(loader.LetterScroll),
+								ApplyCallback: func(success func()) {
+									letter := loader.GetRandomLetter(uint64(item.ID))
+
+									sound.GetInstance().
+										GetSoundSounderLetterScrollActivationFxManager().
+										PushWithHandbrake(loader.LetterScrollActivationFxSound)
+
+									dispatcher.GetInstance().Dispatch(
+										action.NewSetLetterNameAction(letter))
+								},
+								RemoveCallback: func(success func()) {
+									handler.PerformDropInventoryItem(item.ID, func(err error) {
+										if err != nil {
+											notification.GetInstance().Push(
+												common.ComposeMessage(
+													translation.GetInstance().GetTranslation("client.networking.drop-inventory-item-failure"),
+													err.Error()),
+												time.Second*3,
+												common.NotificationErrorTextColor)
+
+										} else {
+											success()
+										}
+									})
+								},
+							})
+						} else if item.Name == dto.CHEST_ITEM_HEALTH_PACK_TYPE {
+							elements = append(elements, dto.InventoryElement{
+								Image: loader.GetInstance().GetStatic(loader.StandardHealthPack),
+								ApplyCallback: func(success func()) {
+									handler.PerformOpenHealthPack(
+										store.GetSelectedSessionMetadata().ID,
+										item.ID,
+										func(err error) {
+											if err != nil {
+												notification.GetInstance().Push(
+													common.ComposeMessage(
+														translation.GetInstance().GetTranslation(
+															"client.networking.open-health-pack-failure"),
+														err.Error()),
+													time.Second*3,
+													common.NotificationErrorTextColor)
+
+												return
+											}
+
+											sound.GetInstance().
+												GetSoundSounderHealthPackActivationFxManager().
+												PushWithHandbrake(loader.HealthPackActivationFxSound)
+
+											notification.GetInstance().Push(
+												translation.GetInstance().GetTranslation(
+													"client.networking.open-health-pack-opened"),
+												time.Second*3,
+												common.NotificationInfoTextColor)
+
+											success()
+										},
+									)
+								},
+								RemoveCallback: func(success func()) {
+									handler.PerformDropInventoryItem(item.ID, func(err error) {
+										if err != nil {
+											notification.GetInstance().Push(
+												common.ComposeMessage(
+													translation.GetInstance().GetTranslation(
+														"client.networking.drop-inventory-item-failure"),
+													err.Error()),
+												time.Second*3,
+												common.NotificationErrorTextColor)
+
+										} else {
+											success()
+										}
+									})
+								},
+							})
+						}
+					}
+
+					inventory.GetInstance().CleanElements()
+
+					inventory.GetInstance().AddElements(elements)
+
+					inventory.GetInstance().Show()
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetInventoryOpenedSession(value.INVENTORY_OPENED_TRUE_VALUE))
+				} else {
+					inventory.GetInstance().CleanElements()
+
+					inventory.GetInstance().Hide()
+
+					dispatcher.GetInstance().Dispatch(
+						action.NewSetInventoryOpenedSession(value.INVENTORY_OPENED_FALSE_VALUE))
+				}
 			}
 		}
 
@@ -616,16 +815,17 @@ func (ss *SessionScreen) HandleInput() error {
 
 				sounder.GetInstance().SetMainTrackableObject(
 					store.GetPositionSession(), shiftWidth, shiftHeight)
+
+				selected.GetInstance().SetMainTrackableObject(
+					store.GetPositionSession(), shiftWidth, shiftHeight)
 			} else {
 				dispatcher.GetInstance().Dispatch(action.NewSyncStagePositionXSession())
 				dispatcher.GetInstance().Dispatch(action.NewSyncStagePositionYSession())
 			}
 		} else {
-			sounder.GetInstance().InterruptMainTrackableObject()
+			sounder.GetInstance().InterruptStepsTrackableObject()
 		}
 	}
-
-	store.RetrievedUsersMetadataSessionSyncHelper.Unlock()
 
 	var movableUnit *movable.Movable
 
@@ -658,6 +858,15 @@ func (ss *SessionScreen) HandleInput() error {
 
 	shiftWidth, shiftHeight := movableUnit.GetShiftBounds()
 
+	if _, ok := retrievedUsersMetadataSession[store.GetRepositoryUUID()]; ok {
+		if !selected.GetInstance().MainTrackableObjectExists() {
+			selected.GetInstance().SetMainTrackableObject(
+				store.GetPositionSession(), shiftWidth, shiftHeight)
+		}
+	}
+
+	store.RetrievedUsersMetadataSessionSyncHelper.Unlock()
+
 	ss.camera.LookAt(
 		store.GetPositionSession().X+(shiftWidth/2),
 		-store.GetPositionSession().Y+(shiftHeight/2))
@@ -665,11 +874,185 @@ func (ss *SessionScreen) HandleInput() error {
 	dispatcher.GetInstance().Dispatch(
 		action.NewSyncPreviousPositionSession())
 
+	if store.GetSelectedPositionSession() != nil {
+		selectedPosition := store.GetSelectedPositionSession()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSelectedPositionSession(nil))
+
+		switch selectedPosition.Kind {
+		case dto.SELECTED_LOCAL_STATIC_OBJECT:
+			var found bool
+
+			for _, item := range store.GetRetrievedHealthPacksSession() {
+				if item.Position == selectedPosition.Position {
+					handler.PerformTakeHealthPack(
+						item.SessionID,
+						item.ID,
+						func(err error) {
+							if err != nil {
+								notification.GetInstance().Push(
+									common.ComposeMessage(
+										translation.GetInstance().GetTranslation(
+											"client.networking.take-health-pack-failure"),
+										err.Error()),
+									time.Second*3,
+									common.NotificationErrorTextColor)
+
+								return
+							}
+
+							if item.Name == dto.FROG_HEALTH_PACK_TYPE {
+								sound.GetInstance().
+									GetSoundSounderHealthPackActivationFxManager().
+									PushWithHandbrake(loader.FrogHealthPackActivationFxSound)
+							}
+
+							notification.GetInstance().Push(
+								translation.GetInstance().GetTranslation(
+									"client.networking.open-health-pack-opened"),
+								time.Second*3,
+								common.NotificationInfoTextColor)
+						})
+
+					found = true
+
+					break
+				}
+			}
+
+			if found {
+				break
+			}
+
+			for _, item := range store.GetRetrievedChestsSession() {
+				if item.Position == selectedPosition.Position {
+					if store.GetInventoryOpenedSession() == value.INVENTORY_OPENED_FALSE_VALUE {
+						if store.GetChestOpenedSession() == value.CHEST_OPENED_FALSE_VALUE {
+							var elements []dto.ChestElement
+
+							for _, insideItem := range item.ChestItems {
+								if insideItem.Active {
+									if insideItem.Name == dto.CHEST_ITEM_LETTER_TYPE {
+										elements = append(elements, dto.ChestElement{
+											Image: loader.GetInstance().GetStatic(loader.LetterScroll),
+											Callback: func(success func()) {
+												handler.PerformTakeChestItem(
+													item.SessionID,
+													store.GetSelectedLobbySetUnitMetadata().ID,
+													item.ID,
+													insideItem.ID,
+													func(err error) {
+														if err != nil {
+															notification.GetInstance().Push(
+																common.ComposeMessage(
+																	translation.GetInstance().GetTranslation(
+																		"client.networking.take-chest-item-failure"),
+																	err.Error()),
+																time.Second*3,
+																common.NotificationErrorTextColor)
+
+															return
+														}
+
+														letterPath := loader.GetRandomLetter(uint64(insideItem.ID))
+
+														letter := loader.GetInstance().GetLetter(letterPath)
+
+														exists, err := repository.GetCollectionsRepository().Exists(letter.Title)
+														if err != nil {
+															notification.GetInstance().Push(
+																common.ComposeMessage(
+																	translation.GetInstance().GetTranslation(
+																		"client.repository.collections-retrieval-failure"),
+																	err.Error()),
+																time.Second*3,
+																common.NotificationErrorTextColor)
+														} else {
+															if !exists {
+																err = repository.GetCollectionsRepository().Insert(letter.Title, letterPath)
+																if err != nil {
+																	notification.GetInstance().Push(
+																		common.ComposeMessage(
+																			translation.GetInstance().GetTranslation(
+																				"client.repository.collections-retrieval-failure"),
+																			err.Error()),
+																		time.Second*3,
+																		common.NotificationErrorTextColor)
+																} else {
+																	notification.GetInstance().Push(
+																		translation.GetInstance().GetTranslation(
+																			"client.repository.collections-added"),
+																		time.Second*3,
+																		common.NotificationInfoTextColor)
+																}
+															}
+														}
+
+														sound.GetInstance().
+															GetSoundSounderChestFxManager().
+															PushWithHandbrake(loader.ChestGrabFXSound)
+
+														success()
+													})
+											},
+										})
+									} else if insideItem.Name == dto.CHEST_ITEM_HEALTH_PACK_TYPE {
+										elements = append(elements, dto.ChestElement{
+											Image: loader.GetInstance().GetStatic(loader.StandardHealthPack),
+											Callback: func(success func()) {
+												handler.PerformTakeChestItem(
+													item.SessionID,
+													store.GetSelectedLobbySetUnitMetadata().ID,
+													item.ID,
+													insideItem.ID,
+													func(err error) {
+														if err != nil {
+															notification.GetInstance().Push(
+																common.ComposeMessage(
+																	translation.GetInstance().GetTranslation(
+																		"client.networking.take-chest-item-failure"),
+																	err.Error()),
+																time.Second*3,
+																common.NotificationErrorTextColor)
+
+															return
+														}
+
+														sound.GetInstance().
+															GetSoundSounderChestFxManager().
+															PushWithHandbrake(loader.ChestGrabFXSound)
+
+														success()
+													})
+											},
+										})
+									}
+								}
+							}
+
+							chest.GetInstance().CleanElements()
+
+							chest.GetInstance().AddElements(elements)
+
+							chest.GetInstance().Show()
+
+							dispatcher.GetInstance().Dispatch(
+								action.NewSetChestOpenedSession(value.CHEST_OPENED_TRUE_VALUE))
+						}
+					}
+
+					break
+				}
+			}
+		}
+	}
+
 	selectedPosition, ok := selected.GetInstance().Scan(ss.camera)
 	if ok {
 		ss.pressTransparentTransitionEffect.Reset()
 
-		// renderer.GetInstance().SetSelectedObject(selectedPosition)
+		renderer.GetInstance().SetSelectedObject(selectedPosition.Position)
 
 		var pressed bool
 
@@ -682,14 +1065,31 @@ func (ss *SessionScreen) HandleInput() error {
 		} else {
 			press.GetInstance().SetPressType(press.KEYBOARD)
 
-			if ebiten.IsKeyPressed(ebiten.KeyE) {
+			if inpututil.IsKeyJustPressed(ebiten.KeyE) {
 				pressed = true
 			}
 		}
 
 		if pressed {
-			fmt.Println(selectedPosition)
-			// TODO: check for saved location associations in memory.
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetSelectedPositionSession(&selectedPosition))
+
+			switch selectedPosition.Kind {
+			case dto.SELECTED_LOCAL_STATIC_OBJECT:
+				for _, item := range store.GetRetrievedChestsSession() {
+					if item.Position == selectedPosition.Position {
+						sound.GetInstance().
+							GetSoundSounderChestFxManager().
+							PushWithHandbrake(loader.ChestActivationFXSound)
+
+						dispatcher.GetInstance().Dispatch(
+							action.NewSetActiveScreenAction(
+								value.ACTIVE_SCREEN_ANSWER_INPUT_VALUE))
+
+						break
+					}
+				}
+			}
 		}
 	} else {
 		if !ss.pressTransparentTransitionEffect.Done() {
@@ -715,9 +1115,9 @@ func (ss *SessionScreen) HandleInput() error {
 		}
 	}
 
-	ss.passiveUI.Update()
-
 	ss.activeUI.Update()
+
+	ss.passiveUI.Update()
 
 	if store.GetEventName() != value.EVENT_NAME_EMPTY_VALUE {
 		if store.GetEventEnding() == value.EVENT_ENDING_TRUE_VALUE {
@@ -759,18 +1159,10 @@ func (ss *SessionScreen) HandleInput() error {
 		}
 	}
 
-	// TODO: click on the letter.
-
-	// dispatcher.GetInstance().Dispatch(action.NewSetLetterImageAction(""))
-
-	// TODO: click on the chest.
-	// dispatcher.GetInstance().Dispatch(action.New)
-
 	return nil
 }
 
 func (ss *SessionScreen) HandleRender(screen *ebiten.Image) {
-	// TODO: refactor to remove session sync helper lock usage.
 	store.RetrievedUsersMetadataSessionSyncHelper.Lock()
 
 	retrievedUsersMetadataSession := store.GetRetrievedUsersMetadataSession()
@@ -839,13 +1231,27 @@ func newSessionScreen() screen.Screen {
 	pressTransparentTransitionEffect := transparent.NewTransparentTransitionEffect(false, 0, 255, 5, time.Microsecond*10)
 	pressTransparentTransitionEffect.Clean()
 
+	chest.GetInstance().SetCloseCallback(func() {
+		chest.GetInstance().CleanElements()
+
+		chest.GetInstance().Hide()
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetSelectedPositionSession(nil))
+
+		dispatcher.GetInstance().Dispatch(
+			action.NewSetChestOpenedSession(value.CHEST_OPENED_FALSE_VALUE))
+	})
+
 	return &SessionScreen{
 		passiveTransitionUI: builder.Build(
 			press.GetInstance().GetContainer()),
 		passiveUI: builder.Build(
 			bar.GetInstance().GetContainer()),
-		activeUI: builder.Build(),
-		camera:   camera,
+		activeUI: builder.Build(
+			chest.GetInstance().GetContainer(),
+			inventory.GetInstance().GetContainer()),
+		camera: camera,
 		transparentTransitionEffect: transparent.NewTransparentTransitionEffect(
 			true, 255, 0, 5, time.Microsecond*10),
 		toxicRainEventStartTransparentTransitionEffect: transparent.NewTransparentTransitionEffect(

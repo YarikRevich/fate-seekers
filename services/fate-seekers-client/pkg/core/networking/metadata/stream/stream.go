@@ -32,9 +32,6 @@ var (
 	// GetGetUsersMetadataSubmitter retrieves instance of the users metadata retrieval submitter, performing initial creation if needed.
 	GetGetUsersMetadataSubmitter = sync.OnceValue[*getUsersMetadataSubmitter](newGetUsersMetadataSubmitter)
 
-	// GetGetUserInventorySubmitter retrieves instance of the user inventory retrieval submitter, performing initial creation if needed.
-	GetGetUserInventorySubmitter = sync.OnceValue[*getUserInventorySubmitter](newGetUserInventorySubmitter)
-
 	// GetGetChestsSubmitter retrieves instance of the chests retrieval submitter, performing initial creation if needed.
 	GetGetChestsSubmitter = sync.OnceValue[*getChestsSubmitter](newGetChestsSubmitter)
 
@@ -500,107 +497,6 @@ func (gums *getUsersMetadataSubmitter) Clean(callback func()) {
 // newGetUsersMetadataSubmitter initializes getUsersMetadataSubmitter.
 func newGetUsersMetadataSubmitter() *getUsersMetadataSubmitter {
 	return new(getUsersMetadataSubmitter)
-}
-
-// getUserInventorySubmitter represents user inventory retrieval submitter.
-type getUserInventorySubmitter struct {
-	// Represents general context used to manage submitted context.
-	ctx context.Context
-
-	// Represents channel, which is used to close the submitted action.
-	cancel context.CancelFunc
-}
-
-// close performs stream submitter close operation.
-func (guis *getUserInventorySubmitter) close() {
-	if guis.ctx != nil {
-		select {
-		case <-guis.ctx.Done():
-		default:
-			guis.cancel()
-		}
-	}
-}
-
-// Submit performs a submittion of user inventory retrieval action. Callback is required
-// to return boolean value, which defines whether submitter should be closed or not.
-func (guis *getUserInventorySubmitter) Submit(sessionID int64, callback func(response *metadatav1.GetUserInventoryResponse, err error) bool) {
-	guis.ctx, guis.cancel = context.WithCancel(context.Background())
-
-	go func() {
-		stream, err := connector.
-			GetInstance().
-			GetClient().
-			GetUserInventory(
-				guis.ctx,
-				&metadatav1.GetUserInventoryRequest{
-					SessionId: sessionID,
-					Issuer:    store.GetRepositoryUUID(),
-				})
-		if err != nil {
-			if callback(nil, err) {
-				guis.close()
-			}
-
-			return
-		}
-
-		for {
-			response, err := stream.Recv()
-			if err != nil {
-				if status.Code(err) == codes.Unavailable {
-					dispatcher.
-						GetInstance().
-						Dispatch(
-							action.NewSetStateResetApplicationAction(
-								value.STATE_RESET_APPLICATION_FALSE_VALUE))
-
-					dispatcher.GetInstance().Dispatch(
-						action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_MENU_VALUE))
-
-					if callback(nil, common.ErrConnectionLost) {
-						guis.close()
-					}
-
-					return
-				}
-
-				errRaw, ok := status.FromError(err)
-				if !ok {
-					if callback(nil, err) {
-						guis.close()
-					}
-
-					return
-				}
-
-				if callback(nil, errors.New(errRaw.Message())) {
-					guis.close()
-				}
-
-				break
-			}
-
-			if callback(response, nil) {
-				guis.close()
-			}
-		}
-	}()
-}
-
-// Clean perform delayed submitter close operation, which results in a called
-// provided callback when operation is finished.
-func (guis *getUserInventorySubmitter) Clean(callback func()) {
-	go func() {
-		guis.close()
-
-		callback()
-	}()
-}
-
-// newGetUserInventorySubmitter initializes getUserInventorySubmitter.
-func newGetUserInventorySubmitter() *getUserInventorySubmitter {
-	return new(getUserInventorySubmitter)
 }
 
 // getChestsSubmitter represents chests metadata retrieval submitter.

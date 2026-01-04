@@ -91,8 +91,7 @@ const (
 
 // Describes all the available sounds to be loaded.
 const (
-	AmbientMusicSound   = "music/ambient/ambient.mp3"
-	EnergetykMusicSound = "music/energetyk/energetyk.mp3"
+	AmbientMusicSound = "music/ambient/ambient.mp3"
 
 	ButtonFXSound = "fx/button/button.ogg"
 )

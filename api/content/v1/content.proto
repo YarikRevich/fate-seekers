@@ -14,8 +14,9 @@ message Position {
 // UpdateUserMetadataPositionsRequest represents users positions update request message.
 message UpdateUserMetadataPositionsRequest {
     string issuer = 1 [(buf.validate.field).string.uuid = true];
-    int64 lobby_id = 2;
-    Position position = 3;
+    int64 session_id = 2;
+    int64 lobby_id = 3;
+    Position position = 4;
 };
 
 // UpdateUserMetadataPositionsResponse represents users position update response message;
@@ -25,43 +26,22 @@ message UpdateUserMetadataPositionsResponse {
 // UpdateUserMetadataStaticRequest represents users static update request message.
 message UpdateUserMetadataStaticRequest {
     string issuer = 1 [(buf.validate.field).string.uuid = true];
-    int64 lobby_id = 2;
-    bool static = 3;
+    int64 session_id = 2;
+    int64 lobby_id = 3;
+    bool static = 4;
 };
 
 // UpdateUserMetadataStaticResponse represents users static update response message;
 message UpdateUserMetadataStaticResponse {
 };
 
-// OpenGeneratedChestRequest represents open generation chest request message.
-message OpenGeneratedChestRequest {
+// HitPlayerWithFistRequest represents hit player with fist request message.
+message HitPlayerWithFistRequest {
     string issuer = 1 [(buf.validate.field).string.uuid = true];
     int64 session_id = 2;
-    int64 generation_id = 3;
 };
 
-// OpenGeneratedChestResponse represents open generation chest response message;
-message OpenGeneratedChestResponse {
-};
+// HitPlayerWithFistResponse represents git player with fist response message.
+message HitPlayerWithFistResponse {
 
-// OpenGeneratedHealthPackRequest represents open generation health pack request message.
-message OpenGeneratedHealthPackRequest {
-    string issuer = 1 [(buf.validate.field).string.uuid = true];
-    int64 session_id = 2;
-    int64 generation_id = 3;
-};
-
-// OpenGeneratedHealthPackResponse represents open generation health pack response message;
-message OpenGeneratedHealthPackResponse {
-};
-
-// SendChatMessageRequest represents send chat message request message.
-message SendChatMessageRequest {
-    string issuer = 1 [(buf.validate.field).string.uuid = true];
-    int64 session_id = 2;
-    string text = 3;
-};
-
-// SendChatMessageResponse represents send chat message response message.
-message SendChatMessageResponse {
 };

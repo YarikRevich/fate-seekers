@@ -64,7 +64,6 @@ CREATE TABLE lobbies (
     position_x REAL NOT NULL,
     position_y REAL NOT NULL,
     position_static BOOLEAN NOT NULL,
-    ammo INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
     FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
@@ -98,31 +97,6 @@ CREATE TABLE inventory (
     FOREIGN KEY (user_id) REFERENCES users(id)
     FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
     FOREIGN KEY (lobby_id) REFERENCES lobbies(id) ON DELETE CASCADE
-);
-
--- --
--- -- Name: idx_inventory_lobby_id; Type: INDEX; Schema: public; 
--- --
-
--- CREATE INDEX idx_inventory_lobby_id
--- ON inventory (lobby_id);
-
---
--- Name: idx_inventory_user_id_session_id; Type: INDEX; Schema: public; 
---
-
-CREATE UNIQUE INDEX idx_inventory_user_id_session_id
-ON inventory (user_id, session_id);
-
---
--- Name: messages; Type: TABLE; Schema: public; 
---
-
-CREATE TABLE messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    content TEXT NOT NULL,
-    issuer INTEGER NOT NULL,
-    FOREIGN KEY (issuer) REFERENCES users(id)
 );
 
 --

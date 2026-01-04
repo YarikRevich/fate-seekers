@@ -3,9 +3,9 @@ package loader
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"image"
 	"io/fs"
+	"math/rand"
 	"path/filepath"
 	"sync"
 
@@ -61,6 +61,21 @@ const (
 	MapTilemap = "tilemap/tilemap.tmx"
 )
 
+// Describes tileset image source file.
+const (
+	MapTileset = "tileset/tileset.png"
+)
+
+// Describes tileset standard chest for first map.
+const (
+	StandardChestFirstMap = 222
+)
+
+// Describes tileset frog health pack for first map.
+const (
+	FrogHealthPackFirstMap = 13
+)
+
 // Describes available tilemap properties
 const (
 	TilemapCollidableProperty         = "collidable"
@@ -103,9 +118,13 @@ const (
 
 	DefaultLaserGun = "default_laser_gun/default_laser_gun.png"
 
+	Fist = "fist/fist.png"
+
 	Pointer = "pointer/pointer.png"
 
-	OpenedStandardChest = "session/opened_standard_chest.png"
+	StandardHealthPack = "standard_health_pack/standard_health_pack.png"
+
+	LetterScroll = "letter_scroll/letter_scroll.png"
 )
 
 // Describes all the available shaders to be loaded.
@@ -120,7 +139,20 @@ const (
 
 // Describes all the available letters to be loaded.
 const (
-	LoneManLetter = "lone-man.json"
+	LastLetterLetter  = "last-letter.json"
+	TransmissionOne   = "transmission-1.json"
+	TransmissionTwo   = "transmission-2.json"
+	TransmissionThree = "transmission-3.json"
+)
+
+// Represents all the available letters used for random selection.
+var (
+	AvailableLetters = []string{
+		LastLetterLetter,
+		TransmissionOne,
+		TransmissionTwo,
+		TransmissionThree,
+	}
 )
 
 // Describes all the available client templates to be loaded.
@@ -173,12 +205,25 @@ const (
 
 // Describes all the available sounds to be loaded.
 const (
-	AmbientMusicSound   = "music/ambient/ambient.mp3"
-	EnergetykMusicSound = "music/energetyk/energetyk.mp3"
+	AmbientMusicSound = "music/ambient/ambient.mp3"
 
-	ButtonFXSound    = "fx/button/button.ogg"
-	ToxicRainFXSound = "fx/toxicrain/toxicrain.ogg"
-	RockFXSound      = "fx/rock/rock.ogg"
+	ButtonFXSound = "fx/button/button.ogg"
+
+	ToxicRainFXSound    = "fx/toxic_rain/toxic_rain.ogg"
+	ToxicThunderFXSound = "fx/toxic_thunder/toxic_thunder.ogg"
+
+	RockFXSound = "fx/rock/rock.ogg"
+
+	FistFXSound = "fx/fist/fist.ogg"
+
+	ChestActivationFXSound = "fx/chest_activation/chest_activation.ogg"
+	ChestOpenFXSound       = "fx/chest_open/chest_open.ogg"
+	ChestGrabFXSound       = "fx/chest_grab/chest_grab.ogg"
+
+	LetterScrollActivationFxSound = "fx/letter_scroll_activation/letter_scroll_activation.ogg"
+
+	HealthPackActivationFxSound     = "fx/health_pack_activation/health_pack_activation.ogg"
+	FrogHealthPackActivationFxSound = "fx/frog_health_pack_activation/frog_health_pack_activation.ogg"
 )
 
 // Decsribes all the embedded files specific paths.
@@ -245,6 +290,68 @@ func (l *Loader) GetMap(name string) *tiled.Map {
 	return file
 }
 
+// GetMapTilesetFrogHealthPack retrieves map tileset frog health pack.
+func (l *Loader) GetMapTilesetFrogHealthPack(selectedMap string) *ebiten.Image {
+	parsedMap := l.GetMap(selectedMap)
+
+	tilesetColumns := parsedMap.Tilesets[0].Columns
+
+	if tilesetColumns == 0 {
+		tilesetColumns = parsedMap.Tilesets[0].Image.Width / (parsedMap.Tilesets[0].TileWidth + parsedMap.Tilesets[0].Spacing)
+	}
+
+	var x, y int
+
+	switch selectedMap {
+	case FirstMap:
+		x = FrogHealthPackFirstMap % tilesetColumns
+		y = FrogHealthPackFirstMap / tilesetColumns
+	}
+
+	xOffset := int(x)*parsedMap.Tilesets[0].Spacing + parsedMap.Tilesets[0].Margin
+	yOffset := int(y)*parsedMap.Tilesets[0].Spacing + parsedMap.Tilesets[0].Margin
+
+	rect := image.Rect(x*parsedMap.Tilesets[0].TileWidth+xOffset,
+		y*parsedMap.Tilesets[0].TileHeight+yOffset,
+		(x+1)*parsedMap.Tilesets[0].TileWidth+xOffset,
+		(y+1)*parsedMap.Tilesets[0].TileHeight+yOffset)
+
+	return getMapTileImage(
+		filepath.Join(common.ClientBasePath, MapsPath, FirstMap, MapTileset),
+		rect)
+}
+
+// GetMapTilesetStandardChest retrieves map tileset standard chest.
+func (l *Loader) GetMapTilesetStandardChest(selectedMap string) *ebiten.Image {
+	parsedMap := l.GetMap(selectedMap)
+
+	tilesetColumns := parsedMap.Tilesets[0].Columns
+
+	if tilesetColumns == 0 {
+		tilesetColumns = parsedMap.Tilesets[0].Image.Width / (parsedMap.Tilesets[0].TileWidth + parsedMap.Tilesets[0].Spacing)
+	}
+
+	var x, y int
+
+	switch selectedMap {
+	case FirstMap:
+		x = StandardChestFirstMap % tilesetColumns
+		y = StandardChestFirstMap / tilesetColumns
+	}
+
+	xOffset := int(x)*parsedMap.Tilesets[0].Spacing + parsedMap.Tilesets[0].Margin
+	yOffset := int(y)*parsedMap.Tilesets[0].Spacing + parsedMap.Tilesets[0].Margin
+
+	rect := image.Rect(x*parsedMap.Tilesets[0].TileWidth+xOffset,
+		y*parsedMap.Tilesets[0].TileHeight+yOffset,
+		(x+1)*parsedMap.Tilesets[0].TileWidth+xOffset,
+		(y+1)*parsedMap.Tilesets[0].TileHeight+yOffset)
+
+	return getMapTileImage(
+		filepath.Join(common.ClientBasePath, MapsPath, FirstMap, MapTileset),
+		rect)
+}
+
 // GetMapLayerTiles retrieves map layer tiles for the provided layer.
 func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth int) (
 	*btree.Map[float64, []*dto.ProcessedTile],
@@ -279,6 +386,8 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 			tileImage, ok := tiles.Load(layer.Tiles[i].Tileset.FirstGID + layer.Tiles[i].ID)
 			if !ok {
 				for k := uint32(0); k < uint32(layer.Tiles[i].Tileset.TileCount); k++ {
+					// TODO: use this approach to retrieve box image.
+
 					tiles.Store(k+layer.Tiles[i].Tileset.FirstGID, getMapTileImage(
 						layer.Tiles[i].Tileset.GetFileFullPath(layer.Tiles[i].Tileset.Image.Source),
 						layer.Tiles[i].Tileset.GetTileRect(uint32(k))))
@@ -335,8 +444,6 @@ func GetMapLayerTiles(layer *tiled.Layer, height, width, tileHeight, tileWidth i
 
 					chestProperty := tile.Properties.GetBool(TilemapChestLocationProperty)
 					if chestProperty {
-						fmt.Println(chestProperty, position)
-
 						chests = append(chests, position)
 					}
 
@@ -687,6 +794,13 @@ func (l *Loader) GetAnimation(name string, shared bool) *asebiten.Animation {
 	}
 
 	return animation
+}
+
+// GetRandomLetter performs random letter selection.
+func GetRandomLetter(seed uint64) string {
+	source := rand.New(rand.NewSource(int64(seed)))
+
+	return AvailableLetters[source.Intn(len(AvailableLetters))]
 }
 
 // newLoader initializes Loader.

@@ -20,10 +20,11 @@ settings:
       # Represents encryption key used for all the networking communication.
       key: "hello"
   
-  # Represents sector used for monitoring settings description.
+  # Represents sector used for monitoring settings description. Monitoring should be enabled
+  # only in CLI mode, case it's more advanced setting.
   monitoring:
     # Rerpesents a toggle button to enable server monitoring.
-    enabled: true
+    enabled: false
 
     # Represents sector used for Grafana properties.
     grafana:

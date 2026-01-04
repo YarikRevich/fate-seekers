@@ -131,10 +131,10 @@ func (s *Sounder) AddSoundableTileObject(value *dto.SoundableTile) {
 	s.collisionPolygonsMutex.Unlock()
 }
 
-// InterruptMainTrackableObject performs sound interruption for main trackable object.
-func (s *Sounder) InterruptMainTrackableObject() {
-	if sound.GetInstance().GetSoundSounderMainFxManager().IsFXPlaying() {
-		sound.GetInstance().GetSoundSounderMainFxManager().StopFXPlaying()
+// InterruptStepsTrackableObject performs sound interruption for steps trackable object.
+func (s *Sounder) InterruptStepsTrackableObject() {
+	if sound.GetInstance().GetSoundSounderStepsFxManager().IsFXPlaying() {
+		sound.GetInstance().GetSoundSounderStepsFxManager().StopFXPlaying()
 	}
 }
 
@@ -160,10 +160,15 @@ func (s *Sounder) Update(camera *kamera.Camera) {
 
 		for _, polygon := range s.collisionPolygons {
 			if polygon.IsIntersecting(s.mainTrackableObject) {
-				if !sound.GetInstance().GetSoundSounderMainFxManager().IsFXPlaying() {
-					switch s.soundableTileObjects[polygon.ID()].Name {
+				if !sound.GetInstance().GetSoundSounderStepsFxManager().IsFXPlaying() {
+					value, ok := s.soundableTileObjects[polygon.ID()]
+					if !ok {
+						continue
+					}
+
+					switch value.Name {
 					case loader.TilemapSoundRockValue:
-						sound.GetInstance().GetSoundSounderMainFxManager().PushWithHandbrake(loader.RockFXSound)
+						sound.GetInstance().GetSoundSounderStepsFxManager().PushWithHandbrake(loader.RockFXSound)
 					}
 				}
 
@@ -200,7 +205,12 @@ func (s *Sounder) Update(camera *kamera.Camera) {
 							}
 
 							if !sound.GetInstance().GetSoundSounderExternalFxManager(key).IsFXPlaying() {
-								switch s.soundableTileObjects[polygon.ID()].Name {
+								value, ok := s.soundableTileObjects[polygon.ID()]
+								if !ok {
+									continue
+								}
+
+								switch value.Name {
 								case loader.TilemapSoundRockValue:
 									sound.GetInstance().GetSoundSounderExternalFxManager(key).PushWithHandbrake(loader.RockFXSound)
 								}

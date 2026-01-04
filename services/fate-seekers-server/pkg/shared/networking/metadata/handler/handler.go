@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"math/rand"
 	"time"
@@ -39,6 +38,9 @@ var (
 	ErrSessionNotStarted                    = errors.New("err happened session has not been started yet")
 	ErrSessionChestLocationsNotEnough       = errors.New("err happened session chest locations don't fulfil min chests per session amount")
 	ErrSessionHealthPacksLocationsNotEnough = errors.New("err happened session health packs locations don't fulfil min health packs per session amount")
+	ErrInventoryCapacityExceeded            = errors.New("err happened inventory capacity has been exceeded")
+	ErrGenerationIsNotHealthPack            = errors.New("err happened generation is not a health pack")
+	ErrHealthPackDoesNotExist               = errors.New("err happened health pack does not exist")
 	ErrFilteredSessionDoesNotExists         = errors.New("err happened filtered session does not exist")
 	ErrUserIsNotLobbyHost                   = errors.New("err happened user is not a host of a lobby")
 	ErrUserIsNotInLobby                     = errors.New("err happened user is not in a lobby")
@@ -53,7 +55,6 @@ const (
 	getSessionMetadataFrequency = time.Second * 2
 	getLobbySetFrequency        = time.Second * 1
 	getUserMetadataFrequency    = time.Millisecond * 25
-	getUserInventoryFrequency   = time.Millisecond * 25
 	getChestsFrequency          = time.Second
 	getHealthPacksFrequency     = time.Second
 	getEventsFrequency          = time.Millisecond * 100
@@ -295,13 +296,9 @@ func (h *Handler) CreateSession(ctx context.Context, request *metadatav1.CreateS
 		return nil, ErrSessionAlreadyExists
 	}
 
-	fmt.Println("BEFORE SESSION LOCK")
-
 	cache.
 		GetInstance().
 		BeginSessionsTransaction()
-
-	fmt.Println("BEFORE 3")
 
 	cache.
 		GetInstance().
@@ -426,39 +423,13 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 		}
 	}
 
-	cachedUserID, ok := cache.
-		GetInstance().
-		GetUsers(request.GetIssuer())
-	if ok {
-		userID = cachedUserID
-	} else {
-		user, exists, err := repository.
-			GetUsersRepository().
-			GetByName(request.GetIssuer())
-		if err != nil {
-			return nil, err
-		}
-
-		if !exists {
-			cache.
-				GetInstance().
-				CommitSessionsTransaction()
-
-			return nil, ErrUserDoesNotExist
-		}
-
-		userID = user.ID
-	}
-
-	fmt.Println("BEFORE 4")
-
 	cache.
 		GetInstance().
 		BeginLobbySetTransaction()
 
 	cachedLobbySet, ok := cache.
 		GetInstance().
-		GetLobbySet(cachedUserID)
+		GetLobbySet(request.GetSessionId())
 	if ok && len(cachedLobbySet) != 0 {
 		cache.
 			GetInstance().
@@ -540,6 +511,8 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 		return nil, err
 	}
 
+	cache.GetInstance().EvictUserSessions(request.GetIssuer())
+
 	cache.
 		GetInstance().
 		CommitLobbySetTransaction()
@@ -558,12 +531,6 @@ func (h *Handler) RemoveSession(ctx context.Context, request *metadatav1.RemoveS
 }
 
 func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSessionRequest) (*metadatav1.StartSessionResponse, error) {
-	// // 4. Determine count (Min of available positions or Max limit of 10)
-	// count := 10
-	// if len(availablePositions) < count {
-	// 	count = len(availablePositions)
-	// }
-
 	cache.
 		GetInstance().
 		BeginMetadataTransaction()
@@ -621,12 +588,23 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 			return nil, ErrLobbyDoesNotExist
 		}
 
+		inventory, _, err := repository.
+			GetInventoryRepository().
+			GetBySessionIDAndUserID(request.GetSessionId(), userID)
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, err
+		}
+
 		cache.
 			GetInstance().
 			AddMetadata(
 				request.GetIssuer(),
 				converter.ConvertLobbyEntityToCacheMetadataEntity(
-					lobbies))
+					lobbies, inventory))
 
 		var selectedLobby *entity.LobbyEntity
 
@@ -787,8 +765,6 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 		sessionSeed = cachedSession.Seed
 	}
 
-	fmt.Println("BEFORE 5")
-
 	cache.
 		GetInstance().
 		BeginLobbySetTransaction()
@@ -809,7 +785,7 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 					SessionID: request.GetSessionId(),
 					Instance:  chest.Instance,
 					Name:      chest.Name,
-					Type:      dto.ChestGenerationType,
+					Type:      dto.CHEST_GENERATION_TYPE,
 					Active:    true,
 					PositionX: float64(chest.Position.X),
 					PositionY: float64(chest.Position.Y),
@@ -826,8 +802,6 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 			if err != nil {
 				return err
 			}
-
-			fmt.Println(generation.ID, chest.ChestItems, "INGENERATION")
 
 			for _, chestItem := range chest.ChestItems {
 				err = repository.
@@ -854,7 +828,7 @@ func (h *Handler) StartSession(ctx context.Context, request *metadatav1.StartSes
 					SessionID: request.GetSessionId(),
 					Instance:  healthPack.Instance,
 					Name:      healthPack.Name,
-					Type:      dto.HealthPackGenerationType,
+					Type:      dto.HEALTH_PACK_GENERATION_TYPE,
 					Active:    true,
 					PositionX: float64(healthPack.Position.X),
 					PositionY: float64(healthPack.Position.Y),
@@ -1028,12 +1002,23 @@ func (h *Handler) GetSessionMetadata(request *metadatav1.GetSessionMetadataReque
 			return ErrLobbyDoesNotExist
 		}
 
+		inventory, _, err := repository.
+			GetInventoryRepository().
+			GetBySessionIDAndUserID(request.GetSessionId(), userID)
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return err
+		}
+
 		cache.
 			GetInstance().
 			AddMetadata(
 				request.GetIssuer(),
 				converter.ConvertLobbyEntityToCacheMetadataEntity(
-					lobbies))
+					lobbies, inventory))
 
 		var found bool
 
@@ -1146,15 +1131,9 @@ func (h *Handler) GetLobbySet(request *metadatav1.GetLobbySetRequest, stream grp
 
 			response.LobbySet = response.LobbySet[:0]
 
-			fmt.Println("BEFORE LOBBY SET LOCK")
-
-			fmt.Println("BEFORE 6")
-
 			cache.
 				GetInstance().
 				BeginLobbySetTransaction()
-
-			fmt.Println("AFTER LOBBY SET LOCK")
 
 			cachedLobbySet, ok := cache.
 				GetInstance().
@@ -1377,8 +1356,6 @@ func (h *Handler) CreateLobby(ctx context.Context, request *metadatav1.CreateLob
 		GetInstance().
 		CommitSessionsTransaction()
 
-	fmt.Println("BEFORE 7")
-
 	cache.
 		GetInstance().
 		BeginLobbySetTransaction()
@@ -1597,8 +1574,6 @@ func (h *Handler) RemoveLobby(context context.Context, request *metadatav1.Remov
 		GetInstance().
 		CommitSessionsTransaction()
 
-	fmt.Println("BEFORE 8")
-
 	cache.
 		GetInstance().
 		BeginLobbySetTransaction()
@@ -1771,7 +1746,18 @@ func (h *Handler) LeaveLobby(context context.Context, request *metadatav1.LeaveL
 			return nil, ErrLobbyDoesNotExist
 		}
 
-		metadata = converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies)
+		inventory, _, err := repository.
+			GetInventoryRepository().
+			GetBySessionIDAndUserID(request.GetSessionId(), userID)
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, err
+		}
+
+		metadata = converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies, inventory)
 
 		cache.
 			GetInstance().
@@ -1839,13 +1825,11 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 
 			cache.
 				GetInstance().
-				BeginMetadataTransaction()
-
-			fmt.Println("BEFORE 9")
+				BeginLobbySetTransaction()
 
 			cache.
 				GetInstance().
-				BeginLobbySetTransaction()
+				BeginMetadataTransaction()
 
 			cachedLobbySet, ok := cache.
 				GetInstance().
@@ -1857,11 +1841,11 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 				if err != nil {
 					cache.
 						GetInstance().
-						CommitLobbySetTransaction()
+						CommitMetadataTransaction()
 
 					cache.
 						GetInstance().
-						CommitMetadataTransaction()
+						CommitLobbySetTransaction()
 
 					return err
 				}
@@ -1869,11 +1853,11 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 				if !exists {
 					cache.
 						GetInstance().
-						CommitLobbySetTransaction()
+						CommitMetadataTransaction()
 
 					cache.
 						GetInstance().
-						CommitMetadataTransaction()
+						CommitLobbySetTransaction()
 
 					return ErrLobbySetDoesNotExist
 				}
@@ -1915,11 +1899,11 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 						if err != nil {
 							cache.
 								GetInstance().
-								CommitLobbySetTransaction()
+								CommitMetadataTransaction()
 
 							cache.
 								GetInstance().
-								CommitMetadataTransaction()
+								CommitLobbySetTransaction()
 
 							return err
 						}
@@ -1927,11 +1911,11 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 						if !exists {
 							cache.
 								GetInstance().
-								CommitLobbySetTransaction()
+								CommitMetadataTransaction()
 
 							cache.
 								GetInstance().
-								CommitMetadataTransaction()
+								CommitLobbySetTransaction()
 
 							return ErrUserDoesNotExist
 						}
@@ -1945,11 +1929,11 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 					if err != nil {
 						cache.
 							GetInstance().
-							CommitLobbySetTransaction()
+							CommitMetadataTransaction()
 
 						cache.
 							GetInstance().
-							CommitMetadataTransaction()
+							CommitLobbySetTransaction()
 
 						return err
 					}
@@ -1957,16 +1941,31 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 					if !exists {
 						cache.
 							GetInstance().
-							CommitLobbySetTransaction()
+							CommitMetadataTransaction()
 
 						cache.
 							GetInstance().
-							CommitMetadataTransaction()
+							CommitLobbySetTransaction()
 
 						return ErrLobbyDoesNotExist
 					}
 
-					metadata := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies)
+					inventory, _, err := repository.
+						GetInventoryRepository().
+						GetBySessionIDAndUserID(request.GetSessionId(), userID)
+					if err != nil {
+						cache.
+							GetInstance().
+							CommitMetadataTransaction()
+
+						cache.
+							GetInstance().
+							CommitLobbySetTransaction()
+
+						return err
+					}
+
+					metadata := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies, inventory)
 
 					cachedMetadata = metadata
 
@@ -1988,6 +1987,8 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 								Y: metadata.PositionY,
 							},
 							Static: metadata.PositionStatic,
+							Inventory: converter.ConvertCacheInventoryEntityToInventory(
+								metadata.Inventory),
 						})
 					}
 				}
@@ -1995,11 +1996,11 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 
 			cache.
 				GetInstance().
-				CommitLobbySetTransaction()
+				CommitMetadataTransaction()
 
 			cache.
 				GetInstance().
-				CommitMetadataTransaction()
+				CommitLobbySetTransaction()
 
 			err := stream.Send(response)
 			if err != nil {
@@ -2013,196 +2014,136 @@ func (h *Handler) GetUsersMetadata(request *metadatav1.GetUsersMetadataRequest, 
 	}
 }
 
-func (h *Handler) GetUserInventory(request *metadatav1.GetUserInventoryRequest, stream grpc.ServerStreamingServer[metadatav1.GetUserInventoryResponse]) error {
-	response := new(metadatav1.GetUserInventoryResponse)
+func (h *Handler) DropInventoryItem(context context.Context, request *metadatav1.DropInventoryItemRequest) (*metadatav1.DropInventoryItemResponse, error) {
+	response := new(metadatav1.DropInventoryItemResponse)
 
-	ticker := time.NewTicker(getUserInventoryFrequency)
+	var userID int64
 
-	for {
-		select {
-		case <-ticker.C:
-			ticker.Stop()
-
-			response.UserInventoryItems = response.UserInventoryItems[:0]
-
-			// cache.
-			// 	GetInstance().
-			// 	BeginMetadataTransaction()
-
-			// fmt.Println("BEFORE 9")
-
-			// cache.
-			// 	GetInstance().
-			// 	BeginLobbySetTransaction()
-
-			// cachedLobbySet, ok := cache.
-			// 	GetInstance().
-			// 	GetLobbySet(request.GetSessionId())
-			// if !ok {
-			// 	lobbies, exists, err := repository.
-			// 		GetLobbiesRepository().
-			// 		GetBySessionID(request.GetSessionId())
-			// 	if err != nil {
-			// 		cache.
-			// 			GetInstance().
-			// 			CommitLobbySetTransaction()
-
-			// 		cache.
-			// 			GetInstance().
-			// 			CommitMetadataTransaction()
-
-			// 		return err
-			// 	}
-
-			// 	if !exists {
-			// 		cache.
-			// 			GetInstance().
-			// 			CommitLobbySetTransaction()
-
-			// 		cache.
-			// 			GetInstance().
-			// 			CommitMetadataTransaction()
-
-			// 		return ErrLobbySetDoesNotExist
-			// 	}
-
-			// 	var lobbySet []dto.CacheLobbySetEntity
-
-			// 	for _, lobby := range lobbies {
-			// 		lobbySet = append(lobbySet, dto.CacheLobbySetEntity{
-			// 			ID:     lobby.ID,
-			// 			Issuer: lobby.UserEntity.Name,
-			// 			Skin:   uint64(lobby.Skin),
-			// 			Host:   lobby.Host,
-			// 		})
-			// 	}
-
-			// 	cachedLobbySet = lobbySet
-
-			// 	cache.
-			// 		GetInstance().
-			// 		AddLobbySet(request.GetSessionId(), lobbySet)
-			// }
-
-			// for _, lobbySet := range cachedLobbySet {
-			// 	cachedMetadata, ok := cache.
-			// 		GetInstance().
-			// 		GetMetadata(lobbySet.Issuer)
-			// 	if !ok {
-			// 		var userID int64
-
-			// 		cachedUserID, ok := cache.
-			// 			GetInstance().
-			// 			GetUsers(lobbySet.Issuer)
-			// 		if ok {
-			// 			userID = cachedUserID
-			// 		} else {
-			// 			user, exists, err := repository.
-			// 				GetUsersRepository().
-			// 				GetByName(lobbySet.Issuer)
-			// 			if err != nil {
-			// 				cache.
-			// 					GetInstance().
-			// 					CommitLobbySetTransaction()
-
-			// 				cache.
-			// 					GetInstance().
-			// 					CommitMetadataTransaction()
-
-			// 				return err
-			// 			}
-
-			// 			if !exists {
-			// 				cache.
-			// 					GetInstance().
-			// 					CommitLobbySetTransaction()
-
-			// 				cache.
-			// 					GetInstance().
-			// 					CommitMetadataTransaction()
-
-			// 				return ErrUserDoesNotExist
-			// 			}
-
-			// 			userID = user.ID
-			// 		}
-
-			// 		lobbies, exists, err := repository.
-			// 			GetLobbiesRepository().
-			// 			GetByUserID(userID)
-			// 		if err != nil {
-			// 			cache.
-			// 				GetInstance().
-			// 				CommitLobbySetTransaction()
-
-			// 			cache.
-			// 				GetInstance().
-			// 				CommitMetadataTransaction()
-
-			// 			return err
-			// 		}
-
-			// 		if !exists {
-			// 			cache.
-			// 				GetInstance().
-			// 				CommitLobbySetTransaction()
-
-			// 			cache.
-			// 				GetInstance().
-			// 				CommitMetadataTransaction()
-
-			// 			return ErrLobbyDoesNotExist
-			// 		}
-
-			// 		metadata := converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies)
-
-			// 		cachedMetadata = metadata
-
-			// 		cache.
-			// 			GetInstance().
-			// 			AddMetadata(lobbySet.Issuer, metadata)
-			// 	}
-
-			// 	for _, metadata := range cachedMetadata {
-			// 		if metadata.SessionID == request.GetSessionId() {
-			// 			response.UserMetadata = append(response.UserMetadata, &metadatav1.UserMetadata{
-			// 				Issuer:     lobbySet.Issuer,
-			// 				Health:     metadata.Health,
-			// 				Skin:       metadata.Skin,
-			// 				Active:     metadata.Active,
-			// 				Eliminated: metadata.Eliminated,
-			// 				Position: &metadatav1.Position{
-			// 					X: metadata.PositionX,
-			// 					Y: metadata.PositionY,
-			// 				},
-			// 				Static: metadata.PositionStatic,
-			// 			})
-			// 		}
-			// 	}
-			// }
-
-			// cache.
-			// 	GetInstance().
-			// 	CommitLobbySetTransaction()
-
-			// cache.
-			// 	GetInstance().
-			// 	CommitMetadataTransaction()
-
-			err := stream.Send(response)
-			if err != nil {
-				return err
-			}
-
-			ticker.Reset(getUserMetadataFrequency)
-		case <-stream.Context().Done():
-			return nil
+	cachedUserID, ok := cache.
+		GetInstance().
+		GetUsers(request.GetIssuer())
+	if ok {
+		userID = cachedUserID
+	} else {
+		user, exists, err := repository.
+			GetUsersRepository().
+			GetByName(request.GetIssuer())
+		if err != nil {
+			return nil, err
 		}
+
+		if !exists {
+			return nil, ErrUserDoesNotExist
+		}
+
+		userID = user.ID
 	}
+
+	cache.GetInstance().BeginMetadataTransaction()
+
+	err := repository.
+		GetInventoryRepository().
+		DeleteByUserIDAndID(request.GetInventoryId(), userID)
+	if err != nil {
+		cache.GetInstance().CommitMetadataTransaction()
+
+		return nil, err
+	}
+
+	cache.GetInstance().EvictMetadata(request.GetIssuer())
+
+	cache.GetInstance().CommitMetadataTransaction()
+
+	return response, nil
 }
 
 func (h *Handler) TakeChestItem(context context.Context, request *metadatav1.TakeChestItemRequest) (*metadatav1.TakeChestItemResponse, error) {
 	response := new(metadatav1.TakeChestItemResponse)
+
+	var userID int64
+
+	cachedUserID, ok := cache.
+		GetInstance().
+		GetUsers(request.GetIssuer())
+	if ok {
+		userID = cachedUserID
+	} else {
+		user, exists, err := repository.
+			GetUsersRepository().
+			GetByName(request.GetIssuer())
+		if err != nil {
+			return nil, err
+		}
+
+		if !exists {
+			return nil, ErrUserDoesNotExist
+		}
+
+		userID = user.ID
+	}
+
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
+
+	var sessionName string
+
+	cachedSession, ok := cache.
+		GetInstance().
+		GetSessions(request.GetSessionId())
+	if !ok {
+		session, _, err := repository.
+			GetSessionsRepository().
+			GetByID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, err
+		}
+
+		if !session.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, ErrSessionNotStarted
+		}
+
+		sessionName = session.Name
+
+		cache.
+			GetInstance().
+			AddSessions(
+				request.GetSessionId(),
+				converter.ConvertSessionEntityToCacheSessionEntity(session))
+	} else {
+		if !cachedSession.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			return nil, ErrSessionNotStarted
+		}
+
+		sessionName = cachedSession.Name
+	}
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
+	inventoryCount, err := repository.
+		GetInventoryRepository().
+		CountByLobbyIDAndUserID(request.GetLobbyId(), userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if inventoryCount >= dto.MAX_INVENTORY_CAPACITY {
+		return nil, ErrInventoryCapacityExceeded
+	}
 
 	association, _, err := repository.
 		GetAssociationsRepository().
@@ -2211,9 +2152,59 @@ func (h *Handler) TakeChestItem(context context.Context, request *metadatav1.Tak
 		return nil, err
 	}
 
-	fmt.Println(association)
+	err = repository.
+		GetInventoryRepository().
+		InsertOrUpdate(dto.InventoryRepositoryInsertOrUpdateRequest{
+			UserID:    userID,
+			LobbyID:   request.GetLobbyId(),
+			SessionID: request.GetSessionId(),
+			Name:      association.Name,
+		})
+	if err != nil {
+		return nil, err
+	}
 
-	// TODO: create inventory item here.
+	cache.
+		GetInstance().
+		BeginMetadataTransaction()
+
+	lobbies, exists, err := repository.
+		GetLobbiesRepository().
+		GetByUserID(userID)
+	if err != nil {
+		cache.
+			GetInstance().
+			CommitMetadataTransaction()
+
+		return nil, err
+	}
+
+	if !exists {
+		cache.
+			GetInstance().
+			CommitMetadataTransaction()
+
+		return nil, ErrLobbyDoesNotExist
+	}
+
+	inventory, _, err := repository.
+		GetInventoryRepository().
+		GetBySessionIDAndUserID(request.GetSessionId(), userID)
+	if err != nil {
+		cache.
+			GetInstance().
+			CommitMetadataTransaction()
+
+		return nil, err
+	}
+
+	cache.GetInstance().EvictMetadata(request.GetIssuer())
+
+	cache.
+		GetInstance().
+		AddMetadata(
+			request.GetIssuer(),
+			converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies, inventory))
 
 	err = repository.
 		GetAssociationsRepository().
@@ -2222,8 +2213,251 @@ func (h *Handler) TakeChestItem(context context.Context, request *metadatav1.Tak
 			Active: false,
 		})
 	if err != nil {
+		cache.
+			GetInstance().
+			CommitMetadataTransaction()
+
 		return nil, err
 	}
+
+	cache.
+		GetInstance().
+		CommitMetadataTransaction()
+
+	cache.
+		GetInstance().
+		EvictGeneratedChests(sessionName)
+
+	return response, nil
+}
+
+func (h *Handler) TakeHealthPack(context context.Context, request *metadatav1.TakeHealthPackRequest) (*metadatav1.TakeHealthPackResponse, error) {
+	response := new(metadatav1.TakeHealthPackResponse)
+
+	var userID int64
+
+	cachedUserID, ok := cache.
+		GetInstance().
+		GetUsers(request.GetIssuer())
+	if ok {
+		userID = cachedUserID
+	} else {
+		user, exists, err := repository.
+			GetUsersRepository().
+			GetByName(request.GetIssuer())
+		if err != nil {
+			return nil, err
+		}
+
+		if !exists {
+			return nil, ErrUserDoesNotExist
+		}
+
+		userID = user.ID
+	}
+
+	cache.
+		GetInstance().
+		BeginGeneratedHealthPacksTransaction()
+
+	generation, _, err := repository.
+		GetGenerationRepository().
+		GetByID(request.GetGenerationId())
+	if err != nil {
+		cache.
+			GetInstance().
+			CommitGeneratedHealthPacksTransaction()
+
+		return nil, err
+	}
+
+	if generation.Type != dto.HEALTH_PACK_GENERATION_TYPE || generation.Name != utils.HEALTH_PACK_FROG_TYPE {
+		cache.
+			GetInstance().
+			CommitGeneratedHealthPacksTransaction()
+
+		return nil, ErrGenerationIsNotHealthPack
+	}
+
+	cache.
+		GetInstance().
+		BeginSessionsTransaction()
+
+	var sessionName string
+
+	cachedSession, ok := cache.
+		GetInstance().
+		GetSessions(request.GetSessionId())
+	if !ok {
+		session, _, err := repository.
+			GetSessionsRepository().
+			GetByID(request.GetSessionId())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, err
+		}
+
+		if !session.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, ErrSessionNotStarted
+		}
+
+		sessionName = session.Name
+
+		cache.
+			GetInstance().
+			AddSessions(
+				request.GetSessionId(),
+				converter.ConvertSessionEntityToCacheSessionEntity(session))
+	} else {
+		if !cachedSession.Started {
+			cache.
+				GetInstance().
+				CommitSessionsTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, ErrSessionNotStarted
+		}
+
+		sessionName = cachedSession.Name
+	}
+
+	cache.
+		GetInstance().
+		CommitSessionsTransaction()
+
+	cache.
+		GetInstance().
+		BeginMetadataTransaction()
+
+	metadata, ok := cache.
+		GetInstance().
+		GetMetadata(request.GetIssuer())
+	if !ok {
+		lobbies, exists, err := repository.
+			GetLobbiesRepository().
+			GetByUserID(userID)
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, err
+		}
+
+		if !exists {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, ErrLobbyDoesNotExist
+		}
+
+		inventory, exists, err := repository.
+			GetInventoryRepository().
+			GetBySessionIDAndUserID(request.GetSessionId(), userID)
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, err
+		}
+
+		if !exists {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			cache.
+				GetInstance().
+				CommitGeneratedHealthPacksTransaction()
+
+			return nil, ErrHealthPackDoesNotExist
+		}
+
+		metadata = converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies, inventory)
+
+		cache.
+			GetInstance().
+			AddMetadata(request.GetIssuer(), metadata)
+	}
+
+	for _, value := range metadata {
+		if value.SessionID == request.GetSessionId() {
+			if !value.Eliminated {
+				previous := value.Health
+
+				if generation.Name == utils.HEALTH_PACK_FROG_TYPE {
+					if value.Health+dto.FROG_HEALTH_PACK_RATE >= 100 {
+						value.Health = 100
+					} else {
+						value.Health += dto.FROG_HEALTH_PACK_RATE
+					}
+				}
+
+				err = repository.
+					GetGenerationRepository().
+					InsertOrUpdate(dto.GenerationsRepositoryInsertOrUpdateRequest{
+						ID:        generation.ID,
+						SessionID: request.GetSessionId(),
+						Active:    false,
+					})
+				if err != nil {
+					value.Health = previous
+
+					cache.
+						GetInstance().
+						CommitMetadataTransaction()
+
+					cache.
+						GetInstance().
+						CommitGeneratedHealthPacksTransaction()
+
+					return nil, err
+				}
+
+				cache.
+					GetInstance().
+					EvictGeneratedHealthPacks(sessionName)
+
+				break
+			}
+		}
+	}
+
+	cache.
+		GetInstance().
+		CommitMetadataTransaction()
+
+	cache.
+		GetInstance().
+		CommitGeneratedHealthPacksTransaction()
 
 	return response, nil
 }
@@ -2464,12 +2698,14 @@ func (h *Handler) GetChests(request *metadatav1.GetChestsRequest, stream grpc.Se
 					chestItems = append(chestItems, &metadatav1.ChestItem{
 						ChestItemId: association.ID,
 						Name:        association.Name,
+						Active:      association.Active,
 					})
 				}
 
 				response.Chests = append(response.Chests, &metadatav1.Chest{
-					ChestId: chest.ID,
-					Active:  chest.Active,
+					SessionId: chest.SessionID,
+					ChestId:   chest.ID,
+					Active:    chest.Active,
 					Position: &metadatav1.Position{
 						X: chest.PositionX,
 						Y: chest.PositionY,
@@ -2614,27 +2850,125 @@ func (h *Handler) OpenHealthPack(context context.Context, request *metadatav1.Op
 		GetInstance().
 		CommitLobbySetTransaction()
 
-	cache.
+	var userID int64
+
+	cachedUserID, ok := cache.
 		GetInstance().
-		BeginGeneratedHealthPacksTransaction()
+		GetUsers(request.GetIssuer())
+	if ok {
+		userID = cachedUserID
+	} else {
+		user, exists, err := repository.
+			GetUsersRepository().
+			GetByName(request.GetIssuer())
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
 
-	err := repository.
-		GetGenerationRepository().
-		InsertOrUpdate(dto.GenerationsRepositoryInsertOrUpdateRequest{
-			ID:     request.GetGenerationId(),
-			Active: false,
-		})
-	if err != nil {
-		cache.
-			GetInstance().
-			CommitGeneratedHealthPacksTransaction()
+			return nil, err
+		}
 
-		return nil, err
+		if !exists {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, ErrUserDoesNotExist
+		}
+
+		userID = user.ID
 	}
 
 	cache.
 		GetInstance().
-		CommitGeneratedHealthPacksTransaction()
+		BeginMetadataTransaction()
+
+	metadata, ok := cache.
+		GetInstance().
+		GetMetadata(request.GetIssuer())
+	if !ok {
+		lobbies, exists, err := repository.
+			GetLobbiesRepository().
+			GetByUserID(userID)
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, err
+		}
+
+		if !exists {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, ErrLobbyDoesNotExist
+		}
+
+		inventory, exists, err := repository.
+			GetInventoryRepository().
+			GetBySessionIDAndUserID(request.GetSessionId(), userID)
+		if err != nil {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, err
+		}
+
+		if !exists {
+			cache.
+				GetInstance().
+				CommitMetadataTransaction()
+
+			return nil, ErrHealthPackDoesNotExist
+		}
+
+		metadata = converter.ConvertLobbyEntityToCacheMetadataEntity(lobbies, inventory)
+
+		cache.
+			GetInstance().
+			AddMetadata(request.GetIssuer(), metadata)
+	}
+
+	for _, value := range metadata {
+		if value.SessionID == request.GetSessionId() {
+			if !value.Eliminated {
+				for index, item := range value.Inventory {
+					if item.ID == request.GetInventoryId() {
+						previous := value.Health
+
+						if item.Name == utils.CHEST_ITEM_HEALTH_PACK_TYPE {
+							if value.Health+dto.HEALTH_PACK_RATE >= 100 {
+								value.Health = 100
+							} else {
+								value.Health += dto.HEALTH_PACK_RATE
+							}
+						}
+
+						err := repository.
+							GetInventoryRepository().
+							DeleteByUserIDAndID(request.GetInventoryId(), userID)
+						if err != nil {
+							value.Health = previous
+
+							cache.GetInstance().CommitMetadataTransaction()
+
+							return nil, err
+						}
+
+						value.Inventory = append(value.Inventory[:index], value.Inventory[index+1:]...)
+
+						break
+					}
+				}
+			}
+		}
+	}
+
+	cache.GetInstance().CommitMetadataTransaction()
 
 	return response, nil
 }
@@ -2715,7 +3049,9 @@ func (h *Handler) GetHealthPacks(request *metadatav1.GetHealthPacksRequest, stre
 
 			for _, healthPack := range healthPacks {
 				response.HealthPacks = append(response.HealthPacks, &metadatav1.HealthPack{
+					SessionId:    healthPack.SessionID,
 					HealthPackId: healthPack.ID,
+					Name:         healthPack.Name,
 					Active:       healthPack.Active,
 					Position: &metadatav1.Position{
 						X: healthPack.PositionX,
@@ -2827,22 +3163,6 @@ func (h *Handler) GetEvents(request *metadatav1.GetEventsRequest, stream grpc.Se
 			return nil
 		}
 	}
-}
-
-func (h *Handler) GetMap(request *metadatav1.GetMapRequest, stream grpc.ServerStreamingServer[metadatav1.GetMapResponse]) error {
-	return nil
-}
-
-func (h *Handler) GetChatMessages(request *metadatav1.GetChatMessagesRequest, stream grpc.ServerStreamingServer[metadatav1.GetChatMessagesResponse]) error {
-	// TODO: messages would be retrieved from memory(not lru cache??????)
-
-	return nil
-}
-
-func (h *Handler) CreateChatMessage(context.Context, *metadatav1.CreateChatMessageRequest) (*metadatav1.CreateChatMessageResponse, error) {
-	// TODO: add to a delayed batch, not to overload the database.
-
-	return nil, nil
 }
 
 // NewHandler initializes implementation of metadatav1.MetadataServer.

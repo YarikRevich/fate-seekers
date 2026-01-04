@@ -26,8 +26,23 @@ type SoundManager struct {
 	// Represents instance of sound events FX manager.
 	soundEventsFxManager *fx.SoundFXManager
 
-	// Represents instance of sound sounder main FX manager.
-	soundSounderMainFxManager *fx.SoundFXManager
+	// Represents instance of sound events announcement FX manager.
+	soundEventsAnnouncementFxManager *fx.SoundFXManager
+
+	// Represents instance of sound sounder steps FX manager.
+	soundSounderStepsFxManager *fx.SoundFXManager
+
+	// Represents instance of sound sounder melee FX manager.
+	soundSounderMeleeFxManager *fx.SoundFXManager
+
+	// Represents instance of sound sounder chest FX manager.
+	soundSounderChestFxManager *fx.SoundFXManager
+
+	// Represents instance of sound sounder letter scroll activation FX manager.
+	soundSounderLetterScrollActivationFxManager *fx.SoundFXManager
+
+	// Represents instance of sound sounder health pack activation FX manager.
+	soundSounderHealthPackActivationFxManager *fx.SoundFXManager
 
 	// Represents map of sound sounder external FX manager instances.
 	soundSounderExternalFxManagers map[string]*fx.SoundFXManager
@@ -46,9 +61,34 @@ func (sm *SoundManager) GetSoundEventsFxManager() *fx.SoundFXManager {
 	return sm.soundEventsFxManager
 }
 
-// GetSoundSounderMainFxManager retrieves instance of sound sounder main FX manager.
-func (sm *SoundManager) GetSoundSounderMainFxManager() *fx.SoundFXManager {
-	return sm.soundSounderMainFxManager
+// GetSoundEventsAnnouncementFxManager retrieves instance of sound events announcement FX manager.
+func (sm *SoundManager) GetSoundEventsAnnouncementFxManager() *fx.SoundFXManager {
+	return sm.soundEventsAnnouncementFxManager
+}
+
+// GetSoundSounderStepsFxManager retrieves instance of sound sounder steps FX manager.
+func (sm *SoundManager) GetSoundSounderStepsFxManager() *fx.SoundFXManager {
+	return sm.soundSounderStepsFxManager
+}
+
+// GetSoundSounderMeleeFxManager retrieves instance of sound sounder melee FX manager.
+func (sm *SoundManager) GetSoundSounderMeleeFxManager() *fx.SoundFXManager {
+	return sm.soundSounderMeleeFxManager
+}
+
+// GetSoundSounderChestFxManager retrieves instance of sound sounder chest FX manager.
+func (sm *SoundManager) GetSoundSounderChestFxManager() *fx.SoundFXManager {
+	return sm.soundSounderChestFxManager
+}
+
+// GetSoundSounderLetterScrollActivationFxManager retrieves instance of sound sounder letter scroll activation FX manager.
+func (sm *SoundManager) GetSoundSounderLetterScrollActivationFxManager() *fx.SoundFXManager {
+	return sm.soundSounderLetterScrollActivationFxManager
+}
+
+// GetSoundSounderHealthPackActivationFxManager retrieves instance of sound sounder health pack activation FX manager.
+func (sm *SoundManager) GetSoundSounderHealthPackActivationFxManager() *fx.SoundFXManager {
+	return sm.soundSounderLetterScrollActivationFxManager
 }
 
 // AddSoundSounderExternalFxManager adds an instance of sound sounder external FX manager.
@@ -98,19 +138,39 @@ func newSoundManager() *SoundManager {
 	soundEventsFxManager := fx.NewSoundFxManager(audioContext)
 	soundEventsFxManager.Init()
 
-	soundSounderMainFxManager := fx.NewSoundFxManager(audioContext)
-	soundSounderMainFxManager.Init()
+	soundEventsAnnouncementFxManager := fx.NewSoundFxManager(audioContext)
+	soundEventsAnnouncementFxManager.Init()
+
+	soundSounderStepsFxManager := fx.NewSoundFxManager(audioContext)
+	soundSounderStepsFxManager.Init()
+
+	soundSounderMeleeFxManager := fx.NewSoundFxManager(audioContext)
+	soundSounderMeleeFxManager.Init()
+
+	soundSounderChestFxManager := fx.NewSoundFxManager(audioContext)
+	soundSounderChestFxManager.Init()
+
+	soundSounderLetterScrollActivationFxManager := fx.NewSoundFxManager(audioContext)
+	soundSounderLetterScrollActivationFxManager.Init()
+
+	soundSounderHealthPackActivationFxManager := fx.NewSoundFxManager(audioContext)
+	soundSounderHealthPackActivationFxManager.Init()
 
 	soundMusicManager := music.NewSoundMusicManager(audioContext)
 	soundMusicManager.Init()
 
 	result := &SoundManager{
-		audioContext:                   audioContext,
-		soundUIFxManager:               soundUIFxManager,
-		soundEventsFxManager:           soundEventsFxManager,
-		soundSounderMainFxManager:      soundSounderMainFxManager,
-		soundMusicManager:              soundMusicManager,
-		soundSounderExternalFxManagers: make(map[string]*fx.SoundFXManager),
+		audioContext:                                audioContext,
+		soundUIFxManager:                            soundUIFxManager,
+		soundEventsFxManager:                        soundEventsFxManager,
+		soundEventsAnnouncementFxManager:            soundEventsAnnouncementFxManager,
+		soundSounderStepsFxManager:                  soundSounderStepsFxManager,
+		soundSounderMeleeFxManager:                  soundSounderMeleeFxManager,
+		soundSounderChestFxManager:                  soundSounderChestFxManager,
+		soundSounderLetterScrollActivationFxManager: soundSounderLetterScrollActivationFxManager,
+		soundSounderHealthPackActivationFxManager:   soundSounderHealthPackActivationFxManager,
+		soundMusicManager:                           soundMusicManager,
+		soundSounderExternalFxManagers:              make(map[string]*fx.SoundFXManager),
 	}
 
 	return result

@@ -11,10 +11,6 @@
         "one": "Server has not been started yet",
         "other": "Server has not been started yet"
     },
-    "server.menu.monitoring": {
-        "one": "Monitoring",
-        "other": "Monitoring"
-    },
     "server.monitoring.start": {
         "one": "Start",
         "other": "Start"
