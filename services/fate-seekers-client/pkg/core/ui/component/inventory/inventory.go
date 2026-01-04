@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/ebitenui/ebitenui/image"
@@ -20,12 +21,16 @@ var (
 
 // InventoryComponent represents inventory component.
 type InventoryComponent struct {
+	// Represents container instance.
 	container *widget.Container
 
+	// Represents general font instance.
 	generalFont *text.GoTextFace
 
+	// Represent button icons.
 	buttonIdleIcon, buttonHoverIcon *image.NineSlice
 
+	// Represents a set of elements to be retrieved.
 	elements *widget.Container
 }
 
@@ -113,7 +118,10 @@ func newInventoryComponent() *InventoryComponent {
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
-		widget.TextOpts.Text("Inventory", generalFont, color.White)))
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("client.inventory.title"),
+			generalFont,
+			color.White)))
 
 	elements := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{

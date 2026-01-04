@@ -87,8 +87,8 @@ func NewCreditsComponent(closeCallback func()) *widget.Container {
 		Name string
 	}{
 		{"Lead Developer: ", "Yaroslav Svitlytskyi"},
-		{translation.GetInstance().GetTranslation("client.credits.special-thanks"), "Sonya"},
-		{"                                     ", "Nikita"},
+		{translation.GetInstance().GetTranslation("client.credits.special-thanks"), "Nikita Parkovskiy"},
+		{"                                     ", "Sofiia Zaytseva"},
 	}
 
 	generalFont := &text.GoTextFace{

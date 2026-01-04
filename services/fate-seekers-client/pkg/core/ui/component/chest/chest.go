@@ -9,6 +9,7 @@ import (
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/tools/scaler"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/common"
 	componentscommon "github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/component/common"
+	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/core/ui/manager/translation"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/dto"
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-client/pkg/loader"
 	"github.com/ebitenui/ebitenui/image"
@@ -129,7 +130,10 @@ func newChestComponent() *ChestComponent {
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{
 			Stretch: true,
 		})),
-		widget.TextOpts.Text("Chest", generalFont, color.White)))
+		widget.TextOpts.Text(
+			translation.GetInstance().GetTranslation("client.chest.title"),
+			generalFont,
+			color.White)))
 
 	elements := widget.NewContainer(
 		widget.ContainerOpts.WidgetOpts(
@@ -172,7 +176,7 @@ func newChestComponent() *ChestComponent {
 			Disabled:     buttonIdleIcon,
 		}),
 		widget.ButtonOpts.Text(
-			"Close",
+			translation.GetInstance().GetTranslation("client.chest.close"),
 			generalFont,
 			&widget.ButtonTextColor{Idle: componentscommon.ButtonTextColor}),
 		widget.ButtonOpts.WidgetOpts(

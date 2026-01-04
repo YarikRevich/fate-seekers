@@ -131,6 +131,18 @@
         "one": "Close",
         "other": "Close"
     },
+    "client.chest.title": {
+        "one": "Chest",
+        "other": "Chest"
+    },
+    "client.chest.close": {
+        "one": "Close",
+        "other": "Close"
+    },
+    "client.inventory.title": {
+        "one": "Inventory",
+        "other": "Inventory"
+    },
     "client.prompt.networking.encryption-key": {
         "one": "Server key is not set or is not valid. \nProceed with its configuration?",
         "other": "Server key is not set or is not valid. \nProceed with its configuration?"
