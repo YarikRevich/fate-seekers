@@ -176,8 +176,8 @@
         "other": "Answer is incorrect!"
     },
     "client.press.gamepad": {
-        "one": "Please press square button",
-        "other": "Please press square button"
+        "one": "Please press circle button",
+        "other": "Please press circle button"
     },
     "client.press.keyboard": {
         "one": "Please press button E",

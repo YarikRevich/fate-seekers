@@ -264,6 +264,10 @@ func (ss *SessionScreen) HandleInput() error {
 							return true
 						}
 
+						if userMetadata.Eliminated {
+							continue
+						}
+
 						store.RetrievedUsersMetadataSessionSyncHelper.Lock()
 
 						retrievedUsersMetadataSession := store.GetRetrievedUsersMetadataSession()
@@ -562,15 +566,28 @@ func (ss *SessionScreen) HandleInput() error {
 
 	if _, ok := retrievedUsersMetadataSession[store.GetRepositoryUUID()]; ok {
 		var (
-			spacePressed bool
-			iKeyPressed  bool
+			spacePressed  bool
+			iKeyPressed   bool
+			escapePressed bool
 		)
 
 		if store.GetApplicationStateGamepadEnabled() == value.GAMEPAD_ENABLED_APPLICATION_TRUE_VALUE && ebiten.IsFocused() {
 			gamepadID := ebiten.GamepadIDs()[0]
 
-			// TODO: check if space is pressed
-			// TODO: check if I button is pressed
+			if inpututil.IsStandardGamepadButtonJustPressed(
+				ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonFrontTopLeft) {
+				iKeyPressed = true
+			}
+
+			if inpututil.IsStandardGamepadButtonJustPressed(
+				ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonFrontBottomRight) {
+				spacePressed = true
+			}
+
+			if inpututil.IsStandardGamepadButtonJustPressed(
+				ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonRightTop) {
+				escapePressed = true
+			}
 
 			direction := gamepad.GetGamepadLeftStickDirection(gamepadID)
 
@@ -604,8 +621,7 @@ func (ss *SessionScreen) HandleInput() error {
 			}
 		} else {
 			if ebiten.IsKeyPressed(ebiten.KeyEscape) {
-				dispatcher.GetInstance().Dispatch(
-					action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
+				escapePressed = true
 			}
 
 			if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
@@ -643,6 +659,11 @@ func (ss *SessionScreen) HandleInput() error {
 
 				}
 			}
+		}
+
+		if escapePressed {
+			dispatcher.GetInstance().Dispatch(
+				action.NewSetActiveScreenAction(value.ACTIVE_SCREEN_RESUME_VALUE))
 		}
 
 		if spacePressed {

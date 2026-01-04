@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"math"
 
 	"github.com/YarikRevich/fate-seekers/services/fate-seekers-server/pkg/shared/dto"
@@ -524,6 +525,8 @@ func (h *Handler) Process(key string, value []byte) error {
 						dist := math.Hypot(metadata.PositionX-mainPositionX, metadata.PositionY-mainPositionY)
 
 						if dist <= dto.HIT_PLAYER_WITH_FIST_DISTANCE {
+							fmt.Println(metadata.Health, dto.HIT_PLAYER_WITH_FIST_RATE, metadata.Health-dto.HIT_PLAYER_WITH_FIST_RATE)
+
 							if metadata.Health-dto.HIT_PLAYER_WITH_FIST_RATE <= 0 {
 								metadata.Eliminated = true
 							} else {

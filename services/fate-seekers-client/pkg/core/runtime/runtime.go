@@ -124,6 +124,10 @@ func (r *Runtime) Update() error {
 			})
 
 			external.SetExternalLeftMouseClick(func() bool {
+				return inpututil.IsStandardGamepadButtonJustPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonRightLeft)
+			})
+
+			external.SetExternalRightMouseClick(func() bool {
 				return inpututil.IsStandardGamepadButtonJustPressed(ebiten.GamepadIDs()[0], ebiten.StandardGamepadButtonRightBottom)
 			})
 
@@ -169,6 +173,8 @@ func (r *Runtime) Update() error {
 			external.SetExternalCursorPositionSource(nil)
 
 			external.SetExternalLeftMouseClick(nil)
+
+			external.SetExternalRightMouseClick(nil)
 
 			external.SetExternalMiddleMouseClick(nil)
 
